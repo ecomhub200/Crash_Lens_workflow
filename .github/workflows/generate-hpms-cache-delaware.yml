@@ -1,0 +1,61 @@
+name: "Generate HPMS Cache (Delaware)"
+
+# ═══════════════════════════════════════════════════════════════
+#  CrashLens — HPMS Federal Road Data for Delaware
+#  Downloads AADT, FC, Speed Limit, Lanes, Surface, etc.
+#  Quick test: ~2-5 minutes
+# ═══════════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_regenerate:
+        description: 'Force regenerate (overwrite existing R2 cache)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
+
+jobs:
+  generate-delaware-hpms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow geopandas boto3
+
+      - name: "Generate Delaware HPMS (AADT, FC, speed, lanes, surface)"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_hpms_data.py --state de $FORCE
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Delaware HPMS Cache" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files generated" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Expected in R2 at delaware/cache/:" >> $GITHUB_STEP_SUMMARY
+          echo "- de_hpms.parquet.gz (AADT, FC, speed limit, lanes, surface, ownership, etc.)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Key fields downloaded:" >> $GITHUB_STEP_SUMMARY
+          echo "- AADT (traffic volume — enables crash rate calculation)" >> $GITHUB_STEP_SUMMARY
+          echo "- F_System (official FHWA Functional Class)" >> $GITHUB_STEP_SUMMARY
+          echo "- Speed_Limit (posted speed limit, mph)" >> $GITHUB_STEP_SUMMARY
+          echo "- Through_Lanes (lane count)" >> $GITHUB_STEP_SUMMARY
+          echo "- Median_Type + Median_Width (divided highway detail)" >> $GITHUB_STEP_SUMMARY
+          echo "- Surface_Type (pavement classification)" >> $GITHUB_STEP_SUMMARY
+          echo "- IRI (pavement roughness)" >> $GITHUB_STEP_SUMMARY
+          echo "- Shoulder_Width (road departure recovery)" >> $GITHUB_STEP_SUMMARY
+          echo "- Signal_Type (traffic control detail)" >> $GITHUB_STEP_SUMMARY
+          echo "- Lane_Width, Access_Control, Terrain, Curve/Grade class" >> $GITHUB_STEP_SUMMARY
