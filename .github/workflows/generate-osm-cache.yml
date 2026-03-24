@@ -1,0 +1,347 @@
+name: "Generate OSM Cache (Nationwide)"
+
+# ═══════════════════════════════════════════════════════════════
+#  CrashLens — OSM Road + POI Cache Generator for All 51 States
+#
+#  10 batches sized by state road network complexity.
+#  Largest states (TX, CA) get their own job.
+#  Each batch stays well under GitHub's 6-hour job limit.
+#  Public repo = unlimited free minutes.
+#
+#  SCHEDULE: 1st Friday of each month, staggered 3 hours apart:
+#    Batch 01-05:  Friday   12AM, 3AM, 6AM, 9AM, 12PM EST
+#    Batch 06-10:  Friday   3PM, 6PM, 9PM + Sat 12AM, 3AM EST
+#
+#  MANUAL: "nationwide" runs ALL 10 in parallel (finishes ~4 hr)
+# ═══════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    - cron: '0 5 1-7 * 5'     # Batch 01: Fri 12:00 AM EST
+    - cron: '0 8 1-7 * 5'     # Batch 02: Fri  3:00 AM EST
+    - cron: '0 11 1-7 * 5'    # Batch 03: Fri  6:00 AM EST
+    - cron: '0 14 1-7 * 5'    # Batch 04: Fri  9:00 AM EST
+    - cron: '0 17 1-7 * 5'    # Batch 05: Fri 12:00 PM EST
+    - cron: '0 20 1-7 * 5'    # Batch 06: Fri  3:00 PM EST
+    - cron: '0 23 1-7 * 5'    # Batch 07: Fri  6:00 PM EST
+    - cron: '0 2 2-8 * 6'     # Batch 08: Fri  9:00 PM EST
+    - cron: '0 5 2-8 * 6'     # Batch 09: Sat 12:00 AM EST
+    - cron: '0 8 2-8 * 6'     # Batch 10: Sat  3:00 AM EST
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to generate'
+        required: true
+        type: choice
+        default: 'nationwide'
+        options:
+          - nationwide
+          - single-state
+          - batch01-tiny
+          - batch02-small
+          - batch03-small-med
+          - batch04-med-west
+          - batch05-medium
+          - batch06-med-large
+          - batch07-large-east
+          - batch08-large
+          - batch09-xl
+          - batch10-xxl
+      single_state:
+        description: 'State abbreviation (only for single-state)'
+        required: false
+        default: ''
+      force_regenerate:
+        description: 'Force regenerate (overwrite existing R2 cache)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
+
+# ═══════════════════════════════════════════════════════════════
+#  BATCH PLAN (10 batches, 51 states, sorted by size)
+#
+#  01: DE RI CT DC NH VT          (6 tiny)      ~120 min
+#  02: HI WV ME SD WY ND          (6 small)     ~150 min
+#  03: NJ MD MA SC KY NE          (6 small-med) ~180 min
+#  04: IN IA KS NM MT ID          (6 med-west)  ~180 min
+#  05: NV UT CO WI MN OK          (6 medium)    ~200 min
+#  06: OR WA AZ AR LA MS          (6 med-large) ~220 min
+#  07: VA OH TN MO AL NC          (6 large-E)   ~250 min
+#  08: GA MI IL PA                 (4 large)     ~240 min
+#  09: NY FL AK                    (3 XL)        ~240 min
+#  10: TX CA                       (2 XXL)       ~240 min
+# ═══════════════════════════════════════════════════════════════
+
+jobs:
+
+  batch01-tiny:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 5 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch01-tiny'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 01: DE RI CT DC NH VT"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state de ri ct dc nh vt $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 01 — DE RI CT DC NH VT" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch02-small:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch02-small'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 02: HI WV ME SD WY ND"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state hi wv me sd wy nd $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 02 — HI WV ME SD WY ND" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch03-small-med:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 11 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch03-small-med'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 03: NJ MD MA SC KY NE"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state nj md ma sc ky ne $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 03 — NJ MD MA SC KY NE" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch04-med-west:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 14 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch04-med-west'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 04: IN IA KS NM MT ID"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state in ia ks nm mt id $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 04 — IN IA KS NM MT ID" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch05-medium:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 17 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch05-medium'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 05: NV UT CO WI MN OK"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state nv ut co wi mn ok $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 05 — NV UT CO WI MN OK" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch06-med-large:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 20 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch06-med-large'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 06: OR WA AZ AR LA MS"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state or wa az ar la ms $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 06 — OR WA AZ AR LA MS" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch07-large-east:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 23 1-7 * 5') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch07-large-east'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 07: VA OH TN MO AL NC"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state va oh tn mo al nc $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 07 — VA OH TN MO AL NC" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch08-large:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 2 2-8 * 6') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch08-large'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 08: GA MI IL PA"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state ga mi il pa $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 08 — GA MI IL PA" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch09-xl:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 5 2-8 * 6') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch09-xl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 09: NY FL AK"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state ny fl ak $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 09 — NY FL AK" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  batch10-xxl:
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 2-8 * 6') ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'batch10-xxl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Batch 10: TX CA"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state tx ca $FORCE
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Batch 10 — TX CA" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  single-state:
+    if: github.event.inputs.scope == 'single-state' && github.event.inputs.single_state != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+      - name: "Generate: ${{ github.event.inputs.single_state }}"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state ${{ github.event.inputs.single_state }} $FORCE
