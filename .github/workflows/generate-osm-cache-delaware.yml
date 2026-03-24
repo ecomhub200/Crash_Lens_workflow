@@ -1,0 +1,54 @@
+name: "Generate OSM Cache (Delaware)"
+
+# ═══════════════════════════════════════════════════════════════
+#  CrashLens — OSM Road + POI Cache Generator for Delaware
+#  Downloads roads + intersections + POIs → gzip → upload to R2
+#
+#  ⚠️  FORCE REGENERATE = re-downloads everything from scratch.
+#      Only use if cache is corrupted. Normal runs auto-skip
+#      existing files — leave force UNCHECKED.
+# ═══════════════════════════════════════════════════════════════
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_regenerate:
+        description: '⚠️ Force regenerate (re-downloads ALL files — slow! Leave unchecked for normal use)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
+
+jobs:
+  generate-delaware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install osmnx geopandas pandas pyarrow scipy boto3
+
+      - name: "Generate Delaware roads + intersections + POIs"
+        run: |
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          python generate_osm_data.py --state de $FORCE
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Delaware OSM Cache" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files generated" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Expected files in R2 at delaware/cache/:" >> $GITHUB_STEP_SUMMARY
+          echo "- de_roads.parquet.gz (roads + speed, surface, lighting, sidewalk, bike lanes)" >> $GITHUB_STEP_SUMMARY
+          echo "- de_intersections.parquet.gz (intersection nodes)" >> $GITHUB_STEP_SUMMARY
+          echo "- de_pois.parquet.gz (bars, schools, signals, hospitals, crosswalks)" >> $GITHUB_STEP_SUMMARY
