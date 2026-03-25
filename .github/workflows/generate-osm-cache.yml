@@ -1,0 +1,224 @@
+# ==============================================================================
+# Generate OSM Cache — Nationwide (Sequential Matrix)
+# ==============================================================================
+# Downloads OSM roads + intersections + POIs for all 51 states.
+#
+# WHY SEQUENTIAL (max-parallel: 3)?
+#   - 51 parallel jobs all hit Overpass simultaneously → rate limiting + failures
+#   - Large states (TX, CA, AL) need 60+ Overpass sub-queries at default settings
+#   - With max-parallel: 3, Overpass gets breathing room between requests
+#   - Combined with bumped max_query_area_size in generate_osm_data.py,
+#     even Texas only needs ~14 sub-queries instead of 280
+#
+# STATE ORDERING:
+#   Small states first (quick wins, <5 min each), large states last.
+#   3 tiers: small → medium → large. Each tier runs ~3 at a time.
+#
+# RUNTIME:
+#   ~4-8 hours total (vs 6 hours with 51 parallel jobs that mostly fail).
+#   Most small/medium states: 2-15 min. Large states (TX, CA): 30-90 min.
+# ==============================================================================
+
+name: "Generate OSM Cache (Nationwide)"
+
+on:
+  schedule:
+    - cron: '0 2 1 */3 *'   # 1st of every 3rd month, 2am UTC
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to generate'
+        required: true
+        type: choice
+        default: 'nationwide'
+        options:
+          - nationwide
+          - single-state
+          - failed-only
+      single_state:
+        description: 'State abbreviation (only for single-state scope)'
+        required: false
+        default: ''
+      force_regenerate:
+        description: '⚠️ Force regenerate (re-downloads ALL, ignores R2 cache)'
+        required: false
+        type: boolean
+        default: false
+      mode:
+        description: 'What to download'
+        required: false
+        type: choice
+        default: 'all'
+        options:
+          - all
+          - roads-only
+          - pois-only
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
+
+jobs:
+  # ============================================================
+  # MATRIX STRATEGY: 3 concurrent jobs, ordered small → large
+  # ============================================================
+  generate:
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event.inputs.scope == 'nationwide' ||
+      github.event.inputs.scope == 'failed-only'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        # Ordered by approximate state area: small → medium → large
+        # Small states finish in 2-10 min, freeing slots for bigger ones
+        state:
+          # ── Tier 1: Small states (~2-5 min each) ──
+          - dc    # District of Columbia
+          - ri    # Rhode Island
+          - de    # Delaware
+          - ct    # Connecticut
+          - hi    # Hawaii
+          - nh    # New Hampshire
+          - vt    # Vermont
+          - nj    # New Jersey
+          - ma    # Massachusetts
+          - md    # Maryland
+          - wv    # West Virginia
+          - sc    # South Carolina
+          # ── Tier 2: Medium states (~5-20 min each) ──
+          - me    # Maine
+          - in    # Indiana
+          - ky    # Kentucky
+          - tn    # Tennessee
+          - va    # Virginia
+          - oh    # Ohio
+          - la    # Louisiana
+          - ms    # Mississippi
+          - ar    # Arkansas
+          - al    # Alabama
+          - nc    # North Carolina
+          - ny    # New York
+          - pa    # Pennsylvania
+          - il    # Illinois
+          - ga    # Georgia
+          - ia    # Iowa
+          - mo    # Missouri
+          - wi    # Wisconsin
+          - mi    # Michigan
+          - mn    # Minnesota
+          - fl    # Florida
+          # ── Tier 3: Large states (~20-90 min each) ──
+          - wa    # Washington
+          - or    # Oregon
+          - ok    # Oklahoma
+          - ks    # Kansas
+          - ne    # Nebraska
+          - sd    # South Dakota
+          - nd    # North Dakota
+          - id    # Idaho
+          - nv    # Nevada
+          - ut    # Utah
+          - co    # Colorado
+          - wy    # Wyoming
+          - az    # Arizona
+          - nm    # New Mexico
+          - mt    # Montana
+          - ca    # California
+          - ak    # Alaska
+          - tx    # Texas
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install osmnx geopandas pandas pyarrow scipy boto3
+
+      - name: "Generate OSM: ${{ matrix.state }}"
+        run: |
+          STATE="${{ matrix.state }}"
+          FORCE=""
+          MODE_FLAG=""
+
+          # Handle force flag
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+
+          # Handle mode
+          MODE="${{ github.event.inputs.mode }}"
+          if [ "$MODE" = "roads-only" ]; then
+            MODE_FLAG="--roads-only"
+          elif [ "$MODE" = "pois-only" ]; then
+            MODE_FLAG="--pois-only"
+          fi
+
+          echo "=========================================="
+          echo "  State: ${STATE}"
+          echo "  Force: ${FORCE:-no}"
+          echo "  Mode:  ${MODE_FLAG:-all}"
+          echo "=========================================="
+
+          python generate_osm_data.py --state ${STATE} ${FORCE} ${MODE_FLAG}
+
+      - name: Summary
+        if: always()
+        run: |
+          STATE="${{ matrix.state }}"
+          echo "### ${STATE^^} — OSM Cache" >> $GITHUB_STEP_SUMMARY
+          if ls cache/*.gz 1>/dev/null 2>&1; then
+            ls -lh cache/*.gz >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No cache files generated (skipped or failed)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================
+  # SINGLE STATE (manual trigger)
+  # ============================================================
+  single-state:
+    if: >-
+      github.event.inputs.scope == 'single-state' &&
+      github.event.inputs.single_state != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install osmnx geopandas pandas pyarrow scipy boto3
+
+      - name: "Generate OSM: ${{ github.event.inputs.single_state }}"
+        run: |
+          STATE="${{ github.event.inputs.single_state }}"
+          FORCE=""
+          MODE_FLAG=""
+
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+
+          MODE="${{ github.event.inputs.mode }}"
+          if [ "$MODE" = "roads-only" ]; then
+            MODE_FLAG="--roads-only"
+          elif [ "$MODE" = "pois-only" ]; then
+            MODE_FLAG="--pois-only"
+          fi
+
+          python generate_osm_data.py --state ${STATE} ${FORCE} ${MODE_FLAG}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### ${{ github.event.inputs.single_state }} — OSM Cache" >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
