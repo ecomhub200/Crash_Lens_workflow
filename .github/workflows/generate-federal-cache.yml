@@ -1,0 +1,1036 @@
+name: "Generate Federal Cache (Nationwide)"
+
+# ═══════════════════════════════════════════════════════════════
+#  CrashLens — Federal Safety Data for All 51 States
+#  Schools (Urban Institute) + Bridges (NBI) + Rail Crossings (FRA)
+#  + Transit Stops (NTM). Each state = own job.
+#  Fast APIs — each state ~2-5 min for all 4 sources.
+# ═══════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    - cron: '0 6 15 1 *'     # Jan 15 annually (same as HPMS)
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to generate'
+        required: true
+        type: choice
+        default: 'nationwide'
+        options:
+          - nationwide
+          - single-state
+          - al
+          - ak
+          - az
+          - ar
+          - ca
+          - co
+          - ct
+          - de
+          - dc
+          - fl
+          - ga
+          - hi
+          - id
+          - il
+          - in
+          - ia
+          - ks
+          - ky
+          - la
+          - me
+          - md
+          - ma
+          - mi
+          - mn
+          - ms
+          - mo
+          - mt
+          - ne
+          - nv
+          - nh
+          - nj
+          - nm
+          - ny
+          - nc
+          - nd
+          - oh
+          - ok
+          - or
+          - pa
+          - ri
+          - sc
+          - sd
+          - tn
+          - tx
+          - ut
+          - vt
+          - va
+          - wa
+          - wv
+          - wi
+          - wy
+      single_state:
+        description: 'State abbreviation (only for single-state scope)'
+        required: false
+        default: ''
+      source:
+        description: 'Which source(s) to download'
+        required: false
+        type: choice
+        default: 'all'
+        options:
+          - all
+          - schools
+          - bridges
+          - rail_crossings
+          - transit
+      force_regenerate:
+        description: '⚠️  Force regenerate (re-downloads ALL)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
+
+jobs:
+
+  alabama:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'al'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Alabama (AL)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state al --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Alabama (AL)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  alaska:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ak'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Alaska (AK)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ak --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Alaska (AK)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  arizona:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'az'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Arizona (AZ)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state az --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Arizona (AZ)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  arkansas:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ar'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Arkansas (AR)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ar --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Arkansas (AR)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  california:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ca'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "California (CA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ca --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### California (CA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  colorado:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'co'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Colorado (CO)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state co --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Colorado (CO)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  connecticut:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ct'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Connecticut (CT)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ct --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Connecticut (CT)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  delaware:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'de'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Delaware (DE)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state de --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Delaware (DE)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  district-of-columbia:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'dc'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "District of Columbia (DC)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state dc --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### District of Columbia (DC)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  florida:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'fl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Florida (FL)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state fl --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Florida (FL)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  georgia:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ga'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Georgia (GA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ga --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Georgia (GA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  hawaii:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'hi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Hawaii (HI)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state hi --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Hawaii (HI)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  idaho:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'id'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Idaho (ID)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state id --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Idaho (ID)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  illinois:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'il'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Illinois (IL)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state il --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Illinois (IL)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  indiana:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'in'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Indiana (IN)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state in --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Indiana (IN)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  iowa:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ia'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Iowa (IA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ia --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Iowa (IA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  kansas:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ks'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Kansas (KS)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ks --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Kansas (KS)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  kentucky:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ky'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Kentucky (KY)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ky --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Kentucky (KY)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  louisiana:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'la'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Louisiana (LA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state la --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Louisiana (LA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  maine:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'me'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Maine (ME)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state me --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Maine (ME)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  maryland:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'md'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Maryland (MD)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state md --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Maryland (MD)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  massachusetts:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ma'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Massachusetts (MA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ma --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Massachusetts (MA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  michigan:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Michigan (MI)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state mi --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Michigan (MI)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  minnesota:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mn'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Minnesota (MN)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state mn --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Minnesota (MN)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  mississippi:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ms'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Mississippi (MS)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ms --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Mississippi (MS)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  missouri:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Missouri (MO)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state mo --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Missouri (MO)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  montana:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mt'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Montana (MT)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state mt --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Montana (MT)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  nebraska:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ne'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Nebraska (NE)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ne --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Nebraska (NE)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  nevada:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nv'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Nevada (NV)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nv --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Nevada (NV)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  new-hampshire:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nh'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "New Hampshire (NH)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nh --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### New Hampshire (NH)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  new-jersey:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nj'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "New Jersey (NJ)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nj --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### New Jersey (NJ)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  new-mexico:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "New Mexico (NM)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nm --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### New Mexico (NM)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  new-york:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ny'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "New York (NY)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ny --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### New York (NY)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  north-carolina:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nc'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "North Carolina (NC)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nc --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### North Carolina (NC)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  north-dakota:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "North Dakota (ND)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state nd --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### North Dakota (ND)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  ohio:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'oh'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Ohio (OH)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state oh --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Ohio (OH)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  oklahoma:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ok'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Oklahoma (OK)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ok --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Oklahoma (OK)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  oregon:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'or'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Oregon (OR)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state or --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Oregon (OR)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  pennsylvania:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'pa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Pennsylvania (PA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state pa --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Pennsylvania (PA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  rhode-island:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ri'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Rhode Island (RI)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ri --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Rhode Island (RI)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  south-carolina:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'sc'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "South Carolina (SC)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state sc --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### South Carolina (SC)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  south-dakota:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'sd'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "South Dakota (SD)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state sd --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### South Dakota (SD)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  tennessee:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'tn'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Tennessee (TN)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state tn --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Tennessee (TN)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  texas:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'tx'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Texas (TX)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state tx --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Texas (TX)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  utah:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ut'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Utah (UT)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ut --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Utah (UT)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  vermont:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'vt'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Vermont (VT)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state vt --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Vermont (VT)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  virginia:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'va'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Virginia (VA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state va --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Virginia (VA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  washington:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Washington (WA)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state wa --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Washington (WA)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  west-virginia:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wv'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "West Virginia (WV)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state wv --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### West Virginia (WV)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  wisconsin:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wi'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Wisconsin (WI)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state wi --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Wisconsin (WI)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  wyoming:
+    if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wy'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Wyoming (WY)"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state wy --source $SOURCE $FORCE
+      - if: always()
+        run: echo "### Wyoming (WY)" >> $GITHUB_STEP_SUMMARY && ls -lh cache/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+  single-state:
+    if: github.event.inputs.scope == 'single-state' && github.event.inputs.single_state != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install requests pandas pyarrow boto3
+      - name: "Generate: ${{ github.event.inputs.single_state }}"
+        run: |
+          FORCE=""; [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          SOURCE="${{ github.event.inputs.source }}"
+          [ -z "$SOURCE" ] && SOURCE="all"
+          python generate_federal_data.py --state ${{ github.event.inputs.single_state }} --source $SOURCE $FORCE
