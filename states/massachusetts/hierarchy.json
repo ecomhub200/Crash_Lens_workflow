@@ -1,0 +1,566 @@
+{
+  "state": {
+    "fips": "25",
+    "name": "Massachusetts",
+    "abbreviation": "MA",
+    "dot": "MassDOT",
+    "dotFullName": "Massachusetts Department of Transportation",
+    "center": [
+      -71.530106,
+      42.230171
+    ],
+    "zoom": 8,
+    "placesCount": 58
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ma_1": {
+      "name": "District 1 (Lenox)",
+      "shortName": "District 1",
+      "center": [
+        -73.0,
+        42.35
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "011",
+        "013",
+        "015"
+      ],
+      "countyNames": {
+        "003": "Berkshire",
+        "011": "Franklin (partial)",
+        "013": "Hampden (partial)",
+        "015": "Hampshire (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -73.5
+        ],
+        "ne": [
+          42.8,
+          -72.5
+        ]
+      },
+      "hq": "Lenox"
+    },
+    "ma_2": {
+      "name": "District 2 (Northampton)",
+      "shortName": "District 2",
+      "center": [
+        -72.6,
+        42.3
+      ],
+      "zoom": 9,
+      "counties": [
+        "011",
+        "015",
+        "013"
+      ],
+      "countyNames": {
+        "011": "Franklin",
+        "015": "Hampshire",
+        "013": "Hampden"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -73.1
+        ],
+        "ne": [
+          42.7,
+          -72.1
+        ]
+      },
+      "hq": "Northampton"
+    },
+    "ma_3": {
+      "name": "District 3 (Worcester)",
+      "shortName": "District 3",
+      "center": [
+        -71.8,
+        42.27
+      ],
+      "zoom": 9,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Worcester"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -72.3
+        ],
+        "ne": [
+          42.6,
+          -71.3
+        ]
+      },
+      "hq": "Worcester"
+    },
+    "ma_4": {
+      "name": "District 4 (Arlington)",
+      "shortName": "District 4",
+      "center": [
+        -71.2,
+        42.42
+      ],
+      "zoom": 10,
+      "counties": [
+        "017",
+        "009",
+        "025"
+      ],
+      "countyNames": {
+        "017": "Middlesex (partial)",
+        "009": "Essex (partial)",
+        "025": "Suffolk (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          42.2,
+          -71.5
+        ],
+        "ne": [
+          42.65,
+          -70.9
+        ]
+      },
+      "hq": "Arlington"
+    },
+    "ma_5": {
+      "name": "District 5 (Taunton)",
+      "shortName": "District 5",
+      "center": [
+        -71.0,
+        41.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "023",
+        "021"
+      ],
+      "countyNames": {
+        "005": "Bristol",
+        "023": "Plymouth",
+        "021": "Norfolk (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -71.3
+        ],
+        "ne": [
+          42.1,
+          -70.5
+        ]
+      },
+      "hq": "Taunton"
+    },
+    "ma_6": {
+      "name": "District 6 (North)",
+      "shortName": "District 6",
+      "center": [
+        -70.9,
+        42.6
+      ],
+      "zoom": 10,
+      "counties": [
+        "009"
+      ],
+      "countyNames": {
+        "009": "Essex"
+      },
+      "mapBounds": {
+        "sw": [
+          42.4,
+          -71.2
+        ],
+        "ne": [
+          42.9,
+          -70.6
+        ]
+      },
+      "hq": "Middleton"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "ctps": {
+      "name": "Boston Region MPO (CTPS)",
+      "shortName": "CTPS",
+      "type": "mpo",
+      "center": [
+        -71.0589,
+        42.3601
+      ],
+      "zoom": 9,
+      "counties": [
+        "025",
+        "017",
+        "021",
+        "009"
+      ],
+      "countyNames": {
+        "025": "Suffolk",
+        "017": "Middlesex (partial)",
+        "021": "Norfolk (partial)",
+        "009": "Essex (partial)"
+      },
+      "btsAcronym": "CTPS",
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -71.5
+        ],
+        "ne": [
+          42.7,
+          -70.6
+        ]
+      }
+    },
+    "cmmpow": {
+      "name": "Central Massachusetts MPO (Worcester)",
+      "shortName": "Worcester",
+      "type": "mpo",
+      "center": [
+        -72.5898,
+        42.1015
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Worcester"
+      },
+      "btsAcronym": "CMM",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -72.85
+        ],
+        "ne": [
+          42.35,
+          -72.3
+        ]
+      }
+    },
+    "pvmpos": {
+      "name": "Pioneer Valley MPO (Springfield)",
+      "shortName": "Springfield",
+      "type": "mpo",
+      "center": [
+        -70.9342,
+        41.6362
+      ],
+      "zoom": 10,
+      "counties": [
+        "013",
+        "015"
+      ],
+      "countyNames": {
+        "013": "Hampden",
+        "015": "Hampshire"
+      },
+      "btsAcronym": "PVM",
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -71.2
+        ],
+        "ne": [
+          41.85,
+          -70.65
+        ]
+      }
+    },
+    "srpedd": {
+      "name": "Southeastern Massachusetts MPO (SRPEDD)",
+      "shortName": "SRPEDD",
+      "type": "mpo",
+      "center": [
+        -72.0296,
+        42.4072
+      ],
+      "zoom": 10,
+      "counties": [
+        "005",
+        "023"
+      ],
+      "countyNames": {
+        "005": "Bristol",
+        "023": "Plymouth"
+      },
+      "btsAcronym": "SRPEDD",
+      "mapBounds": {
+        "sw": [
+          42.2,
+          -72.3
+        ],
+        "ne": [
+          42.6,
+          -71.75
+        ]
+      }
+    },
+    "ccmpo": {
+      "name": "Cape Cod MPO",
+      "shortName": "Cape Cod",
+      "type": "mpo",
+      "center": [
+        -71.3161,
+        42.6526
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Barnstable"
+      },
+      "btsAcronym": "CCM",
+      "mapBounds": {
+        "sw": [
+          42.45,
+          -71.55
+        ],
+        "ne": [
+          42.85,
+          -71.05
+        ]
+      }
+    },
+    "mvmpo": {
+      "name": "Martha's Vineyard MPO",
+      "shortName": "Martha's Vineyard",
+      "type": "mpo",
+      "center": [
+        -70.8967,
+        42.5195
+      ],
+      "zoom": 10,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Dukes"
+      },
+      "btsAcronym": "MVM",
+      "mapBounds": {
+        "sw": [
+          42.35,
+          -71.1
+        ],
+        "ne": [
+          42.7,
+          -70.65
+        ]
+      }
+    },
+    "mmpo": {
+      "name": "Montachusett MPO",
+      "shortName": "Montachusett",
+      "type": "mpo",
+      "center": [
+        -71.8023,
+        42.2626
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Worcester (partial)"
+      },
+      "btsAcronym": "MM",
+      "mapBounds": {
+        "sw": [
+          42.05,
+          -72.05
+        ],
+        "ne": [
+          42.45,
+          -71.55
+        ]
+      }
+    },
+    "nmmpo": {
+      "name": "Northern Middlesex MPO",
+      "shortName": "Northern Middlesex",
+      "type": "mpo",
+      "center": [
+        -73.2497,
+        42.2514
+      ],
+      "zoom": 10,
+      "counties": [
+        "017"
+      ],
+      "countyNames": {
+        "017": "Middlesex (partial)"
+      },
+      "btsAcronym": "NMM",
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -73.5
+        ],
+        "ne": [
+          42.5,
+          -73.0
+        ]
+      }
+    },
+    "nmpo": {
+      "name": "Nantucket MPO",
+      "shortName": "Nantucket",
+      "type": "mpo",
+      "center": [
+        -71.1556,
+        41.7003
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Nantucket"
+      },
+      "btsAcronym": "NM",
+      "mapBounds": {
+        "sw": [
+          41.5,
+          -71.4
+        ],
+        "ne": [
+          41.9,
+          -70.9
+        ]
+      }
+    },
+    "frcogmpo": {
+      "name": "Franklin Regional COG MPO",
+      "shortName": "Franklin Regional COG",
+      "type": "mpo",
+      "center": [
+        -70.2962,
+        41.6688
+      ],
+      "zoom": 10,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Franklin"
+      },
+      "btsAcronym": "FRCM",
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -70.55
+        ],
+        "ne": [
+          41.9,
+          -70.05
+        ]
+      }
+    },
+    "bmpo": {
+      "name": "Berkshire MPO",
+      "shortName": "Berkshire",
+      "type": "mpo",
+      "center": [
+        -73.25,
+        42.45
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Berkshire"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          42.2,
+          -73.5
+        ],
+        "ne": [
+          42.7,
+          -73.0
+        ]
+      }
+    },
+    "ocmpo": {
+      "name": "Old Colony MPO",
+      "shortName": "Old Colony",
+      "type": "mpo",
+      "center": [
+        -70.94,
+        42.0808
+      ],
+      "zoom": 10,
+      "counties": [
+        "023"
+      ],
+      "countyNames": {
+        "023": "Plymouth (partial)"
+      },
+      "btsAcronym": "OCM",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -71.2
+        ],
+        "ne": [
+          42.3,
+          -70.65
+        ]
+      }
+    },
+    "merrimack_valley_mpo": {
+      "name": "Merrimack Valley MPO",
+      "shortName": "Merrimack Valley",
+      "type": "mpo",
+      "btsMpoId": "25197603",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -70.962942,
+        42.762373
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Barnstable",
+    "003": "Berkshire",
+    "005": "Bristol",
+    "007": "Dukes",
+    "009": "Essex (partial)",
+    "011": "Franklin",
+    "013": "Hampden",
+    "015": "Hampshire",
+    "017": "Middlesex (partial)",
+    "019": "Nantucket",
+    "021": "Norfolk (partial)",
+    "023": "Plymouth (partial)",
+    "025": "Suffolk",
+    "027": "Worcester (partial)"
+  }
+}

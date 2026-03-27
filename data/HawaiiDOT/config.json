@@ -1,0 +1,152 @@
+{
+  "state": {
+    "name": "Hawaii",
+    "abbreviation": "HI",
+    "fips": "15",
+    "dotName": "HDOT",
+    "dotFullName": "Hawaii Department of Transportation",
+    "dataPortalUrl": "https://highways.hidot.hawaii.gov",
+    "coordinateBounds": {
+      "latMin": 18.91,
+      "latMax": 22.24,
+      "lonMin": -160.25,
+      "lonMax": -154.81
+    },
+    "dataDir": "HawaiiDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps HDOT crash data fields to CRASH LENS field codes",
+    "_note": "CRITICAL: data.hawaii.gov is NO LONGER the correct portal. Use highways.hidot.hawaii.gov (Socrata). Limited datasets: u3kh-tzq9 (State Jurisdiction Accidents 2015-2017), b6fq-udep (crash-related). Exact column names require API query to confirm. Fields below are from Hawaii MVAR form (DOT-1-174).",
+    "ID": "_TBD_REPORT_NUMBER",
+    "DATE": "_TBD_CRASH_DATE",
+    "TIME": "_TBD_CRASH_TIME",
+    "LAT": "_TBD_LATITUDE",
+    "LON": "_TBD_LONGITUDE",
+    "SEVERITY": "_TBD_INJURY_SEVERITY",
+    "JURISDICTION": "_TBD_COUNTY",
+    "ROUTE": "_TBD_ROAD_NAME",
+    "COLLISION": "_TBD_COLLISION_TYPE",
+    "WEATHER": "_TBD_WEATHER_CONDITIONS",
+    "LIGHT": "_TBD_LIGHTING",
+    "SURFACE_CONDITION": "_TBD_SURFACE",
+    "JUNCTION": "_TBD_JUNCTION_TYPE",
+    "HITRUN": "_TBD_HIT_AND_RUN"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "_portal_warning": "Hawaii's Socrata portal moved from data.hawaii.gov to highways.hidot.hawaii.gov. Crash data coverage is LIMITED (2015-2017 for state jurisdiction roads). The CARTO-based Safety Analytics Tool at safety-tool-hidot.hawaii.gov may have more comprehensive data but uses a proprietary API.",
+    "SEVERITY": {
+      "method": "kabco_from_mvar",
+      "source": "_TBD_INJURY_SEVERITY",
+      "_note": "Hawaii MVAR uses KABCO: K=Fatal, A=Suspected Serious Injury, B=Suspected Minor Injury, C=Possible Injury, O=No Apparent Injury"
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "_TBD_CRASH_DATE"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "_TBD_ROAD1",
+        "_TBD_ROAD2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Hawaii road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Hawaii collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "HDOT Highways Division Portal",
+    "url": "https://highways.hidot.hawaii.gov",
+    "apiUrl": "https://highways.hidot.hawaii.gov/resource/u3kh-tzq9.json",
+    "_apiUrlAlternate": "https://highways.hidot.hawaii.gov/resource/b6fq-udep.json",
+    "fileFormat": "JSON/CSV (Socrata SODA API)",
+    "dataDictionary": "Hawaii MVAR Form DOT-1-174 (NHTSA). See also HDOT Safety Analytics Tool at safety-tool-hidot.hawaii.gov",
+    "resourceId": "u3kh-tzq9",
+    "_resourceIdAlternate": "b6fq-udep",
+    "_dataLimitation": "State Jurisdiction Accidents dataset covers 2015-2017 only for state roads. Not a comprehensive statewide crash database.",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 50000,
+      "paramLimit": "$limit",
+      "paramOffset": "$offset"
+    }
+  }
+}

@@ -1,0 +1,220 @@
+name: Seed R2 Bucket (One-Time)
+
+# One-time workflow to upload existing CSV files to R2.
+# Use this when the OnBase download can't run from GitHub Actions
+# (e.g., IP blocking) and you need to seed the bucket from files in the repo.
+#
+# After R2 is seeded, the CSVs should be removed from Git and re-gitignored.
+
+on:
+  workflow_dispatch:
+    inputs:
+      jurisdiction:
+        description: 'County to upload (must match file prefix)'
+        required: false
+        default: 'douglas'
+        type: string
+      state:
+        description: 'State (colorado or virginia)'
+        required: false
+        default: 'colorado'
+        type: string
+      upload_raw:
+        description: 'Also upload raw annual CSVs (20XX files)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  seed-r2:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: List available CSV files
+        run: |
+          echo "=========================================="
+          echo "Available CSV files"
+          echo "=========================================="
+
+          JURISDICTION="${{ github.event.inputs.jurisdiction || 'douglas' }}"
+          STATE="${{ github.event.inputs.state || 'colorado' }}"
+
+          if [ "$STATE" = "colorado" ]; then
+            DATA_DIR="data/CDOT"
+          elif [ "$STATE" = "virginia" ]; then
+            DATA_DIR="data"
+          else
+            DATA_DIR="data/$STATE"
+          fi
+
+          echo "Data directory: $DATA_DIR"
+          echo "Jurisdiction: $JURISDICTION"
+          echo ""
+
+          echo "Processed files:"
+          ls -lh "$DATA_DIR/${JURISDICTION}_"*.csv 2>/dev/null || echo "  None found"
+          echo ""
+
+          echo "Raw annual files:"
+          ls -lh "$DATA_DIR"/20*.csv 2>/dev/null || echo "  None found"
+          echo ""
+
+          echo "Forecast JSON files:"
+          ls -lh "$DATA_DIR"/forecasts_*.json 2>/dev/null || echo "  None found"
+
+      - name: Build upload file list
+        id: files
+        run: |
+          JURISDICTION="${{ github.event.inputs.jurisdiction || 'douglas' }}"
+          STATE="${{ github.event.inputs.state || 'colorado' }}"
+          UPLOAD_RAW="${{ github.event.inputs.upload_raw || 'true' }}"
+
+          if [ "$STATE" = "colorado" ]; then
+            DATA_DIR="data/CDOT"
+            R2_PREFIX="colorado/${JURISDICTION}"
+          elif [ "$STATE" = "virginia" ]; then
+            DATA_DIR="data"
+            R2_PREFIX="virginia/${JURISDICTION}"
+          else
+            DATA_DIR="data/$STATE"
+            R2_PREFIX="${STATE}/${JURISDICTION}"
+          fi
+
+          # Build JSON array of files to upload (gzip-compressed)
+          # Gzip each file first; the upload-r2 action detects .gz extensions
+          # and sets Content-Encoding: gzip automatically.
+          FILES="["
+          FIRST=true
+
+          # Processed pipeline outputs — gzip before upload
+          for suffix in standardized all_roads county_roads city_roads no_interstate; do
+            FILE="${DATA_DIR}/${JURISDICTION}_${suffix}.csv"
+            if [ -f "$FILE" ]; then
+              GZ_FILE="${FILE}.gz"
+              gzip -c "$FILE" > "$GZ_FILE"
+              ORIG_SIZE=$(stat -c%s "$FILE" 2>/dev/null || stat -f%z "$FILE")
+              GZ_SIZE=$(stat -c%s "$GZ_FILE" 2>/dev/null || stat -f%z "$GZ_FILE")
+              if [ "$FIRST" = true ]; then FIRST=false; else FILES="$FILES,"; fi
+              FILES="$FILES{\"local_path\":\"$GZ_FILE\",\"r2_key\":\"${R2_PREFIX}/${suffix}.csv\",\"uncompressed_size\":$ORIG_SIZE}"
+              echo "  Found: $FILE -> ${R2_PREFIX}/${suffix}.csv (${ORIG_SIZE} -> ${GZ_SIZE} bytes)"
+            fi
+          done
+
+          # Forecast JSON files — gzip before upload
+          for rt in county_roads city_roads no_interstate all_roads; do
+            FFILE="${DATA_DIR}/forecasts_${rt}.json"
+            if [ -f "$FFILE" ]; then
+              GZ_FILE="${FFILE}.gz"
+              gzip -c "$FFILE" > "$GZ_FILE"
+              ORIG_SIZE=$(stat -c%s "$FFILE" 2>/dev/null || stat -f%z "$FFILE")
+              GZ_SIZE=$(stat -c%s "$GZ_FILE" 2>/dev/null || stat -f%z "$GZ_FILE")
+              if [ "$FIRST" = true ]; then FIRST=false; else FILES="$FILES,"; fi
+              FILES="$FILES{\"local_path\":\"$GZ_FILE\",\"r2_key\":\"${R2_PREFIX}/forecasts_${rt}.json\",\"uncompressed_size\":$ORIG_SIZE}"
+              echo "  Found: $FFILE -> ${R2_PREFIX}/forecasts_${rt}.json (${ORIG_SIZE} -> ${GZ_SIZE} bytes)"
+            fi
+          done
+
+          FILES="$FILES]"
+
+          echo "files_json<<EOFFILES" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOFFILES" >> $GITHUB_OUTPUT
+
+          # Raw annual CSVs (handled separately with aws cli for flexible naming)
+          echo "upload_raw=$UPLOAD_RAW" >> $GITHUB_OUTPUT
+          echo "data_dir=$DATA_DIR" >> $GITHUB_OUTPUT
+          echo "r2_prefix=$R2_PREFIX" >> $GITHUB_OUTPUT
+          echo "jurisdiction=$JURISDICTION" >> $GITHUB_OUTPUT
+
+      - name: Upload processed CSVs to R2
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: ${{ steps.files.outputs.files_json }}
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Upload raw annual CSVs to R2
+        if: steps.files.outputs.upload_raw == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          DATA_DIR="${{ steps.files.outputs.data_dir }}"
+          R2_PREFIX="${{ steps.files.outputs.r2_prefix }}"
+
+          echo "Uploading raw annual CSVs (gzip-compressed)..."
+          echo "Endpoint: $R2_ENDPOINT"
+          UPLOADED=0
+          for f in "${DATA_DIR}"/20*.csv; do
+            [ -f "$f" ] || continue
+            BASENAME=$(basename "$f")
+            YEAR=$(echo "$BASENAME" | grep -oP '^\d{4}')
+            if [ -n "$YEAR" ]; then
+              R2_KEY="${R2_PREFIX}/raw/${YEAR}.csv"
+              GZ_FILE="${f}.gz"
+              gzip -c "$f" > "$GZ_FILE"
+              echo "  Uploading: $f -> s3://crash-lens-data/${R2_KEY} (gzip)"
+              OUTPUT=$(aws s3 cp "$GZ_FILE" "s3://crash-lens-data/${R2_KEY}" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "text/csv" \
+                --content-encoding "gzip" 2>&1)
+              EXIT_CODE=$?
+              echo "    exit_code=$EXIT_CODE output=$OUTPUT"
+              if [ $EXIT_CODE -eq 0 ]; then
+                echo "  OK: $f -> $R2_KEY"
+                UPLOADED=$((UPLOADED + 1))
+              else
+                echo "  FAIL: $f"
+              fi
+              rm -f "$GZ_FILE"
+            fi
+          done
+          echo "Uploaded $UPLOADED raw annual CSVs"
+
+      - name: Commit updated manifest
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add data/r2-manifest.json
+
+          if git diff --staged --quiet; then
+            echo "No manifest changes to commit"
+            exit 0
+          fi
+
+          JURISDICTION="${{ steps.files.outputs.jurisdiction }}"
+          STATE="${{ github.event.inputs.state || 'colorado' }}"
+          git commit -m "chore: seed R2 bucket with ${STATE} ${JURISDICTION} data [$(date +'%Y-%m-%d')]"
+
+          for i in 1 2 3 4; do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/4), retrying..."
+            sleep $((2 ** i))
+            git pull --rebase origin ${{ github.ref_name }} || git pull --no-edit origin ${{ github.ref_name }}
+          done
+          echo "ERROR: Push failed after 4 attempts"
+          exit 1
+
+      - name: Verify R2 contents
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          echo "=========================================="
+          echo "R2 Bucket Contents"
+          echo "=========================================="
+          aws s3 ls "s3://crash-lens-data/" --endpoint-url "$R2_ENDPOINT" --recursive --human-readable || echo "Could not list bucket"

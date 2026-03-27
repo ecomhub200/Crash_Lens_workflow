@@ -1,0 +1,1007 @@
+{
+  "state": {
+    "fips": "06",
+    "name": "California",
+    "abbreviation": "CA",
+    "dot": "Caltrans",
+    "dotFullName": "California Department of Transportation",
+    "center": [
+      -119.417931,
+      36.778259
+    ],
+    "zoom": 6,
+    "placesCount": 482
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ca_1": {
+      "name": "District 1 (Eureka)",
+      "shortName": "District 1",
+      "center": [
+        -123.2,
+        40.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "023",
+        "033",
+        "045"
+      ],
+      "countyNames": {
+        "015": "Del Norte",
+        "023": "Humboldt",
+        "033": "Lake",
+        "045": "Mendocino"
+      },
+      "mapBounds": {
+        "sw": [
+          38.7,
+          -124.4
+        ],
+        "ne": [
+          42.0,
+          -122.0
+        ]
+      },
+      "hq": "Eureka"
+    },
+    "ca_2": {
+      "name": "District 2 (Redding)",
+      "shortName": "District 2",
+      "center": [
+        -121.8,
+        40.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "035",
+        "049",
+        "063",
+        "089",
+        "093",
+        "103",
+        "105"
+      ],
+      "countyNames": {
+        "035": "Lassen",
+        "049": "Modoc",
+        "063": "Plumas",
+        "089": "Shasta",
+        "093": "Siskiyou",
+        "103": "Tehama",
+        "105": "Trinity"
+      },
+      "mapBounds": {
+        "sw": [
+          39.5,
+          -123.5
+        ],
+        "ne": [
+          42.0,
+          -120.1
+        ]
+      },
+      "hq": "Redding"
+    },
+    "ca_3": {
+      "name": "District 3 (Marysville)",
+      "shortName": "District 3",
+      "center": [
+        -121.0,
+        39.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "011",
+        "017",
+        "021",
+        "057",
+        "061",
+        "067",
+        "091",
+        "101",
+        "113",
+        "115"
+      ],
+      "countyNames": {
+        "007": "Butte",
+        "011": "Colusa",
+        "017": "El Dorado",
+        "021": "Glenn",
+        "057": "Nevada",
+        "061": "Placer",
+        "067": "Sacramento",
+        "091": "Sierra",
+        "101": "Sutter",
+        "113": "Yolo",
+        "115": "Yuba"
+      },
+      "mapBounds": {
+        "sw": [
+          38.3,
+          -122.0
+        ],
+        "ne": [
+          40.0,
+          -120.0
+        ]
+      },
+      "hq": "Marysville"
+    },
+    "ca_4": {
+      "name": "District 4 (Oakland)",
+      "shortName": "District 4",
+      "center": [
+        -122.1,
+        37.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "013",
+        "041",
+        "055",
+        "075",
+        "081",
+        "085",
+        "095",
+        "097"
+      ],
+      "countyNames": {
+        "001": "Alameda",
+        "013": "Contra Costa",
+        "041": "Marin",
+        "055": "Napa",
+        "075": "San Francisco",
+        "081": "San Mateo",
+        "085": "Santa Clara",
+        "095": "Solano",
+        "097": "Sonoma"
+      },
+      "mapBounds": {
+        "sw": [
+          37.1,
+          -123.0
+        ],
+        "ne": [
+          38.6,
+          -121.2
+        ]
+      },
+      "hq": "Oakland"
+    },
+    "ca_5": {
+      "name": "District 5 (San Luis Obispo)",
+      "shortName": "District 5",
+      "center": [
+        -120.8,
+        35.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "053",
+        "069",
+        "079",
+        "083",
+        "087"
+      ],
+      "countyNames": {
+        "053": "Monterey",
+        "069": "San Benito",
+        "079": "San Luis Obispo",
+        "083": "Santa Barbara",
+        "087": "Santa Cruz"
+      },
+      "mapBounds": {
+        "sw": [
+          34.4,
+          -122.0
+        ],
+        "ne": [
+          37.0,
+          -119.6
+        ]
+      },
+      "hq": "San Luis Obispo"
+    },
+    "ca_6": {
+      "name": "District 6 (Fresno)",
+      "shortName": "District 6",
+      "center": [
+        -119.5,
+        36.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "019",
+        "029",
+        "031",
+        "039",
+        "107"
+      ],
+      "countyNames": {
+        "019": "Fresno",
+        "029": "Kern (western)",
+        "031": "Kings",
+        "039": "Madera",
+        "107": "Tulare"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -120.5
+        ],
+        "ne": [
+          37.5,
+          -118.5
+        ]
+      },
+      "hq": "Fresno"
+    },
+    "ca_7": {
+      "name": "District 7 (Los Angeles)",
+      "shortName": "District 7",
+      "center": [
+        -118.5,
+        34.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "037",
+        "111"
+      ],
+      "countyNames": {
+        "037": "Los Angeles",
+        "111": "Ventura"
+      },
+      "mapBounds": {
+        "sw": [
+          33.7,
+          -119.5
+        ],
+        "ne": [
+          34.8,
+          -117.5
+        ]
+      },
+      "hq": "Los Angeles"
+    },
+    "ca_8": {
+      "name": "District 8 (San Bernardino)",
+      "shortName": "District 8",
+      "center": [
+        -116.5,
+        33.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "065",
+        "071"
+      ],
+      "countyNames": {
+        "065": "Riverside",
+        "071": "San Bernardino"
+      },
+      "mapBounds": {
+        "sw": [
+          33.4,
+          -117.7
+        ],
+        "ne": [
+          35.8,
+          -114.5
+        ]
+      },
+      "hq": "San Bernardino"
+    },
+    "ca_9": {
+      "name": "District 9 (Bishop)",
+      "shortName": "District 9",
+      "center": [
+        -118.0,
+        37.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "027",
+        "029",
+        "051"
+      ],
+      "countyNames": {
+        "027": "Inyo",
+        "029": "Kern (eastern)",
+        "051": "Mono"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -119.0
+        ],
+        "ne": [
+          38.3,
+          -117.0
+        ]
+      },
+      "hq": "Bishop"
+    },
+    "ca_10": {
+      "name": "District 10 (Stockton)",
+      "shortName": "District 10",
+      "center": [
+        -120.3,
+        37.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "005",
+        "009",
+        "043",
+        "047",
+        "077",
+        "099",
+        "109"
+      ],
+      "countyNames": {
+        "003": "Alpine",
+        "005": "Amador",
+        "009": "Calaveras",
+        "043": "Mariposa",
+        "047": "Merced",
+        "077": "San Joaquin",
+        "099": "Stanislaus",
+        "109": "Tuolumne"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -121.3
+        ],
+        "ne": [
+          38.5,
+          -119.3
+        ]
+      },
+      "hq": "Stockton"
+    },
+    "ca_11": {
+      "name": "District 11 (San Diego)",
+      "shortName": "District 11",
+      "center": [
+        -116.2,
+        33.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "025",
+        "073"
+      ],
+      "countyNames": {
+        "025": "Imperial",
+        "073": "San Diego"
+      },
+      "mapBounds": {
+        "sw": [
+          32.5,
+          -117.6
+        ],
+        "ne": [
+          33.5,
+          -114.8
+        ]
+      },
+      "hq": "San Diego"
+    },
+    "ca_12": {
+      "name": "District 12 (Irvine)",
+      "shortName": "District 12",
+      "center": [
+        -117.83,
+        33.68
+      ],
+      "zoom": 10,
+      "counties": [
+        "059"
+      ],
+      "countyNames": {
+        "059": "Orange"
+      },
+      "mapBounds": {
+        "sw": [
+          33.4,
+          -118.1
+        ],
+        "ne": [
+          33.95,
+          -117.55
+        ]
+      },
+      "hq": "Irvine"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "scagscag": {
+      "name": "SCAG (Southern California Association of Governments)",
+      "shortName": "Southern California Association of Governments",
+      "type": "mpo",
+      "center": [
+        -118.2437,
+        34.0522
+      ],
+      "zoom": 9,
+      "counties": [
+        "037",
+        "059",
+        "071",
+        "065",
+        "111",
+        "025"
+      ],
+      "countyNames": {
+        "037": "Los Angeles",
+        "059": "Orange",
+        "071": "San Bernardino",
+        "065": "Riverside",
+        "111": "Ventura",
+        "025": "Imperial"
+      },
+      "btsAcronym": "SCAG",
+      "mapBounds": {
+        "sw": [
+          33.4,
+          -119.0
+        ],
+        "ne": [
+          34.8,
+          -117.0
+        ]
+      }
+    },
+    "mtcmtc": {
+      "name": "MTC (Metropolitan Transportation Commission)",
+      "shortName": "Metropolitan Transportation Commission",
+      "type": "mpo",
+      "center": [
+        -122.4194,
+        37.7749
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "013",
+        "041",
+        "055",
+        "075",
+        "081",
+        "085",
+        "095",
+        "097"
+      ],
+      "countyNames": {
+        "001": "Alameda",
+        "013": "Contra Costa",
+        "041": "Marin",
+        "055": "Napa",
+        "075": "San Francisco",
+        "081": "San Mateo",
+        "085": "Santa Clara",
+        "095": "Solano",
+        "097": "Sonoma"
+      },
+      "btsAcronym": "MTC",
+      "mapBounds": {
+        "sw": [
+          37.2,
+          -123.0
+        ],
+        "ne": [
+          38.5,
+          -121.5
+        ]
+      }
+    },
+    "sandagsdag": {
+      "name": "SANDAG (San Diego Association of Governments)",
+      "shortName": "San Diego Association of Governments",
+      "type": "mpo",
+      "center": [
+        -121.4944,
+        38.5816
+      ],
+      "zoom": 9,
+      "counties": [
+        "073"
+      ],
+      "countyNames": {
+        "073": "San Diego"
+      },
+      "btsAcronym": "SDAG",
+      "mapBounds": {
+        "sw": [
+          38.2,
+          -122.0
+        ],
+        "ne": [
+          39.0,
+          -121.0
+        ]
+      }
+    },
+    "sacogsacog": {
+      "name": "SACOG (Sacramento Area COG)",
+      "shortName": "Sacramento Area COG",
+      "type": "mpo",
+      "center": [
+        -117.1611,
+        32.7157
+      ],
+      "zoom": 9,
+      "counties": [
+        "067",
+        "113",
+        "061",
+        "017",
+        "101",
+        "115"
+      ],
+      "countyNames": {
+        "067": "Sacramento",
+        "113": "Yolo",
+        "061": "Placer",
+        "017": "El Dorado",
+        "101": "Sutter",
+        "115": "Yuba"
+      },
+      "btsAcronym": "SAC",
+      "mapBounds": {
+        "sw": [
+          32.5,
+          -117.6
+        ],
+        "ne": [
+          33.3,
+          -116.1
+        ]
+      }
+    },
+    "fcog": {
+      "name": "Fresno COG",
+      "shortName": "Fresno COG",
+      "type": "mpo",
+      "center": [
+        -119.7726,
+        36.7468
+      ],
+      "zoom": 9,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Fresno"
+      },
+      "btsAcronym": "FC",
+      "mapBounds": {
+        "sw": [
+          36.2,
+          -120.3
+        ],
+        "ne": [
+          37.3,
+          -119.2
+        ]
+      }
+    },
+    "kcog": {
+      "name": "Kern COG",
+      "shortName": "Kern COG",
+      "type": "mpo",
+      "center": [
+        -121.2908,
+        37.9577
+      ],
+      "zoom": 10,
+      "counties": [
+        "029"
+      ],
+      "countyNames": {
+        "029": "Kern"
+      },
+      "btsAcronym": "KC",
+      "mapBounds": {
+        "sw": [
+          37.6,
+          -121.6
+        ],
+        "ne": [
+          38.3,
+          -121.0
+        ]
+      }
+    },
+    "sjcog": {
+      "name": "San Joaquin COG",
+      "shortName": "San Joaquin COG",
+      "type": "mpo",
+      "center": [
+        -119.0187,
+        35.3733
+      ],
+      "zoom": 9,
+      "counties": [
+        "077"
+      ],
+      "countyNames": {
+        "077": "San Joaquin"
+      },
+      "btsAcronym": "SJC",
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -119.6
+        ],
+        "ne": [
+          35.8,
+          -118.2
+        ]
+      }
+    },
+    "scog": {
+      "name": "Stanislaus COG",
+      "shortName": "Stanislaus COG",
+      "type": "mpo",
+      "center": [
+        -119.2921,
+        36.3302
+      ],
+      "zoom": 10,
+      "counties": [
+        "099"
+      ],
+      "countyNames": {
+        "099": "Stanislaus"
+      },
+      "btsAcronym": "SC",
+      "mapBounds": {
+        "sw": [
+          36.0,
+          -119.65
+        ],
+        "ne": [
+          36.65,
+          -118.9
+        ]
+      }
+    },
+    "tcag": {
+      "name": "Tulare County Association of Governments",
+      "shortName": "Tulare County Association of Governments",
+      "type": "mpo",
+      "center": [
+        -120.4358,
+        34.953
+      ],
+      "zoom": 10,
+      "counties": [
+        "107"
+      ],
+      "countyNames": {
+        "107": "Tulare"
+      },
+      "btsAcronym": "TCAG",
+      "mapBounds": {
+        "sw": [
+          34.6,
+          -120.8
+        ],
+        "ne": [
+          35.4,
+          -120.0
+        ]
+      }
+    },
+    "ambagambag": {
+      "name": "AMBAG (Association of Monterey Bay Area Governments)",
+      "shortName": "Association of Monterey Bay Area Governments",
+      "type": "mpo",
+      "center": [
+        -122.0308,
+        36.9741
+      ],
+      "zoom": 10,
+      "counties": [
+        "053",
+        "087",
+        "069"
+      ],
+      "countyNames": {
+        "053": "Monterey",
+        "087": "Santa Cruz",
+        "069": "San Benito"
+      },
+      "btsAcronym": "AMBAG",
+      "mapBounds": {
+        "sw": [
+          36.8,
+          -122.25
+        ],
+        "ne": [
+          37.2,
+          -121.8
+        ]
+      }
+    },
+    "sbcagsbcag": {
+      "name": "SBCAG (Santa Barbara County Association of Governments)",
+      "shortName": "Santa Barbara County Association of Governments",
+      "type": "mpo",
+      "center": [
+        -122.143,
+        37.4419
+      ],
+      "zoom": 10,
+      "counties": [
+        "083"
+      ],
+      "countyNames": {
+        "083": "Santa Barbara"
+      },
+      "btsAcronym": "SBCAG",
+      "mapBounds": {
+        "sw": [
+          37.3,
+          -122.35
+        ],
+        "ne": [
+          37.6,
+          -121.9
+        ]
+      }
+    },
+    "slocog": {
+      "name": "San Luis Obispo COG",
+      "shortName": "San Luis Obispo COG",
+      "type": "mpo",
+      "center": [
+        -121.8375,
+        39.7285
+      ],
+      "zoom": 10,
+      "counties": [
+        "079"
+      ],
+      "countyNames": {
+        "079": "San Luis Obispo"
+      },
+      "btsAcronym": "SLOC",
+      "mapBounds": {
+        "sw": [
+          39.5,
+          -122.1
+        ],
+        "ne": [
+          39.95,
+          -121.55
+        ]
+      }
+    },
+    "mcag": {
+      "name": "Merced County Association of Governments",
+      "shortName": "Merced County Association of Governments",
+      "type": "mpo",
+      "center": [
+        -121.8863,
+        37.3382
+      ],
+      "zoom": 10,
+      "counties": [
+        "047"
+      ],
+      "countyNames": {
+        "047": "Merced"
+      },
+      "btsAcronym": "MCAG",
+      "mapBounds": {
+        "sw": [
+          37.1,
+          -122.15
+        ],
+        "ne": [
+          37.5,
+          -121.6
+        ]
+      }
+    },
+    "kcag": {
+      "name": "Kings County Association of Governments",
+      "shortName": "Kings County Association of Governments",
+      "type": "mpo",
+      "center": [
+        -122.3917,
+        40.5865
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "Kings"
+      },
+      "btsAcronym": "KCAG",
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -122.7
+        ],
+        "ne": [
+          40.9,
+          -122.1
+        ]
+      }
+    },
+    "mctc": {
+      "name": "Madera County Transportation Commission",
+      "shortName": "Madera County Transportation Commission",
+      "type": "mpo",
+      "center": [
+        -121.8947,
+        36.6002
+      ],
+      "zoom": 10,
+      "counties": [
+        "039"
+      ],
+      "countyNames": {
+        "039": "Madera"
+      },
+      "btsAcronym": "MCTC",
+      "mapBounds": {
+        "sw": [
+          36.3,
+          -122.15
+        ],
+        "ne": [
+          36.85,
+          -121.6
+        ]
+      }
+    },
+    "bcag": {
+      "name": "Butte County Association of Governments",
+      "shortName": "Butte County Association of Governments",
+      "type": "mpo",
+      "center": [
+        -120.9958,
+        37.6017
+      ],
+      "zoom": 10,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Butte"
+      },
+      "btsAcronym": "BCAG",
+      "mapBounds": {
+        "sw": [
+          37.3,
+          -121.3
+        ],
+        "ne": [
+          37.9,
+          -120.7
+        ]
+      }
+    },
+    "srta": {
+      "name": "Shasta Regional Transportation Agency",
+      "shortName": "Shasta Regional Transportation Agency",
+      "type": "mpo",
+      "center": [
+        -120.599,
+        37.3688
+      ],
+      "zoom": 10,
+      "counties": [
+        "089"
+      ],
+      "countyNames": {
+        "089": "Shasta"
+      },
+      "btsAcronym": "SRTA",
+      "mapBounds": {
+        "sw": [
+          37.1,
+          -120.9
+        ],
+        "ne": [
+          37.6,
+          -120.3
+        ]
+      }
+    },
+    "fresno_council_of_governments_mpo": {
+      "name": "Fresno Council of Governments",
+      "shortName": "Fresno Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "06197202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -119.83441,
+        36.716553
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Alameda",
+    "003": "Alpine",
+    "005": "Amador",
+    "007": "Butte",
+    "009": "Calaveras",
+    "011": "Colusa",
+    "013": "Contra Costa",
+    "015": "Del Norte",
+    "017": "El Dorado",
+    "019": "Fresno",
+    "021": "Glenn",
+    "023": "Humboldt",
+    "025": "Imperial",
+    "027": "Inyo",
+    "029": "Kern",
+    "031": "Kings",
+    "033": "Lake",
+    "035": "Lassen",
+    "037": "Los Angeles",
+    "039": "Madera",
+    "041": "Marin",
+    "043": "Mariposa",
+    "045": "Mendocino",
+    "047": "Merced",
+    "049": "Modoc",
+    "051": "Mono",
+    "053": "Monterey",
+    "055": "Napa",
+    "057": "Nevada",
+    "059": "Orange",
+    "061": "Placer",
+    "063": "Plumas",
+    "065": "Riverside",
+    "067": "Sacramento",
+    "069": "San Benito",
+    "071": "San Bernardino",
+    "073": "San Diego",
+    "075": "San Francisco",
+    "077": "San Joaquin",
+    "079": "San Luis Obispo",
+    "081": "San Mateo",
+    "083": "Santa Barbara",
+    "085": "Santa Clara",
+    "087": "Santa Cruz",
+    "089": "Shasta",
+    "091": "Sierra",
+    "093": "Siskiyou",
+    "095": "Solano",
+    "097": "Sonoma",
+    "099": "Stanislaus",
+    "101": "Sutter",
+    "103": "Tehama",
+    "105": "Trinity",
+    "107": "Tulare",
+    "109": "Tuolumne",
+    "111": "Ventura",
+    "113": "Yolo",
+    "115": "Yuba"
+  }
+}

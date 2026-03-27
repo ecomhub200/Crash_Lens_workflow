@@ -1,0 +1,19 @@
+{
+  "_description": "TxDOT crash data registry. 254 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Texas Department of Transportation",
+    "base_url": "https://cris.dot.state.tx.us",
+    "api_url": "https://cris.dot.state.tx.us/public/Query/app/home",
+    "file_format": "CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 254 Texas counties. FIPS codes are 5-digit (state 48 + 3-digit county).",
+    "_placeholder": "Populate with all 254 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "portal": "https://cris.dot.state.tx.us/public/Query/app/home",
+    "access": "Registration required",
+    "download_method": "Bulk CSV export"
+  }
+}

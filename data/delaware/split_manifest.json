@@ -1,0 +1,102 @@
+{
+  "state": "delaware",
+  "generated_at": "2026-03-25T19:16:11.587820+00:00",
+  "elapsed_s": 111.2,
+  "total_input_rows": 566762,
+  "dry_run": false,
+  "strategies": {
+    "region": "column",
+    "mpo": "column",
+    "planning_district": "column"
+  },
+  "splits": {
+    "state": {
+      "all_roads": 566762,
+      "dot_roads": 0,
+      "primary_roads": 0,
+      "non_dot_roads": 0,
+      "statewide_all_roads": 566762
+    },
+    "regions": {
+      "central_district": {
+        "all_roads": 97576,
+        "dot_roads": 0,
+        "primary_roads": 0,
+        "non_dot_roads": 0
+      },
+      "north_district": {
+        "all_roads": 336541,
+        "dot_roads": 0,
+        "primary_roads": 0,
+        "non_dot_roads": 0
+      },
+      "south_district": {
+        "all_roads": 132645,
+        "dot_roads": 0,
+        "primary_roads": 0,
+        "non_dot_roads": 0
+      }
+    },
+    "mpos": {
+      "dover_kent_county_mpo": {
+        "all_roads": 97576,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 97576
+      },
+      "salisbury_wicomico_mpo": {
+        "all_roads": 132645,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 132645
+      },
+      "wilmapco": {
+        "all_roads": 336541,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 336541
+      }
+    },
+    "planning_districts": {
+      "central_district": {
+        "all_roads": 97576,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 97576
+      },
+      "north_district": {
+        "all_roads": 336541,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 336541
+      },
+      "south_district": {
+        "all_roads": 132645,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 132645
+      }
+    },
+    "counties": {
+      "kent": {
+        "all_roads": 97576,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 97576
+      },
+      "new_castle": {
+        "all_roads": 336541,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 336541
+      },
+      "sussex": {
+        "all_roads": 132645,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 132645
+      }
+    },
+    "cities": {}
+  }
+}

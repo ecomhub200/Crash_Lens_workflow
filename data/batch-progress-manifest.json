@@ -1,0 +1,201 @@
+{
+  "_comment": "Batch processing progress tracker",
+  "states": {
+    "virginia": {
+      "runs": [
+        {
+          "timestamp": "2026-03-14T11:18:14.489182+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097430,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23086842599"
+        },
+        {
+          "timestamp": "2026-03-14T11:59:18.093778+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 8,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23087471583"
+        },
+        {
+          "timestamp": "2026-03-15T19:50:21.155104+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097423,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23117482895"
+        },
+        {
+          "timestamp": "2026-03-15T20:52:25.846434+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097423,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23118583606"
+        },
+        {
+          "timestamp": "2026-03-15T23:31:57.037459+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097423,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23121433366"
+        },
+        {
+          "timestamp": "2026-03-16T17:38:17.271828+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097477,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23156201877"
+        },
+        {
+          "timestamp": "2026-03-17T04:44:00.908122+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097477,
+          "jurisdiction_count": 133,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23178168563"
+        }
+      ],
+      "last_updated": "2026-03-17T04:44:00.908112+00:00"
+    },
+    "delaware": {
+      "runs": [
+        {
+          "timestamp": "2026-03-17T17:01:54.510560+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23206087745"
+        },
+        {
+          "timestamp": "2026-03-17T18:15:36.765734+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23209167641"
+        },
+        {
+          "timestamp": "2026-03-19T23:06:21.898834+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23321028760",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-22T03:41:40.951272+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23394750472",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-22T21:11:20.434475+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23412310943",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-22T21:51:52.219784+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23413042667",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-23T00:58:25.035086+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23416470026",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-23T20:45:34.758810+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23458073315",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-24T02:17:41.224443+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23469438099",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        },
+        {
+          "timestamp": "2026-03-25T19:12:27.721024+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "23558466198",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
+        }
+      ],
+      "last_updated": "2026-03-25T19:12:27.721014+00:00"
+    }
+  }
+}

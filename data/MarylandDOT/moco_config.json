@@ -1,0 +1,155 @@
+{
+  "_description": "Montgomery County ACRS column mapping — maps MoCo Socrata field names to CRASH LENS internal codes. MoCo uses shorter field names than the statewide portal (e.g., 'collision_type' not 'collision_type_desc').",
+  "_updated": "2026-02-17",
+
+  "columnMapping": {
+    "ID": "report_number",
+    "DATE": "crash_date_time",
+    "LAT": "latitude",
+    "LON": "longitude",
+    "SEVERITY_RAW": "acrs_report_type",
+    "ROUTE": "road_name",
+    "CROSS_STREET": "cross_street_name",
+    "ROUTE_TYPE": "route_type",
+    "COLLISION": "collision_type",
+    "WEATHER": "weather",
+    "LIGHT": "light",
+    "SURFACE_CONDITION": "surface_condition",
+    "HITRUN": "hit_run",
+    "MUNICIPALITY": "municipality",
+    "YEAR": "year",
+    "AGENCY": "agency_name",
+    "SPEED_LIMIT": "speed_limit",
+    "REPORT_TYPE": "report_type",
+    "OFF_ROAD": "off_road_description",
+    "JUNCTION": "junction",
+    "TRAFFIC_CONTROL": "traffic_control",
+    "ROAD_ALIGNMENT": "road_alignment",
+    "ROAD_CONDITION": "road_condition",
+    "ROAD_DIVISION": "road_division"
+  },
+
+  "derivedFields": {
+    "SEVERITY": {
+      "method": "report_type_map",
+      "source": "acrs_report_type",
+      "mapping": {
+        "Fatal Crash": "K",
+        "Injury Crash": "B",
+        "Property Damage Crash": "O"
+      },
+      "_note": "Same 3-tier system as statewide MD. For true KABCO, join with drivers/nonmotorists datasets by report_number."
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "crash_date_time"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": ["road_name", "cross_street_name"],
+      "separator": " & "
+    }
+  },
+
+  "crashTypeMapping": {
+    "_description": "Maps MoCo collision_type values to CRASH LENS standard collision types (VDOT numbered format)",
+    "_note": "MoCo uses 'collision_type' (not 'collision_type_desc' like statewide). Values may differ slightly.",
+    "SAME DIR REAR END": "1. Rear End",
+    "Same Dir Rear End": "1. Rear End",
+    "SAME DIRECTION REAR END": "1. Rear End",
+    "HEAD ON": "3. Head On",
+    "Head On": "3. Head On",
+    "HEAD ON LEFT TURN": "3. Head On",
+    "Head On Left Turn": "3. Head On",
+    "ANGLE": "2. Angle",
+    "Angle": "2. Angle",
+    "ANGLE MEETS LEFT HEAD ON": "2. Angle",
+    "ANGLE MEETS LEFT TURN": "2. Angle",
+    "ANGLE MEETS RIGHT TURN": "2. Angle",
+    "SAME DIRECTION SIDESWIPE": "4. Sideswipe - Same Direction",
+    "Same Direction Sideswipe": "4. Sideswipe - Same Direction",
+    "SAME DIR BOTH LEFT TURN": "4. Sideswipe - Same Direction",
+    "SAME DIR BOTH RIGHT TURN": "4. Sideswipe - Same Direction",
+    "OPPOSITE DIRECTION SIDESWIPE": "5. Sideswipe - Opposite Direction",
+    "Opposite Direction Sideswipe": "5. Sideswipe - Opposite Direction",
+    "SINGLE VEHICLE": "14. Fixed Object",
+    "Single Vehicle": "14. Fixed Object",
+    "OTHER": "16. Other/Unknown",
+    "Other": "16. Other/Unknown",
+    "UNKNOWN": "16. Other/Unknown"
+  },
+
+  "weatherMapping": {
+    "CLEAR": "1. No Adverse Condition (Clear/Cloudy)",
+    "Clear": "1. No Adverse Condition (Clear/Cloudy)",
+    "CLOUDY": "1. No Adverse Condition (Clear/Cloudy)",
+    "Cloudy": "1. No Adverse Condition (Clear/Cloudy)",
+    "RAINING": "5. Rain",
+    "Raining": "5. Rain",
+    "FOGGY": "3. Fog/Smog/Smoke",
+    "Foggy": "3. Fog/Smog/Smoke",
+    "SNOW": "4. Snow",
+    "Snow": "4. Snow",
+    "SLEET": "6. Sleet/Hail/Freezing",
+    "Sleet": "6. Sleet/Hail/Freezing",
+    "BLOWING SAND, SOIL, DIRT": "7. Blowing Sand/Dust",
+    "BLOWING SNOW": "4. Snow",
+    "SEVERE CROSSWINDS": "8. Severe Crosswinds",
+    "OTHER": "9. Other",
+    "N/A": ""
+  },
+
+  "lightMapping": {
+    "DAYLIGHT": "2. Daylight",
+    "Daylight": "2. Daylight",
+    "DARK LIGHTS ON": "4. Darkness - Road Lighted",
+    "Dark Lights On": "4. Darkness - Road Lighted",
+    "DARK-LIGHTS ON": "4. Darkness - Road Lighted",
+    "Dark-Lights On": "4. Darkness - Road Lighted",
+    "DARK NO LIGHTS": "5. Darkness - Road Not Lighted",
+    "Dark No Lights": "5. Darkness - Road Not Lighted",
+    "DARK-NO LIGHTS": "5. Darkness - Road Not Lighted",
+    "Dark-No Lights": "5. Darkness - Road Not Lighted",
+    "DAWN": "1. Dawn",
+    "Dawn": "1. Dawn",
+    "DUSK": "3. Dusk",
+    "Dusk": "3. Dusk",
+    "DARK -- UNKNOWN LIGHTING": "6. Dark - Unknown",
+    "Dark - Unknown Lighting": "6. Dark - Unknown",
+    "OTHER": "9. Other",
+    "N/A": ""
+  },
+
+  "surfaceMapping": {
+    "DRY": "1. Dry",
+    "Dry": "1. Dry",
+    "WET": "2. Wet",
+    "Wet": "2. Wet",
+    "SNOW": "3. Snow",
+    "Snow": "3. Snow",
+    "ICE": "5. Ice",
+    "Ice": "5. Ice",
+    "SLUSH": "4. Slush",
+    "Slush": "4. Slush",
+    "MUD, DIRT, GRAVEL": "6. Sand/Mud/Dirt/Oil/Gravel",
+    "SAND": "6. Sand/Mud/Dirt/Oil/Gravel",
+    "WATER (STANDING, MOVING)": "7. Water",
+    "OIL": "6. Sand/Mud/Dirt/Oil/Gravel",
+    "OTHER": "16. Other",
+    "N/A": ""
+  },
+
+  "roadSystemMapping": {
+    "Interstate": "Interstate",
+    "US Route": "Primary",
+    "US (State)": "Primary",
+    "Maryland (State)": "Primary",
+    "State Route": "Primary",
+    "County": "Non-DOT secondary",
+    "Municipality": "Non-DOT secondary",
+    "Other Public Roadway": "Non-DOT secondary",
+    "Government": "Non-DOT secondary",
+    "Service Road": "Secondary",
+    "Ramp": "Secondary"
+  }
+}

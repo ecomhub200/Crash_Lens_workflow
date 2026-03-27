@@ -1,0 +1,471 @@
+{
+  "state": {
+    "fips": "16",
+    "name": "Idaho",
+    "abbreviation": "ID",
+    "dot": "ITD",
+    "dotFullName": "Idaho Transportation Department",
+    "center": [
+      -114.478828,
+      44.240459
+    ],
+    "zoom": 6,
+    "placesCount": 198
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "id_1": {
+      "name": "District 1 (Coeur d'Alene)",
+      "shortName": "District 1",
+      "center": [
+        -116.5,
+        47.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "017",
+        "021",
+        "055",
+        "079"
+      ],
+      "countyNames": {
+        "009": "Benewah",
+        "017": "Bonner",
+        "021": "Boundary",
+        "055": "Kootenai",
+        "079": "Shoshone"
+      },
+      "mapBounds": {
+        "sw": [
+          46.7,
+          -117.2
+        ],
+        "ne": [
+          49.0,
+          -115.6
+        ]
+      },
+      "hq": "Coeur d'Alene"
+    },
+    "id_2": {
+      "name": "District 2 (Lewiston)",
+      "shortName": "District 2",
+      "center": [
+        -115.5,
+        46.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "035",
+        "049",
+        "057",
+        "061",
+        "069"
+      ],
+      "countyNames": {
+        "035": "Clearwater",
+        "049": "Idaho",
+        "057": "Latah",
+        "061": "Lewis",
+        "069": "Nez Perce"
+      },
+      "mapBounds": {
+        "sw": [
+          45.5,
+          -116.5
+        ],
+        "ne": [
+          47.0,
+          -114.5
+        ]
+      },
+      "hq": "Lewiston"
+    },
+    "id_3": {
+      "name": "District 3 (Boise)",
+      "shortName": "District 3",
+      "center": [
+        -116.0,
+        43.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "015",
+        "027",
+        "039",
+        "045",
+        "073",
+        "075",
+        "085",
+        "087"
+      ],
+      "countyNames": {
+        "001": "Ada",
+        "003": "Adams",
+        "015": "Boise",
+        "027": "Canyon",
+        "039": "Elmore",
+        "045": "Gem",
+        "073": "Owyhee",
+        "075": "Payette",
+        "085": "Valley",
+        "087": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -117.2
+        ],
+        "ne": [
+          45.0,
+          -114.8
+        ]
+      },
+      "hq": "Boise"
+    },
+    "id_4": {
+      "name": "District 4 (Shoshone)",
+      "shortName": "District 4",
+      "center": [
+        -114.5,
+        42.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "013",
+        "025",
+        "031",
+        "047",
+        "053",
+        "063",
+        "067",
+        "083"
+      ],
+      "countyNames": {
+        "013": "Blaine",
+        "025": "Camas",
+        "031": "Cassia",
+        "047": "Gooding",
+        "053": "Jerome",
+        "063": "Lincoln",
+        "067": "Minidoka",
+        "083": "Twin Falls"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -115.5
+        ],
+        "ne": [
+          43.5,
+          -113.5
+        ]
+      },
+      "hq": "Shoshone"
+    },
+    "id_5": {
+      "name": "District 5 (Pocatello)",
+      "shortName": "District 5",
+      "center": [
+        -112.5,
+        42.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "007",
+        "011",
+        "029",
+        "041",
+        "071",
+        "077"
+      ],
+      "countyNames": {
+        "005": "Bannock",
+        "007": "Bear Lake",
+        "011": "Bingham",
+        "029": "Caribou",
+        "041": "Franklin",
+        "071": "Oneida",
+        "077": "Power"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -113.5
+        ],
+        "ne": [
+          43.2,
+          -111.5
+        ]
+      },
+      "hq": "Pocatello"
+    },
+    "id_6": {
+      "name": "District 6 (Rigby)",
+      "shortName": "District 6",
+      "center": [
+        -112.5,
+        44.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "019",
+        "023",
+        "033",
+        "037",
+        "043",
+        "051",
+        "059",
+        "065",
+        "081"
+      ],
+      "countyNames": {
+        "019": "Bonneville",
+        "023": "Butte",
+        "033": "Clark",
+        "037": "Custer",
+        "043": "Fremont",
+        "051": "Jefferson",
+        "059": "Lemhi",
+        "065": "Madison",
+        "081": "Teton"
+      },
+      "mapBounds": {
+        "sw": [
+          43.0,
+          -114.2
+        ],
+        "ne": [
+          45.0,
+          -111.0
+        ]
+      },
+      "hq": "Rigby"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "compasscpaswi": {
+      "name": "COMPASS (Community Planning Association of SW Idaho)",
+      "shortName": "Community Planning Association of SW Idaho",
+      "type": "mpo",
+      "center": [
+        -116.2023,
+        43.615
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "027"
+      ],
+      "countyNames": {
+        "001": "Ada",
+        "027": "Canyon"
+      },
+      "btsAcronym": "CPASI",
+      "mapBounds": {
+        "sw": [
+          43.4,
+          -116.5
+        ],
+        "ne": [
+          43.8,
+          -115.9
+        ]
+      }
+    },
+    "bmpobmpo": {
+      "name": "BMPO (Bonneville MPO)",
+      "shortName": "Bonneville MPO",
+      "type": "mpo",
+      "center": [
+        -112.4455,
+        42.8713
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Bonneville"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          42.65,
+          -112.7
+        ],
+        "ne": [
+          43.1,
+          -112.15
+        ]
+      }
+    },
+    "btpobtpo": {
+      "name": "BTPO (Bannock Transportation Planning Organization)",
+      "shortName": "Bannock Transportation Planning Organization",
+      "type": "mpo",
+      "center": [
+        -112.0341,
+        43.4666
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Bannock"
+      },
+      "btsAcronym": "BTPO",
+      "mapBounds": {
+        "sw": [
+          43.25,
+          -112.3
+        ],
+        "ne": [
+          43.7,
+          -111.75
+        ]
+      }
+    },
+    "kmpokmpo": {
+      "name": "KMPO (Kootenai MPO)",
+      "shortName": "Kootenai MPO",
+      "type": "mpo",
+      "center": [
+        -117.0002,
+        46.7324
+      ],
+      "zoom": 10,
+      "counties": [
+        "055"
+      ],
+      "countyNames": {
+        "055": "Kootenai"
+      },
+      "btsAcronym": "KM",
+      "mapBounds": {
+        "sw": [
+          46.5,
+          -117.25
+        ],
+        "ne": [
+          46.95,
+          -116.75
+        ]
+      }
+    },
+    "lcvmpo": {
+      "name": "Lewis-Clark Valley MPO",
+      "shortName": "Lewis-Clark Valley",
+      "type": "mpo",
+      "center": [
+        -117.0177,
+        46.4165
+      ],
+      "zoom": 10,
+      "counties": [
+        "069"
+      ],
+      "countyNames": {
+        "069": "Nez Perce"
+      },
+      "btsAcronym": "LVM",
+      "mapBounds": {
+        "sw": [
+          46.2,
+          -117.25
+        ],
+        "ne": [
+          46.65,
+          -116.75
+        ]
+      }
+    },
+    "community_planning_association_of_southwest_idaho_mpo": {
+      "name": "Community Planning Association of Southwest Idaho",
+      "shortName": "Community Planning Association of Southwest Idaho",
+      "type": "mpo",
+      "btsMpoId": "16197700",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -116.582563,
+        43.520441
+      ],
+      "zoom": 10
+    },
+    "magic_valley_mpo": {
+      "name": "Magic Valley MPO",
+      "shortName": "Magic Valley",
+      "type": "mpo",
+      "btsMpoId": "16202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -114.37791,
+        42.612748
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Ada",
+    "003": "Adams",
+    "005": "Bannock",
+    "007": "Bear Lake",
+    "009": "Benewah",
+    "011": "Bingham",
+    "013": "Blaine",
+    "015": "Boise",
+    "017": "Bonner",
+    "019": "Bonneville",
+    "021": "Boundary",
+    "023": "Butte",
+    "025": "Camas",
+    "027": "Canyon",
+    "029": "Caribou",
+    "031": "Cassia",
+    "033": "Clark",
+    "035": "Clearwater",
+    "037": "Custer",
+    "039": "Elmore",
+    "041": "Franklin",
+    "043": "Fremont",
+    "045": "Gem",
+    "047": "Gooding",
+    "049": "Idaho",
+    "051": "Jefferson",
+    "053": "Jerome",
+    "055": "Kootenai",
+    "057": "Latah",
+    "059": "Lemhi",
+    "061": "Lewis",
+    "063": "Lincoln",
+    "065": "Madison",
+    "067": "Minidoka",
+    "069": "Nez Perce",
+    "071": "Oneida",
+    "073": "Owyhee",
+    "075": "Payette",
+    "077": "Power",
+    "079": "Shoshone",
+    "081": "Teton",
+    "083": "Twin Falls",
+    "085": "Valley",
+    "087": "Washington"
+  }
+}

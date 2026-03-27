@@ -1,0 +1,97 @@
+{
+  "state": {
+    "fips": "11",
+    "name": "District of Columbia",
+    "abbreviation": "DC",
+    "dot": "DDOT",
+    "dotFullName": "District Department of Transportation",
+    "center": [
+      -77.036871,
+      38.907192
+    ],
+    "zoom": 12
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "dc_1": {
+      "name": "District of Columbia (single district)",
+      "shortName": "District of Columbia",
+      "center": [
+        -77.0369,
+        38.9072
+      ],
+      "zoom": 12,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "District of Columbia"
+      },
+      "mapBounds": {
+        "sw": [
+          38.79,
+          -77.12
+        ],
+        "ne": [
+          38.99,
+          -76.91
+        ]
+      },
+      "hq": "Washington"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mwcog": {
+      "name": "National Capital Region TPB (MWCOG)",
+      "shortName": "MWCOG",
+      "type": "mpo",
+      "center": [
+        -77.0365,
+        38.8977
+      ],
+      "zoom": 9,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "District of Columbia"
+      },
+      "btsAcronym": "MWCOG",
+      "mapBounds": {
+        "sw": [
+          38.5,
+          -77.6
+        ],
+        "ne": [
+          39.3,
+          -76.5
+        ]
+      }
+    },
+    "national_capital_region_transportation_planning_board_mpo": {
+      "name": "National Capital Region Transportation Planning Board",
+      "shortName": "National Capital Region Transportation Planning Board",
+      "type": "mpo",
+      "btsMpoId": "11196500",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.103429,
+        38.651659
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "District of Columbia"
+  }
+}

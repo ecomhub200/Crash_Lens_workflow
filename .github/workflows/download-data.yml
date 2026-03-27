@@ -1,0 +1,869 @@
+name: Download Traffic Data
+
+on:
+  schedule:
+    # Crash data: First Monday of each month at 11:00 UTC (6:00 AM ET)
+    - cron: '0 11 1-7 * 1'
+    # Grants data: Every Monday at 11:00 UTC (6:00 AM ET)
+    - cron: '0 11 * * 1'
+    # CMF data: First Monday of Jan, Apr, Jul, Oct (quarterly) at 12:00 UTC (7:00 AM ET)
+    - cron: '0 12 1-7 1,4,7,10 1'
+  workflow_dispatch:
+    inputs:
+      jurisdiction:
+        description: 'Select Jurisdiction (leave empty to use saved setting)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          # Counties (95)
+          - accomack
+          - albemarle
+          - alleghany
+          - amelia
+          - amherst
+          - appomattox
+          - arlington
+          - augusta
+          - bath
+          - bedford_county
+          - bland
+          - botetourt
+          - brunswick
+          - buchanan
+          - buckingham
+          - campbell
+          - caroline
+          - carroll
+          - charles_city
+          - charlotte
+          - chesterfield
+          - clarke
+          - craig
+          - culpeper
+          - cumberland
+          - dickenson
+          - dinwiddie
+          - essex
+          - fairfax_county
+          - fauquier
+          - floyd
+          - fluvanna
+          - franklin_county
+          - frederick
+          - giles
+          - gloucester
+          - goochland
+          - grayson
+          - greene
+          - greensville
+          - halifax
+          - hanover
+          - henrico
+          - henry
+          - highland
+          - isle_of_wight
+          - james_city
+          - king_and_queen
+          - king_george
+          - king_william
+          - lancaster
+          - lee
+          - loudoun
+          - louisa
+          - lunenburg
+          - madison
+          - mathews
+          - mecklenburg
+          - middlesex
+          - montgomery
+          - nelson
+          - new_kent
+          - northampton
+          - northumberland
+          - nottoway
+          - orange
+          - page
+          - patrick
+          - pittsylvania
+          - powhatan
+          - prince_edward
+          - prince_george
+          - prince_william
+          - pulaski
+          - rappahannock
+          - richmond_county
+          - roanoke_county
+          - rockbridge
+          - rockingham
+          - russell
+          - scott
+          - shenandoah
+          - smyth
+          - southampton
+          - spotsylvania
+          - stafford
+          - surry
+          - sussex
+          - tazewell
+          - warren
+          - washington
+          - westmoreland
+          - wise
+          - wythe
+          - york
+          # Independent Cities (38)
+          - alexandria
+          - bristol
+          - buena_vista
+          - charlottesville
+          - chesapeake
+          - colonial_heights
+          - covington
+          - danville
+          - emporia
+          - fairfax_city
+          - falls_church
+          - franklin_city
+          - fredericksburg
+          - galax
+          - hampton
+          - harrisonburg
+          - hopewell
+          - lexington
+          - lynchburg
+          - manassas
+          - manassas_park
+          - martinsville
+          - newport_news
+          - norfolk
+          - norton
+          - petersburg
+          - poquoson
+          - portsmouth
+          - radford
+          - richmond_city
+          - roanoke_city
+          - salem
+          - staunton
+          - suffolk
+          - virginia_beach
+          - waynesboro
+          - williamsburg
+          - winchester
+      download_type:
+        description: 'What to download'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - 'both'
+          - 'crash_only'
+          - 'grants_only'
+          - 'cmf_only'
+          - 'all'
+
+permissions:
+  contents: write
+
+env:
+  NOTIFICATION_EMAIL: ecomhub200@gmail.com
+  # R2 state prefix - parameterized for multi-state support
+  # Change this to support different states (e.g., 'colorado', 'texas')
+  R2_STATE_PREFIX: virginia
+  STATE_DISPLAY: Virginia
+
+jobs:
+  download-crash-data:
+    runs-on: ubuntu-24.04
+    # Run crash download on first Monday of month OR manual trigger (not grants_only)
+    if: |
+      github.event_name == 'workflow_dispatch' && github.event.inputs.download_type != 'grants_only' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 11 1-7 * 1'
+    outputs:
+      crash_status: ${{ steps.crash-download.outcome }}
+      crash_records: ${{ steps.crash-stats.outputs.records }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Determine jurisdiction
+        id: get-jurisdiction
+        run: |
+          # Check if jurisdiction was provided via workflow_dispatch
+          INPUT_JURISDICTION="${{ github.event.inputs.jurisdiction }}"
+
+          if [ -n "$INPUT_JURISDICTION" ]; then
+            echo "Using workflow input jurisdiction: $INPUT_JURISDICTION"
+            echo "jurisdiction=$INPUT_JURISDICTION" >> $GITHUB_OUTPUT
+          else
+            # Read from settings.json for scheduled runs
+            if [ -f "config/settings.json" ]; then
+              SAVED_JURISDICTION=$(python -c "import json; print(json.load(open('config/settings.json'))['selectedJurisdiction'])")
+              echo "Using saved jurisdiction from settings: $SAVED_JURISDICTION"
+              echo "jurisdiction=$SAVED_JURISDICTION" >> $GITHUB_OUTPUT
+            else
+              echo "No settings file found, using default: henrico"
+              echo "jurisdiction=henrico" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: API Health Check
+        id: health-check
+        run: |
+          echo "=========================================="
+          echo "Running API Health Check"
+          echo "=========================================="
+          python download_crash_data.py --health-check
+          echo "health_status=success" >> $GITHUB_OUTPUT
+
+      - name: Download crash data (all 3 road type filters)
+        id: crash-download
+        run: |
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Downloading data for: $JURISDICTION"
+          echo "Download started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          # Download County Roads Only (also save statewide gzip at Stage 1.5)
+          echo ">>> Downloading County Roads Only (+ statewide gzip)..."
+          python download_crash_data.py --jurisdiction "$JURISDICTION" --filter countyOnly --output "data/${JURISDICTION}_county_roads.csv" --save-statewide
+
+          # Download All Roads (No Interstate)
+          echo ">>> Downloading All Roads (No Interstate)..."
+          python download_crash_data.py --jurisdiction "$JURISDICTION" --filter countyPlusVDOT --output "data/${JURISDICTION}_no_interstate.csv"
+
+          # Download All Roads (Including Interstate)
+          echo ">>> Downloading All Roads (Including Interstate)..."
+          python download_crash_data.py --jurisdiction "$JURISDICTION" --filter allRoads --output "data/${JURISDICTION}_all_roads.csv"
+
+          echo "=========================================="
+          echo "Download complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Generate download statistics
+        id: crash-stats
+        run: |
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Download Statistics"
+          echo "=========================================="
+
+          # Count records in each file
+          COUNTY_RECORDS=$(wc -l < "data/${JURISDICTION}_county_roads.csv" | tr -d ' ')
+          NO_INTERSTATE_RECORDS=$(wc -l < "data/${JURISDICTION}_no_interstate.csv" | tr -d ' ')
+          ALL_ROADS_RECORDS=$(wc -l < "data/${JURISDICTION}_all_roads.csv" | tr -d ' ')
+
+          echo "County Roads Only: $((COUNTY_RECORDS - 1)) records"
+          echo "All Roads (No Interstate): $((NO_INTERSTATE_RECORDS - 1)) records"
+          echo "All Roads (Including Interstate): $((ALL_ROADS_RECORDS - 1)) records"
+
+          # File sizes
+          echo ""
+          echo "File sizes:"
+          ls -lh data/*.csv
+
+          # Output for notifications
+          echo "records=$((COUNTY_RECORDS - 1))" >> $GITHUB_OUTPUT
+
+          echo "=========================================="
+
+      - name: Install validation dependencies
+        run: |
+          pip install -r validation/requirements.txt
+
+      - name: Validate and correct crash data
+        id: validate
+        run: |
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Validating Crash Data for: $JURISDICTION"
+          echo "Validation started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          # Run validation with auto-correction (enabled by default)
+          python validation/run_validation.py \
+            --jurisdiction "$JURISDICTION"
+
+          echo "=========================================="
+          echo "Validation complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          # Capture validation stats for summary
+          if [ -f "data/.validation/latest_report.json" ]; then
+            echo "Validation Report:"
+            cat data/.validation/latest_report.json | python -m json.tool
+
+            # Extract key metrics
+            TOTAL=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json'))['totalRecords'])")
+            NEW=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json'))['newRecords'])")
+            CORRECTED=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json'))['autoCorrections'])")
+            FLAGGED=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json'))['flaggedRecords'])")
+
+            echo "total_records=$TOTAL" >> $GITHUB_OUTPUT
+            echo "new_records=$NEW" >> $GITHUB_OUTPUT
+            echo "auto_corrections=$CORRECTED" >> $GITHUB_OUTPUT
+            echo "flagged=$FLAGGED" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for critical validation issues
+        run: |
+          # Stop if error rate > 10%
+          if [ -f "data/.validation/latest_report.json" ]; then
+            ERROR_RATE=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json')).get('errorRate', 0))")
+            if (( $(echo "$ERROR_RATE > 10" | bc -l) )); then
+              echo "::error::Error rate exceeds 10% ($ERROR_RATE%). Manual review required."
+              exit 1
+            fi
+            echo "Error rate ($ERROR_RATE%) is within acceptable limits."
+          fi
+
+      # Stage 3: GEOCODE — Fill missing GPS coordinates
+      - name: Geocode crash data (Stage 3)
+        run: |
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Stage 3: GEOCODE — Filling missing GPS coordinates"
+          echo "=========================================="
+
+          # Run geocoding on all_roads (largest file, superset of others)
+          # process_crash_data.py can geocode Virginia data directly
+          python scripts/process_crash_data.py \
+            -i "data/${JURISDICTION}_all_roads.csv" \
+            -s virginia -j "$JURISDICTION" \
+            -o data \
+            --skip-split --skip-validation --convert-only=false \
+            -f -v 2>&1 || {
+            echo "WARNING: Full pipeline geocode failed, trying standalone geocode..."
+            # Fallback: run just geocoding via Python
+            python -c "
+          import sys
+          sys.path.insert(0, 'scripts')
+          from process_crash_data import stage_geocode, PipelineConfig, PipelineStats
+          from pathlib import Path
+          config = PipelineConfig()
+          config.output_dir = Path('data')
+          config.jurisdiction = '$JURISDICTION'
+          config.state = 'virginia'
+          config.dry_run = False
+          stats = PipelineStats()
+          for suffix in ['all_roads', 'county_roads', 'city_roads', 'no_interstate']:
+              fpath = f'data/${JURISDICTION}_{suffix}.csv'
+              try:
+                  stage_geocode(fpath, config, stats)
+                  print(f'  Geocoded: {fpath}')
+              except Exception as e:
+                  print(f'  WARNING: Geocode failed for {fpath}: {e}')
+          " || echo "WARNING: Geocoding failed (non-fatal). CSVs still valid."
+          }
+
+          # Report GPS coverage
+          for suffix in all_roads county_roads city_roads no_interstate; do
+            FILE="data/${JURISDICTION}_${suffix}.csv"
+            if [ -f "$FILE" ]; then
+              TOTAL=$(wc -l < "$FILE")
+              GPS=$(python -c "
+          import csv
+          with open('$FILE') as f:
+              r = csv.DictReader(f)
+              total = gps = 0
+              for row in r:
+                  total += 1
+                  x, y = row.get('x',''), row.get('y','')
+                  if x and y and x != '0' and y != '0':
+                      gps += 1
+          print(f'{gps}/{total} ({gps/total*100:.1f}%)' if total else '0/0')
+          ")
+              echo "  $FILE: GPS coverage = $GPS"
+            fi
+          done
+
+      - name: Upload crash CSVs to R2
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/${{ steps.get-jurisdiction.outputs.jurisdiction }}_county_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/county_roads.csv"},
+              {"local_path": "data/${{ steps.get-jurisdiction.outputs.jurisdiction }}_no_interstate.csv", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/no_interstate.csv"},
+              {"local_path": "data/${{ steps.get-jurisdiction.outputs.jurisdiction }}_all_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/all_roads.csv"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      # Stage 4.5: Upload statewide gzip to R2 (if saved at Stage 1.5)
+      - name: Check statewide gzip exists
+        id: check-statewide-gzip
+        run: |
+          GZ="data/virginia_statewide_all_roads.csv.gz"
+          if [ -f "$GZ" ]; then
+            SIZE=$(stat -c%s "$GZ" 2>/dev/null || stat -f%z "$GZ" 2>/dev/null || echo 0)
+            # Read uncompressed size from gzip footer (last 4 bytes, little-endian)
+            UNCOMPRESSED=$(python3 -c "
+          import struct
+          with open('$GZ', 'rb') as f:
+              f.seek(-4, 2)
+              print(struct.unpack('<I', f.read(4))[0])
+          " 2>/dev/null || echo 0)
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "size=$SIZE" >> $GITHUB_OUTPUT
+            echo "uncompressed=$UNCOMPRESSED" >> $GITHUB_OUTPUT
+            echo "Statewide gzip found: $GZ ($SIZE bytes, uncompressed ~$UNCOMPRESSED bytes)"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Statewide gzip not found (--save-statewide may have been skipped or failed)"
+          fi
+
+      - name: Upload statewide gzip to R2 (Stage 4.5)
+        if: steps.check-statewide-gzip.outputs.exists == 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/virginia_statewide_all_roads.csv.gz", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/_state/statewide_all_roads.csv.gz", "uncompressed_size": ${{ steps.check-statewide-gzip.outputs.uncompressed || 0 }}}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      # Stage 5: PREDICT — Generate forecasts
+      - name: Generate crash forecasts (Stage 5)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Stage 5: PREDICT — Generating forecasts"
+          echo "=========================================="
+
+          # Generate forecasts for all 4 road types (data-dir is root data/ for Virginia)
+          CMD="python scripts/generate_forecast.py --all-road-types --jurisdiction $JURISDICTION --data-dir data"
+
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "WARNING: No AWS credentials — skipping forecast generation."
+            echo "Run the pipeline with valid AWS credentials to generate real Chronos-2 forecasts."
+          else
+            echo "Running: $CMD"
+            $CMD || {
+              echo "WARNING: Forecast generation failed (non-fatal). Check SageMaker endpoint status."
+            }
+          fi
+
+          # Verify forecast outputs
+          for rt in county_roads city_roads no_interstate all_roads; do
+            FFILE="data/forecasts_${rt}.json"
+            if [ -f "$FFILE" ]; then
+              SIZE=$(ls -lh "$FFILE" | awk '{print $5}')
+              echo "  $FFILE: $SIZE"
+            else
+              echo "  $FFILE: NOT GENERATED"
+            fi
+          done
+
+      - name: Upload forecast JSONs to R2
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/forecasts_county_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/forecasts_county_roads.json"},
+              {"local_path": "data/forecasts_city_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/forecasts_city_roads.json"},
+              {"local_path": "data/forecasts_no_interstate.json", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/forecasts_no_interstate.json"},
+              {"local_path": "data/forecasts_all_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX || 'virginia' }}/${{ steps.get-jurisdiction.outputs.jurisdiction }}/forecasts_all_roads.json"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      # Stage 6.5: Generate region/MPO aggregates from county CSVs (bottom-up)
+      - name: Generate region/MPO aggregates (Stage 6.5)
+        run: |
+          STATE="${{ env.R2_STATE_PREFIX || 'virginia' }}"
+          echo "=========================================="
+          echo "Stage 6.5: Generating aggregates (bottom-up from county CSVs)"
+          echo "=========================================="
+
+          # Generate statewide + region + MPO aggregates from available county CSVs
+          # Output to data/{STATE}/ so paths match R2 hierarchy: {state}/_statewide/, _region/, _mpo/
+          python scripts/generate_aggregates.py --state "$STATE" --data-dir data --output-dir "data/$STATE" || {
+            echo "WARNING: Aggregate generation failed (non-fatal)"
+          }
+
+          # Generate federal-level cross-state aggregates
+          python scripts/generate_aggregates.py --federal --output-dir data || {
+            echo "WARNING: Federal aggregate generation failed (non-fatal)"
+          }
+
+          # Find and list generated aggregate JSON files
+          echo "Generated aggregate files:"
+          find data -name "aggregates.json" -o -name "county_summary.json" -o -name "mpo_summary.json" -o -name "hotspots.json" -o -name "state_summary.json" 2>/dev/null | sort
+        continue-on-error: true
+
+      - name: Build aggregate upload manifest (Stage 6.5)
+        id: build-aggregate-manifest
+        run: |
+          STATE="${{ env.R2_STATE_PREFIX || 'virginia' }}"
+          # Build JSON array of {local_path, r2_key} pairs from generated aggregate files
+          python3 -c "
+          import json, os, glob
+
+          state = '$STATE'
+          files = []
+
+          # Statewide aggregates
+          for name in ['aggregates.json', 'county_summary.json', 'mpo_summary.json']:
+              path = f'data/{state}/_statewide/{name}'
+              if os.path.isfile(path):
+                  files.append({'local_path': path, 'r2_key': f'{state}/_statewide/{name}'})
+
+          # Region aggregates
+          for agg in glob.glob(f'data/{state}/_region/*/aggregates.json'):
+              region_id = agg.split('/')[-2]
+              files.append({'local_path': agg, 'r2_key': f'{state}/_region/{region_id}/aggregates.json'})
+          for hs in glob.glob(f'data/{state}/_region/*/hotspots.json'):
+              region_id = hs.split('/')[-2]
+              files.append({'local_path': hs, 'r2_key': f'{state}/_region/{region_id}/hotspots.json'})
+
+          # MPO aggregates
+          for agg in glob.glob(f'data/{state}/_mpo/*/aggregates.json'):
+              mpo_id = agg.split('/')[-2]
+              files.append({'local_path': agg, 'r2_key': f'{state}/_mpo/{mpo_id}/aggregates.json'})
+          for hs in glob.glob(f'data/{state}/_mpo/*/hotspots.json'):
+              mpo_id = hs.split('/')[-2]
+              files.append({'local_path': hs, 'r2_key': f'{state}/_mpo/{mpo_id}/hotspots.json'})
+
+          # Federal aggregates
+          for name in ['aggregates.json', 'state_summary.json']:
+              path = f'data/_federal/{name}'
+              if os.path.isfile(path):
+                  files.append({'local_path': path, 'r2_key': f'_federal/{name}'})
+
+          print(f'Found {len(files)} aggregate files to upload')
+          with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+              f.write(f'files_json={json.dumps(files)}\n')
+          "
+        continue-on-error: true
+
+      - name: Upload aggregate JSONs to R2 (Stage 6.5)
+        if: steps.build-aggregate-manifest.outputs.files_json != '[]'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            ${{ steps.build-aggregate-manifest.outputs.files_json || '[]' }}
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+        continue-on-error: true
+
+      - name: Commit manifest, geocode cache, and validation data
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/r2-manifest.json
+          git add data/.validation/ 2>/dev/null || true
+          git add data/.geocode_cache.json 2>/dev/null || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          JURISDICTION="${{ steps.get-jurisdiction.outputs.jurisdiction }}"
+          COMMIT_MSG="Auto-update: $STATE_DISPLAY $JURISDICTION pipeline + forecasts -> R2 - $(date +'%Y-%m-%d')"
+
+          if [ -f "data/.validation/latest_report.json" ]; then
+            SUMMARY=$(python -c "import json; print(json.load(open('data/.validation/latest_report.json'))['summary'])")
+            git commit -m "$(cat <<'EOFMSG'
+          $COMMIT_MSG
+
+          Validation: $SUMMARY
+          Data + forecasts uploaded to Cloudflare R2
+          EOFMSG
+          )"
+          else
+            git commit -m "$COMMIT_MSG"
+          fi
+
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))
+            git fetch origin main
+            git rebase origin/main || {
+              echo "Rebase failed, trying merge..."
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1
+
+  download-grants-data:
+    runs-on: ubuntu-24.04
+    # Run grants download every Monday OR manual trigger (not crash_only)
+    if: |
+      github.event_name == 'workflow_dispatch' && github.event.inputs.download_type != 'crash_only' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 11 * * 1'
+    outputs:
+      grants_status: ${{ steps.grants-download.outcome }}
+      grants_count: ${{ steps.grants-stats.outputs.count }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download grants data
+        id: grants-download
+        run: |
+          echo "=========================================="
+          echo "Downloading Grants Data"
+          echo "Download started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+          python download_grants_data.py
+          echo "=========================================="
+          echo "Download complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Generate grants statistics
+        id: grants-stats
+        run: |
+          if [ -f "data/grants.csv" ]; then
+            GRANTS_COUNT=$(wc -l < "data/grants.csv" | tr -d ' ')
+            echo "Total grants: $((GRANTS_COUNT - 1))"
+            echo "count=$((GRANTS_COUNT - 1))" >> $GITHUB_OUTPUT
+          else
+            echo "No grants file found"
+            echo "count=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push grants data changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Auto-update: Grants data - $(date +'%Y-%m-%d')"
+
+          # Push with retry logic to handle race conditions with crash job
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))  # Exponential backoff: 2, 4, 8, 16 seconds
+            git fetch origin main
+            git rebase origin/main || {
+              echo "Rebase failed, trying merge..."
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1
+
+  download-cmf-data:
+    runs-on: ubuntu-24.04
+    # Run CMF download quarterly (Jan, Apr, Jul, Oct) OR manual trigger (cmf_only or all)
+    if: |
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.download_type == 'cmf_only' || github.event.inputs.download_type == 'all') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 12 1-7 1,4,7,10 1'
+    outputs:
+      cmf_status: ${{ steps.cmf-download.outcome }}
+      cmf_records: ${{ steps.cmf-stats.outputs.records }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download and transform CMF data
+        id: cmf-download
+        run: |
+          echo "=========================================="
+          echo "Downloading CMF Clearinghouse Data"
+          echo "Download started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+          python download_cmf_data.py
+          echo "=========================================="
+          echo "Download complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Generate CMF statistics
+        id: cmf-stats
+        run: |
+          if [ -f "data/cmf_processed.json" ]; then
+            # Extract record count from JSON
+            CMF_RECORDS=$(python -c "import json; print(json.load(open('data/cmf_processed.json'))['stats']['filtered'])")
+            VA_RELEVANT=$(python -c "import json; print(json.load(open('data/cmf_processed.json'))['stats']['virginiaRelevant'])")
+            echo "Total CMF records: $CMF_RECORDS"
+            echo "Virginia-relevant: $VA_RELEVANT"
+            echo "records=$CMF_RECORDS" >> $GITHUB_OUTPUT
+            echo "va_records=$VA_RELEVANT" >> $GITHUB_OUTPUT
+
+            # File size
+            echo ""
+            echo "File sizes:"
+            ls -lh data/cmf_*.json data/cmfclearinghouse*.csv 2>/dev/null || true
+          else
+            echo "No CMF processed file found"
+            echo "records=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push CMF data changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/cmf_processed.json data/cmf_metadata.json data/cmfclearinghouse_raw.csv 2>/dev/null || true
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Auto-update: CMF Clearinghouse data - $(date +'%Y-%m-%d') (Quarterly)"
+
+          # Push with retry logic to handle race conditions with other jobs
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))  # Exponential backoff: 2, 4, 8, 16 seconds
+            git fetch origin main
+            git rebase origin/main || {
+              echo "Rebase failed, trying merge..."
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1
+
+  notify-on-failure:
+    runs-on: ubuntu-24.04
+    needs: [download-crash-data, download-grants-data, download-cmf-data]
+    if: failure()
+    steps:
+      - name: Send failure notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "⚠️ CRASH LENS Data Download Failed - ${{ github.repository }}"
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: "CRASH LENS Bot <noreply@crashlens.local>"
+          body: |
+            The automated data download workflow has failed.
+
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Trigger: ${{ github.event_name }}
+            Time: ${{ github.event.head_commit.timestamp || 'Scheduled run' }}
+
+            Please check the workflow logs for details.
+
+            --
+            CRASH LENS Automated Notification
+
+  notify-on-success:
+    runs-on: ubuntu-24.04
+    needs: [download-crash-data, download-grants-data, download-cmf-data]
+    if: success() && github.event_name == 'schedule'
+    steps:
+      - name: Send success notification (monthly only)
+        if: github.event.schedule == '0 11 1-7 * 1'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "✅ CRASH LENS Monthly Data Update Complete"
+          to: ${{ env.NOTIFICATION_EMAIL }}
+          from: "CRASH LENS Bot <noreply@crashlens.local>"
+          body: |
+            The monthly crash data download and validation has completed successfully.
+
+            Repository: ${{ github.repository }}
+            Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            === CRASH DATA ===
+            Records Downloaded: ${{ needs.download-crash-data.outputs.crash_records || 'N/A' }}
+
+            === VALIDATION ===
+            Total Records: ${{ needs.download-crash-data.outputs.total_records || 'N/A' }}
+            New Records: ${{ needs.download-crash-data.outputs.new_records || 'N/A' }}
+            Auto-Corrected: ${{ needs.download-crash-data.outputs.auto_corrections || 'N/A' }}
+            Flagged for Review: ${{ needs.download-crash-data.outputs.flagged || 'N/A' }}
+
+            === GRANTS ===
+            Grants Updated: ${{ needs.download-grants-data.outputs.grants_count || 'N/A' }}
+
+            Data Source: Virginia Roads (VDOT)
+            Dataset ID: 1a96a2f31b4f4d77991471b6cabb38ba
+
+            --
+            CRASH LENS Automated Notification

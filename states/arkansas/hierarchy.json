@@ -1,0 +1,791 @@
+{
+  "state": {
+    "fips": "05",
+    "name": "Arkansas",
+    "abbreviation": "AR",
+    "dot": "ArDOT",
+    "dotFullName": "Arkansas Department of Transportation",
+    "center": [
+      -92.373123,
+      34.969704
+    ],
+    "zoom": 7,
+    "placesCount": 500
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ar_1": {
+      "name": "District 1 (Helena-West Helena)",
+      "shortName": "District 1",
+      "center": [
+        -90.8,
+        34.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "035",
+        "037",
+        "041",
+        "077",
+        "095",
+        "107",
+        "123",
+        "147"
+      ],
+      "countyNames": {
+        "001": "Arkansas",
+        "035": "Crittenden",
+        "037": "Cross",
+        "041": "Desha",
+        "077": "Lee",
+        "095": "Monroe",
+        "107": "Phillips",
+        "123": "St. Francis",
+        "147": "Woodruff"
+      },
+      "mapBounds": {
+        "sw": [
+          34.1,
+          -91.5
+        ],
+        "ne": [
+          35.3,
+          -90.1
+        ]
+      },
+      "hq": "Helena-West Helena"
+    },
+    "ar_2": {
+      "name": "District 2 (Jonesboro)",
+      "shortName": "District 2",
+      "center": [
+        -90.8,
+        35.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "021",
+        "031",
+        "055",
+        "063",
+        "067",
+        "075",
+        "093",
+        "111",
+        "121",
+        "135",
+        "145"
+      ],
+      "countyNames": {
+        "021": "Clay",
+        "031": "Craighead",
+        "055": "Greene",
+        "063": "Independence",
+        "067": "Jackson",
+        "075": "Lawrence",
+        "093": "Mississippi",
+        "111": "Poinsett",
+        "121": "Randolph",
+        "135": "Sharp",
+        "145": "White"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -91.5
+        ],
+        "ne": [
+          36.5,
+          -90.1
+        ]
+      },
+      "hq": "Jonesboro"
+    },
+    "ar_3": {
+      "name": "District 3 (Batesville)",
+      "shortName": "District 3",
+      "center": [
+        -92.3,
+        35.95
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "023",
+        "049",
+        "065",
+        "089",
+        "101",
+        "129",
+        "137",
+        "141"
+      ],
+      "countyNames": {
+        "005": "Baxter",
+        "023": "Cleburne",
+        "049": "Fulton",
+        "065": "Izard",
+        "089": "Marion",
+        "101": "Newton",
+        "129": "Searcy",
+        "137": "Stone",
+        "141": "Van Buren"
+      },
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -93.0
+        ],
+        "ne": [
+          36.5,
+          -91.6
+        ]
+      },
+      "hq": "Batesville"
+    },
+    "ar_4": {
+      "name": "District 4 (Camden)",
+      "shortName": "District 4",
+      "center": [
+        -92.1,
+        33.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "011",
+        "013",
+        "017",
+        "025",
+        "027",
+        "039",
+        "043",
+        "053",
+        "079",
+        "103",
+        "139"
+      ],
+      "countyNames": {
+        "003": "Ashley",
+        "011": "Bradley",
+        "013": "Calhoun",
+        "017": "Chicot",
+        "025": "Cleveland",
+        "027": "Columbia",
+        "039": "Dallas",
+        "043": "Drew",
+        "053": "Grant",
+        "079": "Lincoln",
+        "103": "Ouachita",
+        "139": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          33.0,
+          -92.9
+        ],
+        "ne": [
+          34.0,
+          -91.3
+        ]
+      },
+      "hq": "Camden"
+    },
+    "ar_5": {
+      "name": "District 5 (Russellville)",
+      "shortName": "District 5",
+      "center": [
+        -93.0,
+        35.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "029",
+        "045",
+        "071",
+        "083",
+        "105",
+        "115",
+        "127",
+        "149"
+      ],
+      "countyNames": {
+        "029": "Conway",
+        "045": "Faulkner",
+        "071": "Johnson",
+        "083": "Logan",
+        "105": "Perry",
+        "115": "Pope",
+        "127": "Scott",
+        "149": "Yell"
+      },
+      "mapBounds": {
+        "sw": [
+          34.7,
+          -93.8
+        ],
+        "ne": [
+          35.9,
+          -92.2
+        ]
+      },
+      "hq": "Russellville"
+    },
+    "ar_6": {
+      "name": "District 6 (Little Rock)",
+      "shortName": "District 6",
+      "center": [
+        -92.4,
+        34.55
+      ],
+      "zoom": 8,
+      "counties": [
+        "051",
+        "059",
+        "069",
+        "085",
+        "117",
+        "119",
+        "125"
+      ],
+      "countyNames": {
+        "051": "Garland",
+        "059": "Hot Spring",
+        "069": "Jefferson",
+        "085": "Lonoke",
+        "117": "Prairie",
+        "119": "Pulaski",
+        "125": "Saline"
+      },
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -93.1
+        ],
+        "ne": [
+          35.1,
+          -91.7
+        ]
+      },
+      "hq": "Little Rock"
+    },
+    "ar_7": {
+      "name": "District 7 (Hot Springs)",
+      "shortName": "District 7",
+      "center": [
+        -93.8,
+        34.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "019",
+        "057",
+        "061",
+        "073",
+        "081",
+        "091",
+        "097",
+        "099",
+        "109",
+        "113",
+        "133"
+      ],
+      "countyNames": {
+        "019": "Clark",
+        "057": "Hempstead",
+        "061": "Howard",
+        "073": "Lafayette",
+        "081": "Little River",
+        "091": "Miller",
+        "097": "Montgomery",
+        "099": "Nevada",
+        "109": "Pike",
+        "113": "Polk",
+        "133": "Sevier"
+      },
+      "mapBounds": {
+        "sw": [
+          33.3,
+          -94.5
+        ],
+        "ne": [
+          34.7,
+          -93.1
+        ]
+      },
+      "hq": "Hot Springs"
+    },
+    "ar_8": {
+      "name": "District 8 (Harrison)",
+      "shortName": "District 8",
+      "center": [
+        -93.7,
+        36.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "009",
+        "015",
+        "087",
+        "143"
+      ],
+      "countyNames": {
+        "007": "Benton",
+        "009": "Boone",
+        "015": "Carroll",
+        "087": "Madison",
+        "143": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          35.75,
+          -94.3
+        ],
+        "ne": [
+          36.5,
+          -93.1
+        ]
+      },
+      "hq": "Harrison"
+    },
+    "ar_9": {
+      "name": "District 9 (Fort Smith)",
+      "shortName": "District 9",
+      "center": [
+        -94.2,
+        35.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "033",
+        "047",
+        "131"
+      ],
+      "countyNames": {
+        "033": "Crawford",
+        "047": "Franklin",
+        "131": "Sebastian"
+      },
+      "mapBounds": {
+        "sw": [
+          35.1,
+          -94.6
+        ],
+        "ne": [
+          35.7,
+          -93.8
+        ]
+      },
+      "hq": "Fort Smith"
+    },
+    "ar_10": {
+      "name": "District 10 (Pine Bluff)",
+      "shortName": "District 10",
+      "center": [
+        -91.9,
+        34.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "041",
+        "043",
+        "069",
+        "079"
+      ],
+      "countyNames": {
+        "041": "Desha",
+        "043": "Drew",
+        "069": "Jefferson",
+        "079": "Lincoln"
+      },
+      "mapBounds": {
+        "sw": [
+          33.7,
+          -92.3
+        ],
+        "ne": [
+          34.5,
+          -91.5
+        ]
+      },
+      "hq": "Pine Bluff"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mlr": {
+      "name": "Metroplan (Little Rock)",
+      "shortName": "Little Rock",
+      "type": "mpo",
+      "center": [
+        -92.2896,
+        34.7465
+      ],
+      "zoom": 10,
+      "counties": [
+        "119",
+        "125",
+        "045",
+        "085",
+        "105",
+        "053"
+      ],
+      "countyNames": {
+        "119": "Pulaski",
+        "125": "Saline",
+        "045": "Faulkner",
+        "085": "Lonoke",
+        "105": "Perry",
+        "053": "Grant"
+      },
+      "btsAcronym": "MR",
+      "mapBounds": {
+        "sw": [
+          34.4,
+          -92.7
+        ],
+        "ne": [
+          35.0,
+          -91.8
+        ]
+      }
+    },
+    "nwarpc": {
+      "name": "NW Arkansas Regional Planning Commission",
+      "shortName": "NW Arkansas Regional Planning Commission",
+      "type": "mpo",
+      "center": [
+        -94.1574,
+        36.0726
+      ],
+      "zoom": 10,
+      "counties": [
+        "007",
+        "143",
+        "087"
+      ],
+      "countyNames": {
+        "007": "Benton",
+        "143": "Washington",
+        "087": "Madison"
+      },
+      "btsAcronym": "NARPC",
+      "mapBounds": {
+        "sw": [
+          35.8,
+          -94.5
+        ],
+        "ne": [
+          36.4,
+          -93.8
+        ]
+      }
+    },
+    "fmpofs": {
+      "name": "Frontier MPO (Fort Smith)",
+      "shortName": "Fort Smith",
+      "type": "mpo",
+      "center": [
+        -94.3985,
+        35.3859
+      ],
+      "zoom": 10,
+      "counties": [
+        "131",
+        "033"
+      ],
+      "countyNames": {
+        "131": "Sebastian",
+        "033": "Crawford"
+      },
+      "btsAcronym": "FMS",
+      "mapBounds": {
+        "sw": [
+          35.15,
+          -94.7
+        ],
+        "ne": [
+          35.6,
+          -94.1
+        ]
+      }
+    },
+    "jats": {
+      "name": "Jonesboro Area Transportation Study",
+      "shortName": "Jonesboro Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -90.7043,
+        35.8423
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "Craighead"
+      },
+      "btsAcronym": "JATS",
+      "mapBounds": {
+        "sw": [
+          35.6,
+          -91.0
+        ],
+        "ne": [
+          36.1,
+          -90.4
+        ]
+      }
+    },
+    "wmats": {
+      "name": "West Memphis Area Transportation Study",
+      "shortName": "West Memphis Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -93.0552,
+        34.5037
+      ],
+      "zoom": 10,
+      "counties": [
+        "035"
+      ],
+      "countyNames": {
+        "035": "Crittenden"
+      },
+      "btsAcronym": "WMATS",
+      "mapBounds": {
+        "sw": [
+          34.3,
+          -93.3
+        ],
+        "ne": [
+          34.7,
+          -92.8
+        ]
+      }
+    },
+    "tlmpohs": {
+      "name": "Tri-Lakes MPO (Hot Springs)",
+      "shortName": "Hot Springs",
+      "type": "mpo",
+      "center": [
+        -92.6663,
+        33.2148
+      ],
+      "zoom": 10,
+      "counties": [
+        "051"
+      ],
+      "countyNames": {
+        "051": "Garland"
+      },
+      "btsAcronym": "TMS",
+      "mapBounds": {
+        "sw": [
+          33.0,
+          -92.9
+        ],
+        "ne": [
+          33.45,
+          -92.4
+        ]
+      }
+    },
+    "sarpcpb": {
+      "name": "Southeast Arkansas Regional Planning Commission (Pine Bluff)",
+      "shortName": "Pine Bluff",
+      "type": "mpo",
+      "center": [
+        -92.0032,
+        34.2284
+      ],
+      "zoom": 10,
+      "counties": [
+        "069"
+      ],
+      "countyNames": {
+        "069": "Jefferson"
+      },
+      "btsAcronym": "SARPCB",
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -92.25
+        ],
+        "ne": [
+          34.45,
+          -91.75
+        ]
+      }
+    },
+    "tmpo": {
+      "name": "Texarkana MPO",
+      "shortName": "Texarkana",
+      "type": "mpo",
+      "center": [
+        -93.999,
+        33.4418
+      ],
+      "zoom": 10,
+      "counties": [
+        "091"
+      ],
+      "countyNames": {
+        "091": "Miller"
+      },
+      "btsAcronym": "TM",
+      "mapBounds": {
+        "sw": [
+          33.2,
+          -94.25
+        ],
+        "ne": [
+          33.65,
+          -93.75
+        ]
+      }
+    },
+    "central_arkansas_regional_transportation_study_mpo": {
+      "name": "Central Arkansas Regional Transportation Study",
+      "shortName": "Central Arkansas Regional Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "05197400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -92.24171,
+        34.970388
+      ],
+      "zoom": 10
+    },
+    "northwest_arkansas_regional_planning_commission_mpo": {
+      "name": "Northwest Arkansas Regional Planning Commission",
+      "shortName": "Northwest Arkansas Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "05198200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -94.038031,
+        36.396226
+      ],
+      "zoom": 10
+    },
+    "west_memphis_marion_area_transportation_study_mpo": {
+      "name": "West Memphis-Marion Area Transportation Study",
+      "shortName": "West Memphis-Marion Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "05198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -90.135621,
+        35.180041
+      ],
+      "zoom": 10
+    },
+    "northeast_arkansas_regional_transportation_planning_commission_mpo": {
+      "name": "Northeast Arkansas Regional Transportation Planning Commission",
+      "shortName": "Northeast Arkansas Regional Transportation Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "05200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -90.669189,
+        35.864121
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Arkansas",
+    "003": "Ashley",
+    "005": "Baxter",
+    "007": "Benton",
+    "009": "Boone",
+    "011": "Bradley",
+    "013": "Calhoun",
+    "015": "Carroll",
+    "017": "Chicot",
+    "019": "Clark",
+    "021": "Clay",
+    "023": "Cleburne",
+    "025": "Cleveland",
+    "027": "Columbia",
+    "029": "Conway",
+    "031": "Craighead",
+    "033": "Crawford",
+    "035": "Crittenden",
+    "037": "Cross",
+    "039": "Dallas",
+    "041": "Desha",
+    "043": "Drew",
+    "045": "Faulkner",
+    "047": "Franklin",
+    "049": "Fulton",
+    "051": "Garland",
+    "053": "Grant",
+    "055": "Greene",
+    "057": "Hempstead",
+    "059": "Hot Spring",
+    "061": "Howard",
+    "063": "Independence",
+    "065": "Izard",
+    "067": "Jackson",
+    "069": "Jefferson",
+    "071": "Johnson",
+    "073": "Lafayette",
+    "075": "Lawrence",
+    "077": "Lee",
+    "079": "Lincoln",
+    "081": "Little River",
+    "083": "Logan",
+    "085": "Lonoke",
+    "087": "Madison",
+    "089": "Marion",
+    "091": "Miller",
+    "093": "Mississippi",
+    "095": "Monroe",
+    "097": "Montgomery",
+    "099": "Nevada",
+    "101": "Newton",
+    "103": "Ouachita",
+    "105": "Perry",
+    "107": "Phillips",
+    "109": "Pike",
+    "111": "Poinsett",
+    "113": "Polk",
+    "115": "Pope",
+    "117": "Prairie",
+    "119": "Pulaski",
+    "121": "Randolph",
+    "123": "St. Francis",
+    "125": "Saline",
+    "127": "Scott",
+    "129": "Searcy",
+    "131": "Sebastian",
+    "133": "Sevier",
+    "135": "Sharp",
+    "137": "Stone",
+    "139": "Union",
+    "141": "Van Buren",
+    "143": "Washington",
+    "145": "White",
+    "147": "Woodruff",
+    "149": "Yell"
+  }
+}

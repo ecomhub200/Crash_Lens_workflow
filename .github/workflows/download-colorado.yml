@@ -1,0 +1,210 @@
+# ==============================================================================
+# Colorado State Download Workflow
+# ==============================================================================
+# Downloads crash data from CDOT OnBase Portal, converts to Virginia standard
+# format via state_adapter.py, then triggers pipeline.yml for processing.
+#
+# Scope options:
+#   - jurisdiction: Download + process single county (e.g., douglas)
+#   - region: Download + process a CDOT engineering region (e.g., region_1)
+#   - mpo: Download + process an MPO area (e.g., drcog)
+#   - statewide: Download + process all 64 counties
+# ==============================================================================
+
+name: "Download: Colorado"
+
+on:
+  schedule:
+    # 1st of every month at 11:00 AM UTC — checks for new data
+    - cron: '0 11 1 * *'
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Processing scope'
+        required: true
+        type: choice
+        default: 'jurisdiction'
+        options:
+          - jurisdiction
+          - region
+          - mpo
+          - statewide
+
+      selection:
+        description: 'Jurisdiction/Region/MPO name (blank for statewide)'
+        required: false
+        default: 'douglas'
+        type: string
+
+      region:
+        description: 'CDOT Region (if scope=region)'
+        required: false
+        type: choice
+        default: ''
+        options:
+          - ''
+          - region_1
+          - region_2
+          - region_3
+          - region_4
+          - region_5
+
+      mpo:
+        description: 'MPO (if scope=mpo)'
+        required: false
+        type: choice
+        default: ''
+        options:
+          - ''
+          - drcog
+          - ppacg
+          - nfrmpo
+          - gvmpo
+          - pacog
+
+      years:
+        description: 'Years to download (comma-separated, e.g., "2024,2025")'
+        required: false
+        default: ''
+        type: string
+
+      force_download:
+        description: 'Force re-download (skip cache)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_pipeline:
+        description: 'Skip pipeline trigger (download only)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  STATE: colorado
+  DOT_NAME: CDOT
+  DATA_DIR: data/CDOT
+
+jobs:
+  download:
+    name: "Download Colorado (${{ github.event.inputs.scope || 'jurisdiction' }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    outputs:
+      scope: ${{ steps.params.outputs.scope }}
+      selection: ${{ steps.params.outputs.selection }}
+      csv_path: ${{ steps.download.outputs.csv_path }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas requests openpyxl
+
+      - name: Resolve parameters
+        id: params
+        run: |
+          SCOPE="${{ github.event.inputs.scope || 'jurisdiction' }}"
+          SELECTION="${{ github.event.inputs.selection || 'douglas' }}"
+
+          # Override selection with region/mpo dropdown if those scopes selected
+          if [ "$SCOPE" = "region" ] && [ -n "${{ github.event.inputs.region }}" ]; then
+            SELECTION="${{ github.event.inputs.region }}"
+          elif [ "$SCOPE" = "mpo" ] && [ -n "${{ github.event.inputs.mpo }}" ]; then
+            SELECTION="${{ github.event.inputs.mpo }}"
+          elif [ "$SCOPE" = "statewide" ]; then
+            SELECTION=""
+          fi
+
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+
+          # Resolve jurisdictions
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state colorado --scope "$SCOPE" --selection "$SELECTION" --json)
+          echo "Resolved: $RESOLVED"
+
+      - name: Download Colorado crash data
+        id: download
+        run: |
+          SCOPE="${{ steps.params.outputs.scope }}"
+          SELECTION="${{ steps.params.outputs.selection }}"
+          FORCE="${{ github.event.inputs.force_download }}"
+          YEARS="${{ github.event.inputs.years }}"
+
+          # Determine download strategy
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state colorado --scope "$SCOPE" --selection "$SELECTION" --json)
+          MODE=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['download_mode'])")
+
+          ARGS="--output-dir ${{ env.DATA_DIR }}"
+          if [ "$FORCE" = "true" ]; then
+            ARGS="$ARGS --force-download"
+          fi
+          if [ -n "$YEARS" ]; then
+            ARGS="$ARGS --years $YEARS"
+          fi
+
+          if [ "$MODE" = "statewide" ]; then
+            ARGS="$ARGS --save-statewide-gzip"
+            python download_cdot_crash_data.py $ARGS
+            CSV_PATH="${{ env.DATA_DIR }}/colorado_statewide_all_roads.csv"
+          else
+            ARGS="$ARGS --jurisdiction $SELECTION"
+            python download_cdot_crash_data.py $ARGS
+            CSV_PATH="${{ env.DATA_DIR }}/${SELECTION}_all_roads.csv"
+          fi
+
+          echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+          echo "Download complete: $CSV_PATH"
+
+      - name: Commit downloaded data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add ${{ env.DATA_DIR }}/ 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No new data to commit"
+          else
+            git commit -m "data: colorado download (${{ steps.params.outputs.scope }}/${{ steps.params.outputs.selection || 'all' }})"
+            git push origin main
+          fi
+
+  # Trigger unified pipeline
+  trigger-pipeline:
+    name: "Trigger pipeline"
+    needs: download
+    if: github.event.inputs.skip_pipeline != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'pipeline.yml',
+              ref: 'main',
+              inputs: {
+                state: 'colorado',
+                scope: '${{ needs.download.outputs.scope }}',
+                selection: '${{ needs.download.outputs.selection }}',
+                data_source: '${{ needs.download.outputs.csv_path }}',
+                skip_forecasts: 'false'
+              }
+            });
+            console.log('Pipeline triggered for Colorado');

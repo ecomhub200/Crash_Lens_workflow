@@ -1,0 +1,150 @@
+{
+  "state": {
+    "name": "Nevada",
+    "abbreviation": "NV",
+    "fips": "32",
+    "dotName": "NDOT",
+    "dotFullName": "Nevada Department of Transportation",
+    "dataPortalUrl": "https://data-ndot.opendata.arcgis.com",
+    "coordinateBounds": {
+      "latMin": 35.0,
+      "latMax": 42.0,
+      "lonMin": -120.01,
+      "lonMax": -114.04
+    },
+    "dataDir": "NevadaDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Nevada NDOT CrashData OpenData fields to CRASH LENS field codes",
+    "_note": "Inferred field names from NCATS (Nevada Citation and Accident Tracking System). Exact field names require FeatureServer metadata query. Data covers state-maintained roads (vehicles, pedestrians, bicycles, wildlife).",
+    "ID": "_LIKELY_CRASHID",
+    "DATE": "_LIKELY_CRASH_DT",
+    "TIME": "_TBD_CRASH_TIME",
+    "LAT": "_DERIVED_FROM_GEOMETRY",
+    "LON": "_DERIVED_FROM_GEOMETRY",
+    "SEVERITY": "_LIKELY_INJSEV",
+    "JURISDICTION": "_LIKELY_CNTYNAME",
+    "ROUTE": "_TBD_ROAD_NAME",
+    "COLLISION": "_TBD_COLLISION_TYPE",
+    "WEATHER": "_TBD_WEATHER",
+    "LIGHT": "_TBD_LIGHTING",
+    "SURFACE_CONDITION": "_TBD_SURFACE",
+    "JUNCTION": "_TBD_JUNCTION_TYPE",
+    "HITRUN": "_TBD_HIT_AND_RUN"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "_data_note": "Field names are INFERRED from NCATS system and CLV (City of Las Vegas) crash data patterns. Confirm by querying FeatureServer metadata.",
+    "SEVERITY": {
+      "method": "direct_or_derived",
+      "source": "_LIKELY_INJSEV",
+      "_note": "Nevada uses NCATS (Nevada Citation and Accident Tracking System). Severity field and coding TBD."
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "_LIKELY_CRASH_DT"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "_TBD_ROAD1",
+        "_TBD_ROAD2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Nevada road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Nevada collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "NDOT GIS Portal",
+    "url": "https://data-ndot.opendata.arcgis.com",
+    "apiUrl": "https://geohub-ndot.hub.arcgis.com/datasets/crashdata-opendata",
+    "_apiUrlAlt": "https://geohub-ndot.hub.arcgis.com/datasets/NDOT::trafficsafety-crash-data/about",
+    "fileFormat": "GeoJSON/CSV (ArcGIS)",
+    "dataDictionary": "NDOT TSE Crash Data Request Form: https://survey123.arcgis.com/share/2361c89935aa497183387106ec46e18d",
+    "_dataNote": "Data geo-located by NDOT Traffic Safety Engineering division from NCATS. State-maintained roads only.",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

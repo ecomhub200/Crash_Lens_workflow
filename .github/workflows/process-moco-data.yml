@@ -1,0 +1,331 @@
+name: Process MoCo Crash Data
+
+# Processes downloaded Montgomery County crash data through the full pipeline:
+#   CONVERT → VALIDATE → GEOCODE → SPLIT → PREDICT
+# Triggered after download completes, or manually.
+
+on:
+  workflow_run:
+    workflows: ["Download MoCo Crash Data"]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      input_files:
+        description: 'Input CSV file(s) glob pattern (e.g., "data/MarylandDOT/montgomery/moco_crashes_2024.csv")'
+        required: false
+        default: ''
+        type: string
+      merge:
+        description: 'Merge all matching input files before processing'
+        required: false
+        type: boolean
+        default: true
+      skip_geocode:
+        description: 'Skip geocoding stage'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run (preview only, no output files)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  R2_STATE_PREFIX: maryland
+  STATE_DISPLAY: "Montgomery County, MD"
+  JURISDICTION: montgomery
+
+jobs:
+  process-moco-data:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download raw CSVs from R2
+        if: github.event_name == 'workflow_run'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          echo "Downloading raw CSVs from R2 for montgomery..."
+          mkdir -p data/MarylandDOT/montgomery
+          aws s3 sync "s3://crash-lens-data/${R2_STATE_PREFIX}/montgomery/raw/" "data/MarylandDOT/montgomery/" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --exclude "*" --include "moco_crashes_*.csv" --include "moco_crashes_*.csv.gz"
+          echo "Downloaded files:"
+          ls -lh data/MarylandDOT/montgomery/moco_crashes_*.csv* 2>/dev/null || echo "  No CSVs found"
+
+      - name: Detect input files
+        id: detect
+        run: |
+          set -e
+
+          FILE_LIST="${RUNNER_TEMP}/input_files.txt"
+          > "$FILE_LIST"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            INPUT_PATTERN="${{ github.event.inputs.input_files }}"
+            if [ -z "$INPUT_PATTERN" ]; then
+              # Default: all crash CSVs (not drivers/nonmotorists — those are supplemental)
+              for f in data/MarylandDOT/montgomery/moco_crashes_*.csv; do
+                [ -f "$f" ] && echo "$f" >> "$FILE_LIST"
+              done
+            else
+              for f in $INPUT_PATTERN; do
+                [ -f "$f" ] && echo "$f" >> "$FILE_LIST"
+              done
+            fi
+
+            echo "merge=${{ github.event.inputs.merge }}" >> "$GITHUB_OUTPUT"
+            echo "skip_geocode=${{ github.event.inputs.skip_geocode }}" >> "$GITHUB_OUTPUT"
+            echo "dry_run=${{ github.event.inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+          else
+            # Auto-trigger: use all crash CSVs
+            for f in data/MarylandDOT/montgomery/moco_crashes_*.csv; do
+              [ -f "$f" ] && echo "$f" >> "$FILE_LIST"
+            done
+            echo "merge=true" >> "$GITHUB_OUTPUT"
+            echo "skip_geocode=false" >> "$GITHUB_OUTPUT"
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ ! -s "$FILE_LIST" ]; then
+            echo "No input CSV files found. Exiting."
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          else
+            FILE_COUNT=$(wc -l < "$FILE_LIST")
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+            echo "file_count=$FILE_COUNT" >> "$GITHUB_OUTPUT"
+
+            echo "=========================================="
+            echo "Detected $FILE_COUNT input file(s):"
+            while IFS= read -r f; do
+              if [ -f "$f" ]; then
+                ROWS=$(wc -l < "$f")
+                echo "  $f ($ROWS rows)"
+              fi
+            done < "$FILE_LIST"
+            echo "=========================================="
+          fi
+
+      - name: Run pipeline
+        if: steps.detect.outputs.has_files == 'true'
+        id: pipeline
+        run: |
+          MERGE="${{ steps.detect.outputs.merge }}"
+          SKIP_GEOCODE="${{ steps.detect.outputs.skip_geocode }}"
+          DRY_RUN="${{ steps.detect.outputs.dry_run }}"
+          FILE_LIST="${RUNNER_TEMP}/input_files.txt"
+
+          echo "=========================================="
+          echo "MoCo Pipeline — Processing $JURISDICTION"
+          echo "Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          CMD=(python scripts/process_crash_data.py)
+          CMD+=(-i)
+          while IFS= read -r f; do
+            CMD+=("$f")
+          done < "$FILE_LIST"
+
+          CMD+=(-s maryland -j "$JURISDICTION" -f -v)
+
+          if [ "$MERGE" = "true" ]; then
+            CMD+=(--merge)
+          fi
+          if [ "$SKIP_GEOCODE" = "true" ]; then
+            CMD+=(--skip-geocode)
+          fi
+          if [ "$DRY_RUN" = "true" ]; then
+            CMD+=(--dry-run)
+          fi
+
+          echo "Running: ${CMD[*]}"
+          "${CMD[@]}"
+
+          echo "=========================================="
+          echo "Pipeline complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Display pipeline report
+        if: steps.detect.outputs.has_files == 'true'
+        run: |
+          REPORT="data/MarylandDOT/.validation/pipeline_report.json"
+          if [ -f "$REPORT" ]; then
+            echo "=========================================="
+            echo "Pipeline Report"
+            echo "=========================================="
+            python -m json.tool "$REPORT"
+          else
+            echo "No pipeline report found"
+          fi
+
+      - name: Verify output files
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          echo "=========================================="
+          echo "Output Files"
+          echo "=========================================="
+
+          for suffix in standardized all_roads county_roads city_roads no_interstate; do
+            FILE="data/MarylandDOT/${JURISDICTION}_${suffix}.csv"
+            if [ -f "$FILE" ]; then
+              ROWS=$(wc -l < "$FILE")
+              SIZE=$(ls -lh "$FILE" | awk '{print $5}')
+              echo "  $FILE: $((ROWS - 1)) rows ($SIZE)"
+            else
+              echo "  $FILE: MISSING"
+            fi
+          done
+
+      - name: Upload processed CSVs to R2
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/MarylandDOT/${JURISDICTION}_standardized.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/standardized.csv"},
+              {"local_path": "data/MarylandDOT/${JURISDICTION}_all_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/all_roads.csv"},
+              {"local_path": "data/MarylandDOT/${JURISDICTION}_county_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/county_roads.csv"},
+              {"local_path": "data/MarylandDOT/${JURISDICTION}_no_interstate.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/no_interstate.csv"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Generate crash forecasts (Stage 5)
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          echo "=========================================="
+          echo "Stage 5: PREDICT — Generating forecasts"
+          echo "=========================================="
+
+          CMD="python scripts/generate_forecast.py --all-road-types --jurisdiction $JURISDICTION --data data/MarylandDOT/${JURISDICTION}_all_roads.csv"
+
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "WARNING: No AWS credentials — skipping forecast generation."
+            echo "Run the pipeline with valid AWS credentials to generate real Chronos-2 forecasts."
+          else
+            echo "Running: $CMD"
+            $CMD || {
+              echo "WARNING: Forecast generation failed (non-fatal). Check SageMaker endpoint status."
+            }
+          fi
+
+          for rt in county_roads city_roads no_interstate all_roads; do
+            FFILE="data/MarylandDOT/forecasts_${rt}.json"
+            if [ -f "$FFILE" ]; then
+              SIZE=$(ls -lh "$FFILE" | awk '{print $5}')
+              echo "  $FFILE: $SIZE"
+            else
+              echo "  $FFILE: NOT GENERATED"
+            fi
+          done
+
+      - name: Upload forecast JSONs to R2
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/MarylandDOT/forecasts_county_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/forecasts_county_roads.json"},
+              {"local_path": "data/MarylandDOT/forecasts_city_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/forecasts_city_roads.json"},
+              {"local_path": "data/MarylandDOT/forecasts_no_interstate.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/forecasts_no_interstate.json"},
+              {"local_path": "data/MarylandDOT/forecasts_all_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/montgomery/forecasts_all_roads.json"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Commit manifest and pipeline metadata
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add data/r2-manifest.json
+          git add "data/MarylandDOT/.geocode_cache.json" 2>/dev/null || true
+          git add "data/MarylandDOT/.validation/" 2>/dev/null || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "Auto-process: MoCo $JURISDICTION pipeline + forecasts -> R2 - $(date +'%Y-%m-%d')"
+
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))
+            git fetch origin main
+            git rebase origin/main || {
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Generate workflow summary
+        if: steps.detect.outputs.has_files == 'true'
+        run: |
+          REPORT="data/MarylandDOT/.validation/pipeline_report.json"
+
+          {
+            echo "## MoCo Pipeline Results"
+            echo ""
+            echo "| Parameter | Value |"
+            echo "|-----------|-------|"
+            echo "| Jurisdiction | Montgomery County, MD |"
+            echo "| Input Files | ${{ steps.detect.outputs.file_count }} |"
+            echo "| Merge Mode | ${{ steps.detect.outputs.merge }} |"
+            echo "| Trigger | ${{ github.event_name }} |"
+            echo ""
+
+            if [ -f "$REPORT" ]; then
+              echo "### Pipeline Report"
+              echo ""
+              echo "| Metric | Value |"
+              echo "|--------|-------|"
+              echo "| Input Rows | $(python -c "import json; print(json.load(open('$REPORT'))['input_rows'])" 2>/dev/null || echo 'N/A') |"
+              echo "| Output Rows | $(python -c "import json; print(json.load(open('$REPORT'))['output_rows'])" 2>/dev/null || echo 'N/A') |"
+              echo "| Duplicates Removed | $(python -c "import json; print(json.load(open('$REPORT'))['duplicates_removed'])" 2>/dev/null || echo 'N/A') |"
+              echo "| GPS Coverage | $(python -c "import json; print(json.load(open('$REPORT'))['gps_coverage'])" 2>/dev/null || echo 'N/A') |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

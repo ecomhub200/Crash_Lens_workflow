@@ -1,0 +1,207 @@
+{
+  "state": {
+    "fips": "15",
+    "name": "Hawaii",
+    "abbreviation": "HI",
+    "dot": "HDOT",
+    "dotFullName": "Hawaii Department of Transportation",
+    "center": [
+      -157.362311,
+      20.489773
+    ],
+    "zoom": 7
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "hi_1": {
+      "name": "Oahu District",
+      "shortName": "Oahu District",
+      "center": [
+        -157.98,
+        21.47
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Honolulu"
+      },
+      "mapBounds": {
+        "sw": [
+          21.25,
+          -158.3
+        ],
+        "ne": [
+          21.72,
+          -157.65
+        ]
+      },
+      "hq": "Honolulu"
+    },
+    "hi_2": {
+      "name": "Maui District",
+      "shortName": "Maui District",
+      "center": [
+        -156.5,
+        20.89
+      ],
+      "zoom": 10,
+      "counties": [
+        "009",
+        "005"
+      ],
+      "countyNames": {
+        "009": "Maui",
+        "005": "Kalawao"
+      },
+      "mapBounds": {
+        "sw": [
+          20.55,
+          -156.8
+        ],
+        "ne": [
+          21.05,
+          -155.95
+        ]
+      },
+      "hq": "Wailuku"
+    },
+    "hi_3": {
+      "name": "Hawaii District",
+      "shortName": "Hawaii District",
+      "center": [
+        -155.5,
+        19.72
+      ],
+      "zoom": 9,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Hawaii"
+      },
+      "mapBounds": {
+        "sw": [
+          18.9,
+          -156.1
+        ],
+        "ne": [
+          20.25,
+          -154.8
+        ]
+      },
+      "hq": "Hilo"
+    },
+    "hi_4": {
+      "name": "Kauai District",
+      "shortName": "Kauai District",
+      "center": [
+        -159.53,
+        22.07
+      ],
+      "zoom": 10,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Kauai"
+      },
+      "mapBounds": {
+        "sw": [
+          21.87,
+          -159.8
+        ],
+        "ne": [
+          22.24,
+          -159.28
+        ]
+      },
+      "hq": "Lihue"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "ompo": {
+      "name": "OahuMPO",
+      "shortName": "OahuMPO",
+      "type": "mpo",
+      "center": [
+        -157.8583,
+        21.3069
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Honolulu"
+      },
+      "mapBounds": {
+        "sw": [
+          21.15,
+          -158.1
+        ],
+        "ne": [
+          21.7,
+          -157.6
+        ]
+      }
+    },
+    "mmpo": {
+      "name": "Maui MPO",
+      "shortName": "Maui",
+      "type": "mpo",
+      "center": [
+        -156.4729,
+        20.8893
+      ],
+      "zoom": 10,
+      "counties": [
+        "009"
+      ],
+      "countyNames": {
+        "009": "Maui"
+      },
+      "btsAcronym": "MM",
+      "mapBounds": {
+        "sw": [
+          20.55,
+          -156.8
+        ],
+        "ne": [
+          21.05,
+          -156.15
+        ]
+      }
+    },
+    "oahu_mpo": {
+      "name": "Oahu MPO",
+      "shortName": "Oahu",
+      "type": "mpo",
+      "btsMpoId": "15197500",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -160.683514,
+        22.381796
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Hawaii",
+    "003": "Honolulu",
+    "005": "Kalawao",
+    "007": "Kauai",
+    "009": "Maui"
+  }
+}

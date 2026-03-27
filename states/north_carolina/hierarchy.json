@@ -1,0 +1,1278 @@
+{
+  "state": {
+    "fips": "37",
+    "name": "North Carolina",
+    "abbreviation": "NC",
+    "dot": "NCDOT",
+    "dotFullName": "North Carolina Department of Transportation",
+    "center": [
+      -79.806419,
+      35.630066
+    ],
+    "zoom": 7,
+    "placesCount": 549
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nc_1": {
+      "name": "Division 1 (Ahoskie)",
+      "shortName": "Division 1",
+      "center": [
+        -76.3,
+        36.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "029",
+        "041",
+        "053",
+        "055",
+        "073",
+        "091",
+        "095",
+        "117",
+        "131",
+        "139",
+        "143",
+        "177",
+        "187"
+      ],
+      "countyNames": {
+        "015": "Bertie",
+        "029": "Camden",
+        "041": "Chowan",
+        "053": "Currituck",
+        "055": "Dare",
+        "073": "Gates",
+        "091": "Hertford",
+        "095": "Hyde",
+        "117": "Martin",
+        "131": "Northampton",
+        "139": "Pasquotank",
+        "143": "Perquimans",
+        "177": "Tyrrell",
+        "187": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -77.1
+        ],
+        "ne": [
+          36.55,
+          -75.5
+        ]
+      },
+      "hq": "Ahoskie"
+    },
+    "nc_2": {
+      "name": "Division 2 (Greenville)",
+      "shortName": "Division 2",
+      "center": [
+        -76.8,
+        35.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "013",
+        "031",
+        "049",
+        "079",
+        "103",
+        "107",
+        "137",
+        "147"
+      ],
+      "countyNames": {
+        "013": "Beaufort",
+        "031": "Carteret",
+        "049": "Craven",
+        "079": "Greene",
+        "103": "Jones",
+        "107": "Lenoir",
+        "137": "Pamlico",
+        "147": "Pitt"
+      },
+      "mapBounds": {
+        "sw": [
+          34.5,
+          -77.5
+        ],
+        "ne": [
+          35.7,
+          -76.1
+        ]
+      },
+      "hq": "Greenville"
+    },
+    "nc_3": {
+      "name": "Division 3 (Castle Hayne)",
+      "shortName": "Division 3",
+      "center": [
+        -77.8,
+        34.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "019",
+        "061",
+        "129",
+        "133",
+        "141",
+        "163"
+      ],
+      "countyNames": {
+        "019": "Brunswick",
+        "061": "Duplin",
+        "129": "New Hanover",
+        "133": "Onslow",
+        "141": "Pender",
+        "163": "Sampson"
+      },
+      "mapBounds": {
+        "sw": [
+          33.8,
+          -78.5
+        ],
+        "ne": [
+          35.0,
+          -77.1
+        ]
+      },
+      "hq": "Castle Hayne"
+    },
+    "nc_4": {
+      "name": "Division 4 (Wilson)",
+      "shortName": "Division 4",
+      "center": [
+        -78.0,
+        35.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "065",
+        "069",
+        "083",
+        "101",
+        "127",
+        "181",
+        "185",
+        "191",
+        "195"
+      ],
+      "countyNames": {
+        "065": "Edgecombe",
+        "069": "Franklin",
+        "083": "Halifax",
+        "101": "Johnston",
+        "127": "Nash",
+        "181": "Vance",
+        "185": "Warren",
+        "191": "Wayne",
+        "195": "Wilson"
+      },
+      "mapBounds": {
+        "sw": [
+          35.1,
+          -78.7
+        ],
+        "ne": [
+          36.5,
+          -77.3
+        ]
+      },
+      "hq": "Wilson"
+    },
+    "nc_5": {
+      "name": "Division 5 (Durham)",
+      "shortName": "Division 5",
+      "center": [
+        -78.9,
+        36.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "063",
+        "069",
+        "077",
+        "135",
+        "145",
+        "181",
+        "183",
+        "185"
+      ],
+      "countyNames": {
+        "063": "Durham",
+        "069": "Franklin",
+        "077": "Granville",
+        "135": "Orange",
+        "145": "Person",
+        "181": "Vance",
+        "183": "Wake",
+        "185": "Warren"
+      },
+      "mapBounds": {
+        "sw": [
+          35.5,
+          -79.5
+        ],
+        "ne": [
+          36.55,
+          -78.3
+        ]
+      },
+      "hq": "Durham"
+    },
+    "nc_6": {
+      "name": "Division 6 (Fayetteville)",
+      "shortName": "Division 6",
+      "center": [
+        -79.0,
+        34.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "017",
+        "047",
+        "051",
+        "085",
+        "093",
+        "155",
+        "165"
+      ],
+      "countyNames": {
+        "017": "Bladen",
+        "047": "Columbus",
+        "051": "Cumberland",
+        "085": "Harnett",
+        "093": "Hoke",
+        "155": "Robeson",
+        "165": "Scotland"
+      },
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -79.7
+        ],
+        "ne": [
+          35.4,
+          -78.3
+        ]
+      },
+      "hq": "Fayetteville"
+    },
+    "nc_7": {
+      "name": "Division 7 (Greensboro)",
+      "shortName": "Division 7",
+      "center": [
+        -79.7,
+        36.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "033",
+        "081",
+        "157"
+      ],
+      "countyNames": {
+        "001": "Alamance",
+        "033": "Caswell",
+        "081": "Guilford",
+        "157": "Rockingham"
+      },
+      "mapBounds": {
+        "sw": [
+          35.7,
+          -80.3
+        ],
+        "ne": [
+          36.55,
+          -79.1
+        ]
+      },
+      "hq": "Greensboro"
+    },
+    "nc_8": {
+      "name": "Division 8 (Pinehurst)",
+      "shortName": "Division 8",
+      "center": [
+        -80.0,
+        35.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "105",
+        "123",
+        "125",
+        "151",
+        "153",
+        "167"
+      ],
+      "countyNames": {
+        "007": "Anson",
+        "105": "Lee",
+        "123": "Montgomery",
+        "125": "Moore",
+        "151": "Randolph",
+        "153": "Richmond",
+        "167": "Stanly"
+      },
+      "mapBounds": {
+        "sw": [
+          34.7,
+          -80.6
+        ],
+        "ne": [
+          35.8,
+          -79.4
+        ]
+      },
+      "hq": "Pinehurst"
+    },
+    "nc_9": {
+      "name": "Division 9 (Winston-Salem)",
+      "shortName": "Division 9",
+      "center": [
+        -80.4,
+        35.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "057",
+        "059",
+        "067",
+        "159",
+        "169",
+        "171",
+        "197"
+      ],
+      "countyNames": {
+        "057": "Davidson",
+        "059": "Davie",
+        "067": "Forsyth",
+        "159": "Rowan",
+        "169": "Stokes",
+        "171": "Surry",
+        "197": "Yadkin"
+      },
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -80.9
+        ],
+        "ne": [
+          36.55,
+          -79.9
+        ]
+      },
+      "hq": "Winston-Salem"
+    },
+    "nc_10": {
+      "name": "Division 10 (Albemarle)",
+      "shortName": "Division 10",
+      "center": [
+        -80.5,
+        35.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "025",
+        "119",
+        "167",
+        "179"
+      ],
+      "countyNames": {
+        "007": "Anson",
+        "025": "Cabarrus",
+        "119": "Mecklenburg",
+        "167": "Stanly",
+        "179": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          34.7,
+          -81.0
+        ],
+        "ne": [
+          35.5,
+          -80.0
+        ]
+      },
+      "hq": "Albemarle"
+    },
+    "nc_11": {
+      "name": "Division 11 (North Wilkesboro)",
+      "shortName": "Division 11",
+      "center": [
+        -81.2,
+        36.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "005",
+        "009",
+        "027",
+        "097",
+        "171",
+        "189",
+        "193"
+      ],
+      "countyNames": {
+        "003": "Alexander",
+        "005": "Alleghany",
+        "009": "Ashe",
+        "027": "Caldwell",
+        "097": "Iredell",
+        "171": "Surry",
+        "189": "Watauga",
+        "193": "Wilkes"
+      },
+      "mapBounds": {
+        "sw": [
+          35.6,
+          -81.8
+        ],
+        "ne": [
+          36.6,
+          -80.6
+        ]
+      },
+      "hq": "North Wilkesboro"
+    },
+    "nc_12": {
+      "name": "Division 12 (Shelby)",
+      "shortName": "Division 12",
+      "center": [
+        -81.5,
+        35.3
+      ],
+      "zoom": 9,
+      "counties": [
+        "045",
+        "071",
+        "109"
+      ],
+      "countyNames": {
+        "045": "Cleveland",
+        "071": "Gaston",
+        "109": "Lincoln"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -81.8
+        ],
+        "ne": [
+          35.6,
+          -81.1
+        ]
+      },
+      "hq": "Shelby"
+    },
+    "nc_13": {
+      "name": "Division 13 (Asheville)",
+      "shortName": "Division 13",
+      "center": [
+        -82.2,
+        35.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "021",
+        "023",
+        "115",
+        "111",
+        "121",
+        "161",
+        "199"
+      ],
+      "countyNames": {
+        "021": "Buncombe",
+        "023": "Burke",
+        "115": "Madison",
+        "111": "McDowell",
+        "121": "Mitchell",
+        "161": "Rutherford",
+        "199": "Yancey"
+      },
+      "mapBounds": {
+        "sw": [
+          35.2,
+          -82.7
+        ],
+        "ne": [
+          36.1,
+          -81.7
+        ]
+      },
+      "hq": "Asheville"
+    },
+    "nc_14": {
+      "name": "Division 14 (Sylva)",
+      "shortName": "Division 14",
+      "center": [
+        -83.1,
+        35.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "039",
+        "043",
+        "075",
+        "087",
+        "089",
+        "099",
+        "113",
+        "149",
+        "173",
+        "175"
+      ],
+      "countyNames": {
+        "011": "Avery",
+        "039": "Cherokee",
+        "043": "Clay",
+        "075": "Graham",
+        "087": "Haywood",
+        "089": "Henderson",
+        "099": "Jackson",
+        "113": "Macon",
+        "149": "Polk",
+        "173": "Swain",
+        "175": "Transylvania"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -84.0
+        ],
+        "ne": [
+          35.8,
+          -82.4
+        ]
+      },
+      "hq": "Sylva"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "crtpo": {
+      "name": "Charlotte Regional TPO (CRTPO)",
+      "shortName": "CRTPO",
+      "type": "mpo",
+      "center": [
+        -80.8431,
+        35.2271
+      ],
+      "zoom": 9,
+      "counties": [
+        "119",
+        "097",
+        "179"
+      ],
+      "countyNames": {
+        "119": "Mecklenburg",
+        "097": "Iredell",
+        "179": "Union"
+      },
+      "btsAcronym": "CRTPO",
+      "mapBounds": {
+        "sw": [
+          34.9,
+          -81.25
+        ],
+        "ne": [
+          35.55,
+          -80.4
+        ]
+      }
+    },
+    "tacampodchc": {
+      "name": "Triangle Area (CAMPO/DCHC)",
+      "shortName": "CAMPO/DCHC",
+      "type": "mpo",
+      "center": [
+        -79.792,
+        36.0726
+      ],
+      "zoom": 10,
+      "counties": [
+        "183",
+        "063",
+        "135",
+        "101"
+      ],
+      "countyNames": {
+        "183": "Wake",
+        "063": "Durham",
+        "135": "Orange",
+        "101": "Johnston"
+      },
+      "btsAcronym": "CAMPODCHC",
+      "mapBounds": {
+        "sw": [
+          35.8,
+          -80.1
+        ],
+        "ne": [
+          36.3,
+          -79.5
+        ]
+      }
+    },
+    "gmpo": {
+      "name": "Greenville MPO",
+      "shortName": "Greenville",
+      "type": "mpo",
+      "center": [
+        -77.3664,
+        35.6127
+      ],
+      "zoom": 10,
+      "counties": [
+        "147"
+      ],
+      "countyNames": {
+        "147": "Pitt"
+      },
+      "btsAcronym": "GM",
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -77.6
+        ],
+        "ne": [
+          35.85,
+          -77.1
+        ]
+      }
+    },
+    "wsmpo": {
+      "name": "Winston-Salem MPO",
+      "shortName": "Winston-Salem",
+      "type": "mpo",
+      "center": [
+        -78.8986,
+        35.994
+      ],
+      "zoom": 10,
+      "counties": [
+        "067"
+      ],
+      "countyNames": {
+        "067": "Forsyth"
+      },
+      "btsAcronym": "WM",
+      "mapBounds": {
+        "sw": [
+          35.75,
+          -79.15
+        ],
+        "ne": [
+          36.2,
+          -78.65
+        ]
+      }
+    },
+    "wmpo": {
+      "name": "Wilmington MPO",
+      "shortName": "Wilmington",
+      "type": "mpo",
+      "center": [
+        -80.2442,
+        36.0999
+      ],
+      "zoom": 10,
+      "counties": [
+        "129",
+        "019"
+      ],
+      "countyNames": {
+        "129": "New Hanover",
+        "019": "Brunswick"
+      },
+      "btsAcronym": "WM",
+      "mapBounds": {
+        "sw": [
+          35.85,
+          -80.5
+        ],
+        "ne": [
+          36.35,
+          -79.95
+        ]
+      }
+    },
+    "fampo": {
+      "name": "Fayetteville Area MPO (FAMPO)",
+      "shortName": "FAMPO",
+      "type": "mpo",
+      "center": [
+        -78.8784,
+        35.0527
+      ],
+      "zoom": 10,
+      "counties": [
+        "051",
+        "093"
+      ],
+      "countyNames": {
+        "051": "Cumberland",
+        "093": "Hoke"
+      },
+      "btsAcronym": "FAMPO",
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -79.15
+        ],
+        "ne": [
+          35.3,
+          -78.6
+        ]
+      }
+    },
+    "gclmpo": {
+      "name": "Gastonia-Cleveland MPO (GCLMPO)",
+      "shortName": "GCLMPO",
+      "type": "mpo",
+      "center": [
+        -77.9447,
+        34.2257
+      ],
+      "zoom": 10,
+      "counties": [
+        "071",
+        "045",
+        "109"
+      ],
+      "countyNames": {
+        "071": "Gaston",
+        "045": "Cleveland",
+        "109": "Lincoln"
+      },
+      "btsAcronym": "GCLMPO",
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -78.2
+        ],
+        "ne": [
+          34.45,
+          -77.7
+        ]
+      }
+    },
+    "crmpo": {
+      "name": "Cabarrus-Rowan MPO",
+      "shortName": "Cabarrus-Rowan",
+      "type": "mpo",
+      "center": [
+        -80.85,
+        36.456
+      ],
+      "zoom": 10,
+      "counties": [
+        "025",
+        "159"
+      ],
+      "countyNames": {
+        "025": "Cabarrus",
+        "159": "Rowan"
+      },
+      "btsAcronym": "CM",
+      "mapBounds": {
+        "sw": [
+          36.25,
+          -81.1
+        ],
+        "ne": [
+          36.65,
+          -80.6
+        ]
+      }
+    },
+    "hpmpo": {
+      "name": "High Point MPO",
+      "shortName": "High Point",
+      "type": "mpo",
+      "center": [
+        -83.4555,
+        35.396
+      ],
+      "zoom": 10,
+      "counties": [
+        "081",
+        "057",
+        "151"
+      ],
+      "countyNames": {
+        "081": "Guilford",
+        "057": "Davidson",
+        "151": "Randolph"
+      },
+      "btsAcronym": "HPM",
+      "mapBounds": {
+        "sw": [
+          35.2,
+          -83.7
+        ],
+        "ne": [
+          35.6,
+          -83.2
+        ]
+      }
+    },
+    "bgmpo": {
+      "name": "Burlington-Graham MPO",
+      "shortName": "Burlington-Graham",
+      "type": "mpo",
+      "center": [
+        -82.5515,
+        35.5951
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Alamance"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -82.8
+        ],
+        "ne": [
+          35.8,
+          -82.3
+        ]
+      }
+    },
+    "ampofbrmpo": {
+      "name": "Asheville MPO (French Broad River MPO)",
+      "shortName": "French Broad River MPO",
+      "type": "mpo",
+      "center": [
+        -81.3443,
+        35.7399
+      ],
+      "zoom": 10,
+      "counties": [
+        "021",
+        "089"
+      ],
+      "countyNames": {
+        "021": "Buncombe",
+        "089": "Henderson"
+      },
+      "btsAcronym": "AMBRM",
+      "mapBounds": {
+        "sw": [
+          35.55,
+          -81.6
+        ],
+        "ne": [
+          35.95,
+          -81.1
+        ]
+      }
+    },
+    "ghmpo": {
+      "name": "Hickory-Lenoir-Morganton MPO (GHMPO)",
+      "shortName": "GHMPO",
+      "type": "mpo",
+      "center": [
+        -81.1873,
+        35.2621
+      ],
+      "zoom": 10,
+      "counties": [
+        "035",
+        "023",
+        "027"
+      ],
+      "countyNames": {
+        "035": "Catawba",
+        "023": "Burke",
+        "027": "Caldwell"
+      },
+      "btsAcronym": "GHMPO",
+      "mapBounds": {
+        "sw": [
+          35.05,
+          -81.4
+        ],
+        "ne": [
+          35.45,
+          -80.95
+        ]
+      }
+    },
+    "rmmpo": {
+      "name": "Rocky Mount MPO",
+      "shortName": "Rocky Mount",
+      "type": "mpo",
+      "center": [
+        -79.392,
+        36.3329
+      ],
+      "zoom": 10,
+      "counties": [
+        "127",
+        "065"
+      ],
+      "countyNames": {
+        "127": "Nash",
+        "065": "Edgecombe"
+      },
+      "btsAcronym": "RMM",
+      "mapBounds": {
+        "sw": [
+          36.1,
+          -79.65
+        ],
+        "ne": [
+          36.55,
+          -79.15
+        ]
+      }
+    },
+    "jmpo": {
+      "name": "Jacksonville MPO",
+      "shortName": "Jacksonville",
+      "type": "mpo",
+      "center": [
+        -79.445,
+        36.0726
+      ],
+      "zoom": 10,
+      "counties": [
+        "133"
+      ],
+      "countyNames": {
+        "133": "Onslow"
+      },
+      "btsAcronym": "JM",
+      "mapBounds": {
+        "sw": [
+          35.85,
+          -79.7
+        ],
+        "ne": [
+          36.3,
+          -79.2
+        ]
+      }
+    },
+    "nbmpo": {
+      "name": "New Bern MPO",
+      "shortName": "New Bern",
+      "type": "mpo",
+      "center": [
+        -80.5275,
+        35.4654
+      ],
+      "zoom": 10,
+      "counties": [
+        "049"
+      ],
+      "countyNames": {
+        "049": "Craven"
+      },
+      "btsAcronym": "NBM",
+      "mapBounds": {
+        "sw": [
+          35.25,
+          -80.75
+        ],
+        "ne": [
+          35.65,
+          -80.3
+        ]
+      }
+    },
+    "derpok": {
+      "name": "Down East RPO (Kinston)",
+      "shortName": "Kinston",
+      "type": "mpo",
+      "center": [
+        -80.5795,
+        35.404
+      ],
+      "zoom": 10,
+      "counties": [
+        "107"
+      ],
+      "countyNames": {
+        "107": "Lenoir"
+      },
+      "btsAcronym": "DER",
+      "mapBounds": {
+        "sw": [
+          35.2,
+          -80.85
+        ],
+        "ne": [
+          35.6,
+          -80.3
+        ]
+      }
+    },
+    "cabarrus_rowan_mpo": {
+      "name": "Cabarrus Rowan MPO",
+      "shortName": "Cabarrus Rowan",
+      "type": "mpo",
+      "btsMpoId": "37198002",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.575264,
+        35.583506
+      ],
+      "zoom": 10
+    },
+    "capital_area_mpo": {
+      "name": "Capital Area MPO",
+      "shortName": "Capital",
+      "type": "mpo",
+      "btsMpoId": "37196400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.570694,
+        35.737924
+      ],
+      "zoom": 10
+    },
+    "charlotte_regional_transportation_planning_organization_mpo": {
+      "name": "Charlotte Regional Transportation Planning Organization",
+      "shortName": "Charlotte Regional Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "37197900",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.769057,
+        35.362422
+      ],
+      "zoom": 10
+    },
+    "durham_chapel_hill_carrboro_mpo": {
+      "name": "Durham Chapel Hill Carrboro MPO",
+      "shortName": "Durham Chapel Hill Carrboro",
+      "type": "mpo",
+      "btsMpoId": "37198001",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.989011,
+        35.982684
+      ],
+      "zoom": 10
+    },
+    "gaston_cleveland_lincoln_mpo": {
+      "name": "Gaston-Cleveland-Lincoln MPO",
+      "shortName": "Gaston-Cleveland-Lincoln",
+      "type": "mpo",
+      "btsMpoId": "37197403",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -81.312383,
+        35.442704
+      ],
+      "zoom": 10
+    },
+    "goldsboro_urban_area_mpo": {
+      "name": "Goldsboro Urban Area MPO",
+      "shortName": "Goldsboro Urban",
+      "type": "mpo",
+      "btsMpoId": "37198202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.988852,
+        35.360554
+      ],
+      "zoom": 10
+    },
+    "greater_hickory_mpo": {
+      "name": "Greater Hickory MPO",
+      "shortName": "Greater Hickory",
+      "type": "mpo",
+      "btsMpoId": "37198201",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -81.458638,
+        35.831962
+      ],
+      "zoom": 10
+    },
+    "greensboro_urban_area_mpo": {
+      "name": "Greensboro Urban Area MPO",
+      "shortName": "Greensboro Urban",
+      "type": "mpo",
+      "btsMpoId": "37196000",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.753132,
+        36.097562
+      ],
+      "zoom": 10
+    },
+    "sandhills_mpo": {
+      "name": "Sandhills MPO",
+      "shortName": "Sandhills",
+      "type": "mpo",
+      "btsMpoId": "37202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.466295,
+        35.138711
+      ],
+      "zoom": 10
+    },
+    "winston_salem_urban_area_mpo": {
+      "name": "Winston Salem Urban Area MPO",
+      "shortName": "Winston Salem Urban",
+      "type": "mpo",
+      "btsMpoId": "37197401",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.306007,
+        36.148078
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Alamance",
+    "003": "Alexander",
+    "005": "Alleghany",
+    "007": "Anson",
+    "009": "Ashe",
+    "011": "Avery",
+    "013": "Beaufort",
+    "015": "Bertie",
+    "017": "Bladen",
+    "019": "Brunswick",
+    "021": "Buncombe",
+    "023": "Burke",
+    "025": "Cabarrus",
+    "027": "Caldwell",
+    "029": "Camden",
+    "031": "Carteret",
+    "033": "Caswell",
+    "035": "Catawba",
+    "037": "Chatham",
+    "039": "Cherokee",
+    "041": "Chowan",
+    "043": "Clay",
+    "045": "Cleveland",
+    "047": "Columbus",
+    "049": "Craven",
+    "051": "Cumberland",
+    "053": "Currituck",
+    "055": "Dare",
+    "057": "Davidson",
+    "059": "Davie",
+    "061": "Duplin",
+    "063": "Durham",
+    "065": "Edgecombe",
+    "067": "Forsyth",
+    "069": "Franklin",
+    "071": "Gaston",
+    "073": "Gates",
+    "075": "Graham",
+    "077": "Granville",
+    "079": "Greene",
+    "081": "Guilford",
+    "083": "Halifax",
+    "085": "Harnett",
+    "087": "Haywood",
+    "089": "Henderson",
+    "091": "Hertford",
+    "093": "Hoke",
+    "095": "Hyde",
+    "097": "Iredell",
+    "099": "Jackson",
+    "101": "Johnston",
+    "103": "Jones",
+    "105": "Lee",
+    "107": "Lenoir",
+    "109": "Lincoln",
+    "111": "McDowell",
+    "113": "Macon",
+    "115": "Madison",
+    "117": "Martin",
+    "119": "Mecklenburg",
+    "121": "Mitchell",
+    "123": "Montgomery",
+    "125": "Moore",
+    "127": "Nash",
+    "129": "New Hanover",
+    "131": "Northampton",
+    "133": "Onslow",
+    "135": "Orange",
+    "137": "Pamlico",
+    "139": "Pasquotank",
+    "141": "Pender",
+    "143": "Perquimans",
+    "145": "Person",
+    "147": "Pitt",
+    "149": "Polk",
+    "151": "Randolph",
+    "153": "Richmond",
+    "155": "Robeson",
+    "157": "Rockingham",
+    "159": "Rowan",
+    "161": "Rutherford",
+    "163": "Sampson",
+    "165": "Scotland",
+    "167": "Stanly",
+    "169": "Stokes",
+    "171": "Surry",
+    "173": "Swain",
+    "175": "Transylvania",
+    "177": "Tyrrell",
+    "179": "Union",
+    "181": "Vance",
+    "183": "Wake",
+    "185": "Warren",
+    "187": "Washington",
+    "189": "Watauga",
+    "191": "Wayne",
+    "193": "Wilkes",
+    "195": "Wilson",
+    "197": "Yadkin",
+    "199": "Yancey"
+  }
+}

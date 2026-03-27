@@ -1,0 +1,235 @@
+name: 'Upload to Cloudflare R2'
+description: 'Upload files to Cloudflare R2 and update the data manifest'
+
+inputs:
+  files_json:
+    description: 'JSON array of {local_path, r2_key} pairs'
+    required: true
+  cf_account_id:
+    description: 'Cloudflare Account ID'
+    required: true
+  r2_access_key_id:
+    description: 'R2 API Access Key ID'
+    required: true
+  r2_secret_access_key:
+    description: 'R2 API Secret Access Key'
+    required: true
+  r2_public_url:
+    description: 'R2 public URL (e.g. https://pub-XXX.r2.dev)'
+    required: true
+  bucket:
+    description: 'R2 bucket name'
+    required: false
+    default: 'crash-lens-data'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure AWS CLI for R2
+      shell: bash
+      env:
+        AWS_ACCESS_KEY_ID: ${{ inputs.r2_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.r2_secret_access_key }}
+      run: |
+        aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+        aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+        aws configure set default.region auto
+
+    - name: Verify R2 credentials
+      shell: bash
+      env:
+        R2_ENDPOINT: "https://${{ inputs.cf_account_id }}.r2.cloudflarestorage.com"
+        R2_BUCKET: ${{ inputs.bucket }}
+      run: |
+        echo "=========================================="
+        echo "Verifying R2 credentials"
+        echo "Endpoint: $R2_ENDPOINT"
+        echo "Bucket: $R2_BUCKET"
+        echo "=========================================="
+        echo ""
+        echo "Testing: aws s3 ls s3://$R2_BUCKET/ --endpoint-url $R2_ENDPOINT"
+        aws s3 ls "s3://$R2_BUCKET/" --endpoint-url "$R2_ENDPOINT" 2>&1 || {
+          echo ""
+          echo "ERROR: Cannot list bucket. Check CF_ACCOUNT_ID, CF_R2_ACCESS_KEY_ID, CF_R2_SECRET_ACCESS_KEY"
+          exit 1
+        }
+        echo ""
+        echo "Credential verification passed"
+
+    - name: Upload files to R2 and update manifest
+      shell: bash
+      env:
+        R2_ENDPOINT: "https://${{ inputs.cf_account_id }}.r2.cloudflarestorage.com"
+        R2_BUCKET: ${{ inputs.bucket }}
+        R2_PUBLIC_URL: ${{ inputs.r2_public_url }}
+        FILES_JSON: ${{ inputs.files_json }}
+      run: |
+        echo "=========================================="
+        echo "Uploading files to Cloudflare R2"
+        echo "Endpoint: $R2_ENDPOINT"
+        echo "Bucket: $R2_BUCKET"
+        echo "=========================================="
+
+        python3 -c "
+        import json, sys, subprocess, os, hashlib
+        from datetime import datetime, timezone
+
+        files = json.loads(os.environ['FILES_JSON'])
+        endpoint = os.environ['R2_ENDPOINT']
+        bucket = os.environ['R2_BUCKET']
+        public_url = os.environ['R2_PUBLIC_URL'].rstrip('/')
+        manifest_path = 'data/r2-manifest.json'
+
+        # Load existing manifest or create new one
+        try:
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            manifest = {
+                'version': 1,
+                'r2BaseUrl': '',
+                'updated': '',
+                'files': {},
+                'localPathMapping': {}
+            }
+
+        manifest['r2BaseUrl'] = public_url
+        manifest['updated'] = datetime.now(timezone.utc).isoformat()
+
+        uploaded = 0
+        failed = 0
+        for entry in files:
+            local_path = entry['local_path']
+            r2_key = entry['r2_key']
+
+            if not os.path.isfile(local_path):
+                print(f'  SKIP (not found): {local_path}')
+                continue
+
+            size = os.path.getsize(local_path)
+            is_gzipped = local_path.endswith('.gz')
+
+            # Determine content type
+            if local_path.endswith('.csv') or local_path.endswith('.csv.gz'):
+                content_type = 'text/csv'
+            elif local_path.endswith('.json') or local_path.endswith('.json.gz'):
+                content_type = 'application/json'
+            else:
+                content_type = 'application/octet-stream'
+
+            s3_uri = f's3://{bucket}/{r2_key}'
+            cmd = [
+                'aws', 's3', 'cp', local_path, s3_uri,
+                '--endpoint-url', endpoint,
+                '--content-type', content_type
+            ]
+
+            # Add Content-Encoding for gzipped files so browsers decompress transparently
+            if is_gzipped:
+                cmd.extend(['--content-encoding', 'gzip'])
+
+            print(f'  Uploading: {local_path} ({size:,} bytes) -> {s3_uri}')
+
+            success = False
+            for attempt in range(3):
+                result = subprocess.run(cmd, capture_output=True, text=True)
+                print(f'    [attempt {attempt+1}] returncode={result.returncode}')
+                if result.stdout.strip():
+                    print(f'    [stdout] {result.stdout.strip()}')
+                if result.stderr.strip():
+                    print(f'    [stderr] {result.stderr.strip()}')
+                if result.returncode == 0:
+                    success = True
+                    break
+                import time
+                time.sleep(2 ** attempt)
+
+            if not success:
+                print(f'  FAILED: {local_path}')
+                failed += 1
+                continue
+
+            # Compute file metadata
+            with open(local_path, 'rb') as fh:
+                md5 = hashlib.md5(fh.read()).hexdigest()
+
+            file_meta = {
+                'size': size,
+                'md5': md5,
+                'uploaded': datetime.now(timezone.utc).isoformat()
+            }
+
+            # Record gzip metadata for compressed files
+            if is_gzipped:
+                file_meta['contentEncoding'] = 'gzip'
+                # Try to read uncompressed size from entry metadata if provided
+                uncompressed = entry.get('uncompressed_size')
+                if uncompressed:
+                    file_meta['uncompressedSize'] = int(uncompressed)
+
+            manifest['files'][r2_key] = file_meta
+            manifest['localPathMapping'][local_path] = r2_key
+
+            uploaded += 1
+            print(f'  OK: {r2_key} ({size:,} bytes)')
+
+        # Write updated manifest
+        with open(manifest_path, 'w') as f:
+            json.dump(manifest, f, indent=2)
+
+        print(f'')
+        print(f'Result: {uploaded} uploaded, {failed} failed out of {len(files)} files')
+        print(f'Manifest updated: {manifest_path}')
+
+        if failed > 0:
+            sys.exit(1)
+        "
+
+    - name: Verify R2 public accessibility
+      shell: bash
+      env:
+        R2_PUBLIC_URL: ${{ inputs.r2_public_url }}
+        FILES_JSON: ${{ inputs.files_json }}
+      run: |
+        echo "=========================================="
+        echo "Verifying R2 public accessibility"
+        echo "=========================================="
+
+        # Verify the first uploaded file is publicly accessible via the CDN URL
+        FIRST_KEY=$(python3 -c "
+        import json, os
+        files = json.loads(os.environ['FILES_JSON'])
+        # Find the first file that actually exists on disk
+        for f in files:
+            if os.path.isfile(f['local_path']):
+                print(f['r2_key'])
+                break
+        ")
+
+        if [ -n "$FIRST_KEY" ]; then
+          URL="${R2_PUBLIC_URL}/${FIRST_KEY}"
+          echo "Testing: $URL"
+          # Allow up to 15 seconds for CDN propagation
+          for attempt in 1 2 3; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 -I "$URL" 2>/dev/null || echo "000")
+            echo "  Attempt $attempt: HTTP $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo ""
+              echo "Public accessibility verified OK"
+              break
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "  Waiting 5s for CDN propagation..."
+              sleep 5
+            fi
+          done
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo ""
+            echo "::warning::R2 file uploaded but NOT publicly accessible at $URL (HTTP $HTTP_CODE)"
+            echo "::warning::Check: 1) R2 bucket has public access enabled  2) Custom domain is configured  3) CORS policy is set"
+          fi
+        else
+          echo "No files to verify (all skipped)"
+        fi
+        echo "=========================================="

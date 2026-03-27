@@ -1,0 +1,1097 @@
+{
+  "state": {
+    "fips": "42",
+    "name": "Pennsylvania",
+    "abbreviation": "PA",
+    "dot": "PennDOT",
+    "dotFullName": "Pennsylvania Department of Transportation",
+    "center": [
+      -77.209755,
+      40.590752
+    ],
+    "zoom": 7,
+    "placesCount": 1013
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "pa_1": {
+      "name": "District 1 (Oil City)",
+      "shortName": "District 1",
+      "center": [
+        -79.9,
+        41.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "039",
+        "049",
+        "053",
+        "085",
+        "121",
+        "123"
+      ],
+      "countyNames": {
+        "039": "Crawford",
+        "049": "Erie",
+        "053": "Forest",
+        "085": "Mercer",
+        "121": "Venango",
+        "123": "Warren"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -80.5
+        ],
+        "ne": [
+          42.3,
+          -79.0
+        ]
+      },
+      "hq": "Oil City"
+    },
+    "pa_2": {
+      "name": "District 2 (Clearfield)",
+      "shortName": "District 2",
+      "center": [
+        -78.2,
+        41.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "023",
+        "027",
+        "033",
+        "035",
+        "047",
+        "067",
+        "083",
+        "087",
+        "105"
+      ],
+      "countyNames": {
+        "023": "Cameron",
+        "027": "Centre",
+        "033": "Clearfield",
+        "035": "Clinton",
+        "047": "Elk",
+        "067": "Juniata",
+        "083": "McKean",
+        "087": "Mifflin",
+        "105": "Potter"
+      },
+      "mapBounds": {
+        "sw": [
+          40.5,
+          -79.0
+        ],
+        "ne": [
+          41.8,
+          -77.0
+        ]
+      },
+      "hq": "Clearfield"
+    },
+    "pa_3": {
+      "name": "District 3 (Montoursville)",
+      "shortName": "District 3",
+      "center": [
+        -76.7,
+        41.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "037",
+        "081",
+        "093",
+        "097",
+        "109",
+        "113",
+        "117",
+        "119"
+      ],
+      "countyNames": {
+        "015": "Bradford",
+        "037": "Columbia",
+        "081": "Lycoming",
+        "093": "Montour",
+        "097": "Northumberland",
+        "109": "Snyder",
+        "113": "Sullivan",
+        "117": "Tioga",
+        "119": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          40.7,
+          -77.5
+        ],
+        "ne": [
+          42.0,
+          -76.0
+        ]
+      },
+      "hq": "Montoursville"
+    },
+    "pa_4": {
+      "name": "District 4 (Dunmore)",
+      "shortName": "District 4",
+      "center": [
+        -75.6,
+        41.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "069",
+        "079",
+        "103",
+        "115",
+        "127",
+        "131"
+      ],
+      "countyNames": {
+        "069": "Lackawanna",
+        "079": "Luzerne",
+        "103": "Pike",
+        "115": "Susquehanna",
+        "127": "Wayne",
+        "131": "Wyoming"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -76.3
+        ],
+        "ne": [
+          42.0,
+          -74.9
+        ]
+      },
+      "hq": "Dunmore"
+    },
+    "pa_5": {
+      "name": "District 5 (Allentown)",
+      "shortName": "District 5",
+      "center": [
+        -75.6,
+        40.7
+      ],
+      "zoom": 9,
+      "counties": [
+        "011",
+        "025",
+        "077",
+        "089",
+        "095",
+        "107"
+      ],
+      "countyNames": {
+        "011": "Berks",
+        "025": "Carbon",
+        "077": "Lehigh",
+        "089": "Monroe",
+        "095": "Northampton",
+        "107": "Schuylkill"
+      },
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -76.2
+        ],
+        "ne": [
+          41.1,
+          -75.0
+        ]
+      },
+      "hq": "Allentown"
+    },
+    "pa_6": {
+      "name": "District 6 (King of Prussia)",
+      "shortName": "District 6",
+      "center": [
+        -75.3,
+        40.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "029",
+        "045",
+        "091",
+        "101"
+      ],
+      "countyNames": {
+        "017": "Bucks",
+        "029": "Chester",
+        "045": "Delaware",
+        "091": "Montgomery",
+        "101": "Philadelphia"
+      },
+      "mapBounds": {
+        "sw": [
+          39.7,
+          -75.6
+        ],
+        "ne": [
+          40.4,
+          -74.9
+        ]
+      },
+      "hq": "King of Prussia"
+    },
+    "pa_8": {
+      "name": "District 8 (Harrisburg)",
+      "shortName": "District 8",
+      "center": [
+        -76.8,
+        40.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "041",
+        "043",
+        "055",
+        "071",
+        "075",
+        "099",
+        "133"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "041": "Cumberland",
+        "043": "Dauphin",
+        "055": "Franklin",
+        "071": "Lancaster",
+        "075": "Lebanon",
+        "099": "Perry",
+        "133": "York"
+      },
+      "mapBounds": {
+        "sw": [
+          39.6,
+          -77.5
+        ],
+        "ne": [
+          40.7,
+          -76.1
+        ]
+      },
+      "hq": "Harrisburg"
+    },
+    "pa_9": {
+      "name": "District 9 (Hollidaysburg)",
+      "shortName": "District 9",
+      "center": [
+        -78.5,
+        40.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "013",
+        "021",
+        "057",
+        "061",
+        "111"
+      ],
+      "countyNames": {
+        "009": "Bedford",
+        "013": "Blair",
+        "021": "Cambria",
+        "057": "Fulton",
+        "061": "Huntingdon",
+        "111": "Somerset"
+      },
+      "mapBounds": {
+        "sw": [
+          39.7,
+          -79.1
+        ],
+        "ne": [
+          40.8,
+          -77.8
+        ]
+      },
+      "hq": "Hollidaysburg"
+    },
+    "pa_10": {
+      "name": "District 10 (Indiana)",
+      "shortName": "District 10",
+      "center": [
+        -79.3,
+        41.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "019",
+        "031",
+        "063",
+        "065"
+      ],
+      "countyNames": {
+        "005": "Armstrong",
+        "019": "Butler",
+        "031": "Clarion",
+        "063": "Indiana",
+        "065": "Jefferson"
+      },
+      "mapBounds": {
+        "sw": [
+          40.6,
+          -79.8
+        ],
+        "ne": [
+          41.4,
+          -78.8
+        ]
+      },
+      "hq": "Indiana"
+    },
+    "pa_11": {
+      "name": "District 11 (Bridgeville)",
+      "shortName": "District 11",
+      "center": [
+        -80.2,
+        40.5
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "007",
+        "073"
+      ],
+      "countyNames": {
+        "003": "Allegheny",
+        "007": "Beaver",
+        "073": "Lawrence"
+      },
+      "mapBounds": {
+        "sw": [
+          40.1,
+          -80.5
+        ],
+        "ne": [
+          41.0,
+          -79.7
+        ]
+      },
+      "hq": "Bridgeville"
+    },
+    "pa_12": {
+      "name": "District 12 (Uniontown)",
+      "shortName": "District 12",
+      "center": [
+        -79.8,
+        39.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "051",
+        "059",
+        "125",
+        "129"
+      ],
+      "countyNames": {
+        "051": "Fayette",
+        "059": "Greene",
+        "125": "Washington",
+        "129": "Westmoreland"
+      },
+      "mapBounds": {
+        "sw": [
+          39.5,
+          -80.5
+        ],
+        "ne": [
+          40.4,
+          -79.2
+        ]
+      },
+      "hq": "Uniontown"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "dvrpcdvrpcp": {
+      "name": "DVRPC (Delaware Valley Regional Planning Commission / Philadelphia)",
+      "shortName": "Delaware Valley Regional Planning Commission / Philadelphia",
+      "type": "mpo",
+      "center": [
+        -75.1652,
+        39.9526
+      ],
+      "zoom": 9,
+      "counties": [
+        "101",
+        "091",
+        "017",
+        "029",
+        "045"
+      ],
+      "countyNames": {
+        "101": "Philadelphia",
+        "091": "Montgomery",
+        "017": "Bucks",
+        "029": "Chester",
+        "045": "Delaware"
+      },
+      "btsAcronym": "DVRPCP",
+      "mapBounds": {
+        "sw": [
+          39.6,
+          -75.6
+        ],
+        "ne": [
+          40.3,
+          -74.8
+        ]
+      }
+    },
+    "spcspacp": {
+      "name": "SPC (Southwestern PA Commission / Pittsburgh)",
+      "shortName": "Southwestern PA Commission / Pittsburgh",
+      "type": "mpo",
+      "center": [
+        -79.9959,
+        40.4406
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "005",
+        "007",
+        "019",
+        "051",
+        "059",
+        "063",
+        "073",
+        "125",
+        "129"
+      ],
+      "countyNames": {
+        "003": "Allegheny",
+        "005": "Armstrong",
+        "007": "Beaver",
+        "019": "Butler",
+        "051": "Fayette",
+        "059": "Greene",
+        "063": "Indiana",
+        "073": "Lawrence",
+        "125": "Washington",
+        "129": "Westmoreland"
+      },
+      "btsAcronym": "SPCP",
+      "mapBounds": {
+        "sw": [
+          40.1,
+          -80.4
+        ],
+        "ne": [
+          40.8,
+          -79.6
+        ]
+      }
+    },
+    "lvpclvpc": {
+      "name": "LVPC (Lehigh Valley Planning Commission)",
+      "shortName": "Lehigh Valley Planning Commission",
+      "type": "mpo",
+      "center": [
+        -75.4714,
+        40.5965
+      ],
+      "zoom": 10,
+      "counties": [
+        "077",
+        "095"
+      ],
+      "countyNames": {
+        "077": "Lehigh",
+        "095": "Northampton"
+      },
+      "btsAcronym": "LVPC",
+      "mapBounds": {
+        "sw": [
+          40.35,
+          -75.75
+        ],
+        "ne": [
+          40.85,
+          -75.15
+        ]
+      }
+    },
+    "latsllmposwb": {
+      "name": "LATS (Lackawanna-Luzerne MPO / Scranton-Wilkes Barre)",
+      "shortName": "Lackawanna-Luzerne MPO / Scranton-Wilkes Barre",
+      "type": "mpo",
+      "center": [
+        -75.6624,
+        41.409
+      ],
+      "zoom": 10,
+      "counties": [
+        "069",
+        "079"
+      ],
+      "countyNames": {
+        "069": "Lackawanna",
+        "079": "Luzerne"
+      },
+      "btsAcronym": "LMSB",
+      "mapBounds": {
+        "sw": [
+          41.15,
+          -75.9
+        ],
+        "ne": [
+          41.65,
+          -75.4
+        ]
+      }
+    },
+    "hats": {
+      "name": "Harrisburg Area Transportation Study",
+      "shortName": "Harrisburg Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -76.8867,
+        40.2732
+      ],
+      "zoom": 10,
+      "counties": [
+        "043",
+        "041",
+        "099"
+      ],
+      "countyNames": {
+        "043": "Dauphin",
+        "041": "Cumberland",
+        "099": "Perry"
+      },
+      "btsAcronym": "HATS",
+      "mapBounds": {
+        "sw": [
+          40.0,
+          -77.15
+        ],
+        "ne": [
+          40.5,
+          -76.6
+        ]
+      }
+    },
+    "lcmpo": {
+      "name": "Lebanon County MPO",
+      "shortName": "Lebanon County",
+      "type": "mpo",
+      "center": [
+        -76.4114,
+        40.343
+      ],
+      "zoom": 11,
+      "counties": [
+        "075"
+      ],
+      "countyNames": {
+        "075": "Lebanon"
+      },
+      "btsAcronym": "LCM",
+      "mapBounds": {
+        "sw": [
+          40.15,
+          -76.65
+        ],
+        "ne": [
+          40.55,
+          -76.15
+        ]
+      }
+    },
+    "yampo": {
+      "name": "York Area MPO",
+      "shortName": "York Area",
+      "type": "mpo",
+      "center": [
+        -76.3084,
+        40.0076
+      ],
+      "zoom": 10,
+      "counties": [
+        "133"
+      ],
+      "countyNames": {
+        "133": "York"
+      },
+      "btsAcronym": "YAM",
+      "mapBounds": {
+        "sw": [
+          39.8,
+          -76.55
+        ],
+        "ne": [
+          40.25,
+          -76.05
+        ]
+      }
+    },
+    "ratsb": {
+      "name": "Reading Area Transportation Study (Berks)",
+      "shortName": "Berks",
+      "type": "mpo",
+      "center": [
+        -75.927,
+        40.3573
+      ],
+      "zoom": 10,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Berks"
+      },
+      "btsAcronym": "RATS",
+      "mapBounds": {
+        "sw": [
+          40.15,
+          -76.2
+        ],
+        "ne": [
+          40.55,
+          -75.65
+        ]
+      }
+    },
+    "eampo": {
+      "name": "Erie Area MPO",
+      "shortName": "Erie Area",
+      "type": "mpo",
+      "center": [
+        -80.0851,
+        42.1292
+      ],
+      "zoom": 10,
+      "counties": [
+        "049"
+      ],
+      "countyNames": {
+        "049": "Erie"
+      },
+      "btsAcronym": "EAM",
+      "mapBounds": {
+        "sw": [
+          41.9,
+          -80.35
+        ],
+        "ne": [
+          42.35,
+          -79.8
+        ]
+      }
+    },
+    "ccmpo": {
+      "name": "Centre County MPO",
+      "shortName": "Centre County",
+      "type": "mpo",
+      "center": [
+        -77.8607,
+        40.8082
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Centre"
+      },
+      "btsAcronym": "CCM",
+      "mapBounds": {
+        "sw": [
+          40.55,
+          -78.15
+        ],
+        "ne": [
+          41.05,
+          -77.55
+        ]
+      }
+    },
+    "bcmpoa": {
+      "name": "Blair County MPO (Altoona)",
+      "shortName": "Altoona",
+      "type": "mpo",
+      "center": [
+        -78.3947,
+        40.5087
+      ],
+      "zoom": 10,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Blair"
+      },
+      "btsAcronym": "BCM",
+      "mapBounds": {
+        "sw": [
+          40.25,
+          -78.65
+        ],
+        "ne": [
+          40.75,
+          -78.1
+        ]
+      }
+    },
+    "jampo": {
+      "name": "Johnstown Area MPO",
+      "shortName": "Johnstown Area",
+      "type": "mpo",
+      "center": [
+        -79.6553,
+        40.3234
+      ],
+      "zoom": 10,
+      "counties": [
+        "021",
+        "111"
+      ],
+      "countyNames": {
+        "021": "Cambria",
+        "111": "Somerset"
+      },
+      "btsAcronym": "JAM",
+      "mapBounds": {
+        "sw": [
+          40.1,
+          -79.9
+        ],
+        "ne": [
+          40.55,
+          -79.4
+        ]
+      }
+    },
+    "wampo": {
+      "name": "Williamsport Area MPO",
+      "shortName": "Williamsport Area",
+      "type": "mpo",
+      "center": [
+        -77.0011,
+        41.2412
+      ],
+      "zoom": 10,
+      "counties": [
+        "081"
+      ],
+      "countyNames": {
+        "081": "Lycoming"
+      },
+      "btsAcronym": "WAM",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -77.25
+        ],
+        "ne": [
+          41.45,
+          -76.75
+        ]
+      }
+    },
+    "acmpo": {
+      "name": "Adams County MPO",
+      "shortName": "Adams County",
+      "type": "mpo",
+      "center": [
+        -77.2614,
+        39.871
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Adams"
+      },
+      "btsAcronym": "ACM",
+      "mapBounds": {
+        "sw": [
+          39.65,
+          -77.5
+        ],
+        "ne": [
+          40.1,
+          -77.0
+        ]
+      }
+    },
+    "svampo": {
+      "name": "Shenango Valley Area MPO",
+      "shortName": "Shenango Valley Area",
+      "type": "mpo",
+      "center": [
+        -80.496,
+        41.2282
+      ],
+      "zoom": 10,
+      "counties": [
+        "085"
+      ],
+      "countyNames": {
+        "085": "Mercer"
+      },
+      "btsAcronym": "SVAM",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -80.75
+        ],
+        "ne": [
+          41.45,
+          -80.25
+        ]
+      }
+    },
+    "nepa": {
+      "name": "Northeast PA Alliance (NEPA) MPO",
+      "shortName": "NEPA",
+      "type": "mpo",
+      "center": [
+        -75.8813,
+        41.2461
+      ],
+      "zoom": 10,
+      "counties": [
+        "025",
+        "089",
+        "103",
+        "107",
+        "127"
+      ],
+      "countyNames": {
+        "025": "Carbon",
+        "089": "Monroe",
+        "103": "Pike",
+        "107": "Schuylkill",
+        "127": "Wayne"
+      },
+      "btsAcronym": "NEPA",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -76.15
+        ],
+        "ne": [
+          41.5,
+          -75.6
+        ]
+      }
+    },
+    "southwestern_pennsylvania_commission_mpo": {
+      "name": "Southwestern Pennsylvania Commission",
+      "shortName": "Southwestern Pennsylvania Commission",
+      "type": "mpo",
+      "btsMpoId": "42197400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.530278,
+        40.489778
+      ],
+      "zoom": 10
+    },
+    "erie_mpo": {
+      "name": "Erie MPO",
+      "shortName": "Erie",
+      "type": "mpo",
+      "btsMpoId": "42196406",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.061815,
+        42.074737
+      ],
+      "zoom": 10
+    },
+    "lehigh_valley_transportation_study_mpo": {
+      "name": "Lehigh Valley Transportation Study",
+      "shortName": "Lehigh Valley Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "42196401",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -75.224277,
+        40.737572
+      ],
+      "zoom": 10
+    },
+    "lackawannaluzerne_mpo": {
+      "name": "Lackawanna/Luzerne MPO",
+      "shortName": "Lackawanna/Luzerne",
+      "type": "mpo",
+      "btsMpoId": "42196402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -75.630158,
+        41.246078
+      ],
+      "zoom": 10
+    },
+    "lancaster_county_mpo": {
+      "name": "Lancaster County MPO",
+      "shortName": "Lancaster County",
+      "type": "mpo",
+      "btsMpoId": "42196403",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -76.34022,
+        40.002909
+      ],
+      "zoom": 10
+    },
+    "susquehanna_economic_development_association_council_of_governments_mpo": {
+      "name": "Susquehanna Economic Development Association Council of Governments",
+      "shortName": "Susquehanna Economic Development Association Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "42201312",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.308599,
+        40.88617
+      ],
+      "zoom": 10
+    },
+    "blair_county_planning_commission_mpo": {
+      "name": "Blair County Planning Commission",
+      "shortName": "Blair County Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "42196504",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.323313,
+        40.506926
+      ],
+      "zoom": 10
+    },
+    "franklin_county_mpo": {
+      "name": "Franklin County MPO",
+      "shortName": "Franklin County",
+      "type": "mpo",
+      "btsMpoId": "42201313",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.623317,
+        40.025659
+      ],
+      "zoom": 10
+    },
+    "cambria_county_mpo": {
+      "name": "Cambria County MPO",
+      "shortName": "Cambria County",
+      "type": "mpo",
+      "btsMpoId": "42196503",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.822886,
+        40.332388
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Allegheny",
+    "005": "Armstrong",
+    "007": "Beaver",
+    "009": "Bedford",
+    "011": "Berks",
+    "013": "Blair",
+    "015": "Bradford",
+    "017": "Bucks",
+    "019": "Butler",
+    "021": "Cambria",
+    "023": "Cameron",
+    "025": "Carbon",
+    "027": "Centre",
+    "029": "Chester",
+    "031": "Clarion",
+    "033": "Clearfield",
+    "035": "Clinton",
+    "037": "Columbia",
+    "039": "Crawford",
+    "041": "Cumberland",
+    "043": "Dauphin",
+    "045": "Delaware",
+    "047": "Elk",
+    "049": "Erie",
+    "051": "Fayette",
+    "053": "Forest",
+    "055": "Franklin",
+    "057": "Fulton",
+    "059": "Greene",
+    "061": "Huntingdon",
+    "063": "Indiana",
+    "065": "Jefferson",
+    "067": "Juniata",
+    "069": "Lackawanna",
+    "071": "Lancaster",
+    "073": "Lawrence",
+    "075": "Lebanon",
+    "077": "Lehigh",
+    "079": "Luzerne",
+    "081": "Lycoming",
+    "083": "McKean",
+    "085": "Mercer",
+    "087": "Mifflin",
+    "089": "Monroe",
+    "091": "Montgomery",
+    "093": "Montour",
+    "095": "Northampton",
+    "097": "Northumberland",
+    "099": "Perry",
+    "101": "Philadelphia",
+    "103": "Pike",
+    "105": "Potter",
+    "107": "Schuylkill",
+    "109": "Snyder",
+    "111": "Somerset",
+    "113": "Sullivan",
+    "115": "Susquehanna",
+    "117": "Tioga",
+    "119": "Union",
+    "121": "Venango",
+    "123": "Warren",
+    "125": "Washington",
+    "127": "Wayne",
+    "129": "Westmoreland",
+    "131": "Wyoming",
+    "133": "York"
+  }
+}

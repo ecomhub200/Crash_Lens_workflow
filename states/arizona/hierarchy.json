@@ -1,0 +1,513 @@
+{
+  "state": {
+    "fips": "04",
+    "name": "Arizona",
+    "abbreviation": "AZ",
+    "dot": "ADOT",
+    "dotFullName": "Arizona Department of Transportation",
+    "center": [
+      -111.093731,
+      34.048928
+    ],
+    "zoom": 7,
+    "placesCount": 91
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "az_1": {
+      "name": "Globe District",
+      "shortName": "Globe District",
+      "center": [
+        -110.79,
+        33.39
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "009",
+        "011",
+        "021"
+      ],
+      "countyNames": {
+        "007": "Gila",
+        "009": "Graham",
+        "011": "Greenlee",
+        "021": "Pinal (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          32.6,
+          -111.4
+        ],
+        "ne": [
+          34.1,
+          -110.18
+        ]
+      },
+      "hq": "Globe"
+    },
+    "az_2": {
+      "name": "Tucson District",
+      "shortName": "Tucson District",
+      "center": [
+        -110.5,
+        32.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "019",
+        "023"
+      ],
+      "countyNames": {
+        "003": "Cochise",
+        "019": "Pima",
+        "023": "Santa Cruz"
+      },
+      "mapBounds": {
+        "sw": [
+          31.33,
+          -111.9
+        ],
+        "ne": [
+          32.5,
+          -109.1
+        ]
+      },
+      "hq": "Tucson"
+    },
+    "az_3": {
+      "name": "Safford District",
+      "shortName": "Safford District",
+      "center": [
+        -109.75,
+        32.83
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "011"
+      ],
+      "countyNames": {
+        "009": "Graham",
+        "011": "Greenlee"
+      },
+      "mapBounds": {
+        "sw": [
+          32.4,
+          -110.3
+        ],
+        "ne": [
+          33.25,
+          -109.2
+        ]
+      },
+      "hq": "Safford"
+    },
+    "az_4": {
+      "name": "Holbrook District",
+      "shortName": "Holbrook District",
+      "center": [
+        -110.17,
+        34.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "017"
+      ],
+      "countyNames": {
+        "001": "Apache",
+        "017": "Navajo"
+      },
+      "mapBounds": {
+        "sw": [
+          33.9,
+          -110.75
+        ],
+        "ne": [
+          36.0,
+          -109.05
+        ]
+      },
+      "hq": "Holbrook"
+    },
+    "az_5": {
+      "name": "Flagstaff District",
+      "shortName": "Flagstaff District",
+      "center": [
+        -111.65,
+        35.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "025"
+      ],
+      "countyNames": {
+        "005": "Coconino",
+        "025": "Yavapai (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          34.3,
+          -113.0
+        ],
+        "ne": [
+          36.99,
+          -110.3
+        ]
+      },
+      "hq": "Flagstaff"
+    },
+    "az_6": {
+      "name": "Kingman District",
+      "shortName": "Kingman District",
+      "center": [
+        -114.05,
+        35.19
+      ],
+      "zoom": 8,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Mohave"
+      },
+      "mapBounds": {
+        "sw": [
+          33.7,
+          -114.83
+        ],
+        "ne": [
+          37.0,
+          -113.27
+        ]
+      },
+      "hq": "Kingman"
+    },
+    "az_7": {
+      "name": "Phoenix District",
+      "shortName": "Phoenix District",
+      "center": [
+        -112.07,
+        33.45
+      ],
+      "zoom": 9,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Maricopa"
+      },
+      "mapBounds": {
+        "sw": [
+          33.0,
+          -113.0
+        ],
+        "ne": [
+          33.9,
+          -111.14
+        ]
+      },
+      "hq": "Phoenix"
+    },
+    "az_8": {
+      "name": "Yuma District",
+      "shortName": "Yuma District",
+      "center": [
+        -114.02,
+        32.69
+      ],
+      "zoom": 8,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Yuma"
+      },
+      "mapBounds": {
+        "sw": [
+          32.05,
+          -114.82
+        ],
+        "ne": [
+          33.47,
+          -113.22
+        ]
+      },
+      "hq": "Yuma"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "magmag": {
+      "name": "MAG (Maricopa Association of Governments)",
+      "shortName": "Maricopa Association of Governments",
+      "type": "mpo",
+      "center": [
+        -112.074,
+        33.4484
+      ],
+      "zoom": 9,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Maricopa"
+      },
+      "btsAcronym": "MAG",
+      "mapBounds": {
+        "sw": [
+          33.0,
+          -112.8
+        ],
+        "ne": [
+          33.9,
+          -111.2
+        ]
+      }
+    },
+    "pagpag": {
+      "name": "PAG (Pima Association of Governments)",
+      "shortName": "Pima Association of Governments",
+      "type": "mpo",
+      "center": [
+        -110.9747,
+        32.2226
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Pima"
+      },
+      "btsAcronym": "PAG",
+      "mapBounds": {
+        "sw": [
+          31.9,
+          -111.3
+        ],
+        "ne": [
+          32.5,
+          -110.6
+        ]
+      }
+    },
+    "fmpo": {
+      "name": "Flagstaff MPO",
+      "shortName": "Flagstaff",
+      "type": "mpo",
+      "center": [
+        -111.6513,
+        35.1983
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Coconino"
+      },
+      "btsAcronym": "FM",
+      "mapBounds": {
+        "sw": [
+          34.9,
+          -111.95
+        ],
+        "ne": [
+          35.4,
+          -111.35
+        ]
+      }
+    },
+    "ympo": {
+      "name": "Yuma MPO",
+      "shortName": "Yuma",
+      "type": "mpo",
+      "center": [
+        -112.4685,
+        34.54
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Yuma"
+      },
+      "btsAcronym": "YM",
+      "mapBounds": {
+        "sw": [
+          34.3,
+          -112.8
+        ],
+        "ne": [
+          34.8,
+          -112.1
+        ]
+      }
+    },
+    "cympo": {
+      "name": "Central Yavapai MPO (CYMPO)",
+      "shortName": "CYMPO",
+      "type": "mpo",
+      "center": [
+        -114.6277,
+        32.6927
+      ],
+      "zoom": 10,
+      "counties": [
+        "025"
+      ],
+      "countyNames": {
+        "025": "Yavapai"
+      },
+      "btsAcronym": "CYMPO",
+      "mapBounds": {
+        "sw": [
+          32.4,
+          -114.9
+        ],
+        "ne": [
+          33.0,
+          -114.35
+        ]
+      }
+    },
+    "scmpo": {
+      "name": "Sun Corridor MPO",
+      "shortName": "Sun Corridor",
+      "type": "mpo",
+      "center": [
+        -109.945,
+        31.34
+      ],
+      "zoom": 10,
+      "counties": [
+        "021"
+      ],
+      "countyNames": {
+        "021": "Pinal"
+      },
+      "btsAcronym": "SCM",
+      "mapBounds": {
+        "sw": [
+          31.15,
+          -110.15
+        ],
+        "ne": [
+          31.55,
+          -109.7
+        ]
+      }
+    },
+    "svmpo": {
+      "name": "Sierra Vista MPO",
+      "shortName": "Sierra Vista",
+      "type": "mpo",
+      "center": [
+        -111.76,
+        34.87
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Cochise"
+      },
+      "btsAcronym": "SVM",
+      "mapBounds": {
+        "sw": [
+          34.65,
+          -112.0
+        ],
+        "ne": [
+          35.1,
+          -111.5
+        ]
+      }
+    },
+    "lhmpo": {
+      "name": "Lake Havasu MPO",
+      "shortName": "Lake Havasu",
+      "type": "mpo",
+      "center": [
+        -111.76,
+        32.88
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Mohave"
+      },
+      "btsAcronym": "LHM",
+      "mapBounds": {
+        "sw": [
+          32.6,
+          -112.0
+        ],
+        "ne": [
+          33.15,
+          -111.5
+        ]
+      }
+    },
+    "metroplan_mpo": {
+      "name": "MetroPlan",
+      "shortName": "MetroPlan",
+      "type": "mpo",
+      "btsMpoId": "04199600",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -111.561143,
+        35.17988
+      ],
+      "zoom": 10
+    },
+    "bullhead_city_metropolitan_planning_organization_mpo": {
+      "name": "Bullhead City Metropolitan Planning Organization",
+      "shortName": "Bullhead City",
+      "type": "mpo",
+      "btsMpoId": "04202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -114.589401,
+        35.056471
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Apache",
+    "003": "Cochise",
+    "005": "Coconino",
+    "007": "Gila",
+    "009": "Graham",
+    "011": "Greenlee",
+    "012": "La Paz",
+    "013": "Maricopa",
+    "015": "Mohave",
+    "017": "Navajo",
+    "019": "Pima",
+    "021": "Pinal",
+    "023": "Santa Cruz",
+    "025": "Yavapai",
+    "027": "Yuma"
+  }
+}

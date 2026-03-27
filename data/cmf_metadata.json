@@ -1,0 +1,16 @@
+{
+  "version": "2026-Q1",
+  "updated": "2026-01-06",
+  "source": "FHWA CMF Clearinghouse",
+  "stats": {
+    "totalRaw": 9777,
+    "filtered": 808,
+    "qualityFiltered": 1866,
+    "invalidCMF": 682,
+    "duplicatesRemoved": 6421,
+    "virginiaRelevant": 134,
+    "provenSafetyCountermeasures": 47,
+    "hsmIncluded": 9
+  },
+  "fileSizeBytes": 245302
+}

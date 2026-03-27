@@ -1,0 +1,156 @@
+{
+  "state": {
+    "name": "Delaware",
+    "abbreviation": "DE",
+    "fips": "10",
+    "dotName": "DelDOT",
+    "dotFullName": "Delaware Department of Transportation",
+    "dataPortalUrl": "https://data.delaware.gov",
+    "coordinateBounds": {
+      "latMin": 38.45,
+      "latMax": 39.84,
+      "lonMin": -75.79,
+      "lonMax": -75.05
+    },
+    "dataDir": "DelawareDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Delaware crash data fields (Socrata 827n-m6xc) to CRASH LENS field codes",
+    "_note": "Column names from data.delaware.gov Crash Data dataset. NO crash ID field available \u2014 use row index or composite key. NO route/road name field available.",
+    "ID": "_NO_CRASH_ID_FIELD",
+    "DATE": "crash_datetime",
+    "TIME": "_DERIVED_FROM_DATETIME",
+    "LAT": "latitude",
+    "LON": "longitude",
+    "SEVERITY": "crash_classification_description",
+    "JURISDICTION": "county_name",
+    "ROUTE": "_NOT_IN_DATASET",
+    "COLLISION": "manner_of_impact_description",
+    "WEATHER": "weather_1_description",
+    "LIGHT": "lighting_condition_description",
+    "SURFACE_CONDITION": "road_surface_description",
+    "JUNCTION": "_NOT_IN_DATASET",
+    "HITRUN": "_NOT_IN_DATASET",
+    "PED": "pedestrian_involved",
+    "BIKE": "bicycled_involved"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "text_to_kabco",
+      "source": "crash_classification_description",
+      "_note": "Delaware provides crash_classification_description as text (e.g., 'Fatal Crash', 'Personal Injury Crash', 'Property Damage Crash'). Map to KABCO."
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "crash_datetime"
+    },
+    "ID": {
+      "method": "composite_key",
+      "sources": [
+        "crash_datetime",
+        "latitude",
+        "longitude"
+      ],
+      "_note": "No crash ID field in dataset. Generate composite key from datetime + coordinates."
+    },
+    "NODE": {
+      "method": "not_available",
+      "sources": [],
+      "_note": "No route/road name fields in dataset. Node/intersection identification not possible from this dataset alone."
+    }
+  },
+  "roadSystems": {
+    "_description": "Delaware road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Delaware collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "DelDOT Open Data Portal",
+    "url": "https://data.delaware.gov",
+    "apiUrl": "https://data.delaware.gov/resource/827n-m6xc.json",
+    "fileFormat": "JSON/CSV (Socrata SODA API)",
+    "dataDictionary": "See data.delaware.gov dataset 827n-m6xc metadata. Limited fields: no crash ID, no road/route name.",
+    "resourceId": "827n-m6xc",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 50000,
+      "paramLimit": "$limit",
+      "paramOffset": "$offset"
+    }
+  }
+}

@@ -1,0 +1,951 @@
+{
+  "state": {
+    "fips": "17",
+    "name": "Illinois",
+    "abbreviation": "IL",
+    "dot": "IDOT",
+    "dotFullName": "Illinois Department of Transportation",
+    "center": [
+      -88.986137,
+      40.349457
+    ],
+    "zoom": 7,
+    "placesCount": 1294
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "il_1": {
+      "name": "District 1 (Schaumburg)",
+      "shortName": "District 1",
+      "center": [
+        -87.9,
+        41.85
+      ],
+      "zoom": 9,
+      "counties": [
+        "031",
+        "043",
+        "089",
+        "097",
+        "111",
+        "197"
+      ],
+      "countyNames": {
+        "031": "Cook",
+        "043": "DuPage",
+        "089": "Kane",
+        "097": "Lake",
+        "111": "McHenry",
+        "197": "Will"
+      },
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -88.6
+        ],
+        "ne": [
+          42.5,
+          -87.5
+        ]
+      },
+      "hq": "Schaumburg"
+    },
+    "il_2": {
+      "name": "District 2 (Dixon)",
+      "shortName": "District 2",
+      "center": [
+        -89.5,
+        42.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "011",
+        "015",
+        "037",
+        "085",
+        "099",
+        "103",
+        "141",
+        "155",
+        "177",
+        "195",
+        "201"
+      ],
+      "countyNames": {
+        "007": "Boone",
+        "011": "Bureau",
+        "015": "Carroll",
+        "037": "DeKalb",
+        "085": "Jo Daviess",
+        "099": "LaSalle",
+        "103": "Lee",
+        "141": "Ogle",
+        "155": "Putnam",
+        "177": "Stephenson",
+        "195": "Whiteside",
+        "201": "Winnebago"
+      },
+      "mapBounds": {
+        "sw": [
+          41.2,
+          -90.3
+        ],
+        "ne": [
+          42.5,
+          -88.7
+        ]
+      },
+      "hq": "Dixon"
+    },
+    "il_3": {
+      "name": "District 3 (Ottawa)",
+      "shortName": "District 3",
+      "center": [
+        -88.0,
+        41.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "063",
+        "091",
+        "093",
+        "105",
+        "197"
+      ],
+      "countyNames": {
+        "063": "Grundy",
+        "091": "Kankakee",
+        "093": "Kendall",
+        "105": "Livingston",
+        "197": "Will (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          40.8,
+          -88.6
+        ],
+        "ne": [
+          41.6,
+          -87.4
+        ]
+      },
+      "hq": "Ottawa"
+    },
+    "il_4": {
+      "name": "District 4 (Peoria)",
+      "shortName": "District 4",
+      "center": [
+        -90.0,
+        40.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "057",
+        "071",
+        "073",
+        "095",
+        "123",
+        "109",
+        "131",
+        "143",
+        "175",
+        "179",
+        "187",
+        "203"
+      ],
+      "countyNames": {
+        "057": "Fulton",
+        "071": "Henderson",
+        "073": "Henry",
+        "095": "Knox",
+        "123": "Marshall",
+        "109": "McDonough",
+        "131": "Mercer",
+        "143": "Peoria",
+        "175": "Stark",
+        "179": "Tazewell",
+        "187": "Warren",
+        "203": "Woodford"
+      },
+      "mapBounds": {
+        "sw": [
+          40.1,
+          -91.0
+        ],
+        "ne": [
+          41.5,
+          -89.0
+        ]
+      },
+      "hq": "Peoria"
+    },
+    "il_5": {
+      "name": "District 5 (Paris)",
+      "shortName": "District 5",
+      "center": [
+        -88.2,
+        40.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "019",
+        "023",
+        "029",
+        "035",
+        "039",
+        "041",
+        "045",
+        "053",
+        "075",
+        "105",
+        "113",
+        "115",
+        "139",
+        "147",
+        "173",
+        "183"
+      ],
+      "countyNames": {
+        "019": "Champaign",
+        "023": "Clark",
+        "029": "Coles",
+        "035": "Cumberland",
+        "039": "DeWitt",
+        "041": "Douglas",
+        "045": "Edgar",
+        "053": "Ford",
+        "075": "Iroquois",
+        "105": "Livingston",
+        "113": "McLean",
+        "115": "Macon",
+        "139": "Moultrie",
+        "147": "Piatt",
+        "173": "Shelby",
+        "183": "Vermilion"
+      },
+      "mapBounds": {
+        "sw": [
+          39.4,
+          -89.2
+        ],
+        "ne": [
+          40.8,
+          -87.2
+        ]
+      },
+      "hq": "Paris"
+    },
+    "il_6": {
+      "name": "District 6 (Springfield)",
+      "shortName": "District 6",
+      "center": [
+        -90.0,
+        39.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "009",
+        "017",
+        "021",
+        "061",
+        "067",
+        "107",
+        "117",
+        "125",
+        "129",
+        "135",
+        "137",
+        "149",
+        "167",
+        "169",
+        "171"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "009": "Brown",
+        "017": "Cass",
+        "021": "Christian",
+        "061": "Greene",
+        "067": "Hancock",
+        "107": "Logan",
+        "117": "Macoupin",
+        "125": "Mason",
+        "129": "Menard",
+        "135": "Montgomery",
+        "137": "Morgan",
+        "149": "Pike",
+        "167": "Sangamon",
+        "169": "Schuyler",
+        "171": "Scott"
+      },
+      "mapBounds": {
+        "sw": [
+          39.0,
+          -91.0
+        ],
+        "ne": [
+          40.6,
+          -89.0
+        ]
+      },
+      "hq": "Springfield"
+    },
+    "il_7": {
+      "name": "District 7 (Effingham)",
+      "shortName": "District 7",
+      "center": [
+        -88.0,
+        38.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "025",
+        "033",
+        "047",
+        "049",
+        "051",
+        "079",
+        "101",
+        "121",
+        "159",
+        "185",
+        "191",
+        "193"
+      ],
+      "countyNames": {
+        "025": "Clay",
+        "033": "Crawford",
+        "047": "Edwards",
+        "049": "Effingham",
+        "051": "Fayette",
+        "079": "Jasper",
+        "101": "Lawrence",
+        "121": "Marion",
+        "159": "Richland",
+        "185": "Wabash",
+        "191": "Wayne",
+        "193": "White"
+      },
+      "mapBounds": {
+        "sw": [
+          38.1,
+          -88.8
+        ],
+        "ne": [
+          39.5,
+          -87.2
+        ]
+      },
+      "hq": "Effingham"
+    },
+    "il_8": {
+      "name": "District 8 (Collinsville)",
+      "shortName": "District 8",
+      "center": [
+        -89.8,
+        38.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "013",
+        "027",
+        "083",
+        "119",
+        "133",
+        "157",
+        "163",
+        "189"
+      ],
+      "countyNames": {
+        "005": "Bond",
+        "013": "Calhoun",
+        "027": "Clinton",
+        "083": "Jersey",
+        "119": "Madison",
+        "133": "Monroe",
+        "157": "Randolph",
+        "163": "St. Clair",
+        "189": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          38.0,
+          -90.6
+        ],
+        "ne": [
+          39.1,
+          -89.0
+        ]
+      },
+      "hq": "Collinsville"
+    },
+    "il_9": {
+      "name": "District 9 (Carbondale)",
+      "shortName": "District 9",
+      "center": [
+        -89.0,
+        37.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "055",
+        "059",
+        "065",
+        "069",
+        "077",
+        "081",
+        "087",
+        "127",
+        "145",
+        "151",
+        "153",
+        "165",
+        "181",
+        "199"
+      ],
+      "countyNames": {
+        "003": "Alexander",
+        "055": "Franklin",
+        "059": "Gallatin",
+        "065": "Hamilton",
+        "069": "Hardin",
+        "077": "Jackson",
+        "081": "Jefferson",
+        "087": "Johnson",
+        "127": "Massac",
+        "145": "Perry",
+        "151": "Pope",
+        "153": "Pulaski",
+        "165": "Saline",
+        "181": "Union",
+        "199": "Williamson"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -89.6
+        ],
+        "ne": [
+          38.3,
+          -88.0
+        ]
+      },
+      "hq": "Carbondale"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "cmapcmap": {
+      "name": "CMAP (Chicago Metropolitan Agency for Planning)",
+      "shortName": "Chicago Metropolitan Agency for Planning",
+      "type": "mpo",
+      "center": [
+        -87.6298,
+        41.8781
+      ],
+      "zoom": 9,
+      "counties": [
+        "031",
+        "043",
+        "089",
+        "093",
+        "097",
+        "111",
+        "197"
+      ],
+      "countyNames": {
+        "031": "Cook",
+        "043": "DuPage",
+        "089": "Kane",
+        "093": "Kendall",
+        "097": "Lake",
+        "111": "McHenry",
+        "197": "Will"
+      },
+      "btsAcronym": "CMAP",
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -88.3
+        ],
+        "ne": [
+          42.4,
+          -87.1
+        ]
+      }
+    },
+    "ewgcogsl": {
+      "name": "East-West Gateway COG (St. Louis metro)",
+      "shortName": "St. Louis metro",
+      "type": "mpo",
+      "center": [
+        -89.589,
+        40.6936
+      ],
+      "zoom": 10,
+      "counties": [
+        "119",
+        "163",
+        "133",
+        "083",
+        "027"
+      ],
+      "countyNames": {
+        "119": "Madison",
+        "163": "St. Clair",
+        "133": "Monroe",
+        "083": "Jersey",
+        "027": "Clinton"
+      },
+      "btsAcronym": "EGCLM",
+      "mapBounds": {
+        "sw": [
+          40.45,
+          -89.85
+        ],
+        "ne": [
+          40.9,
+          -89.3
+        ]
+      }
+    },
+    "tcrpcp": {
+      "name": "Tri-County Regional Planning Commission (Peoria)",
+      "shortName": "Peoria",
+      "type": "mpo",
+      "center": [
+        -89.6501,
+        39.7817
+      ],
+      "zoom": 10,
+      "counties": [
+        "143",
+        "179",
+        "203"
+      ],
+      "countyNames": {
+        "143": "Peoria",
+        "179": "Tazewell",
+        "203": "Woodford"
+      },
+      "btsAcronym": "TRPC",
+      "mapBounds": {
+        "sw": [
+          39.55,
+          -89.9
+        ],
+        "ne": [
+          40.0,
+          -89.4
+        ]
+      }
+    },
+    "sats": {
+      "name": "Springfield Area Transportation Study",
+      "shortName": "Springfield Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -88.2434,
+        40.1164
+      ],
+      "zoom": 10,
+      "counties": [
+        "167"
+      ],
+      "countyNames": {
+        "167": "Sangamon"
+      },
+      "btsAcronym": "SATS",
+      "mapBounds": {
+        "sw": [
+          39.9,
+          -88.5
+        ],
+        "ne": [
+          40.35,
+          -87.95
+        ]
+      }
+    },
+    "cuuats": {
+      "name": "Champaign-Urbana Urbanized Area Transportation Study",
+      "shortName": "Champaign-Urbana Urbanized Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -89.094,
+        42.2711
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Champaign"
+      },
+      "btsAcronym": "CUATS",
+      "mapBounds": {
+        "sw": [
+          42.05,
+          -89.35
+        ],
+        "ne": [
+          42.5,
+          -88.8
+        ]
+      }
+    },
+    "bsrcqc": {
+      "name": "Bi-State Regional Commission (Quad Cities)",
+      "shortName": "Quad Cities",
+      "type": "mpo",
+      "center": [
+        -90.5776,
+        41.5236
+      ],
+      "zoom": 10,
+      "counties": [
+        "161",
+        "073"
+      ],
+      "countyNames": {
+        "161": "Rock Island",
+        "073": "Henry"
+      },
+      "btsAcronym": "BRCC",
+      "mapBounds": {
+        "sw": [
+          41.3,
+          -90.85
+        ],
+        "ne": [
+          41.75,
+          -90.3
+        ]
+      }
+    },
+    "duats": {
+      "name": "Decatur Urbanized Area Transportation Study",
+      "shortName": "Decatur Urbanized Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -88.9434,
+        39.8017
+      ],
+      "zoom": 10,
+      "counties": [
+        "115"
+      ],
+      "countyNames": {
+        "115": "Macon"
+      },
+      "btsAcronym": "DUATS",
+      "mapBounds": {
+        "sw": [
+          39.6,
+          -89.2
+        ],
+        "ne": [
+          40.0,
+          -88.7
+        ]
+      }
+    },
+    "bnats": {
+      "name": "Bloomington-Normal Area Transportation Study",
+      "shortName": "Bloomington-Normal Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -89.98,
+        38.52
+      ],
+      "zoom": 10,
+      "counties": [
+        "113"
+      ],
+      "countyNames": {
+        "113": "McLean"
+      },
+      "btsAcronym": "BATS",
+      "mapBounds": {
+        "sw": [
+          38.3,
+          -90.25
+        ],
+        "ne": [
+          38.75,
+          -89.7
+        ]
+      }
+    },
+    "rmpo": {
+      "name": "Rockford MPO",
+      "shortName": "Rockford",
+      "type": "mpo",
+      "center": [
+        -88.9923,
+        40.4864
+      ],
+      "zoom": 10,
+      "counties": [
+        "201",
+        "007"
+      ],
+      "countyNames": {
+        "201": "Winnebago",
+        "007": "Boone"
+      },
+      "btsAcronym": "RM",
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -89.25
+        ],
+        "ne": [
+          40.7,
+          -88.75
+        ]
+      }
+    },
+    "kats": {
+      "name": "Kankakee Area Transportation Study",
+      "shortName": "Kankakee Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -90.1994,
+        38.627
+      ],
+      "zoom": 9,
+      "counties": [
+        "091"
+      ],
+      "countyNames": {
+        "091": "Kankakee"
+      },
+      "btsAcronym": "KATS",
+      "mapBounds": {
+        "sw": [
+          38.3,
+          -90.6
+        ],
+        "ne": [
+          38.9,
+          -89.8
+        ]
+      }
+    },
+    "simpoc": {
+      "name": "Southern Illinois MPO (Carbondale)",
+      "shortName": "Carbondale",
+      "type": "mpo",
+      "center": [
+        -89.2167,
+        37.7273
+      ],
+      "zoom": 10,
+      "counties": [
+        "077",
+        "199"
+      ],
+      "countyNames": {
+        "077": "Jackson",
+        "199": "Williamson"
+      },
+      "btsAcronym": "SIM",
+      "mapBounds": {
+        "sw": [
+          37.5,
+          -89.5
+        ],
+        "ne": [
+          37.95,
+          -88.95
+        ]
+      }
+    },
+    "region_one_planning_council_r1pc_mpo": {
+      "name": "Region One Planning Council (R1PC)",
+      "shortName": "Region One Planning Council (R1PC)",
+      "type": "mpo",
+      "btsMpoId": "17196401",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -89.077164,
+        42.247348
+      ],
+      "zoom": 10
+    },
+    "dekalb_sycamore_area_transportation_study_mpo": {
+      "name": "DeKalb Sycamore Area Transportation Study",
+      "shortName": "DeKalb Sycamore Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "17200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.709847,
+        41.96466
+      ],
+      "zoom": 10
+    },
+    "mclean_county_regional_planning_commission_mpo": {
+      "name": "McLean County Regional Planning Commission",
+      "shortName": "McLean County Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "17196700",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.968583,
+        40.478461
+      ],
+      "zoom": 10
+    },
+    "champaign_county_regional_planning_commission_mpo": {
+      "name": "Champaign County Regional Planning Commission",
+      "shortName": "Champaign County Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "17196402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.303151,
+        40.149609
+      ],
+      "zoom": 10
+    },
+    "kankakee_county_regional_planning_commission_mpo": {
+      "name": "Kankakee County Regional Planning Commission",
+      "shortName": "Kankakee County Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "17198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.828694,
+        41.14214
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Alexander",
+    "005": "Bond",
+    "007": "Boone",
+    "009": "Brown",
+    "011": "Bureau",
+    "013": "Calhoun",
+    "015": "Carroll",
+    "017": "Cass",
+    "019": "Champaign",
+    "021": "Christian",
+    "023": "Clark",
+    "025": "Clay",
+    "027": "Clinton",
+    "029": "Coles",
+    "031": "Cook",
+    "033": "Crawford",
+    "035": "Cumberland",
+    "037": "DeKalb",
+    "039": "DeWitt",
+    "041": "Douglas",
+    "043": "DuPage",
+    "045": "Edgar",
+    "047": "Edwards",
+    "049": "Effingham",
+    "051": "Fayette",
+    "053": "Ford",
+    "055": "Franklin",
+    "057": "Fulton",
+    "059": "Gallatin",
+    "061": "Greene",
+    "063": "Grundy",
+    "065": "Hamilton",
+    "067": "Hancock",
+    "069": "Hardin",
+    "071": "Henderson",
+    "073": "Henry",
+    "075": "Iroquois",
+    "077": "Jackson",
+    "079": "Jasper",
+    "081": "Jefferson",
+    "083": "Jersey",
+    "085": "Jo Daviess",
+    "087": "Johnson",
+    "089": "Kane",
+    "091": "Kankakee",
+    "093": "Kendall",
+    "095": "Knox",
+    "097": "Lake",
+    "099": "LaSalle",
+    "101": "Lawrence",
+    "103": "Lee",
+    "105": "Livingston",
+    "107": "Logan",
+    "109": "McDonough",
+    "111": "McHenry",
+    "113": "McLean",
+    "115": "Macon",
+    "117": "Macoupin",
+    "119": "Madison",
+    "121": "Marion",
+    "123": "Marshall",
+    "125": "Mason",
+    "127": "Massac",
+    "129": "Menard",
+    "131": "Mercer",
+    "133": "Monroe",
+    "135": "Montgomery",
+    "137": "Morgan",
+    "139": "Moultrie",
+    "141": "Ogle",
+    "143": "Peoria",
+    "145": "Perry",
+    "147": "Piatt",
+    "149": "Pike",
+    "151": "Pope",
+    "153": "Pulaski",
+    "155": "Putnam",
+    "157": "Randolph",
+    "159": "Richland",
+    "161": "Rock Island",
+    "163": "St. Clair",
+    "165": "Saline",
+    "167": "Sangamon",
+    "169": "Schuyler",
+    "171": "Scott",
+    "173": "Shelby",
+    "175": "Stark",
+    "177": "Stephenson",
+    "179": "Tazewell",
+    "181": "Union",
+    "183": "Vermilion",
+    "185": "Wabash",
+    "187": "Warren",
+    "189": "Washington",
+    "191": "Wayne",
+    "193": "White",
+    "195": "Whiteside",
+    "197": "Will",
+    "199": "Williamson",
+    "201": "Winnebago",
+    "203": "Woodford"
+  }
+}

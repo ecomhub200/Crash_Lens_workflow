@@ -1,0 +1,1080 @@
+{
+  "state": {
+    "fips": "51",
+    "name": "Virginia",
+    "abbreviation": "VA",
+    "dot": "VDOT",
+    "dotFullName": "Virginia Department of Transportation",
+    "center": [
+      -79.45,
+      37.55
+    ],
+    "zoom": 7,
+    "bbox": [
+      -83.68,
+      36.54,
+      -75.24,
+      39.47
+    ],
+    "placesCount": 227
+  },
+  "regionType": {
+    "label": "Construction District",
+    "labelPlural": "Construction Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "bristol": {
+      "name": "Bristol District",
+      "shortName": "Bristol",
+      "center": [
+        -81.8,
+        36.85
+      ],
+      "zoom": 9,
+      "counties": [
+        "027",
+        "051",
+        "105",
+        "167",
+        "169",
+        "185",
+        "191",
+        "195",
+        "520",
+        "640",
+        "720"
+      ],
+      "countyNames": {
+        "027": "Buchanan",
+        "051": "Dickenson",
+        "105": "Lee",
+        "167": "Russell",
+        "169": "Scott",
+        "185": "Tazewell",
+        "191": "Washington",
+        "195": "Wise",
+        "520": "Bristol City",
+        "640": "Galax City",
+        "720": "Norton City"
+      },
+      "keyCities": [
+        "Bristol",
+        "Abingdon",
+        "Norton"
+      ],
+      "keyCorridors": [
+        "I-81",
+        "US-19",
+        "US-23",
+        "US-58"
+      ]
+    },
+    "salem": {
+      "name": "Salem District",
+      "shortName": "Salem",
+      "center": [
+        -80.1,
+        37.25
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "021",
+        "023",
+        "045",
+        "063",
+        "067",
+        "071",
+        "121",
+        "155",
+        "161",
+        "197",
+        "580",
+        "750",
+        "770"
+      ],
+      "countyNames": {
+        "005": "Alleghany",
+        "021": "Bland",
+        "023": "Botetourt",
+        "045": "Craig",
+        "063": "Floyd",
+        "067": "Franklin",
+        "071": "Giles",
+        "121": "Montgomery",
+        "155": "Pulaski",
+        "161": "Roanoke",
+        "197": "Wythe",
+        "580": "Covington City",
+        "750": "Radford City",
+        "770": "Roanoke City"
+      },
+      "keyCities": [
+        "Roanoke",
+        "Salem",
+        "Blacksburg",
+        "Radford"
+      ],
+      "keyCorridors": [
+        "I-81",
+        "I-581",
+        "US-460",
+        "US-220"
+      ]
+    },
+    "lynchburg": {
+      "name": "Lynchburg District",
+      "shortName": "Lynchburg",
+      "center": [
+        -79.2,
+        37.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "009",
+        "011",
+        "019",
+        "029",
+        "031",
+        "053",
+        "061",
+        "083",
+        "143",
+        "163",
+        "515",
+        "530",
+        "680"
+      ],
+      "countyNames": {
+        "009": "Amherst",
+        "011": "Appomattox",
+        "019": "Bedford",
+        "029": "Buckingham",
+        "031": "Campbell",
+        "053": "Dinwiddie",
+        "061": "Fauquier",
+        "083": "Halifax",
+        "143": "Pittsylvania",
+        "163": "Rockbridge",
+        "515": "Bedford City",
+        "530": "Buena Vista City",
+        "680": "Lynchburg City"
+      },
+      "keyCities": [
+        "Lynchburg",
+        "Bedford",
+        "Lexington"
+      ],
+      "keyCorridors": [
+        "US-29",
+        "US-460",
+        "US-501"
+      ]
+    },
+    "richmond": {
+      "name": "Richmond District",
+      "shortName": "Richmond",
+      "center": [
+        -77.8,
+        37.55
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "025",
+        "033",
+        "036",
+        "037",
+        "041",
+        "049",
+        "075",
+        "085",
+        "087",
+        "095",
+        "101",
+        "109",
+        "111",
+        "127",
+        "145",
+        "149",
+        "183",
+        "570",
+        "670",
+        "730",
+        "760"
+      ],
+      "countyNames": {
+        "007": "Amelia",
+        "025": "Brunswick",
+        "033": "Caroline",
+        "036": "Charles City",
+        "037": "Charlotte",
+        "041": "Chesterfield",
+        "049": "Cumberland",
+        "075": "Goochland",
+        "085": "Hanover",
+        "087": "Henrico",
+        "095": "James City",
+        "101": "King William",
+        "109": "Louisa",
+        "111": "Lunenburg",
+        "127": "Mecklenburg",
+        "145": "Powhatan",
+        "149": "Prince George",
+        "183": "Sussex",
+        "570": "Colonial Heights City",
+        "670": "Hopewell City",
+        "730": "Petersburg City",
+        "760": "Richmond City"
+      },
+      "keyCities": [
+        "Richmond",
+        "Petersburg",
+        "Williamsburg"
+      ],
+      "keyCorridors": [
+        "I-95",
+        "I-64",
+        "I-295",
+        "US-1",
+        "US-360"
+      ]
+    },
+    "hampton_roads": {
+      "name": "Hampton Roads District",
+      "shortName": "Hampton Roads",
+      "center": [
+        -76.35,
+        36.88
+      ],
+      "zoom": 9,
+      "counties": [
+        "073",
+        "093",
+        "115",
+        "175",
+        "181",
+        "199",
+        "550",
+        "650",
+        "700",
+        "710",
+        "735",
+        "740",
+        "800",
+        "810",
+        "830"
+      ],
+      "countyNames": {
+        "073": "Gloucester",
+        "093": "Isle of Wight",
+        "115": "Mathews",
+        "175": "Southampton",
+        "181": "Surry",
+        "199": "York",
+        "550": "Chesapeake City",
+        "650": "Hampton City",
+        "700": "Newport News City",
+        "710": "Norfolk City",
+        "735": "Poquoson City",
+        "740": "Portsmouth City",
+        "800": "Suffolk City",
+        "810": "Virginia Beach City",
+        "830": "Williamsburg City"
+      },
+      "keyCities": [
+        "Norfolk",
+        "Virginia Beach",
+        "Newport News",
+        "Hampton",
+        "Chesapeake"
+      ],
+      "keyCorridors": [
+        "I-64",
+        "I-264",
+        "I-664",
+        "US-13",
+        "US-17",
+        "US-58"
+      ]
+    },
+    "fredericksburg": {
+      "name": "Fredericksburg District",
+      "shortName": "Fredericksburg",
+      "center": [
+        -77.35,
+        38.25
+      ],
+      "zoom": 9,
+      "counties": [
+        "057",
+        "099",
+        "103",
+        "133",
+        "153",
+        "159",
+        "177",
+        "179",
+        "630"
+      ],
+      "countyNames": {
+        "057": "Essex",
+        "099": "King George",
+        "103": "Lancaster",
+        "133": "Northumberland",
+        "153": "Prince William",
+        "159": "Richmond County",
+        "177": "Spotsylvania",
+        "179": "Stafford",
+        "630": "Fredericksburg City"
+      },
+      "keyCities": [
+        "Fredericksburg",
+        "Stafford",
+        "Woodbridge"
+      ],
+      "keyCorridors": [
+        "I-95",
+        "US-1",
+        "US-17",
+        "US-301"
+      ]
+    },
+    "culpeper": {
+      "name": "Culpeper District",
+      "shortName": "Culpeper",
+      "center": [
+        -78.2,
+        38.5
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "015",
+        "043",
+        "047",
+        "061",
+        "079",
+        "113",
+        "119",
+        "125",
+        "137",
+        "139",
+        "141",
+        "157"
+      ],
+      "countyNames": {
+        "003": "Albemarle",
+        "015": "Augusta",
+        "043": "Clarke",
+        "047": "Culpeper",
+        "061": "Fauquier",
+        "079": "Greene",
+        "113": "Madison",
+        "119": "Middlesex",
+        "125": "Nelson",
+        "137": "Orange",
+        "139": "Page",
+        "141": "Patrick",
+        "157": "Rappahannock"
+      },
+      "keyCities": [
+        "Charlottesville",
+        "Culpeper",
+        "Staunton",
+        "Waynesboro"
+      ],
+      "keyCorridors": [
+        "I-64",
+        "US-29",
+        "US-15",
+        "US-33",
+        "US-250"
+      ]
+    },
+    "staunton": {
+      "name": "Staunton District",
+      "shortName": "Staunton",
+      "center": [
+        -79.7,
+        38.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "069",
+        "091",
+        "163",
+        "165",
+        "171",
+        "173",
+        "660",
+        "790",
+        "820"
+      ],
+      "countyNames": {
+        "017": "Bath",
+        "069": "Frederick",
+        "091": "Highland",
+        "163": "Rockbridge",
+        "165": "Rockingham",
+        "171": "Shenandoah",
+        "173": "Smyth",
+        "660": "Harrisonburg City",
+        "790": "Staunton City",
+        "820": "Waynesboro City"
+      },
+      "keyCities": [
+        "Staunton",
+        "Harrisonburg",
+        "Winchester",
+        "Lexington"
+      ],
+      "keyCorridors": [
+        "I-81",
+        "I-64",
+        "US-11",
+        "US-33",
+        "US-250"
+      ]
+    },
+    "nova": {
+      "name": "Northern Virginia District",
+      "shortName": "NOVA",
+      "center": [
+        -77.35,
+        38.85
+      ],
+      "zoom": 10,
+      "counties": [
+        "013",
+        "043",
+        "059",
+        "107",
+        "153",
+        "510",
+        "600",
+        "610",
+        "683",
+        "685"
+      ],
+      "countyNames": {
+        "013": "Arlington",
+        "043": "Clarke",
+        "059": "Fairfax",
+        "107": "Loudoun",
+        "153": "Prince William",
+        "510": "Alexandria City",
+        "600": "Fairfax City",
+        "610": "Falls Church City",
+        "683": "Manassas City",
+        "685": "Manassas Park City"
+      },
+      "keyCities": [
+        "Arlington",
+        "Alexandria",
+        "Fairfax",
+        "Tysons",
+        "Reston",
+        "Manassas"
+      ],
+      "keyCorridors": [
+        "I-95",
+        "I-66",
+        "I-495",
+        "I-395",
+        "US-50",
+        "US-29"
+      ]
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "hrtpo": {
+      "name": "Hampton Roads Transportation Planning Organization",
+      "shortName": "HRTPO",
+      "type": "mpo",
+      "btsAcronym": "HRTPO",
+      "btsMpoId": "VA-125",
+      "population": 1840000,
+      "center": [
+        -76.28,
+        36.85
+      ],
+      "zoom": 10,
+      "counties": [
+        "073",
+        "093",
+        "095",
+        "115",
+        "175",
+        "181",
+        "199",
+        "550",
+        "650",
+        "700",
+        "710",
+        "735",
+        "740",
+        "800",
+        "810",
+        "830"
+      ],
+      "countyNames": {
+        "073": "Gloucester",
+        "093": "Isle of Wight",
+        "095": "James City",
+        "115": "Mathews",
+        "175": "Southampton",
+        "181": "Surry",
+        "199": "York",
+        "550": "Chesapeake",
+        "650": "Hampton",
+        "700": "Newport News",
+        "710": "Norfolk",
+        "735": "Poquoson",
+        "740": "Portsmouth",
+        "800": "Suffolk",
+        "810": "Virginia Beach",
+        "830": "Williamsburg"
+      },
+      "parentRegion": "hampton_roads",
+      "website": "https://www.hrtpo.org"
+    },
+    "nvta": {
+      "name": "Northern Virginia Transportation Authority",
+      "shortName": "NVTA",
+      "type": "mpo",
+      "btsAcronym": "NVTC",
+      "btsMpoId": "VA-150",
+      "population": 2600000,
+      "center": [
+        -77.35,
+        38.85
+      ],
+      "zoom": 10,
+      "counties": [
+        "013",
+        "059",
+        "107",
+        "153",
+        "510",
+        "600",
+        "610",
+        "683",
+        "685"
+      ],
+      "countyNames": {
+        "013": "Arlington",
+        "059": "Fairfax",
+        "107": "Loudoun",
+        "153": "Prince William",
+        "510": "Alexandria",
+        "600": "Fairfax City",
+        "610": "Falls Church",
+        "683": "Manassas",
+        "685": "Manassas Park"
+      },
+      "parentRegion": "nova",
+      "website": "https://thenovaauthority.org"
+    },
+    "rvarc": {
+      "name": "Richmond Area MPO / RVARC",
+      "shortName": "RVARC",
+      "type": "mpo",
+      "btsAcronym": "RRTPO",
+      "btsMpoId": "VA-160",
+      "population": 1310000,
+      "center": [
+        -77.45,
+        37.55
+      ],
+      "zoom": 10,
+      "counties": [
+        "036",
+        "041",
+        "075",
+        "085",
+        "087",
+        "127",
+        "145",
+        "570",
+        "670",
+        "730",
+        "760"
+      ],
+      "countyNames": {
+        "036": "Charles City",
+        "041": "Chesterfield",
+        "075": "Goochland",
+        "085": "Hanover",
+        "087": "Henrico",
+        "127": "New Kent",
+        "145": "Powhatan",
+        "570": "Colonial Heights",
+        "670": "Hopewell",
+        "730": "Petersburg",
+        "760": "Richmond"
+      },
+      "parentRegion": "richmond",
+      "website": "https://planrva.org"
+    },
+    "fampo": {
+      "name": "Fredericksburg Area MPO",
+      "shortName": "FAMPO",
+      "type": "mpo",
+      "btsAcronym": "FAMPO",
+      "btsMpoId": "VA-115",
+      "population": 380000,
+      "center": [
+        -77.46,
+        38.3
+      ],
+      "zoom": 11,
+      "counties": [
+        "177",
+        "179",
+        "630"
+      ],
+      "countyNames": {
+        "177": "Spotsylvania",
+        "179": "Stafford",
+        "630": "Fredericksburg"
+      },
+      "parentRegion": "fredericksburg",
+      "website": "https://fampo.gwregion.org"
+    },
+    "campo": {
+      "name": "Charlottesville-Albemarle MPO",
+      "shortName": "CAMPO",
+      "type": "mpo",
+      "btsAcronym": "CAMPO",
+      "btsMpoId": "VA-105",
+      "population": 220000,
+      "center": [
+        -78.48,
+        38.03
+      ],
+      "zoom": 11,
+      "counties": [
+        "003",
+        "540"
+      ],
+      "countyNames": {
+        "003": "Albemarle",
+        "540": "Charlottesville"
+      },
+      "parentRegion": "culpeper",
+      "website": "https://tjpdc.org"
+    },
+    "rvampo": {
+      "name": "Roanoke Valley-Alleghany MPO",
+      "shortName": "RVAMPO",
+      "type": "mpo",
+      "btsAcronym": "RVTPO",
+      "btsMpoId": "VA-165",
+      "population": 310000,
+      "center": [
+        -79.95,
+        37.27
+      ],
+      "zoom": 11,
+      "counties": [
+        "023",
+        "161",
+        "580",
+        "770"
+      ],
+      "countyNames": {
+        "023": "Botetourt",
+        "161": "Roanoke County",
+        "580": "Covington",
+        "770": "Roanoke City"
+      },
+      "parentRegion": "salem",
+      "website": "https://rfrec.com"
+    },
+    "sawmpo": {
+      "name": "Staunton-Augusta-Waynesboro MPO",
+      "shortName": "SAWMPO",
+      "type": "mpo",
+      "btsAcronym": "SAWMPO",
+      "btsMpoId": "VA-170",
+      "population": 120000,
+      "center": [
+        -79.07,
+        38.15
+      ],
+      "zoom": 11,
+      "counties": [
+        "015",
+        "790",
+        "820"
+      ],
+      "countyNames": {
+        "015": "Augusta",
+        "790": "Staunton",
+        "820": "Waynesboro"
+      },
+      "parentRegion": "staunton",
+      "website": "https://www.sawmpo.org"
+    },
+    "wvmpo": {
+      "name": "Winchester-Frederick MPO",
+      "shortName": "WinFredMPO",
+      "type": "mpo",
+      "btsAcronym": "WFCMPO",
+      "btsMpoId": "VA-180",
+      "population": 140000,
+      "center": [
+        -78.17,
+        39.18
+      ],
+      "zoom": 11,
+      "counties": [
+        "069",
+        "840"
+      ],
+      "countyNames": {
+        "069": "Frederick",
+        "840": "Winchester"
+      },
+      "parentRegion": "staunton",
+      "website": "https://www.winfrednrcmpo.org"
+    },
+    "danville_mpo": {
+      "name": "Danville MPO",
+      "shortName": "Danville",
+      "type": "mpo",
+      "btsMpoId": "51198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.42045,
+        36.64517
+      ],
+      "zoom": 10
+    },
+    "central_virginia_transportation_planning_organization_mpo": {
+      "name": "Central Virginia Transportation Planning Organization",
+      "shortName": "Central Virginia Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "51197900",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.174121,
+        37.447864
+      ],
+      "zoom": 10
+    },
+    "tri_cities_area_mpo": {
+      "name": "Tri Cities Area MPO",
+      "shortName": "Tri Cities",
+      "type": "mpo",
+      "btsMpoId": "51197403",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.415835,
+        37.278335
+      ],
+      "zoom": 10
+    },
+    "new_river_valley_mpo": {
+      "name": "New River Valley MPO",
+      "shortName": "New River Valley",
+      "type": "mpo",
+      "btsMpoId": "51200301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.460447,
+        37.160032
+      ],
+      "zoom": 10
+    },
+    "roanoke_valley_mpo": {
+      "name": "Roanoke Valley MPO",
+      "shortName": "Roanoke Valley",
+      "type": "mpo",
+      "btsMpoId": "51197402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -79.978857,
+        37.301217
+      ],
+      "zoom": 10
+    },
+    "harrisonburg_rockingham_mpo": {
+      "name": "Harrisonburg-Rockingham MPO",
+      "shortName": "Harrisonburg-Rockingham",
+      "type": "mpo",
+      "btsMpoId": "51200303",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.888877,
+        38.436826
+      ],
+      "zoom": 10
+    },
+    "winchester_frederick_county_mpo": {
+      "name": "Winchester-Frederick County MPO",
+      "shortName": "Winchester-Frederick County",
+      "type": "mpo",
+      "btsMpoId": "51200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.153633,
+        39.173934
+      ],
+      "zoom": 10
+    }
+  },
+  "corridors": {
+    "i95": {
+      "name": "I-95 Corridor",
+      "routeId": "I-95",
+      "type": "interstate",
+      "direction": "north-south",
+      "counties": [
+        "025",
+        "053",
+        "149",
+        "041",
+        "087",
+        "085",
+        "033",
+        "177",
+        "179",
+        "153"
+      ],
+      "regions": [
+        "richmond",
+        "fredericksburg",
+        "nova"
+      ],
+      "description": "Primary north-south interstate through eastern Virginia"
+    },
+    "i64": {
+      "name": "I-64 Corridor",
+      "routeId": "I-64",
+      "type": "interstate",
+      "direction": "east-west",
+      "counties": [
+        "199",
+        "095",
+        "700",
+        "650",
+        "810",
+        "710",
+        "740",
+        "800",
+        "087",
+        "075",
+        "003",
+        "015",
+        "163"
+      ],
+      "regions": [
+        "hampton_roads",
+        "richmond",
+        "culpeper",
+        "staunton"
+      ],
+      "description": "East-west from Hampton Roads through Charlottesville to Staunton"
+    },
+    "i81": {
+      "name": "I-81 Corridor",
+      "routeId": "I-81",
+      "type": "interstate",
+      "direction": "north-south",
+      "counties": [
+        "520",
+        "191",
+        "197",
+        "155",
+        "121",
+        "161",
+        "163",
+        "015",
+        "165",
+        "171",
+        "069"
+      ],
+      "regions": [
+        "bristol",
+        "salem",
+        "staunton"
+      ],
+      "description": "North-south through Shenandoah Valley"
+    },
+    "i66": {
+      "name": "I-66 Corridor",
+      "routeId": "I-66",
+      "type": "interstate",
+      "direction": "east-west",
+      "counties": [
+        "153",
+        "061",
+        "013",
+        "059"
+      ],
+      "regions": [
+        "nova",
+        "culpeper"
+      ],
+      "description": "East-west through Northern Virginia to I-81"
+    }
+  },
+  "allCounties": {
+    "001": "Accomack",
+    "003": "Albemarle",
+    "005": "Alleghany",
+    "007": "Amelia",
+    "009": "Amherst",
+    "011": "Appomattox",
+    "013": "Arlington",
+    "015": "Augusta",
+    "017": "Bath",
+    "019": "Bedford",
+    "021": "Bland",
+    "023": "Botetourt",
+    "025": "Brunswick",
+    "027": "Buchanan",
+    "029": "Buckingham",
+    "031": "Campbell",
+    "033": "Caroline",
+    "035": "Carroll",
+    "036": "Charles City",
+    "037": "Charlotte",
+    "041": "Chesterfield",
+    "043": "Clarke",
+    "045": "Craig",
+    "047": "Culpeper",
+    "049": "Cumberland",
+    "051": "Dickenson",
+    "053": "Dinwiddie",
+    "057": "Essex",
+    "059": "Fairfax",
+    "061": "Fauquier",
+    "063": "Floyd",
+    "065": "Fluvanna",
+    "067": "Franklin",
+    "069": "Frederick",
+    "071": "Giles",
+    "073": "Gloucester",
+    "075": "Goochland",
+    "077": "Grayson",
+    "079": "Greene",
+    "081": "Greensville",
+    "083": "Halifax",
+    "085": "Hanover",
+    "087": "Henrico",
+    "089": "Henry",
+    "091": "Highland",
+    "093": "Isle of Wight",
+    "095": "James City",
+    "097": "King and Queen",
+    "099": "King George",
+    "101": "King William",
+    "103": "Lancaster",
+    "105": "Lee",
+    "107": "Loudoun",
+    "109": "Louisa",
+    "111": "Lunenburg",
+    "113": "Madison",
+    "115": "Mathews",
+    "117": "Mecklenburg",
+    "119": "Middlesex",
+    "121": "Montgomery",
+    "125": "Nelson",
+    "127": "New Kent",
+    "131": "Northampton",
+    "133": "Northumberland",
+    "135": "Nottoway",
+    "137": "Orange",
+    "139": "Page",
+    "141": "Patrick",
+    "143": "Pittsylvania",
+    "145": "Powhatan",
+    "147": "Prince Edward",
+    "149": "Prince George",
+    "153": "Prince William",
+    "155": "Pulaski",
+    "157": "Rappahannock",
+    "159": "Richmond County",
+    "161": "Roanoke",
+    "163": "Rockbridge",
+    "165": "Rockingham",
+    "167": "Russell",
+    "169": "Scott",
+    "171": "Shenandoah",
+    "173": "Smyth",
+    "175": "Southampton",
+    "177": "Spotsylvania",
+    "179": "Stafford",
+    "181": "Surry",
+    "183": "Sussex",
+    "185": "Tazewell",
+    "187": "Warren",
+    "191": "Washington",
+    "193": "Westmoreland",
+    "195": "Wise",
+    "197": "Wythe",
+    "199": "York",
+    "510": "Alexandria City",
+    "515": "Bedford City",
+    "520": "Bristol City",
+    "530": "Buena Vista City",
+    "540": "Charlottesville City",
+    "550": "Chesapeake City",
+    "570": "Colonial Heights City",
+    "580": "Covington City",
+    "590": "Danville City",
+    "595": "Emporia",
+    "600": "Fairfax City",
+    "610": "Falls Church City",
+    "620": "Franklin City",
+    "630": "Fredericksburg City",
+    "640": "Galax City",
+    "650": "Hampton City",
+    "660": "Harrisonburg City",
+    "670": "Hopewell City",
+    "678": "Lexington City",
+    "680": "Lynchburg City",
+    "683": "Manassas City",
+    "685": "Manassas Park City",
+    "690": "Martinsville City",
+    "700": "Newport News City",
+    "710": "Norfolk City",
+    "720": "Norton City",
+    "730": "Petersburg City",
+    "735": "Poquoson City",
+    "740": "Portsmouth City",
+    "750": "Radford City",
+    "760": "Richmond City",
+    "770": "Roanoke City",
+    "775": "Salem City",
+    "790": "Staunton City",
+    "800": "Suffolk City",
+    "810": "Virginia Beach City",
+    "820": "Waynesboro City",
+    "830": "Williamsburg City",
+    "840": "Winchester City"
+  }
+}

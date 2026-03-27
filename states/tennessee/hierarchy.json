@@ -1,0 +1,736 @@
+{
+  "state": {
+    "fips": "47",
+    "name": "Tennessee",
+    "abbreviation": "TN",
+    "dot": "TDOT",
+    "dotFullName": "Tennessee Department of Transportation",
+    "center": [
+      -86.692345,
+      35.747845
+    ],
+    "zoom": 7,
+    "placesCount": 344
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "tn_1": {
+      "name": "Region 1 (Knoxville)",
+      "shortName": "Region 1",
+      "center": [
+        -84.0,
+        36.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "009",
+        "013",
+        "025",
+        "029",
+        "057",
+        "063",
+        "089",
+        "093",
+        "105",
+        "123",
+        "129",
+        "145",
+        "151",
+        "155",
+        "173"
+      ],
+      "countyNames": {
+        "001": "Anderson",
+        "009": "Blount",
+        "013": "Campbell",
+        "025": "Claiborne",
+        "029": "Cocke",
+        "057": "Grainger",
+        "063": "Hamblen",
+        "089": "Jefferson",
+        "093": "Knox",
+        "105": "Loudon",
+        "123": "Monroe",
+        "129": "Morgan",
+        "145": "Roane",
+        "151": "Scott",
+        "155": "Sevier",
+        "173": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -85.0
+        ],
+        "ne": [
+          36.6,
+          -83.0
+        ]
+      },
+      "hq": "Knoxville"
+    },
+    "tn_2": {
+      "name": "Region 2 (Chattanooga)",
+      "shortName": "Region 2",
+      "center": [
+        -85.3,
+        35.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "011",
+        "035",
+        "049",
+        "065",
+        "115",
+        "107",
+        "121",
+        "133",
+        "137",
+        "139",
+        "141",
+        "143",
+        "153",
+        "175",
+        "177",
+        "185"
+      ],
+      "countyNames": {
+        "007": "Bledsoe",
+        "011": "Bradley",
+        "035": "Cumberland",
+        "049": "Fentress",
+        "065": "Hamilton",
+        "115": "Marion",
+        "107": "McMinn",
+        "121": "Meigs",
+        "133": "Overton",
+        "137": "Pickett",
+        "139": "Polk",
+        "141": "Putnam",
+        "143": "Rhea",
+        "153": "Sequatchie",
+        "175": "Van Buren",
+        "177": "Warren",
+        "185": "White"
+      },
+      "mapBounds": {
+        "sw": [
+          34.9,
+          -86.0
+        ],
+        "ne": [
+          36.2,
+          -84.5
+        ]
+      },
+      "hq": "Chattanooga"
+    },
+    "tn_3": {
+      "name": "Region 3 (Nashville)",
+      "shortName": "Region 3",
+      "center": [
+        -86.8,
+        36.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "021",
+        "027",
+        "037",
+        "041",
+        "043",
+        "055",
+        "081",
+        "083",
+        "085",
+        "087",
+        "099",
+        "101",
+        "103",
+        "111",
+        "117",
+        "119",
+        "125",
+        "127",
+        "135",
+        "147",
+        "149",
+        "159",
+        "161",
+        "165",
+        "169",
+        "181",
+        "187",
+        "189"
+      ],
+      "countyNames": {
+        "015": "Cannon",
+        "021": "Cheatham",
+        "027": "Clay",
+        "037": "Davidson",
+        "041": "DeKalb",
+        "043": "Dickson",
+        "055": "Giles",
+        "081": "Hickman",
+        "083": "Houston",
+        "085": "Humphreys",
+        "087": "Jackson",
+        "099": "Lawrence",
+        "101": "Lewis",
+        "103": "Lincoln",
+        "111": "Macon",
+        "117": "Marshall",
+        "119": "Maury",
+        "125": "Montgomery",
+        "127": "Moore",
+        "135": "Perry",
+        "147": "Robertson",
+        "149": "Rutherford",
+        "159": "Smith",
+        "161": "Stewart",
+        "165": "Sumner",
+        "169": "Trousdale",
+        "181": "Wayne",
+        "187": "Williamson",
+        "189": "Wilson"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -88.0
+        ],
+        "ne": [
+          36.9,
+          -85.5
+        ]
+      },
+      "hq": "Nashville"
+    },
+    "tn_4": {
+      "name": "Region 4 (Memphis)",
+      "shortName": "Region 4",
+      "center": [
+        -88.8,
+        35.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "017",
+        "023",
+        "033",
+        "039",
+        "045",
+        "047",
+        "053",
+        "069",
+        "071",
+        "075",
+        "077",
+        "079",
+        "095",
+        "097",
+        "113",
+        "109",
+        "131",
+        "157",
+        "167",
+        "183"
+      ],
+      "countyNames": {
+        "005": "Benton",
+        "017": "Carroll",
+        "023": "Chester",
+        "033": "Crockett",
+        "039": "Decatur",
+        "045": "Dyer",
+        "047": "Fayette",
+        "053": "Gibson",
+        "069": "Hardeman",
+        "071": "Hardin",
+        "075": "Haywood",
+        "077": "Henderson",
+        "079": "Henry",
+        "095": "Lake",
+        "097": "Lauderdale",
+        "113": "Madison",
+        "109": "McNairy",
+        "131": "Obion",
+        "157": "Shelby",
+        "167": "Tipton",
+        "183": "Weakley"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -90.3
+        ],
+        "ne": [
+          36.5,
+          -87.5
+        ]
+      },
+      "hq": "Memphis"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "gnrcnampo": {
+      "name": "Greater Nashville Regional Council (Nashville Area MPO)",
+      "shortName": "Nashville Area MPO",
+      "type": "mpo",
+      "center": [
+        -85.3097,
+        35.0456
+      ],
+      "zoom": 10,
+      "counties": [
+        "037",
+        "187",
+        "149",
+        "165",
+        "189",
+        "147",
+        "119"
+      ],
+      "countyNames": {
+        "037": "Davidson",
+        "187": "Williamson",
+        "149": "Rutherford",
+        "165": "Sumner",
+        "189": "Wilson",
+        "147": "Robertson",
+        "119": "Maury"
+      },
+      "btsAcronym": "GNRCAM",
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -85.55
+        ],
+        "ne": [
+          35.3,
+          -85.05
+        ]
+      }
+    },
+    "muampo": {
+      "name": "Memphis Urban Area MPO",
+      "shortName": "Memphis Urban Area",
+      "type": "mpo",
+      "center": [
+        -83.9207,
+        35.9606
+      ],
+      "zoom": 10,
+      "counties": [
+        "157",
+        "047",
+        "167"
+      ],
+      "countyNames": {
+        "157": "Shelby",
+        "047": "Fayette",
+        "167": "Tipton"
+      },
+      "btsAcronym": "MUAM",
+      "mapBounds": {
+        "sw": [
+          35.7,
+          -84.2
+        ],
+        "ne": [
+          36.2,
+          -83.6
+        ]
+      }
+    },
+    "krtpo": {
+      "name": "Knoxville Regional TPO",
+      "shortName": "Knoxville Regional TPO",
+      "type": "mpo",
+      "center": [
+        -90.049,
+        35.1495
+      ],
+      "zoom": 10,
+      "counties": [
+        "093",
+        "009",
+        "001",
+        "105"
+      ],
+      "countyNames": {
+        "093": "Knox",
+        "009": "Blount",
+        "001": "Anderson",
+        "105": "Loudon"
+      },
+      "btsAcronym": "KRT",
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -90.35
+        ],
+        "ne": [
+          35.45,
+          -89.7
+        ]
+      }
+    },
+    "chcngtpo": {
+      "name": "Chattanooga-Hamilton County/North Georgia TPO",
+      "shortName": "Chattanooga-Hamilton County/North Georgia TPO",
+      "type": "mpo",
+      "center": [
+        -86.7816,
+        36.1627
+      ],
+      "zoom": 9,
+      "counties": [
+        "065"
+      ],
+      "countyNames": {
+        "065": "Hamilton"
+      },
+      "btsAcronym": "CCGT",
+      "mapBounds": {
+        "sw": [
+          35.8,
+          -87.15
+        ],
+        "ne": [
+          36.5,
+          -86.4
+        ]
+      }
+    },
+    "juampo": {
+      "name": "Jackson Urban Area MPO",
+      "shortName": "Jackson Urban Area",
+      "type": "mpo",
+      "center": [
+        -82.3733,
+        36.3487
+      ],
+      "zoom": 10,
+      "counties": [
+        "113"
+      ],
+      "countyNames": {
+        "113": "Madison"
+      },
+      "btsAcronym": "JUAM",
+      "mapBounds": {
+        "sw": [
+          36.15,
+          -82.65
+        ],
+        "ne": [
+          36.55,
+          -82.1
+        ]
+      }
+    },
+    "cuampo": {
+      "name": "Clarksville Urbanized Area MPO",
+      "shortName": "Clarksville Urbanized Area",
+      "type": "mpo",
+      "center": [
+        -88.8139,
+        35.6145
+      ],
+      "zoom": 10,
+      "counties": [
+        "125"
+      ],
+      "countyNames": {
+        "125": "Montgomery"
+      },
+      "btsAcronym": "CUAM",
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -89.05
+        ],
+        "ne": [
+          35.8,
+          -88.55
+        ]
+      }
+    },
+    "kbmpo": {
+      "name": "Kingsport-Bristol MPO",
+      "shortName": "Kingsport-Bristol",
+      "type": "mpo",
+      "center": [
+        -86.2816,
+        36.1665
+      ],
+      "zoom": 10,
+      "counties": [
+        "163"
+      ],
+      "countyNames": {
+        "163": "Sullivan"
+      },
+      "btsAcronym": "KM",
+      "mapBounds": {
+        "sw": [
+          35.95,
+          -86.55
+        ],
+        "ne": [
+          36.4,
+          -86.0
+        ]
+      }
+    },
+    "jcmtpo": {
+      "name": "Johnson City MTPO",
+      "shortName": "Johnson City MTPO",
+      "type": "mpo",
+      "center": [
+        -86.3914,
+        35.8425
+      ],
+      "zoom": 10,
+      "counties": [
+        "179"
+      ],
+      "countyNames": {
+        "179": "Washington"
+      },
+      "btsAcronym": "JCM",
+      "mapBounds": {
+        "sw": [
+          35.65,
+          -86.65
+        ],
+        "ne": [
+          36.05,
+          -86.15
+        ]
+      }
+    },
+    "lamtpom": {
+      "name": "Lakeway Area MTPO (Morristown)",
+      "shortName": "Morristown",
+      "type": "mpo",
+      "center": [
+        -86.2289,
+        35.3733
+      ],
+      "zoom": 10,
+      "counties": [
+        "063"
+      ],
+      "countyNames": {
+        "063": "Hamblen"
+      },
+      "btsAcronym": "LAM",
+      "mapBounds": {
+        "sw": [
+          35.15,
+          -86.5
+        ],
+        "ne": [
+          35.6,
+          -85.95
+        ]
+      }
+    },
+    "cleveland_area_mpo": {
+      "name": "Cleveland Area MPO",
+      "shortName": "Cleveland",
+      "type": "mpo",
+      "btsMpoId": "47200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.884058,
+        35.134804
+      ],
+      "zoom": 10
+    },
+    "knoxville_regional_transportation_planning_organization_mpo": {
+      "name": "Knoxville Regional Transportation Planning Organization",
+      "shortName": "Knoxville Regional Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "47197801",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.09876,
+        35.881116
+      ],
+      "zoom": 10
+    },
+    "lakeway_mpo": {
+      "name": "Lakeway MPO",
+      "shortName": "Lakeway",
+      "type": "mpo",
+      "btsMpoId": "47200301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -83.317992,
+        36.215015
+      ],
+      "zoom": 10
+    },
+    "johnson_city_metropolitan_transportation_planning_organization_mpo": {
+      "name": "Johnson City Metropolitan Transportation Planning Organization",
+      "shortName": "Johnson City Metropolitan Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "47198201",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -82.387071,
+        36.328349
+      ],
+      "zoom": 10
+    },
+    "kingsport_mtpo_mpo": {
+      "name": "Kingsport MTPO",
+      "shortName": "Kingsport MTPO",
+      "type": "mpo",
+      "btsMpoId": "47197704",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -82.617774,
+        36.497895
+      ],
+      "zoom": 10
+    },
+    "chattanooga_hamilton_countynorth_georgia_metropolitan_planning_organization_mpo": {
+      "name": "Chattanooga-Hamilton County/North Georgia Metropolitan Planning Organization",
+      "shortName": "Chattanooga-Hamilton County/North Georgia",
+      "type": "mpo",
+      "btsMpoId": "47197703",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.225853,
+        35.149439
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Anderson",
+    "003": "Bedford",
+    "005": "Benton",
+    "007": "Bledsoe",
+    "009": "Blount",
+    "011": "Bradley",
+    "013": "Campbell",
+    "015": "Cannon",
+    "017": "Carroll",
+    "019": "Carter",
+    "021": "Cheatham",
+    "023": "Chester",
+    "025": "Claiborne",
+    "027": "Clay",
+    "029": "Cocke",
+    "031": "Coffee",
+    "033": "Crockett",
+    "035": "Cumberland",
+    "037": "Davidson",
+    "039": "Decatur",
+    "041": "DeKalb",
+    "043": "Dickson",
+    "045": "Dyer",
+    "047": "Fayette",
+    "049": "Fentress",
+    "051": "Franklin",
+    "053": "Gibson",
+    "055": "Giles",
+    "057": "Grainger",
+    "059": "Greene",
+    "061": "Grundy",
+    "063": "Hamblen",
+    "065": "Hamilton",
+    "067": "Hancock",
+    "069": "Hardeman",
+    "071": "Hardin",
+    "073": "Hawkins",
+    "075": "Haywood",
+    "077": "Henderson",
+    "079": "Henry",
+    "081": "Hickman",
+    "083": "Houston",
+    "085": "Humphreys",
+    "087": "Jackson",
+    "089": "Jefferson",
+    "091": "Johnson",
+    "093": "Knox",
+    "095": "Lake",
+    "097": "Lauderdale",
+    "099": "Lawrence",
+    "101": "Lewis",
+    "103": "Lincoln",
+    "105": "Loudon",
+    "107": "McMinn",
+    "109": "McNairy",
+    "111": "Macon",
+    "113": "Madison",
+    "115": "Marion",
+    "117": "Marshall",
+    "119": "Maury",
+    "121": "Meigs",
+    "123": "Monroe",
+    "125": "Montgomery",
+    "127": "Moore",
+    "129": "Morgan",
+    "131": "Obion",
+    "133": "Overton",
+    "135": "Perry",
+    "137": "Pickett",
+    "139": "Polk",
+    "141": "Putnam",
+    "143": "Rhea",
+    "145": "Roane",
+    "147": "Robertson",
+    "149": "Rutherford",
+    "151": "Scott",
+    "153": "Sequatchie",
+    "155": "Sevier",
+    "157": "Shelby",
+    "159": "Smith",
+    "161": "Stewart",
+    "163": "Sullivan",
+    "165": "Sumner",
+    "167": "Tipton",
+    "169": "Trousdale",
+    "171": "Unicoi",
+    "173": "Union",
+    "175": "Van Buren",
+    "177": "Warren",
+    "179": "Washington",
+    "181": "Wayne",
+    "183": "Weakley",
+    "185": "White",
+    "187": "Williamson",
+    "189": "Wilson"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_description": "NYSDOT crash data registry. 62 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "New York State Department of Transportation",
+    "base_url": "https://data.ny.gov",
+    "api_url": "https://data.ny.gov/resource/e8ky-4vqe.json",
+    "file_format": "JSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 62 New York counties. FIPS codes are 5-digit (state 36 + 3-digit county).",
+    "_placeholder": "Populate with all 62 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data.ny.gov/resource/e8ky-4vqe.json",
+    "resource_id": "e8ky-4vqe",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "max_per_request": 50000
+    }
+  }
+}

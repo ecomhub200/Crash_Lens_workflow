@@ -1,0 +1,339 @@
+# ==============================================================================
+# Virginia State Download Workflow (Playwright-Based)
+# ==============================================================================
+# Downloads crash data from Virginia Roads using Playwright to bypass
+# bot-detection on CSV downloads, then triggers pipeline.yml for processing.
+#
+# Why Playwright?
+#   virginiaroads.org blocks programmatic CSV downloads (403 Forbidden) from
+#   server IPs but serves the page fine in a browser. Playwright simulates a
+#   real Chromium browser session. Same approach as download-cdot-crash-data.yml.
+#
+# Flow:
+#   Playwright download → Filter jurisdiction → Split road types → Upload R2 → Pipeline
+#
+# Scope options:
+#   - jurisdiction: Download statewide, filter + split single county
+#   - region: Download statewide, filter + split counties in a VDOT district
+#   - mpo: Download statewide, filter + split counties in an MPO
+#   - statewide: Download + process all 133 jurisdictions
+# ==============================================================================
+
+name: "Download: Virginia"
+
+on:
+  schedule:
+    # First Monday of each month at 11:00 UTC (6:00 AM ET)
+    - cron: '0 11 1-7 * 1'
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Processing scope'
+        required: true
+        type: choice
+        default: 'jurisdiction'
+        options:
+          - jurisdiction
+          - region
+          - mpo
+          - statewide
+
+      selection:
+        description: 'Jurisdiction/Region/MPO name (blank for statewide)'
+        required: false
+        default: 'henrico'
+        type: string
+
+      region:
+        description: 'Region (if scope=region)'
+        required: false
+        type: choice
+        default: ''
+        options:
+          - ''
+          - bristol
+          - culpeper
+          - fredericksburg
+          - hampton_roads
+          - lynchburg
+          - nova
+          - richmond
+          - salem
+          - staunton
+
+      mpo:
+        description: 'MPO (if scope=mpo)'
+        required: false
+        type: choice
+        default: ''
+        options:
+          - ''
+          - hrtpo
+          - nvta
+          - rvarc
+          - rvampo
+          - fampo
+          - campo
+          - sawmpo
+          - wvmpo
+
+      force_download:
+        description: 'Force re-download (skip cache)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_pipeline:
+        description: 'Skip pipeline trigger (download only)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  STATE: virginia
+  DOT_NAME: VDOT
+  DATA_DIR: data
+
+jobs:
+  download:
+    name: "Download Virginia (${{ github.event.inputs.scope || 'jurisdiction' }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    outputs:
+      scope: ${{ steps.params.outputs.scope }}
+      selection: ${{ steps.params.outputs.selection }}
+      csv_path: ${{ steps.download.outputs.csv_path }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas requests openpyxl
+          # Playwright for browser-based download (bypasses 403)
+          pip install playwright
+          playwright install chromium --with-deps
+          # Verify Playwright + Chromium
+          python -c "
+          from playwright.sync_api import sync_playwright
+          import os
+          with sync_playwright() as p:
+              path = p.chromium.executable_path
+              exists = os.path.isfile(path) if path else False
+              print(f'Chromium binary: {path}')
+              print(f'Binary exists: {exists}')
+          " || echo "WARNING: Playwright verification failed (non-fatal)"
+
+      - name: Resolve parameters
+        id: params
+        run: |
+          SCOPE="${{ github.event.inputs.scope || 'jurisdiction' }}"
+          SELECTION="${{ github.event.inputs.selection || 'henrico' }}"
+
+          # Override selection with region/mpo dropdown if those scopes selected
+          if [ "$SCOPE" = "region" ] && [ -n "${{ github.event.inputs.region }}" ]; then
+            SELECTION="${{ github.event.inputs.region }}"
+          elif [ "$SCOPE" = "mpo" ] && [ -n "${{ github.event.inputs.mpo }}" ]; then
+            SELECTION="${{ github.event.inputs.mpo }}"
+          elif [ "$SCOPE" = "statewide" ]; then
+            SELECTION=""
+          fi
+
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+
+          # Resolve jurisdictions
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state virginia --scope "$SCOPE" --selection "$SELECTION" --json)
+          echo "Resolved: $RESOLVED"
+
+      - name: Download Virginia crash data (Playwright)
+        id: download
+        timeout-minutes: 30
+        run: |
+          SCOPE="${{ steps.params.outputs.scope }}"
+          SELECTION="${{ steps.params.outputs.selection }}"
+          FORCE="${{ github.event.inputs.force_download }}"
+
+          echo "=========================================="
+          echo "Downloading Virginia Crash Data (Playwright)"
+          echo "  Scope:     $SCOPE"
+          echo "  Selection: ${SELECTION:-statewide}"
+          echo "  Started:   $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          ARGS="--data-dir ${{ env.DATA_DIR }}"
+
+          if [ "$FORCE" = "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+
+          # Always download statewide, then filter downstream
+          if [ "$SCOPE" = "statewide" ]; then
+            ARGS="$ARGS --jurisdiction statewide --gzip"
+          else
+            ARGS="$ARGS --jurisdiction ${SELECTION:-henrico}"
+          fi
+
+          python download_virginia_crash_data.py $ARGS
+
+          # Determine the output CSV path
+          if [ "$SCOPE" = "statewide" ]; then
+            CSV_PATH="${{ env.DATA_DIR }}/virginia_statewide_all_roads.csv"
+          else
+            CSV_PATH="${{ env.DATA_DIR }}/${SELECTION}_all_roads.csv"
+          fi
+
+          if [ ! -f "$CSV_PATH" ]; then
+            echo "::error::Expected output not found: $CSV_PATH"
+            ls -la ${{ env.DATA_DIR }}/*.csv 2>/dev/null || echo "No CSV files in data dir"
+            exit 1
+          fi
+
+          RECORDS=$(wc -l < "$CSV_PATH" | tr -d ' ')
+          SIZE=$(ls -lh "$CSV_PATH" | awk '{print $5}')
+          echo "  Output: $CSV_PATH ($((RECORDS - 1)) records, $SIZE)"
+
+          echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+          echo "=========================================="
+          echo "Download complete: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Verify output files
+        run: |
+          SELECTION="${{ steps.params.outputs.selection }}"
+          SCOPE="${{ steps.params.outputs.scope }}"
+
+          echo "Output files:"
+          if [ "$SCOPE" = "statewide" ]; then
+            ls -lh ${{ env.DATA_DIR }}/virginia_statewide*.csv* 2>/dev/null || echo "  No statewide files"
+          else
+            for suffix in all_roads county_roads city_roads no_interstate; do
+              FILE="${{ env.DATA_DIR }}/${SELECTION}_${suffix}.csv"
+              if [ -f "$FILE" ]; then
+                ROWS=$(wc -l < "$FILE")
+                SIZE=$(ls -lh "$FILE" | awk '{print $5}')
+                echo "  $FILE: $((ROWS - 1)) records ($SIZE)"
+              else
+                echo "  $FILE: NOT FOUND"
+              fi
+            done
+          fi
+
+      - name: Upload crash CSVs to R2
+        if: steps.params.outputs.scope != 'statewide'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "${{ env.DATA_DIR }}/${{ steps.params.outputs.selection }}_county_roads.csv", "r2_key": "virginia/${{ steps.params.outputs.selection }}/county_roads.csv"},
+              {"local_path": "${{ env.DATA_DIR }}/${{ steps.params.outputs.selection }}_city_roads.csv", "r2_key": "virginia/${{ steps.params.outputs.selection }}/city_roads.csv"},
+              {"local_path": "${{ env.DATA_DIR }}/${{ steps.params.outputs.selection }}_no_interstate.csv", "r2_key": "virginia/${{ steps.params.outputs.selection }}/no_interstate.csv"},
+              {"local_path": "${{ env.DATA_DIR }}/${{ steps.params.outputs.selection }}_all_roads.csv", "r2_key": "virginia/${{ steps.params.outputs.selection }}/all_roads.csv"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Upload statewide gzip to R2
+        if: steps.params.outputs.scope == 'statewide'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "${{ env.DATA_DIR }}/virginia_statewide_all_roads.csv.gz", "r2_key": "virginia/_state/statewide_all_roads.csv.gz"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Commit manifest and metadata
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/r2-manifest.json 2>/dev/null || true
+          git add data/.validation/ 2>/dev/null || true
+          git add data/.geocode_cache.json 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No new data to commit"
+          else
+            SCOPE="${{ steps.params.outputs.scope }}"
+            SELECTION="${{ steps.params.outputs.selection }}"
+            git commit -m "data: virginia download ($SCOPE/${SELECTION:-all}) [$(date +'%Y-%m-%d')]"
+            git push origin main || {
+              git fetch origin main
+              git rebase origin/main
+              git push origin main
+            }
+          fi
+
+      - name: Job summary
+        if: always()
+        run: |
+          SCOPE="${{ steps.params.outputs.scope }}"
+          SELECTION="${{ steps.params.outputs.selection }}"
+          CSV_PATH="${{ steps.download.outputs.csv_path }}"
+          RECORDS="N/A"
+          if [ -f "$CSV_PATH" ]; then
+            RECORDS=$(( $(wc -l < "$CSV_PATH") - 1 ))
+          fi
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Virginia Crash Data Download ($SCOPE)
+
+          | Metric | Value |
+          |--------|-------|
+          | Scope | $SCOPE |
+          | Selection | ${SELECTION:-statewide} |
+          | Records | ${RECORDS} |
+          | Method | Playwright (browser-based) |
+          | Output | ${CSV_PATH:-N/A} |
+          | Run time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+
+          **Download method:** Playwright Chromium browser simulates real user to bypass
+          virginiaroads.org bot-detection (403 Forbidden on programmatic CSV requests).
+          Falls back to ArcGIS REST API pagination if browser download fails.
+          EOF
+
+  # Trigger unified pipeline
+  trigger-pipeline:
+    name: "Trigger pipeline"
+    needs: download
+    if: github.event.inputs.skip_pipeline != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'pipeline.yml',
+              ref: 'main',
+              inputs: {
+                state: 'virginia',
+                scope: '${{ needs.download.outputs.scope }}',
+                selection: '${{ needs.download.outputs.selection }}',
+                data_source: '${{ needs.download.outputs.csv_path }}',
+                skip_forecasts: 'false'
+              }
+            });
+            console.log('Pipeline triggered for Virginia');

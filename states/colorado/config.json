@@ -1,0 +1,231 @@
+{
+  "state": {
+    "name": "Colorado",
+    "abbreviation": "CO",
+    "fips": "08",
+    "dotName": "CDOT",
+    "dotFullName": "Colorado Department of Transportation",
+    "dataSystemName": "CDOT OnBase Portal",
+    "dataPortalUrl": "https://www.codot.gov/safety/traffic-safety/crash-data",
+    "coordinateBounds": {
+      "latMin": 36.9,
+      "latMax": 41.1,
+      "lonMin": -109.1,
+      "lonMax": -101.9
+    }
+  },
+
+  "columnMapping": {
+    "_description": "Maps Colorado CDOT CSV column names to internal field codes",
+
+    "ID": "CUID",
+    "DATE": "Crash Date",
+    "TIME": "Crash Time",
+    "SEVERITY": null,
+    "K": "Injury 04",
+    "A": "Injury 03",
+    "B": "Injury 02",
+    "C": "Injury 01",
+    "O": "Injury 00",
+    "COLLISION": "Crash Type",
+    "WEATHER": "Weather Condition",
+    "LIGHT": "Lighting Conditions",
+    "SURFACE": "Road Condition",
+    "ALIGNMENT": "Road Contour Curves",
+    "ROAD_DESC": "Road Description",
+    "ROUTE": "Rd_Number",
+    "ROAD_SYSTEM": "System Code",
+    "X": "Longitude",
+    "Y": "Latitude",
+    "JURISDICTION": "County",
+    "AGENCY": "Agency Id",
+    "FIRST_HARMFUL": "First HE",
+    "FIRST_HARMFUL_LOC": "Location"
+  },
+
+  "derivedFields": {
+    "_description": "Colorado severity is derived from injury count columns (Injury 04..00 = K..O)",
+    "SEVERITY": {
+      "method": "injury_hierarchy",
+      "columns": ["Injury 04", "Injury 03", "Injury 02", "Injury 01", "Injury 00"],
+      "labels": ["K", "A", "B", "C", "O"]
+    }
+  },
+
+  "roadSystems": {
+    "values": {
+      "City Street": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "City Street",
+        "standardizedSystem": "Non-DOT secondary"
+      },
+      "County Road": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "County Road",
+        "standardizedSystem": "Non-DOT secondary"
+      },
+      "State Highway": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "State Highway",
+        "standardizedSystem": "Primary"
+      },
+      "Interstate Highway": {
+        "category": "interstate",
+        "isStateDOT": true,
+        "isInterstate": true,
+        "displayName": "Interstate Highway",
+        "standardizedSystem": "Interstate"
+      },
+      "Frontage Road": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "Frontage Road",
+        "standardizedSystem": "Secondary"
+      },
+      "Non Crash": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "Non Crash",
+        "standardizedSystem": "Non-DOT secondary"
+      }
+    },
+
+    "splitConfig": {
+      "_description": "Config-driven split logic for stage_split in process_crash_data.py",
+      "countyRoads": {
+        "method": "agency_id",
+        "column": "_co_agency_id",
+        "agencyMap": {
+          "douglas": ["DSO"],
+          "arapahoe": ["ASO"],
+          "jefferson": ["JSO"],
+          "elpaso": ["EPSO"],
+          "denver": ["DPD"],
+          "adams": ["ACSO"]
+        }
+      },
+      "cityRoads": {
+        "method": "column_value",
+        "column": "_co_system_code",
+        "includeValues": ["City Street"]
+      },
+      "interstateExclusion": {
+        "method": "column_value",
+        "column": "_co_system_code",
+        "excludeValues": ["Interstate Highway"]
+      }
+    },
+
+    "filterProfiles": {
+      "countyOnly": {
+        "name": "County Roads Only",
+        "description": "County-maintained roads only",
+        "systemValues": ["Non-DOT secondary"]
+      },
+      "cityOnly": {
+        "name": "City Roads Only",
+        "description": "City street roads only",
+        "systemCodeValues": ["City Street"]
+      },
+      "countyPlusVDOT": {
+        "name": "All Roads (No Interstate)",
+        "description": "Local roads plus state highways, excluding interstates",
+        "systemValues": ["Non-DOT secondary", "Primary", "Secondary"]
+      },
+      "allRoads": {
+        "name": "All Roads (Including Interstate)",
+        "description": "All road types including interstates",
+        "systemValues": ["Non-DOT secondary", "Primary", "Secondary", "Interstate"]
+      }
+    }
+  },
+
+  "epdoWeights": {
+    "_source": "HSM Standard (2010) - CDOT uses AASHTO/FHWA standard weights",
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1
+  },
+
+  "jurisdictions": {
+    "douglas": {
+      "name": "Douglas County",
+      "type": "county",
+      "fips": "035",
+      "namePatterns": ["DOUGLAS", "Douglas", "Douglas County"],
+      "mapCenter": [39.3298, -104.9253],
+      "mapZoom": 11,
+      "bbox": [-105.0543, 39.1298, -104.6014, 39.5624],
+      "maintainsOwnRoads": true
+    },
+    "arapahoe": {
+      "name": "Arapahoe County",
+      "type": "county",
+      "fips": "005",
+      "namePatterns": ["ARAPAHOE", "Arapahoe", "Arapahoe County"],
+      "mapCenter": [39.6498, -104.3389],
+      "mapZoom": 10,
+      "bbox": [-105.0534, 39.5638, -103.7064, 39.7404],
+      "maintainsOwnRoads": true
+    },
+    "jefferson": {
+      "name": "Jefferson County",
+      "type": "county",
+      "fips": "059",
+      "namePatterns": ["JEFFERSON", "Jefferson", "Jefferson County"],
+      "mapCenter": [39.5866, -105.2508],
+      "mapZoom": 10,
+      "bbox": [-105.6798, 39.3677, -105.0534, 39.8282],
+      "maintainsOwnRoads": true
+    },
+    "elpaso": {
+      "name": "El Paso County",
+      "type": "county",
+      "fips": "041",
+      "namePatterns": ["EL PASO", "El Paso", "El Paso County"],
+      "mapCenter": [38.8339, -104.7581],
+      "mapZoom": 10,
+      "bbox": [-105.0286, 38.5157, -104.0534, 39.1298],
+      "maintainsOwnRoads": true
+    },
+    "denver": {
+      "name": "Denver County",
+      "type": "county",
+      "fips": "031",
+      "namePatterns": ["DENVER", "Denver", "Denver County"],
+      "mapCenter": [39.7392, -104.9903],
+      "mapZoom": 12,
+      "bbox": [-105.1098, 39.6144, -104.5996, 39.9142],
+      "maintainsOwnRoads": true
+    },
+    "adams": {
+      "name": "Adams County",
+      "type": "county",
+      "fips": "001",
+      "namePatterns": ["ADAMS", "Adams", "Adams County"],
+      "mapCenter": [39.8737, -104.7624],
+      "mapZoom": 10,
+      "bbox": [-105.0534, 39.7404, -104.4610, 40.0015],
+      "maintainsOwnRoads": true
+    }
+  },
+
+  "cache_config": {
+    "update_frequency": "biannual",
+    "typical_new_records_per_update": 25000,
+    "data_retention_years": 5,
+    "stale_threshold_days": 365,
+    "geocode_ttl_days": 365,
+    "max_cache_size_mb": 100
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_description": "GDOT crash data registry. 159 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Georgia Department of Transportation",
+    "base_url": "https://gdot.aashtowaresafety.net",
+    "api_url": "https://gdot.aashtowaresafety.net/arcgis/rest/services/CrashData/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 159 Georgia counties. FIPS codes are 5-digit (state 13 + 3-digit county).",
+    "_placeholder": "Populate with all 159 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://gdot.aashtowaresafety.net/arcgis/rest/services/CrashData/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_description": "AKDOT&PF crash data registry. 30 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Alaska Department of Transportation and Public Facilities",
+    "base_url": "https://data-soa-akdot.opendata.arcgis.com",
+    "api_url": "https://data-soa-akdot.opendata.arcgis.com/datasets/crash-data/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 30 Alaska counties. FIPS codes are 5-digit (state 02 + 3-digit county).",
+    "_placeholder": "Populate with all 30 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data-soa-akdot.opendata.arcgis.com/datasets/crash-data/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

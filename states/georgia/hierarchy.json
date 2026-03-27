@@ -1,0 +1,1036 @@
+{
+  "state": {
+    "fips": "13",
+    "name": "Georgia",
+    "abbreviation": "GA",
+    "dot": "GDOT",
+    "dotFullName": "Georgia Department of Transportation",
+    "center": [
+      -83.643074,
+      33.040619
+    ],
+    "zoom": 7,
+    "placesCount": 535
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ga_1": {
+      "name": "District 1 (Gainesville)",
+      "shortName": "District 1",
+      "center": [
+        -83.4,
+        34.4
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "013",
+        "059",
+        "085",
+        "105",
+        "119",
+        "137",
+        "139",
+        "147",
+        "157",
+        "187",
+        "195",
+        "219",
+        "221",
+        "241",
+        "257",
+        "281",
+        "291",
+        "311"
+      ],
+      "countyNames": {
+        "011": "Banks",
+        "013": "Barrow",
+        "059": "Clarke",
+        "085": "Dawson",
+        "105": "Elbert",
+        "119": "Franklin",
+        "137": "Habersham",
+        "139": "Hall",
+        "147": "Hart",
+        "157": "Jackson",
+        "187": "Lumpkin",
+        "195": "Madison",
+        "219": "Oconee",
+        "221": "Oglethorpe",
+        "241": "Rabun",
+        "257": "Stephens",
+        "281": "Towns",
+        "291": "Union",
+        "311": "White"
+      },
+      "mapBounds": {
+        "sw": [
+          33.8,
+          -84.0
+        ],
+        "ne": [
+          35.0,
+          -82.8
+        ]
+      },
+      "hq": "Gainesville"
+    },
+    "ga_2": {
+      "name": "District 2 (Tennille)",
+      "shortName": "District 2",
+      "center": [
+        -82.5,
+        33.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "021",
+        "023",
+        "033",
+        "079",
+        "107",
+        "125",
+        "141",
+        "153",
+        "163",
+        "165",
+        "167",
+        "169",
+        "175",
+        "181",
+        "189",
+        "207",
+        "225",
+        "235",
+        "237",
+        "265",
+        "289",
+        "301",
+        "303",
+        "317",
+        "319"
+      ],
+      "countyNames": {
+        "009": "Baldwin",
+        "021": "Bibb",
+        "023": "Bleckley",
+        "033": "Burke",
+        "079": "Crawford",
+        "107": "Emanuel",
+        "125": "Glascock",
+        "141": "Hancock",
+        "153": "Houston",
+        "163": "Jefferson",
+        "165": "Jenkins",
+        "167": "Johnson",
+        "169": "Jones",
+        "175": "Laurens",
+        "181": "Lincoln",
+        "189": "McDuffie",
+        "207": "Monroe",
+        "225": "Peach",
+        "235": "Pulaski",
+        "237": "Putnam",
+        "265": "Taliaferro",
+        "289": "Twiggs",
+        "301": "Warren",
+        "303": "Washington",
+        "317": "Wilkes",
+        "319": "Wilkinson"
+      },
+      "mapBounds": {
+        "sw": [
+          32.2,
+          -83.5
+        ],
+        "ne": [
+          33.7,
+          -81.5
+        ]
+      },
+      "hq": "Tennille"
+    },
+    "ga_3": {
+      "name": "District 3 (Thomaston)",
+      "shortName": "District 3",
+      "center": [
+        -84.9,
+        33.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "045",
+        "055",
+        "077",
+        "113",
+        "115",
+        "129",
+        "143",
+        "145",
+        "149",
+        "171",
+        "199",
+        "215",
+        "223",
+        "231",
+        "233",
+        "255",
+        "263",
+        "269",
+        "285",
+        "293"
+      ],
+      "countyNames": {
+        "045": "Carroll",
+        "055": "Chattooga",
+        "077": "Coweta",
+        "113": "Fayette",
+        "115": "Floyd",
+        "129": "Gordon",
+        "143": "Haralson",
+        "145": "Harris",
+        "149": "Heard",
+        "171": "Lamar",
+        "199": "Meriwether",
+        "215": "Muscogee",
+        "223": "Paulding",
+        "231": "Pike",
+        "233": "Polk",
+        "255": "Spalding",
+        "263": "Talbot",
+        "269": "Taylor",
+        "285": "Troup",
+        "293": "Upson"
+      },
+      "mapBounds": {
+        "sw": [
+          32.4,
+          -85.5
+        ],
+        "ne": [
+          34.2,
+          -84.3
+        ]
+      },
+      "hq": "Thomaston"
+    },
+    "ga_4": {
+      "name": "District 4 (Tifton)",
+      "shortName": "District 4",
+      "center": [
+        -83.5,
+        31.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "017",
+        "019",
+        "027",
+        "065",
+        "069",
+        "071",
+        "075",
+        "081",
+        "091",
+        "093",
+        "101",
+        "155",
+        "173",
+        "177",
+        "185",
+        "193",
+        "249",
+        "261",
+        "271",
+        "275",
+        "277",
+        "287",
+        "307",
+        "309",
+        "315",
+        "321"
+      ],
+      "countyNames": {
+        "003": "Atkinson",
+        "017": "Ben Hill",
+        "019": "Berrien",
+        "027": "Brooks",
+        "065": "Clinch",
+        "069": "Coffee",
+        "071": "Colquitt",
+        "075": "Cook",
+        "081": "Crisp",
+        "091": "Dodge",
+        "093": "Dooly",
+        "101": "Echols",
+        "155": "Irwin",
+        "173": "Lanier",
+        "177": "Lee",
+        "185": "Lowndes",
+        "193": "Macon",
+        "249": "Schley",
+        "261": "Sumter",
+        "271": "Telfair",
+        "275": "Thomas",
+        "277": "Tift",
+        "287": "Turner",
+        "307": "Webster",
+        "309": "Wheeler",
+        "315": "Wilcox",
+        "321": "Worth"
+      },
+      "mapBounds": {
+        "sw": [
+          30.6,
+          -84.5
+        ],
+        "ne": [
+          32.4,
+          -82.5
+        ]
+      },
+      "hq": "Tifton"
+    },
+    "ga_5": {
+      "name": "District 5 (Jesup)",
+      "shortName": "District 5",
+      "center": [
+        -81.9,
+        31.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "005",
+        "025",
+        "029",
+        "031",
+        "039",
+        "043",
+        "049",
+        "051",
+        "103",
+        "109",
+        "127",
+        "161",
+        "179",
+        "183",
+        "191",
+        "209",
+        "229",
+        "251",
+        "267",
+        "279",
+        "283",
+        "299",
+        "305"
+      ],
+      "countyNames": {
+        "001": "Appling",
+        "005": "Bacon",
+        "025": "Brantley",
+        "029": "Bryan",
+        "031": "Bulloch",
+        "039": "Camden",
+        "043": "Candler",
+        "049": "Charlton",
+        "051": "Chatham",
+        "103": "Effingham",
+        "109": "Evans",
+        "127": "Glynn",
+        "161": "Jeff Davis",
+        "179": "Liberty",
+        "183": "Long",
+        "191": "McIntosh",
+        "209": "Montgomery",
+        "229": "Pierce",
+        "251": "Screven",
+        "267": "Tattnall",
+        "279": "Toombs",
+        "283": "Treutlen",
+        "299": "Ware",
+        "305": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          30.6,
+          -82.7
+        ],
+        "ne": [
+          32.8,
+          -81.1
+        ]
+      },
+      "hq": "Jesup"
+    },
+    "ga_6": {
+      "name": "District 6 (Cartersville)",
+      "shortName": "District 6",
+      "center": [
+        -84.6,
+        34.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "047",
+        "057",
+        "067",
+        "083",
+        "111",
+        "117",
+        "123",
+        "213",
+        "227",
+        "295",
+        "313"
+      ],
+      "countyNames": {
+        "015": "Bartow",
+        "047": "Catoosa",
+        "057": "Cherokee",
+        "067": "Cobb",
+        "083": "Dade",
+        "111": "Fannin",
+        "117": "Forsyth",
+        "123": "Gilmer",
+        "213": "Murray",
+        "227": "Pickens",
+        "295": "Walker",
+        "313": "Whitfield"
+      },
+      "mapBounds": {
+        "sw": [
+          33.9,
+          -85.5
+        ],
+        "ne": [
+          35.0,
+          -83.7
+        ]
+      },
+      "hq": "Cartersville"
+    },
+    "ga_7": {
+      "name": "District 7 (Chamblee)",
+      "shortName": "District 7",
+      "center": [
+        -84.2,
+        33.7
+      ],
+      "zoom": 9,
+      "counties": [
+        "063",
+        "089",
+        "097",
+        "121",
+        "135",
+        "151",
+        "217",
+        "247",
+        "297"
+      ],
+      "countyNames": {
+        "063": "Clayton",
+        "089": "DeKalb",
+        "097": "Douglas",
+        "121": "Fulton",
+        "135": "Gwinnett",
+        "151": "Henry",
+        "217": "Newton",
+        "247": "Rockdale",
+        "297": "Walton"
+      },
+      "mapBounds": {
+        "sw": [
+          33.3,
+          -84.7
+        ],
+        "ne": [
+          34.1,
+          -83.7
+        ]
+      },
+      "hq": "Chamblee"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "arcarc": {
+      "name": "ARC (Atlanta Regional Commission)",
+      "shortName": "Atlanta Regional Commission",
+      "type": "mpo",
+      "center": [
+        -84.388,
+        33.749
+      ],
+      "zoom": 9,
+      "counties": [
+        "121",
+        "089",
+        "135",
+        "067",
+        "063",
+        "097",
+        "113",
+        "151",
+        "247",
+        "057",
+        "117"
+      ],
+      "countyNames": {
+        "121": "Fulton",
+        "089": "DeKalb",
+        "135": "Gwinnett",
+        "067": "Cobb",
+        "063": "Clayton",
+        "097": "Douglas",
+        "113": "Fayette",
+        "151": "Henry",
+        "247": "Rockdale",
+        "057": "Cherokee",
+        "117": "Forsyth"
+      },
+      "btsAcronym": "ARC",
+      "mapBounds": {
+        "sw": [
+          33.25,
+          -84.9
+        ],
+        "ne": [
+          34.2,
+          -83.8
+        ]
+      }
+    },
+    "crmpos": {
+      "name": "Coastal Region MPO (Savannah)",
+      "shortName": "Savannah",
+      "type": "mpo",
+      "center": [
+        -81.0912,
+        32.0809
+      ],
+      "zoom": 10,
+      "counties": [
+        "051",
+        "029",
+        "103"
+      ],
+      "countyNames": {
+        "051": "Chatham",
+        "029": "Bryan",
+        "103": "Effingham"
+      },
+      "btsAcronym": "CRM",
+      "mapBounds": {
+        "sw": [
+          31.8,
+          -81.35
+        ],
+        "ne": [
+          32.35,
+          -80.8
+        ]
+      }
+    },
+    "arts": {
+      "name": "Augusta Regional Transportation Study",
+      "shortName": "Augusta Regional Transportation Study",
+      "type": "mpo",
+      "center": [
+        -82.0105,
+        33.4735
+      ],
+      "zoom": 10,
+      "counties": [
+        "245",
+        "073",
+        "189"
+      ],
+      "countyNames": {
+        "245": "Richmond",
+        "073": "Columbia",
+        "189": "McDuffie"
+      },
+      "btsAcronym": "ARTS",
+      "mapBounds": {
+        "sw": [
+          33.2,
+          -82.3
+        ],
+        "ne": [
+          33.7,
+          -81.7
+        ]
+      }
+    },
+    "mats": {
+      "name": "Macon Area Transportation Study",
+      "shortName": "Macon Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -83.6324,
+        32.461
+      ],
+      "zoom": 10,
+      "counties": [
+        "021",
+        "153",
+        "169"
+      ],
+      "countyNames": {
+        "021": "Bibb",
+        "153": "Houston",
+        "169": "Jones"
+      },
+      "btsAcronym": "MATS",
+      "mapBounds": {
+        "sw": [
+          32.2,
+          -83.9
+        ],
+        "ne": [
+          32.7,
+          -83.35
+        ]
+      }
+    },
+    "cpcmpo": {
+      "name": "Columbus-Phenix City MPO",
+      "shortName": "Columbus-Phenix City",
+      "type": "mpo",
+      "center": [
+        -84.9877,
+        32.4609
+      ],
+      "zoom": 10,
+      "counties": [
+        "215",
+        "145"
+      ],
+      "countyNames": {
+        "215": "Muscogee",
+        "145": "Harris"
+      },
+      "btsAcronym": "CVRPC",
+      "mapBounds": {
+        "sw": [
+          32.25,
+          -85.2
+        ],
+        "ne": [
+          32.65,
+          -84.75
+        ]
+      }
+    },
+    "dartsa": {
+      "name": "Dougherty Area Regional Transportation Study (Albany)",
+      "shortName": "Albany",
+      "type": "mpo",
+      "center": [
+        -84.1557,
+        31.5785
+      ],
+      "zoom": 10,
+      "counties": [
+        "095"
+      ],
+      "countyNames": {
+        "095": "Dougherty"
+      },
+      "btsAcronym": "DARTS",
+      "mapBounds": {
+        "sw": [
+          31.35,
+          -84.4
+        ],
+        "ne": [
+          31.8,
+          -83.9
+        ]
+      }
+    },
+    "wrats": {
+      "name": "Warner Robins Area Transportation Study",
+      "shortName": "Warner Robins Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -84.5264,
+        34.2507
+      ],
+      "zoom": 10,
+      "counties": [
+        "153",
+        "225"
+      ],
+      "countyNames": {
+        "153": "Houston",
+        "225": "Peach"
+      },
+      "btsAcronym": "WRATS",
+      "mapBounds": {
+        "sw": [
+          34.05,
+          -84.8
+        ],
+        "ne": [
+          34.45,
+          -84.25
+        ]
+      }
+    },
+    "vlmpo": {
+      "name": "Valdosta-Lowndes MPO",
+      "shortName": "Valdosta-Lowndes",
+      "type": "mpo",
+      "center": [
+        -83.8241,
+        34.2979
+      ],
+      "zoom": 10,
+      "counties": [
+        "185"
+      ],
+      "countyNames": {
+        "185": "Lowndes"
+      },
+      "btsAcronym": "VM",
+      "mapBounds": {
+        "sw": [
+          34.1,
+          -84.05
+        ],
+        "ne": [
+          34.5,
+          -83.6
+        ]
+      }
+    },
+    "bats": {
+      "name": "Brunswick Area Transportation Study",
+      "shortName": "Brunswick Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -83.2785,
+        30.8338
+      ],
+      "zoom": 10,
+      "counties": [
+        "127"
+      ],
+      "countyNames": {
+        "127": "Glynn"
+      },
+      "btsAcronym": "BATS",
+      "mapBounds": {
+        "sw": [
+          30.6,
+          -83.55
+        ],
+        "ne": [
+          31.05,
+          -83.0
+        ]
+      }
+    },
+    "hampo": {
+      "name": "Hinesville Area MPO",
+      "shortName": "Hinesville Area",
+      "type": "mpo",
+      "center": [
+        -81.4962,
+        31.2097
+      ],
+      "zoom": 10,
+      "counties": [
+        "179",
+        "183"
+      ],
+      "countyNames": {
+        "179": "Liberty",
+        "183": "Long"
+      },
+      "btsAcronym": "HAM",
+      "mapBounds": {
+        "sw": [
+          31.0,
+          -81.75
+        ],
+        "ne": [
+          31.4,
+          -81.25
+        ]
+      }
+    },
+    "ghmpo": {
+      "name": "Gainesville-Hall MPO",
+      "shortName": "Gainesville-Hall",
+      "type": "mpo",
+      "center": [
+        -83.6324,
+        32.8407
+      ],
+      "zoom": 10,
+      "counties": [
+        "139"
+      ],
+      "countyNames": {
+        "139": "Hall"
+      },
+      "btsAcronym": "GM",
+      "mapBounds": {
+        "sw": [
+          32.6,
+          -83.9
+        ],
+        "ne": [
+          33.05,
+          -83.35
+        ]
+      }
+    },
+    "dougherty_area_regional_transportation_study_darts_mpo": {
+      "name": "Dougherty Area Regional Transportation Study (DARTS)",
+      "shortName": "Dougherty Regional Transportation Study (DARTS)",
+      "type": "mpo",
+      "btsMpoId": "13196500",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.231796,
+        31.602617
+      ],
+      "zoom": 10
+    },
+    "rome_floyd_county_metropolitan_planning_organization_mpo": {
+      "name": "Rome-Floyd County Metropolitan Planning Organization",
+      "shortName": "Rome-Floyd County",
+      "type": "mpo",
+      "btsMpoId": "13198302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.166125,
+        34.368367
+      ],
+      "zoom": 10
+    },
+    "greater_dalton_mpo": {
+      "name": "Greater Dalton MPO",
+      "shortName": "Greater Dalton",
+      "type": "mpo",
+      "btsMpoId": "13200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.914292,
+        34.821824
+      ],
+      "zoom": 10
+    },
+    "madison_athens_clarke_oconee_regional_transportation_study_macorts_mpo": {
+      "name": "Madison Athens-Clarke Oconee Regional Transportation Study (MACORTS)",
+      "shortName": "Madison Athens-Clarke Oconee Regional Transportation Study (MACORTS)",
+      "type": "mpo",
+      "btsMpoId": "13196900",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -83.371981,
+        33.941464
+      ],
+      "zoom": 10
+    },
+    "cartersville_bartow_metropolitan_planning_organization_cb_mpo": {
+      "name": "Cartersville-Bartow Metropolitan Planning Organization (CB-MPO)",
+      "shortName": "Cartersville-Bartow (CB-MPO)",
+      "type": "mpo",
+      "btsMpoId": "13201300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.828029,
+        34.228886
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Appling",
+    "003": "Atkinson",
+    "005": "Bacon",
+    "007": "Baker",
+    "009": "Baldwin",
+    "011": "Banks",
+    "013": "Barrow",
+    "015": "Bartow",
+    "017": "Ben Hill",
+    "019": "Berrien",
+    "021": "Bibb",
+    "023": "Bleckley",
+    "025": "Brantley",
+    "027": "Brooks",
+    "029": "Bryan",
+    "031": "Bulloch",
+    "033": "Burke",
+    "035": "Butts",
+    "037": "Calhoun",
+    "039": "Camden",
+    "043": "Candler",
+    "045": "Carroll",
+    "047": "Catoosa",
+    "049": "Charlton",
+    "051": "Chatham",
+    "053": "Chattahoochee",
+    "055": "Chattooga",
+    "057": "Cherokee",
+    "059": "Clarke",
+    "061": "Clay",
+    "063": "Clayton",
+    "065": "Clinch",
+    "067": "Cobb",
+    "069": "Coffee",
+    "071": "Colquitt",
+    "073": "Columbia",
+    "075": "Cook",
+    "077": "Coweta",
+    "079": "Crawford",
+    "081": "Crisp",
+    "083": "Dade",
+    "085": "Dawson",
+    "087": "Decatur",
+    "089": "DeKalb",
+    "091": "Dodge",
+    "093": "Dooly",
+    "095": "Dougherty",
+    "097": "Douglas",
+    "099": "Early",
+    "101": "Echols",
+    "103": "Effingham",
+    "105": "Elbert",
+    "107": "Emanuel",
+    "109": "Evans",
+    "111": "Fannin",
+    "113": "Fayette",
+    "115": "Floyd",
+    "117": "Forsyth",
+    "119": "Franklin",
+    "121": "Fulton",
+    "123": "Gilmer",
+    "125": "Glascock",
+    "127": "Glynn",
+    "129": "Gordon",
+    "131": "Grady",
+    "133": "Greene",
+    "135": "Gwinnett",
+    "137": "Habersham",
+    "139": "Hall",
+    "141": "Hancock",
+    "143": "Haralson",
+    "145": "Harris",
+    "147": "Hart",
+    "149": "Heard",
+    "151": "Henry",
+    "153": "Houston",
+    "155": "Irwin",
+    "157": "Jackson",
+    "159": "Jasper",
+    "161": "Jeff Davis",
+    "163": "Jefferson",
+    "165": "Jenkins",
+    "167": "Johnson",
+    "169": "Jones",
+    "171": "Lamar",
+    "173": "Lanier",
+    "175": "Laurens",
+    "177": "Lee",
+    "179": "Liberty",
+    "181": "Lincoln",
+    "183": "Long",
+    "185": "Lowndes",
+    "187": "Lumpkin",
+    "189": "McDuffie",
+    "191": "McIntosh",
+    "193": "Macon",
+    "195": "Madison",
+    "197": "Marion",
+    "199": "Meriwether",
+    "201": "Miller",
+    "205": "Mitchell",
+    "207": "Monroe",
+    "209": "Montgomery",
+    "211": "Morgan",
+    "213": "Murray",
+    "215": "Muscogee",
+    "217": "Newton",
+    "219": "Oconee",
+    "221": "Oglethorpe",
+    "223": "Paulding",
+    "225": "Peach",
+    "227": "Pickens",
+    "229": "Pierce",
+    "231": "Pike",
+    "233": "Polk",
+    "235": "Pulaski",
+    "237": "Putnam",
+    "239": "Quitman",
+    "241": "Rabun",
+    "243": "Randolph",
+    "245": "Richmond",
+    "247": "Rockdale",
+    "249": "Schley",
+    "251": "Screven",
+    "253": "Seminole",
+    "255": "Spalding",
+    "257": "Stephens",
+    "259": "Stewart",
+    "261": "Sumter",
+    "263": "Talbot",
+    "265": "Taliaferro",
+    "267": "Tattnall",
+    "269": "Taylor",
+    "271": "Telfair",
+    "273": "Terrell",
+    "275": "Thomas",
+    "277": "Tift",
+    "279": "Toombs",
+    "281": "Towns",
+    "283": "Treutlen",
+    "285": "Troup",
+    "287": "Turner",
+    "289": "Twiggs",
+    "291": "Union",
+    "293": "Upson",
+    "295": "Walker",
+    "297": "Walton",
+    "299": "Ware",
+    "301": "Warren",
+    "303": "Washington",
+    "305": "Wayne",
+    "307": "Webster",
+    "309": "Wheeler",
+    "311": "White",
+    "313": "Whitfield",
+    "315": "Wilcox",
+    "317": "Wilkes",
+    "319": "Wilkinson",
+    "321": "Worth"
+  }
+}

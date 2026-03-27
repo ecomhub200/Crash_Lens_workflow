@@ -1,0 +1,193 @@
+# ============================================================================
+# Create R2 Folder Structure
+# ============================================================================
+# One-time (or re-runnable) workflow to create the complete folder hierarchy
+# in the crash-lens-data R2 bucket. Creates zero-byte marker objects so that
+# folders appear in the R2 dashboard and are ready for data uploads.
+#
+# Reads from:
+#   - config.json (Virginia jurisdictions)
+#   - data/{State}DOT/source_manifest.json (other state jurisdictions)
+#   - states/{state}/hierarchy.json (DOT regions + MPOs/TPRs + planning districts for all 50 states)
+#   - states/geography/us_places.json (cities for _city/ folders)
+#   - states/geography/us_county_subdivisions.json (towns/townships merged into _city/ folders)
+#   - states/geography/us_mpos.json (MPOs for _mpo/ folders)
+#   - Fallback known lists for states without populated manifests
+#
+# Folder structure per state:
+#   {state}/_state/                         — Statewide raw data
+#   {state}/_statewide/                     — Statewide aggregates
+#   {state}/_region/{id}/                   — DOT district/region aggregates
+#   {state}/_planning_district/{id}/        — Planning district data
+#   {state}/_mpo/{id}/                      — MPO/TPR aggregates
+#   {state}/_city/{slug}/                   — City/town/place data (merged from us_places.json + us_county_subdivisions.json)
+#   {state}/{jurisdiction}/                 — Per-jurisdiction crash data
+#   {state}/{jurisdiction}/raw/             — Raw annual source data
+#
+# Safe to re-run — creating an existing folder marker is a no-op.
+# ============================================================================
+
+name: Create R2 Folder Structure
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Scope of folders to create'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - top_level_only
+          - single_state
+          - geography_only
+      state:
+        description: 'State prefix (only used when scope=single_state)'
+        required: false
+        default: ''
+        type: string
+      upload_geography:
+        description: 'Upload geography JSONs + hierarchy files to R2 (us_counties.json, us_mpos.json, etc.)'
+        required: false
+        default: true
+        type: boolean
+      dry_run:
+        description: 'Dry run (list folders without creating)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  create-folders:
+    name: Create R2 Folders
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+
+    steps:
+      # ── Checkout ──
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # ── Setup Python ──
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # ── Install Python dependencies ──
+      - name: Install boto3
+        run: pip install boto3
+
+      # ── Configure AWS CLI for R2 ──
+      - name: Configure AWS CLI for Cloudflare R2
+        run: |
+          aws configure set aws_access_key_id "${{ secrets.CF_R2_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.CF_R2_SECRET_ACCESS_KEY }}"
+          aws configure set default.region auto
+          aws configure set default.output json
+
+      # ── Verify R2 Access ──
+      - name: Verify R2 credentials
+        run: |
+          echo "Testing R2 access..."
+          aws s3 ls "s3://${R2_BUCKET}/" \
+            --endpoint-url "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com" | head -5 || {
+              echo "::error::Failed to access R2 bucket. Check secrets."
+              exit 1
+            }
+          echo "R2 access confirmed"
+
+      # ── Create Folders ──
+      - name: Create R2 folder structure
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ env.R2_BUCKET }}
+        run: |
+          ARGS=""
+
+          if [ "${{ inputs.scope }}" = "geography_only" ]; then
+            ARGS="--geography-only"
+            echo "Scope: geography files only (us_counties.json, us_mpos.json, hierarchy.json, etc.)"
+          elif [ "${{ inputs.scope }}" = "single_state" ] && [ -n "${{ inputs.state }}" ]; then
+            ARGS="--state ${{ inputs.state }}"
+            echo "Scope: single state (${{ inputs.state }})"
+          elif [ "${{ inputs.scope }}" = "top_level_only" ]; then
+            ARGS="--top-level-only"
+            echo "Scope: top-level + regions + MPOs (no jurisdiction subfolders)"
+          else
+            echo "Scope: all states, regions, MPOs, and jurisdictions"
+          fi
+
+          if [ "${{ inputs.upload_geography }}" = "true" ] && [ "${{ inputs.scope }}" != "geography_only" ]; then
+            ARGS="$ARGS --upload-geography"
+            echo "Geography upload: enabled"
+          fi
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          python3 scripts/create_r2_folders.py $ARGS
+
+      # ── Verify ──
+      - name: Verify R2 folder structure
+        if: inputs.dry_run == false
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: |
+          ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          echo "Listing top-level R2 folders..."
+          echo ""
+
+          aws s3 ls "s3://${R2_BUCKET}/" --endpoint-url "$ENDPOINT" | head -50
+
+          echo ""
+          echo "Listing Virginia structure (sample)..."
+          aws s3 ls "s3://${R2_BUCKET}/virginia/" --endpoint-url "$ENDPOINT" | head -25
+
+          echo ""
+          echo "Listing Colorado structure (sample)..."
+          aws s3 ls "s3://${R2_BUCKET}/colorado/" --endpoint-url "$ENDPOINT" | head -25
+
+          echo ""
+          echo "Listing Maryland structure (sample)..."
+          aws s3 ls "s3://${R2_BUCKET}/maryland/" --endpoint-url "$ENDPOINT" | head -25
+
+          echo ""
+          echo "Listing geography files..."
+          aws s3 ls "s3://${R2_BUCKET}/states/geography/" --endpoint-url "$ENDPOINT"
+
+          echo ""
+          echo "Listing Delaware structure..."
+          aws s3 ls "s3://${R2_BUCKET}/delaware/" --endpoint-url "$ENDPOINT" | head -25
+
+          # Count total objects
+          echo ""
+          TOTAL=$(aws s3 ls "s3://${R2_BUCKET}/" --endpoint-url "$ENDPOINT" --recursive | wc -l)
+          echo "Total objects in bucket: $TOTAL"
+
+      # ── Summary ──
+      - name: Print summary
+        if: always()
+        run: |
+          echo "============================================"
+          echo "R2 Folder Creation Summary"
+          echo "============================================"
+          echo "Bucket:    ${R2_BUCKET}"
+          echo "Scope:     ${{ inputs.scope }}"
+          if [ "${{ inputs.scope }}" = "single_state" ]; then
+            echo "State:     ${{ inputs.state }}"
+          fi
+          echo "Dry Run:   ${{ inputs.dry_run }}"
+          echo "============================================"

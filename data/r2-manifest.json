@@ -1,0 +1,146 @@
+{
+  "version": 4,
+  "_comment": "Version 4: Added planning_district, city, town tiers. Geography JSON references added. All R2 paths lowercase.",
+  "r2BaseUrl": "https://data.aicreatesai.com\r\n",
+  "updated": "2026-03-23T11:47:57.490056+00:00",
+  "tiers": [
+    "federal",
+    "state",
+    "region",
+    "planning_district",
+    "mpo",
+    "county",
+    "city",
+    "town"
+  ],
+  "geography": {
+    "states": "states/geography/us_states.json",
+    "counties": "states/geography/us_counties.json",
+    "places": "states/geography/us_places.json",
+    "mpos": "states/geography/us_mpos.json",
+    "subdivisions": "states/geography/us_county_subdivisions.json"
+  },
+  "files": {
+    "colorado/douglas/standardized.csv": {
+      "size": 18447410,
+      "md5": "908abfa0d4fcb690a28a25b38b8e625b",
+      "uploaded": "2026-02-13T03:32:38.196289+00:00"
+    },
+    "colorado/douglas/all_roads.csv": {
+      "size": 18355770,
+      "md5": "f75adf787799794567329cb5f321680e",
+      "uploaded": "2026-02-13T03:32:40.216522+00:00"
+    },
+    "colorado/douglas/county_roads.csv": {
+      "size": 9500748,
+      "md5": "1bd08eebb2789666adf54872dbc3f9c8",
+      "uploaded": "2026-02-13T03:32:42.812510+00:00"
+    },
+    "colorado/douglas/no_interstate.csv": {
+      "size": 14401256,
+      "md5": "ee39cf08e260fb9c953446b5c185d139",
+      "uploaded": "2026-02-13T03:32:44.740094+00:00"
+    },
+    "colorado/douglas/forecasts_county_roads.json": {
+      "size": 212537,
+      "md5": "c07c955ce513ea7fc12463d10a2cff92",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "colorado/douglas/forecasts_no_interstate.json": {
+      "size": 237416,
+      "md5": "7f97e7f04d086f03b73029aa16390a16",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "colorado/douglas/forecasts_all_roads.json": {
+      "size": 238007,
+      "md5": "fc6dfbcf29022bd9b14095a999297c30",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "virginia/henrico/county_roads.csv": {
+      "size": 17468416,
+      "uploaded": "2026-02-13T04:00:00.000000+00:00"
+    },
+    "virginia/henrico/no_interstate.csv": {
+      "size": 28229222,
+      "uploaded": "2026-02-13T04:00:00.000000+00:00"
+    },
+    "virginia/henrico/all_roads.csv": {
+      "size": 14533015,
+      "md5": "3256b044e26f205482525c998e89127f",
+      "uploaded": "2026-03-23T11:47:59.326685+00:00"
+    },
+    "virginia/henrico/forecasts_county_roads.json": {
+      "size": 358029,
+      "md5": "ae547d16fbcfed2370df0eacd1dc0dd6",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "virginia/henrico/forecasts_no_interstate.json": {
+      "size": 368589,
+      "md5": "7d765252583a75a95dc1f6272f10e1c0",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "virginia/henrico/forecasts_all_roads.json": {
+      "size": 359000,
+      "md5": "8700057111049b7421451c6694575dce",
+      "uploaded": "2026-02-16T00:45:07.223028+00:00"
+    },
+    "maryland/montgomery/standardized.csv": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/all_roads.csv": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/county_roads.csv": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/no_interstate.csv": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/forecasts_county_roads.json": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/forecasts_no_interstate.json": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    },
+    "maryland/montgomery/forecasts_all_roads.json": {
+      "size": 0,
+      "_status": "pending_first_pipeline_run",
+      "uploaded": "2026-02-17T00:00:00.000000+00:00"
+    }
+  },
+  "localPathMapping": {
+    "_comment": "Maps local file paths (relative to repo root) to R2 keys. Pattern: data/{stateDataDir?}/{jurisdiction}_{filter}.csv -> {state}/{jurisdiction}/{filter}.csv",
+    "data/CDOT/douglas_standardized.csv": "colorado/douglas/standardized.csv",
+    "data/CDOT/douglas_all_roads.csv": "colorado/douglas/all_roads.csv",
+    "data/CDOT/douglas_county_roads.csv": "colorado/douglas/county_roads.csv",
+    "data/CDOT/douglas_no_interstate.csv": "colorado/douglas/no_interstate.csv",
+    "data/CDOT/forecasts_county_roads.json": "colorado/douglas/forecasts_county_roads.json",
+    "data/CDOT/forecasts_no_interstate.json": "colorado/douglas/forecasts_no_interstate.json",
+    "data/CDOT/forecasts_all_roads.json": "colorado/douglas/forecasts_all_roads.json",
+    "data/henrico_county_roads.csv": "virginia/henrico/county_roads.csv",
+    "data/henrico_no_interstate.csv": "virginia/henrico/no_interstate.csv",
+    "data/henrico_all_roads.csv": "virginia/henrico/all_roads.csv",
+    "data/forecasts_county_roads.json": "virginia/henrico/forecasts_county_roads.json",
+    "data/forecasts_no_interstate.json": "virginia/henrico/forecasts_no_interstate.json",
+    "data/forecasts_all_roads.json": "virginia/henrico/forecasts_all_roads.json",
+    "data/MarylandDOT/montgomery_standardized.csv": "maryland/montgomery/standardized.csv",
+    "data/MarylandDOT/montgomery_all_roads.csv": "maryland/montgomery/all_roads.csv",
+    "data/MarylandDOT/montgomery_county_roads.csv": "maryland/montgomery/county_roads.csv",
+    "data/MarylandDOT/montgomery_no_interstate.csv": "maryland/montgomery/no_interstate.csv",
+    "data/MarylandDOT/montgomery/forecasts_county_roads.json": "maryland/montgomery/forecasts_county_roads.json",
+    "data/MarylandDOT/montgomery/forecasts_no_interstate.json": "maryland/montgomery/forecasts_no_interstate.json",
+    "data/MarylandDOT/montgomery/forecasts_all_roads.json": "maryland/montgomery/forecasts_all_roads.json"
+  }
+}

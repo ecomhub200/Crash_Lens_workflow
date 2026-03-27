@@ -1,0 +1,20 @@
+{
+  "lastRun": "2026-02-09T11:47:18.887192Z",
+  "runType": "incremental",
+  "jurisdiction": "henrico",
+  "validationRulesVersion": "1.0.0",
+  "correctionRulesVersion": "1.0.0",
+  "recordsProcessed": {
+    "total_records": 48476,
+    "new_records": 0,
+    "validated": 0,
+    "auto_corrected": 0,
+    "flagged": 0,
+    "errors": 0
+  },
+  "filesValidated": [
+    "henrico_county_roads.csv",
+    "henrico_no_interstate.csv",
+    "henrico_all_roads.csv"
+  ]
+}

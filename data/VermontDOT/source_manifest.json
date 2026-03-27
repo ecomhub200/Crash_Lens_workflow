@@ -1,0 +1,18 @@
+{
+  "_description": "VTrans crash data registry. 14 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Vermont Agency of Transportation",
+    "base_url": "https://apps.vtrans.vermont.gov/crashdata",
+    "api_url": "https://apps.vtrans.vermont.gov/crashdata/api/Accident",
+    "file_format": "JSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 14 Vermont counties. FIPS codes are 5-digit (state 50 + 3-digit county).",
+    "_placeholder": "Populate with all 14 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://apps.vtrans.vermont.gov/crashdata/api/Accident",
+    "documentation": "https://apps.vtrans.vermont.gov/crashdata"
+  }
+}

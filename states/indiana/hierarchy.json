@@ -1,0 +1,881 @@
+{
+  "state": {
+    "fips": "18",
+    "name": "Indiana",
+    "abbreviation": "IN",
+    "dot": "INDOT",
+    "dotFullName": "Indiana Department of Transportation",
+    "center": [
+      -86.258278,
+      39.849426
+    ],
+    "zoom": 7,
+    "placesCount": 565
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "in_1": {
+      "name": "Crawfordsville District",
+      "shortName": "Crawfordsville District",
+      "center": [
+        -87.1,
+        39.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "011",
+        "015",
+        "021",
+        "023",
+        "045",
+        "063",
+        "107",
+        "109",
+        "119",
+        "121",
+        "133",
+        "157",
+        "165",
+        "167",
+        "171"
+      ],
+      "countyNames": {
+        "007": "Benton",
+        "011": "Boone",
+        "015": "Carroll",
+        "021": "Clay",
+        "023": "Clinton",
+        "045": "Fountain",
+        "063": "Hendricks",
+        "107": "Montgomery",
+        "109": "Morgan",
+        "119": "Owen",
+        "121": "Parke",
+        "133": "Putnam",
+        "157": "Tippecanoe",
+        "165": "Vermillion",
+        "167": "Vigo",
+        "171": "Warren"
+      },
+      "mapBounds": {
+        "sw": [
+          39.2,
+          -87.8
+        ],
+        "ne": [
+          40.5,
+          -86.4
+        ]
+      },
+      "hq": "Crawfordsville"
+    },
+    "in_2": {
+      "name": "Fort Wayne District",
+      "shortName": "Fort Wayne District",
+      "center": [
+        -85.1,
+        40.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "033",
+        "053",
+        "069",
+        "075",
+        "087",
+        "113",
+        "151",
+        "169",
+        "179",
+        "183"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "003": "Allen",
+        "033": "DeKalb",
+        "053": "Grant",
+        "069": "Huntington",
+        "075": "Jay",
+        "087": "Lagrange",
+        "113": "Noble",
+        "151": "Steuben",
+        "169": "Wabash",
+        "179": "Wells",
+        "183": "Whitley"
+      },
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -85.8
+        ],
+        "ne": [
+          41.8,
+          -84.4
+        ]
+      },
+      "hq": "Fort Wayne"
+    },
+    "in_3": {
+      "name": "Greenfield District",
+      "shortName": "Greenfield District",
+      "center": [
+        -85.6,
+        39.95
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "035",
+        "041",
+        "047",
+        "057",
+        "059",
+        "065",
+        "067",
+        "095",
+        "097",
+        "135",
+        "139",
+        "145",
+        "159",
+        "161",
+        "177"
+      ],
+      "countyNames": {
+        "009": "Blackford",
+        "035": "Delaware",
+        "041": "Fayette",
+        "047": "Franklin",
+        "057": "Hamilton",
+        "059": "Hancock",
+        "065": "Henry",
+        "067": "Howard",
+        "095": "Madison",
+        "097": "Marion",
+        "135": "Randolph",
+        "139": "Rush",
+        "145": "Shelby",
+        "159": "Tipton",
+        "161": "Union",
+        "177": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          39.3,
+          -86.4
+        ],
+        "ne": [
+          40.6,
+          -84.8
+        ]
+      },
+      "hq": "Greenfield"
+    },
+    "in_4": {
+      "name": "LaPorte District",
+      "shortName": "LaPorte District",
+      "center": [
+        -86.6,
+        41.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "017",
+        "039",
+        "049",
+        "073",
+        "085",
+        "089",
+        "091",
+        "099",
+        "103",
+        "111",
+        "127",
+        "131",
+        "141",
+        "149",
+        "181"
+      ],
+      "countyNames": {
+        "017": "Cass",
+        "039": "Elkhart",
+        "049": "Fulton",
+        "073": "Jasper",
+        "085": "Kosciusko",
+        "089": "Lake",
+        "091": "LaPorte",
+        "099": "Marshall",
+        "103": "Miami",
+        "111": "Newton",
+        "127": "Porter",
+        "131": "Pulaski",
+        "141": "St. Joseph",
+        "149": "Starke",
+        "181": "White"
+      },
+      "mapBounds": {
+        "sw": [
+          40.5,
+          -87.5
+        ],
+        "ne": [
+          41.8,
+          -85.7
+        ]
+      },
+      "hq": "LaPorte"
+    },
+    "in_5": {
+      "name": "Seymour District",
+      "shortName": "Seymour District",
+      "center": [
+        -86.1,
+        38.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "013",
+        "019",
+        "029",
+        "031",
+        "043",
+        "061",
+        "071",
+        "077",
+        "079",
+        "081",
+        "093",
+        "105",
+        "115",
+        "117",
+        "137",
+        "143",
+        "155",
+        "175"
+      ],
+      "countyNames": {
+        "005": "Bartholomew",
+        "013": "Brown",
+        "019": "Clark",
+        "029": "Dearborn",
+        "031": "Decatur",
+        "043": "Floyd",
+        "061": "Harrison",
+        "071": "Jackson",
+        "077": "Jefferson",
+        "079": "Jennings",
+        "081": "Johnson",
+        "093": "Lawrence",
+        "105": "Monroe",
+        "115": "Ohio",
+        "117": "Orange",
+        "137": "Ripley",
+        "143": "Scott",
+        "155": "Switzerland",
+        "175": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          38.0,
+          -86.8
+        ],
+        "ne": [
+          39.6,
+          -85.2
+        ]
+      },
+      "hq": "Seymour"
+    },
+    "in_6": {
+      "name": "Vincennes District",
+      "shortName": "Vincennes District",
+      "center": [
+        -87.2,
+        38.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "025",
+        "027",
+        "037",
+        "051",
+        "055",
+        "083",
+        "101",
+        "123",
+        "125",
+        "129",
+        "147",
+        "153",
+        "163",
+        "173"
+      ],
+      "countyNames": {
+        "025": "Crawford",
+        "027": "Daviess",
+        "037": "Dubois",
+        "051": "Gibson",
+        "055": "Greene",
+        "083": "Knox",
+        "101": "Martin",
+        "123": "Perry",
+        "125": "Pike",
+        "129": "Posey",
+        "147": "Spencer",
+        "153": "Sullivan",
+        "163": "Vanderburgh",
+        "173": "Warrick"
+      },
+      "mapBounds": {
+        "sw": [
+          37.8,
+          -88.1
+        ],
+        "ne": [
+          39.3,
+          -86.6
+        ]
+      },
+      "hq": "Vincennes"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "impo": {
+      "name": "Indianapolis MPO",
+      "shortName": "Indianapolis",
+      "type": "mpo",
+      "center": [
+        -86.1581,
+        39.7684
+      ],
+      "zoom": 9,
+      "counties": [
+        "097",
+        "057",
+        "063",
+        "081",
+        "059",
+        "011",
+        "109",
+        "145"
+      ],
+      "countyNames": {
+        "097": "Marion",
+        "057": "Hamilton",
+        "063": "Hendricks",
+        "081": "Johnson",
+        "059": "Hancock",
+        "011": "Boone",
+        "109": "Morgan",
+        "145": "Shelby"
+      },
+      "btsAcronym": "IM",
+      "mapBounds": {
+        "sw": [
+          39.4,
+          -86.55
+        ],
+        "ne": [
+          40.1,
+          -85.75
+        ]
+      }
+    },
+    "nirpcnwirpc": {
+      "name": "NIRPC (NW Indiana Regional Planning Commission)",
+      "shortName": "NW Indiana Regional Planning Commission",
+      "type": "mpo",
+      "center": [
+        -85.1394,
+        41.0793
+      ],
+      "zoom": 10,
+      "counties": [
+        "089",
+        "127",
+        "091"
+      ],
+      "countyNames": {
+        "089": "Lake",
+        "127": "Porter",
+        "091": "LaPorte"
+      },
+      "btsAcronym": "NIRPC",
+      "mapBounds": {
+        "sw": [
+          40.85,
+          -85.4
+        ],
+        "ne": [
+          41.3,
+          -84.85
+        ]
+      }
+    },
+    "fwacmpo": {
+      "name": "Fort Wayne-Allen County MPO",
+      "shortName": "Fort Wayne-Allen County",
+      "type": "mpo",
+      "center": [
+        -86.252,
+        41.6834
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Allen"
+      },
+      "btsAcronym": "FWCM",
+      "mapBounds": {
+        "sw": [
+          41.45,
+          -86.55
+        ],
+        "ne": [
+          41.9,
+          -85.95
+        ]
+      }
+    },
+    "empo": {
+      "name": "Evansville MPO",
+      "shortName": "Evansville",
+      "type": "mpo",
+      "center": [
+        -87.5717,
+        38.0406
+      ],
+      "zoom": 10,
+      "counties": [
+        "163",
+        "173"
+      ],
+      "countyNames": {
+        "163": "Vanderburgh",
+        "173": "Warrick"
+      },
+      "btsAcronym": "EM",
+      "mapBounds": {
+        "sw": [
+          37.85,
+          -87.8
+        ],
+        "ne": [
+          38.25,
+          -87.35
+        ]
+      }
+    },
+    "macogsb": {
+      "name": "Michiana Area COG (South Bend)",
+      "shortName": "South Bend",
+      "type": "mpo",
+      "center": [
+        -86.8753,
+        40.4167
+      ],
+      "zoom": 10,
+      "counties": [
+        "141",
+        "039"
+      ],
+      "countyNames": {
+        "141": "St. Joseph",
+        "039": "Elkhart"
+      },
+      "btsAcronym": "MACB",
+      "mapBounds": {
+        "sw": [
+          40.2,
+          -87.15
+        ],
+        "ne": [
+          40.65,
+          -86.6
+        ]
+      }
+    },
+    "apctcl": {
+      "name": "Area Plan Commission of Tippecanoe County (Lafayette)",
+      "shortName": "Lafayette",
+      "type": "mpo",
+      "center": [
+        -85.3864,
+        40.1934
+      ],
+      "zoom": 10,
+      "counties": [
+        "157"
+      ],
+      "countyNames": {
+        "157": "Tippecanoe"
+      },
+      "btsAcronym": "APCTC",
+      "mapBounds": {
+        "sw": [
+          39.95,
+          -85.65
+        ],
+        "ne": [
+          40.4,
+          -85.1
+        ]
+      }
+    },
+    "bmcmpo": {
+      "name": "Bloomington/Monroe County MPO",
+      "shortName": "Bloomington/Monroe County",
+      "type": "mpo",
+      "center": [
+        -86.5264,
+        39.1653
+      ],
+      "zoom": 10,
+      "counties": [
+        "105"
+      ],
+      "countyNames": {
+        "105": "Monroe"
+      },
+      "btsAcronym": "BCM",
+      "mapBounds": {
+        "sw": [
+          38.95,
+          -86.75
+        ],
+        "ne": [
+          39.4,
+          -86.3
+        ]
+      }
+    },
+    "thampo": {
+      "name": "Terre Haute Area MPO",
+      "shortName": "Terre Haute Area",
+      "type": "mpo",
+      "center": [
+        -87.3469,
+        41.5868
+      ],
+      "zoom": 10,
+      "counties": [
+        "167"
+      ],
+      "countyNames": {
+        "167": "Vigo"
+      },
+      "btsAcronym": "THAM",
+      "mapBounds": {
+        "sw": [
+          41.35,
+          -87.6
+        ],
+        "ne": [
+          41.8,
+          -87.1
+        ]
+      }
+    },
+    "dmmpo": {
+      "name": "Delaware-Muncie MPO",
+      "shortName": "Delaware-Muncie",
+      "type": "mpo",
+      "center": [
+        -85.1787,
+        39.1637
+      ],
+      "zoom": 10,
+      "counties": [
+        "035"
+      ],
+      "countyNames": {
+        "035": "Delaware"
+      },
+      "btsAcronym": "DM",
+      "mapBounds": {
+        "sw": [
+          38.95,
+          -85.45
+        ],
+        "ne": [
+          39.4,
+          -84.9
+        ]
+      }
+    },
+    "krpda": {
+      "name": "Kentuckiana Regional Planning & Development Agency",
+      "shortName": "Kentuckiana Regional Planning & Development Agency",
+      "type": "mpo",
+      "center": [
+        -86.0669,
+        40.7448
+      ],
+      "zoom": 11,
+      "counties": [
+        "019",
+        "043"
+      ],
+      "countyNames": {
+        "019": "Clark",
+        "043": "Floyd"
+      },
+      "btsAcronym": "KRPDA",
+      "mapBounds": {
+        "sw": [
+          40.6,
+          -86.25
+        ],
+        "ne": [
+          40.9,
+          -85.85
+        ]
+      }
+    },
+    "khcmpo": {
+      "name": "Kokomo/Howard County MPO",
+      "shortName": "Kokomo/Howard County",
+      "type": "mpo",
+      "center": [
+        -86.1336,
+        40.4867
+      ],
+      "zoom": 11,
+      "counties": [
+        "067"
+      ],
+      "countyNames": {
+        "067": "Howard"
+      },
+      "btsAcronym": "KCM",
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -86.35
+        ],
+        "ne": [
+          40.65,
+          -85.9
+        ]
+      }
+    },
+    "ampo": {
+      "name": "Anderson MPO",
+      "shortName": "Anderson",
+      "type": "mpo",
+      "center": [
+        -85.6803,
+        40.1053
+      ],
+      "zoom": 11,
+      "counties": [
+        "095"
+      ],
+      "countyNames": {
+        "095": "Madison"
+      },
+      "btsAcronym": "AM",
+      "mapBounds": {
+        "sw": [
+          39.9,
+          -85.9
+        ],
+        "ne": [
+          40.3,
+          -85.45
+        ]
+      }
+    },
+    "campo": {
+      "name": "Columbus Area MPO",
+      "shortName": "Columbus Area",
+      "type": "mpo",
+      "center": [
+        -85.9214,
+        39.2014
+      ],
+      "zoom": 11,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Bartholomew"
+      },
+      "btsAcronym": "CAM",
+      "mapBounds": {
+        "sw": [
+          39.0,
+          -86.15
+        ],
+        "ne": [
+          39.4,
+          -85.7
+        ]
+      }
+    },
+    "madison_county_cog_mpo": {
+      "name": "Madison County COG",
+      "shortName": "Madison County COG",
+      "type": "mpo",
+      "btsMpoId": "18196900",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.731118,
+        40.063364
+      ],
+      "zoom": 10
+    },
+    "northwest_indiana_regional_planning_commission_mpo": {
+      "name": "Northwest Indiana Regional Planning Commission",
+      "shortName": "Northwest Indiana Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "18197501",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.031695,
+        41.508151
+      ],
+      "zoom": 10
+    },
+    "kokomo_howard_county_governmental_coordinating_council_mpo": {
+      "name": "Kokomo & Howard County Governmental Coordinating Council",
+      "shortName": "Kokomo & Howard County Governmental Coordinating Council",
+      "type": "mpo",
+      "btsMpoId": "18198202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -86.133093,
+        40.473984
+      ],
+      "zoom": 10
+    },
+    "northeastern_indiana_regional_coordinating_council_mpo": {
+      "name": "Northeastern Indiana Regional Coordinating Council",
+      "shortName": "Northeastern Indiana Regional Coordinating Council",
+      "type": "mpo",
+      "btsMpoId": "18197402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.082865,
+        41.1246
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Allen",
+    "005": "Bartholomew",
+    "007": "Benton",
+    "009": "Blackford",
+    "011": "Boone",
+    "013": "Brown",
+    "015": "Carroll",
+    "017": "Cass",
+    "019": "Clark",
+    "021": "Clay",
+    "023": "Clinton",
+    "025": "Crawford",
+    "027": "Daviess",
+    "029": "Dearborn",
+    "031": "Decatur",
+    "033": "DeKalb",
+    "035": "Delaware",
+    "037": "Dubois",
+    "039": "Elkhart",
+    "041": "Fayette",
+    "043": "Floyd",
+    "045": "Fountain",
+    "047": "Franklin",
+    "049": "Fulton",
+    "051": "Gibson",
+    "053": "Grant",
+    "055": "Greene",
+    "057": "Hamilton",
+    "059": "Hancock",
+    "061": "Harrison",
+    "063": "Hendricks",
+    "065": "Henry",
+    "067": "Howard",
+    "069": "Huntington",
+    "071": "Jackson",
+    "073": "Jasper",
+    "075": "Jay",
+    "077": "Jefferson",
+    "079": "Jennings",
+    "081": "Johnson",
+    "083": "Knox",
+    "085": "Kosciusko",
+    "087": "Lagrange",
+    "089": "Lake",
+    "091": "LaPorte",
+    "093": "Lawrence",
+    "095": "Madison",
+    "097": "Marion",
+    "099": "Marshall",
+    "101": "Martin",
+    "103": "Miami",
+    "105": "Monroe",
+    "107": "Montgomery",
+    "109": "Morgan",
+    "111": "Newton",
+    "113": "Noble",
+    "115": "Ohio",
+    "117": "Orange",
+    "119": "Owen",
+    "121": "Parke",
+    "123": "Perry",
+    "125": "Pike",
+    "127": "Porter",
+    "129": "Posey",
+    "131": "Pulaski",
+    "133": "Putnam",
+    "135": "Randolph",
+    "137": "Ripley",
+    "139": "Rush",
+    "141": "St. Joseph",
+    "143": "Scott",
+    "145": "Shelby",
+    "147": "Spencer",
+    "149": "Starke",
+    "151": "Steuben",
+    "153": "Sullivan",
+    "155": "Switzerland",
+    "157": "Tippecanoe",
+    "159": "Tipton",
+    "161": "Union",
+    "163": "Vanderburgh",
+    "165": "Vermillion",
+    "167": "Vigo",
+    "169": "Wabash",
+    "171": "Warren",
+    "173": "Warrick",
+    "175": "Washington",
+    "177": "Wayne",
+    "179": "Wells",
+    "181": "White",
+    "183": "Whitley"
+  }
+}

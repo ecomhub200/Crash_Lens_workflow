@@ -1,0 +1,286 @@
+name: Download CDOT Crash Data
+
+# Separate workflow for Colorado CDOT crash data downloads from Hyland OnBase.
+# This is kept separate from download-data.yml because:
+#   1. Different data source (OnBase document portal vs ArcGIS API / Grants.gov)
+#   2. Different cadence (CDOT publishes annually, not monthly)
+#   3. Different failure modes (OnBase may require manual intervention)
+
+on:
+  schedule:
+    # 1st of every month at 11:00 AM UTC — checks for new data
+    - cron: '0 11 1 * *'
+  workflow_dispatch:
+    inputs:
+      years:
+        description: 'Comma-separated years to download (e.g., "2024,2025"). Leave empty for latest only.'
+        required: false
+        default: ''
+        type: string
+      jurisdiction:
+        description: 'County to filter to (any of 64 CO counties)'
+        required: false
+        default: 'douglas'
+        type: string
+      latest_only:
+        description: 'Download only the most recent year'
+        required: false
+        type: boolean
+        default: true
+      skip_dictionaries:
+        description: 'Skip downloading data dictionaries'
+        required: false
+        type: boolean
+        default: false
+      force_download:
+        description: 'Force re-download even for finalized years that already exist'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  # R2 state prefix - parameterized for multi-state support
+  R2_STATE_PREFIX: colorado
+  STATE_DISPLAY: Colorado
+
+jobs:
+  download-cdot-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+          # Verify Playwright + Chromium are working
+          python -c "
+          from playwright.sync_api import sync_playwright
+          import os
+          with sync_playwright() as p:
+              path = p.chromium.executable_path
+              exists = os.path.isfile(path) if path else False
+              print(f'Chromium binary: {path}')
+              print(f'Binary exists: {exists}')
+              if not exists:
+                  print('WARNING: Chromium binary not found!')
+          " || echo "WARNING: Playwright verification failed (non-fatal)"
+
+      - name: Build download arguments
+        id: build-args
+        run: |
+          ARGS="--data-dir data/CDOT"
+
+          # Jurisdiction
+          JURISDICTION="${{ github.event.inputs.jurisdiction || 'douglas' }}"
+          ARGS="$ARGS --jurisdiction $JURISDICTION"
+
+          # Years or latest
+          YEARS="${{ github.event.inputs.years }}"
+          LATEST="${{ github.event.inputs.latest_only }}"
+          SKIP_DICT="${{ github.event.inputs.skip_dictionaries }}"
+
+          if [ -n "$YEARS" ]; then
+            # Convert comma-separated to space-separated
+            YEARS_SPACED=$(echo "$YEARS" | tr ',' ' ')
+            ARGS="$ARGS --years $YEARS_SPACED"
+          elif [ "$LATEST" = "true" ] || [ "${{ github.event_name }}" = "schedule" ]; then
+            # Scheduled runs always use --latest to check for updates
+            ARGS="$ARGS --latest"
+          fi
+
+          if [ "$SKIP_DICT" = "true" ]; then
+            ARGS="$ARGS --no-dict"
+          fi
+
+          FORCE="${{ github.event.inputs.force_download }}"
+          if [ "$FORCE" = "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+
+          echo "args=$ARGS" >> $GITHUB_OUTPUT
+          echo "jurisdiction=$JURISDICTION" >> $GITHUB_OUTPUT
+          echo "Download arguments: $ARGS"
+
+      - name: Download CDOT crash data
+        id: download
+        run: |
+          echo "=========================================="
+          echo "Downloading CDOT Crash Data"
+          echo "Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+          python download_cdot_crash_data.py ${{ steps.build-args.outputs.args }} --save-statewide-gzip
+          echo "=========================================="
+          echo "Download complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Generate download statistics
+        id: stats
+        run: |
+          echo "=========================================="
+          echo "Download Statistics"
+          echo "=========================================="
+          echo ""
+          echo "Files in data/CDOT/:"
+          ls -lh data/CDOT/*.csv 2>/dev/null || echo "  No CSV files found"
+          echo ""
+
+          # Count new/changed files
+          CHANGED=$(git diff --name-only data/CDOT/ 2>/dev/null | wc -l | tr -d ' ')
+          UNTRACKED=$(git ls-files --others --exclude-standard data/CDOT/ 2>/dev/null | wc -l | tr -d ' ')
+          echo "Changed files: $CHANGED"
+          echo "New files: $UNTRACKED"
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+          echo "untracked=$UNTRACKED" >> $GITHUB_OUTPUT
+          echo "=========================================="
+
+      - name: Upload raw annual CSVs to R2
+        id: r2-upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          JURISDICTION="${{ steps.build-args.outputs.jurisdiction }}"
+          UPLOADED=0
+          # Upload raw annual CSVs (filenames may have spaces)
+          for f in data/CDOT/20*.csv; do
+            [ -f "$f" ] || continue
+            BASENAME=$(basename "$f")
+            YEAR=$(echo "$BASENAME" | grep -oP '^\d{4}')
+            if [ -n "$YEAR" ]; then
+              if aws s3 cp "$f" "s3://crash-lens-data/${R2_STATE_PREFIX}/${JURISDICTION}/raw/${YEAR}.csv" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "text/csv"; then
+                echo "  Uploaded: $f -> ${R2_STATE_PREFIX}/${JURISDICTION}/raw/${YEAR}.csv"
+                UPLOADED=$((UPLOADED + 1))
+              else
+                echo "  Warning: failed to upload $f"
+              fi
+            fi
+          done
+          echo "uploaded=$UPLOADED" >> $GITHUB_OUTPUT
+          if [ "$UPLOADED" -eq 0 ]; then
+            echo "::warning::No CSV files were uploaded to R2 — download may have failed"
+          fi
+
+      - name: Verify R2 state
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          JURISDICTION="${{ steps.build-args.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "R2 Storage State: ${R2_STATE_PREFIX}/${JURISDICTION}/raw/"
+          echo "=========================================="
+          aws s3 ls "s3://crash-lens-data/${R2_STATE_PREFIX}/${JURISDICTION}/raw/" \
+            --endpoint-url "$R2_ENDPOINT" 2>/dev/null || echo "  Could not list R2 bucket (check credentials)"
+          echo "=========================================="
+
+      # Stage 2a.5: Upload statewide gzip to R2 (if generated at Stage 1.5)
+      - name: Check statewide gzip exists
+        id: check-statewide-gzip
+        run: |
+          GZ="data/CDOT/colorado_statewide_all_roads.csv.gz"
+          if [ -f "$GZ" ]; then
+            SIZE=$(stat -c%s "$GZ" 2>/dev/null || stat -f%z "$GZ" 2>/dev/null || echo 0)
+            # Read uncompressed size from gzip footer (last 4 bytes, little-endian)
+            UNCOMPRESSED=$(python3 -c "
+          import struct
+          with open('$GZ', 'rb') as f:
+              f.seek(-4, 2)
+              print(struct.unpack('<I', f.read(4))[0])
+          " 2>/dev/null || echo 0)
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "size=$SIZE" >> $GITHUB_OUTPUT
+            echo "uncompressed=$UNCOMPRESSED" >> $GITHUB_OUTPUT
+            echo "Statewide gzip found: $GZ ($SIZE bytes, uncompressed ~$UNCOMPRESSED bytes)"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Statewide gzip not found (--save-statewide-gzip may have been skipped or failed)"
+          fi
+
+      - name: Upload statewide gzip to R2 (Stage 2a.5)
+        if: steps.check-statewide-gzip.outputs.exists == 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/CDOT/colorado_statewide_all_roads.csv.gz", "r2_key": "${{ env.R2_STATE_PREFIX }}/_state/statewide_all_roads.csv.gz", "uncompressed_size": ${{ steps.check-statewide-gzip.outputs.uncompressed || 0 }}}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      - name: Commit manifest and metadata
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Stage only metadata and manifest (NOT the large CSVs)
+          git add data/r2-manifest.json
+          git add data/CDOT/.validation/ 2>/dev/null || true
+          git add data/CDOT/config.json data/CDOT/source_manifest.json data/CDOT/jurisdictions.json 2>/dev/null || true
+          git add data/CDOT/.geocode_cache.json 2>/dev/null || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          JURISDICTION="${{ steps.build-args.outputs.jurisdiction }}"
+          git commit -m "chore: update $STATE_DISPLAY crash data ($JURISDICTION) -> R2 [$(date +'%Y-%m-%d')]"
+
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))
+            git fetch origin main
+            git rebase origin/main || {
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Job summary
+        if: always()
+        run: |
+          JURISDICTION="${{ steps.build-args.outputs.jurisdiction }}"
+          UPLOADED="${{ steps.r2-upload.outputs.uploaded || '0' }}"
+          CHANGED="${{ steps.stats.outputs.changed || '0' }}"
+          UNTRACKED="${{ steps.stats.outputs.untracked || '0' }}"
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## CDOT Crash Data Download — ${JURISDICTION}
+
+          | Metric | Value |
+          |--------|-------|
+          | Jurisdiction | ${JURISDICTION} |
+          | Args | \`${{ steps.build-args.outputs.args }}\` |
+          | CSVs downloaded | ${CHANGED} changed, ${UNTRACKED} new |
+          | CSVs uploaded to R2 | ${UPLOADED} |
+          | Run time | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+
+          > Check the **Download CDOT crash data** step logs for detailed strategy output.
+          > Check the **Verify R2 state** step to confirm data in R2.
+          EOF

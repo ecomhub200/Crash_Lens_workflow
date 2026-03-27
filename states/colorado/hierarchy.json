@@ -1,0 +1,919 @@
+{
+  "state": {
+    "fips": "08",
+    "name": "Colorado",
+    "abbreviation": "CO",
+    "dot": "CDOT",
+    "dotFullName": "Colorado Department of Transportation",
+    "center": [
+      -105.55,
+      39.0
+    ],
+    "zoom": 7,
+    "bbox": [
+      -109.05,
+      36.99,
+      -102.04,
+      41.0
+    ],
+    "placesCount": 271
+  },
+  "regionType": {
+    "label": "Engineering Region",
+    "labelPlural": "Engineering Regions",
+    "shortLabel": "Region"
+  },
+  "regions": {
+    "region_1": {
+      "name": "Region 1 \u2014 Central/Denver Metro",
+      "shortName": "Region 1",
+      "center": [
+        -105.0,
+        39.65
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "005",
+        "013",
+        "014",
+        "019",
+        "031",
+        "035",
+        "047",
+        "059",
+        "117"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "005": "Arapahoe",
+        "013": "Boulder",
+        "014": "Broomfield",
+        "019": "Clear Creek",
+        "031": "Denver",
+        "035": "Douglas",
+        "047": "Gilpin",
+        "059": "Jefferson",
+        "117": "Summit"
+      },
+      "keyCities": [
+        "Denver",
+        "Aurora",
+        "Lakewood",
+        "Arvada",
+        "Boulder",
+        "Castle Rock"
+      ],
+      "keyCorridors": [
+        "I-25",
+        "I-70",
+        "I-76",
+        "US-36",
+        "C-470"
+      ]
+    },
+    "region_2": {
+      "name": "Region 2 \u2014 Southeast",
+      "shortName": "Region 2",
+      "center": [
+        -104.5,
+        38.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "011",
+        "025",
+        "027",
+        "041",
+        "043",
+        "055",
+        "061",
+        "063",
+        "065",
+        "071",
+        "073",
+        "089",
+        "093",
+        "099",
+        "101",
+        "119"
+      ],
+      "countyNames": {
+        "009": "Baca",
+        "011": "Bent",
+        "025": "Crowley",
+        "027": "Custer",
+        "041": "El Paso",
+        "043": "Fremont",
+        "055": "Huerfano",
+        "061": "Kiowa",
+        "063": "Kit Carson",
+        "065": "Lake",
+        "071": "Las Animas",
+        "073": "Lincoln",
+        "089": "Otero",
+        "093": "Park",
+        "099": "Prowers",
+        "101": "Pueblo",
+        "119": "Teller"
+      },
+      "keyCities": [
+        "Colorado Springs",
+        "Pueblo",
+        "Canon City",
+        "Lamar"
+      ],
+      "keyCorridors": [
+        "I-25",
+        "US-24",
+        "US-50",
+        "US-285"
+      ]
+    },
+    "region_3": {
+      "name": "Region 3 \u2014 Western",
+      "shortName": "Region 3",
+      "center": [
+        -107.5,
+        39.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "029",
+        "037",
+        "045",
+        "049",
+        "051",
+        "053",
+        "057",
+        "077",
+        "081",
+        "085",
+        "091",
+        "097",
+        "103",
+        "107",
+        "113"
+      ],
+      "countyNames": {
+        "029": "Delta",
+        "037": "Eagle",
+        "045": "Garfield",
+        "049": "Grand",
+        "051": "Gunnison",
+        "053": "Hinsdale",
+        "057": "Jackson",
+        "077": "Mesa",
+        "081": "Moffat",
+        "085": "Montrose",
+        "091": "Ouray",
+        "097": "Pitkin",
+        "103": "Rio Blanco",
+        "107": "Routt",
+        "113": "San Miguel"
+      },
+      "keyCities": [
+        "Grand Junction",
+        "Steamboat Springs",
+        "Glenwood Springs",
+        "Aspen",
+        "Vail"
+      ],
+      "keyCorridors": [
+        "I-70",
+        "US-40",
+        "US-50",
+        "SH-82",
+        "SH-13"
+      ]
+    },
+    "region_4": {
+      "name": "Region 4 \u2014 Northeast",
+      "shortName": "Region 4",
+      "center": [
+        -104.5,
+        40.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "017",
+        "039",
+        "069",
+        "075",
+        "087",
+        "095",
+        "115",
+        "121",
+        "123",
+        "125"
+      ],
+      "countyNames": {
+        "017": "Cheyenne",
+        "039": "Elbert",
+        "069": "Larimer",
+        "075": "Logan",
+        "087": "Morgan",
+        "095": "Phillips",
+        "115": "Sedgwick",
+        "121": "Washington",
+        "123": "Weld",
+        "125": "Yuma"
+      },
+      "keyCities": [
+        "Fort Collins",
+        "Loveland",
+        "Greeley",
+        "Sterling",
+        "Longmont"
+      ],
+      "keyCorridors": [
+        "I-25",
+        "I-76",
+        "US-34",
+        "US-85",
+        "US-287"
+      ]
+    },
+    "region_5": {
+      "name": "Region 5 \u2014 Southwest",
+      "shortName": "Region 5",
+      "center": [
+        -106.5,
+        37.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "007",
+        "015",
+        "021",
+        "023",
+        "033",
+        "067",
+        "079",
+        "083",
+        "105",
+        "109",
+        "111"
+      ],
+      "countyNames": {
+        "003": "Alamosa",
+        "007": "Archuleta",
+        "015": "Chaffee",
+        "021": "Conejos",
+        "023": "Costilla",
+        "033": "Dolores",
+        "067": "La Plata",
+        "079": "Mineral",
+        "083": "Montezuma",
+        "105": "Rio Grande",
+        "109": "Saguache",
+        "111": "San Juan"
+      },
+      "keyCities": [
+        "Durango",
+        "Alamosa",
+        "Cortez",
+        "Pagosa Springs",
+        "Salida"
+      ],
+      "keyCorridors": [
+        "US-160",
+        "US-550",
+        "US-285",
+        "SH-17",
+        "US-50"
+      ]
+    }
+  },
+  "tprType": {
+    "label": "MPO/TPR",
+    "labelPlural": "MPOs & TPRs"
+  },
+  "tprs": {
+    "drcog": {
+      "name": "Denver Regional Council of Governments",
+      "shortName": "DRCOG",
+      "type": "mpo",
+      "btsAcronym": "DRCOG",
+      "btsMpoId": "CO-180",
+      "population": 3402000,
+      "center": [
+        -104.95,
+        39.72
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "005",
+        "013",
+        "014",
+        "019",
+        "031",
+        "035",
+        "047",
+        "059"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "005": "Arapahoe",
+        "013": "Boulder",
+        "014": "Broomfield",
+        "019": "Clear Creek",
+        "031": "Denver",
+        "035": "Douglas",
+        "047": "Gilpin",
+        "059": "Jefferson"
+      },
+      "parentRegion": "region_1",
+      "website": "https://drcog.org"
+    },
+    "ppacg": {
+      "name": "Pikes Peak Area Council of Governments",
+      "shortName": "PPACG",
+      "type": "mpo",
+      "btsAcronym": "PPACG",
+      "btsMpoId": "CO-200",
+      "population": 755000,
+      "center": [
+        -104.82,
+        38.85
+      ],
+      "zoom": 10,
+      "counties": [
+        "041",
+        "119"
+      ],
+      "countyNames": {
+        "041": "El Paso",
+        "119": "Teller"
+      },
+      "parentRegion": "region_2",
+      "website": "https://ppacg.org"
+    },
+    "nfrmpo": {
+      "name": "North Front Range Metropolitan Planning Organization",
+      "shortName": "NFRMPO",
+      "type": "mpo",
+      "btsAcronym": "NFRMPO",
+      "btsMpoId": "CO-190",
+      "population": 575000,
+      "center": [
+        -105.0,
+        40.45
+      ],
+      "zoom": 10,
+      "counties": [
+        "069",
+        "123"
+      ],
+      "countyNames": {
+        "069": "Larimer",
+        "123": "Weld"
+      },
+      "partialCounties": {
+        "123": "Southwest Weld County only; remainder is rural TPR"
+      },
+      "parentRegion": "region_4",
+      "website": "https://nfrmpo.org"
+    },
+    "gvmpo": {
+      "name": "Grand Valley Metropolitan Planning Organization",
+      "shortName": "GVMPO",
+      "type": "mpo",
+      "btsAcronym": "GVMPO",
+      "btsMpoId": "CO-185",
+      "population": 155000,
+      "center": [
+        -108.55,
+        39.07
+      ],
+      "zoom": 11,
+      "counties": [
+        "077"
+      ],
+      "countyNames": {
+        "077": "Mesa"
+      },
+      "parentRegion": "region_3",
+      "website": "https://gjcity.org/gvmpo"
+    },
+    "pacog": {
+      "name": "Pueblo Area Council of Governments",
+      "shortName": "PACOG",
+      "type": "mpo",
+      "btsAcronym": "PACOG",
+      "btsMpoId": "CO-195",
+      "population": 170000,
+      "center": [
+        -104.61,
+        38.27
+      ],
+      "zoom": 11,
+      "counties": [
+        "101"
+      ],
+      "countyNames": {
+        "101": "Pueblo"
+      },
+      "parentRegion": "region_2",
+      "website": "https://pueblo.us/pacog"
+    },
+    "tpr_central_front_range": {
+      "name": "Central Front Range TPR",
+      "shortName": "Central Front Range",
+      "type": "rural_tpr",
+      "counties": [
+        "015",
+        "019",
+        "027",
+        "043",
+        "065",
+        "093",
+        "117"
+      ],
+      "countyNames": {
+        "015": "Chaffee",
+        "019": "Clear Creek",
+        "027": "Custer",
+        "043": "Fremont",
+        "065": "Lake",
+        "093": "Park",
+        "117": "Summit"
+      },
+      "center": [
+        -105.8,
+        39.1
+      ],
+      "zoom": 9
+    },
+    "tpr_southeast": {
+      "name": "Southeast TPR",
+      "shortName": "Southeast",
+      "type": "rural_tpr",
+      "counties": [
+        "009",
+        "011",
+        "025",
+        "061",
+        "063",
+        "073",
+        "089",
+        "099"
+      ],
+      "countyNames": {
+        "009": "Baca",
+        "011": "Bent",
+        "025": "Crowley",
+        "061": "Kiowa",
+        "063": "Kit Carson",
+        "073": "Lincoln",
+        "089": "Otero",
+        "099": "Prowers"
+      },
+      "center": [
+        -103.5,
+        37.8
+      ],
+      "zoom": 8
+    },
+    "tpr_south_central": {
+      "name": "South Central TPR",
+      "shortName": "South Central",
+      "type": "rural_tpr",
+      "counties": [
+        "055",
+        "071"
+      ],
+      "countyNames": {
+        "055": "Huerfano",
+        "071": "Las Animas"
+      },
+      "center": [
+        -104.8,
+        37.3
+      ],
+      "zoom": 9
+    },
+    "tpr_san_luis_valley": {
+      "name": "San Luis Valley TPR",
+      "shortName": "San Luis Valley",
+      "type": "rural_tpr",
+      "counties": [
+        "003",
+        "021",
+        "023",
+        "079",
+        "105",
+        "109"
+      ],
+      "countyNames": {
+        "003": "Alamosa",
+        "021": "Conejos",
+        "023": "Costilla",
+        "079": "Mineral",
+        "105": "Rio Grande",
+        "109": "Saguache"
+      },
+      "center": [
+        -106.0,
+        37.5
+      ],
+      "zoom": 9
+    },
+    "tpr_gunnison_valley": {
+      "name": "Gunnison Valley TPR",
+      "shortName": "Gunnison Valley",
+      "type": "rural_tpr",
+      "counties": [
+        "029",
+        "051",
+        "053",
+        "091",
+        "113"
+      ],
+      "countyNames": {
+        "029": "Delta",
+        "051": "Gunnison",
+        "053": "Hinsdale",
+        "091": "Ouray",
+        "113": "San Miguel"
+      },
+      "center": [
+        -107.5,
+        38.5
+      ],
+      "zoom": 9
+    },
+    "tpr_southwest": {
+      "name": "Southwest TPR",
+      "shortName": "Southwest",
+      "type": "rural_tpr",
+      "counties": [
+        "007",
+        "033",
+        "067",
+        "083",
+        "111"
+      ],
+      "countyNames": {
+        "007": "Archuleta",
+        "033": "Dolores",
+        "067": "La Plata",
+        "083": "Montezuma",
+        "111": "San Juan"
+      },
+      "center": [
+        -107.8,
+        37.3
+      ],
+      "zoom": 9
+    },
+    "tpr_intermountain": {
+      "name": "Intermountain TPR",
+      "shortName": "Intermountain",
+      "type": "rural_tpr",
+      "counties": [
+        "037",
+        "045",
+        "085",
+        "097"
+      ],
+      "countyNames": {
+        "037": "Eagle",
+        "045": "Garfield",
+        "085": "Montrose",
+        "097": "Pitkin"
+      },
+      "center": [
+        -107.0,
+        39.5
+      ],
+      "zoom": 9
+    },
+    "tpr_northwest": {
+      "name": "Northwest TPR",
+      "shortName": "Northwest",
+      "type": "rural_tpr",
+      "counties": [
+        "049",
+        "057",
+        "081",
+        "103",
+        "107"
+      ],
+      "countyNames": {
+        "049": "Grand",
+        "057": "Jackson",
+        "081": "Moffat",
+        "103": "Rio Blanco",
+        "107": "Routt"
+      },
+      "center": [
+        -107.0,
+        40.5
+      ],
+      "zoom": 8
+    },
+    "tpr_eastern": {
+      "name": "Eastern TPR",
+      "shortName": "Eastern",
+      "type": "rural_tpr",
+      "counties": [
+        "017",
+        "039",
+        "075",
+        "087",
+        "095",
+        "115",
+        "121",
+        "125"
+      ],
+      "countyNames": {
+        "017": "Cheyenne",
+        "039": "Elbert",
+        "075": "Logan",
+        "087": "Morgan",
+        "095": "Phillips",
+        "115": "Sedgwick",
+        "121": "Washington",
+        "125": "Yuma"
+      },
+      "center": [
+        -103.5,
+        40.2
+      ],
+      "zoom": 8
+    },
+    "tpr_upper_front_range": {
+      "name": "Upper Front Range TPR",
+      "shortName": "Upper Front Range",
+      "type": "rural_tpr",
+      "counties": [
+        "069",
+        "123"
+      ],
+      "countyNames": {
+        "069": "Larimer",
+        "123": "Weld"
+      },
+      "partialCounties": {
+        "069": "Portions outside NFRMPO boundary",
+        "123": "Portions outside NFRMPO boundary"
+      },
+      "center": [
+        -104.8,
+        40.6
+      ],
+      "zoom": 9
+    },
+    "denver_regional_cog_mpo": {
+      "name": "Denver Regional COG",
+      "shortName": "Denver Regional COG",
+      "type": "mpo",
+      "btsMpoId": "08197701",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -105.018267,
+        39.833995
+      ],
+      "zoom": 10
+    },
+    "north_front_range_mpo": {
+      "name": "North Front Range MPO",
+      "shortName": "North Front Range",
+      "type": "mpo",
+      "btsMpoId": "08198800",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -105.034547,
+        40.400681
+      ],
+      "zoom": 10
+    },
+    "pueblo_area_cog_and_tpr_mpo": {
+      "name": "Pueblo Area COG MPO and TPR",
+      "shortName": "Pueblo COG and TPR",
+      "type": "mpo",
+      "btsMpoId": "08197703",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -104.642683,
+        38.250764
+      ],
+      "zoom": 10
+    },
+    "pikes_peak_area_cog_mpo": {
+      "name": "Pikes Peak Area COG",
+      "shortName": "Pikes Peak COG",
+      "type": "mpo",
+      "btsMpoId": "08197702",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -104.852433,
+        38.807396
+      ],
+      "zoom": 10
+    },
+    "grand_valley_mpo": {
+      "name": "Grand Valley MPO",
+      "shortName": "Grand Valley",
+      "type": "mpo",
+      "btsMpoId": "08198200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -108.486703,
+        39.079492
+      ],
+      "zoom": 10
+    }
+  },
+  "corridors": {
+    "i25": {
+      "name": "I-25 Corridor",
+      "routeId": "I-25",
+      "type": "interstate",
+      "direction": "north-south",
+      "counties": [
+        "071",
+        "055",
+        "101",
+        "041",
+        "035",
+        "005",
+        "031",
+        "001",
+        "014",
+        "069",
+        "123"
+      ],
+      "regions": [
+        "region_2",
+        "region_1",
+        "region_4"
+      ],
+      "description": "Primary north-south interstate through Colorado Front Range"
+    },
+    "i70": {
+      "name": "I-70 Corridor",
+      "routeId": "I-70",
+      "type": "interstate",
+      "direction": "east-west",
+      "counties": [
+        "063",
+        "073",
+        "039",
+        "005",
+        "031",
+        "059",
+        "019",
+        "117",
+        "037",
+        "045",
+        "077",
+        "029"
+      ],
+      "regions": [
+        "region_4",
+        "region_1",
+        "region_3"
+      ],
+      "description": "Primary east-west interstate, includes mountain corridor"
+    },
+    "i76": {
+      "name": "I-76 Corridor",
+      "routeId": "I-76",
+      "type": "interstate",
+      "direction": "northeast",
+      "counties": [
+        "001",
+        "123",
+        "087",
+        "075",
+        "115"
+      ],
+      "regions": [
+        "region_1",
+        "region_4"
+      ],
+      "description": "Northeast interstate to Nebraska border"
+    },
+    "us285": {
+      "name": "US-285 Corridor",
+      "routeId": "US-285",
+      "type": "us_highway",
+      "direction": "north-south",
+      "counties": [
+        "031",
+        "059",
+        "093",
+        "015",
+        "109",
+        "105",
+        "021"
+      ],
+      "regions": [
+        "region_1",
+        "region_2",
+        "region_5"
+      ],
+      "description": "North-south through mountains and San Luis Valley"
+    },
+    "us550": {
+      "name": "US-550 / Million Dollar Highway",
+      "routeId": "US-550",
+      "type": "us_highway",
+      "direction": "north-south",
+      "counties": [
+        "067",
+        "111",
+        "091",
+        "085",
+        "029",
+        "077"
+      ],
+      "regions": [
+        "region_5",
+        "region_3"
+      ],
+      "description": "Scenic mountain highway through San Juan Mountains"
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Alamosa",
+    "005": "Arapahoe",
+    "007": "Archuleta",
+    "009": "Baca",
+    "011": "Bent",
+    "013": "Boulder",
+    "014": "Broomfield",
+    "015": "Chaffee",
+    "017": "Cheyenne",
+    "019": "Clear Creek",
+    "021": "Conejos",
+    "023": "Costilla",
+    "025": "Crowley",
+    "027": "Custer",
+    "029": "Delta",
+    "031": "Denver",
+    "033": "Dolores",
+    "035": "Douglas",
+    "037": "Eagle",
+    "039": "Elbert",
+    "041": "El Paso",
+    "043": "Fremont",
+    "045": "Garfield",
+    "047": "Gilpin",
+    "049": "Grand",
+    "051": "Gunnison",
+    "053": "Hinsdale",
+    "055": "Huerfano",
+    "057": "Jackson",
+    "059": "Jefferson",
+    "061": "Kiowa",
+    "063": "Kit Carson",
+    "065": "Lake",
+    "067": "La Plata",
+    "069": "Larimer",
+    "071": "Las Animas",
+    "073": "Lincoln",
+    "075": "Logan",
+    "077": "Mesa",
+    "079": "Mineral",
+    "081": "Moffat",
+    "083": "Montezuma",
+    "085": "Montrose",
+    "087": "Morgan",
+    "089": "Otero",
+    "091": "Ouray",
+    "093": "Park",
+    "095": "Phillips",
+    "097": "Pitkin",
+    "099": "Prowers",
+    "101": "Pueblo",
+    "103": "Rio Blanco",
+    "105": "Rio Grande",
+    "107": "Routt",
+    "109": "Saguache",
+    "111": "San Juan",
+    "113": "San Miguel",
+    "115": "Sedgwick",
+    "117": "Summit",
+    "119": "Teller",
+    "121": "Washington",
+    "123": "Weld",
+    "125": "Yuma"
+  }
+}

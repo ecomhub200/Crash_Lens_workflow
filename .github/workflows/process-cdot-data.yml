@@ -1,0 +1,503 @@
+name: Process CDOT Crash Data
+
+# Triggers:
+#   1. Auto-trigger when a new CSV is pushed to data/CDOT/
+#   2. Manual trigger with configurable options
+
+on:
+  workflow_run:
+    workflows: ["Download CDOT Crash Data"]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      jurisdiction:
+        description: 'Jurisdiction to process'
+        required: false
+        default: 'douglas'
+        type: choice
+        options:
+          - douglas
+          - arapahoe
+          - jefferson
+          - elpaso
+          - denver
+          - adams
+      input_files:
+        description: 'Input CSV file(s) glob pattern (e.g., "data/CDOT/2024*.csv")'
+        required: false
+        default: ''
+        type: string
+      merge:
+        description: 'Merge all matching input files before processing'
+        required: false
+        type: boolean
+        default: true
+      skip_geocode:
+        description: 'Skip geocoding stage (uses persistent cache - only new locations need API calls)'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run (preview only, no output files)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  # R2 state prefix - parameterized for multi-state support
+  R2_STATE_PREFIX: colorado
+  STATE_DISPLAY: Colorado
+
+jobs:
+  process-cdot-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download raw CSVs from R2
+        if: github.event_name == 'workflow_run'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+        run: |
+          JURISDICTION="douglas"
+          echo "Downloading raw CSVs from R2 for $JURISDICTION..."
+          aws s3 sync "s3://crash-lens-data/colorado/${JURISDICTION}/raw/" "data/CDOT/" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --exclude "*" --include "*.csv"
+          echo "Downloaded files:"
+          ls -lh data/CDOT/*.csv 2>/dev/null || echo "  No CSVs found"
+
+      - name: Detect new/changed CSV files
+        id: detect
+        run: |
+          set -e
+
+          # Helper: check if a filename is a pipeline output
+          is_pipeline_output() {
+            local name
+            name=$(basename "$1" | tr '[:upper:]' '[:lower:]')
+            case "$name" in
+              *_standardized.csv|*_all_roads.csv|*_county_roads.csv|*_city_roads.csv|*_no_interstate.csv|*_merged_raw.csv|crashes.csv)
+                return 0 ;;
+              *)
+                return 1 ;;
+            esac
+          }
+
+          # File list: one path per line (handles spaces in filenames)
+          FILE_LIST="${RUNNER_TEMP}/input_files.txt"
+          > "$FILE_LIST"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # --- Manual trigger ---
+            JURISDICTION="${{ github.event.inputs.jurisdiction }}"
+            echo "jurisdiction=$JURISDICTION" >> "$GITHUB_OUTPUT"
+
+            INPUT_PATTERN="${{ github.event.inputs.input_files }}"
+            if [ -z "$INPUT_PATTERN" ]; then
+              # Default: all raw CSVs in data/CDOT/ that aren't pipeline outputs
+              while IFS= read -r -d '' f; do
+                if ! is_pipeline_output "$f"; then
+                  echo "$f" >> "$FILE_LIST"
+                fi
+              done < <(find data/CDOT/ -maxdepth 1 -name '*.csv' -print0 | sort -z)
+            else
+              # Expand the user-provided glob pattern
+              for f in $INPUT_PATTERN; do
+                if [ -f "$f" ]; then
+                  echo "$f" >> "$FILE_LIST"
+                fi
+              done
+            fi
+
+            echo "merge=${{ github.event.inputs.merge }}" >> "$GITHUB_OUTPUT"
+            echo "skip_geocode=${{ github.event.inputs.skip_geocode }}" >> "$GITHUB_OUTPUT"
+            echo "dry_run=${{ github.event.inputs.dry_run }}" >> "$GITHUB_OUTPUT"
+
+          else
+            # --- Push trigger: detect which CSVs changed ---
+            JURISDICTION="douglas"
+
+            # Get changed CSV files from the commit (one per line, handles spaces)
+            git diff --name-only HEAD~1 HEAD -- 'data/CDOT/*.csv' 2>/dev/null | while IFS= read -r f; do
+              if [ -n "$f" ] && ! is_pipeline_output "$f"; then
+                echo "$f" >> "$FILE_LIST"
+              fi
+            done
+
+            # If no raw CSV changes detected, collect all raw CSVs for merge
+            if [ ! -s "$FILE_LIST" ]; then
+              echo "No new raw CSVs in this push. Collecting all raw CSVs..."
+              while IFS= read -r -d '' f; do
+                if ! is_pipeline_output "$f"; then
+                  echo "$f" >> "$FILE_LIST"
+                fi
+              done < <(find data/CDOT/ -maxdepth 1 -name '*.csv' -print0 | sort -z)
+            fi
+
+            echo "jurisdiction=$JURISDICTION" >> "$GITHUB_OUTPUT"
+            echo "merge=true" >> "$GITHUB_OUTPUT"
+            echo "skip_geocode=false" >> "$GITHUB_OUTPUT"
+            echo "dry_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Count files and report
+          if [ ! -s "$FILE_LIST" ]; then
+            echo "No input CSV files found. Exiting."
+            echo "has_files=false" >> "$GITHUB_OUTPUT"
+          else
+            FILE_COUNT=$(wc -l < "$FILE_LIST")
+            echo "has_files=true" >> "$GITHUB_OUTPUT"
+            echo "file_count=$FILE_COUNT" >> "$GITHUB_OUTPUT"
+
+            echo "=========================================="
+            echo "Detected $FILE_COUNT input file(s):"
+            while IFS= read -r f; do
+              if [ -f "$f" ]; then
+                SIZE=$(wc -c < "$f")
+                ROWS=$(wc -l < "$f")
+                echo "  $f ($ROWS rows, $(numfmt --to=iec "$SIZE" 2>/dev/null || echo "${SIZE}B"))"
+              else
+                echo "  $f (FILE NOT FOUND)"
+              fi
+            done < "$FILE_LIST"
+            echo "=========================================="
+          fi
+
+      - name: Run pipeline
+        if: steps.detect.outputs.has_files == 'true'
+        id: pipeline
+        run: |
+          JURISDICTION="${{ steps.detect.outputs.jurisdiction }}"
+          MERGE="${{ steps.detect.outputs.merge }}"
+          SKIP_GEOCODE="${{ steps.detect.outputs.skip_geocode }}"
+          DRY_RUN="${{ steps.detect.outputs.dry_run }}"
+          FILE_LIST="${RUNNER_TEMP}/input_files.txt"
+
+          echo "=========================================="
+          echo "CDOT Pipeline - Processing $JURISDICTION"
+          echo "Started at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          # Build command as a bash array (handles spaces in filenames)
+          CMD=(python scripts/process_crash_data.py)
+
+          # Add each input file individually with proper quoting
+          CMD+=(-i)
+          while IFS= read -r f; do
+            CMD+=("$f")
+          done < "$FILE_LIST"
+
+          CMD+=(-s colorado -j "$JURISDICTION" -f -v)
+
+          if [ "$MERGE" = "true" ]; then
+            CMD+=(--merge)
+            echo "Mode: Merge all files before processing"
+          fi
+
+          if [ "$SKIP_GEOCODE" = "true" ]; then
+            CMD+=(--skip-geocode)
+            echo "Geocoding: Skipped"
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            CMD+=(--dry-run)
+            echo "Mode: Dry run (no output)"
+          fi
+
+          echo "Running: ${CMD[*]}"
+          echo ""
+          "${CMD[@]}"
+
+          echo "=========================================="
+          echo "Pipeline complete at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+      - name: Display pipeline report
+        if: steps.detect.outputs.has_files == 'true'
+        run: |
+          REPORT="data/CDOT/.validation/pipeline_report.json"
+          if [ -f "$REPORT" ]; then
+            echo "=========================================="
+            echo "Pipeline Report"
+            echo "=========================================="
+            python -m json.tool "$REPORT"
+
+            # Extract key metrics for summary
+            INPUT=$(python -c "import json; print(json.load(open('$REPORT'))['input_rows'])")
+            OUTPUT=$(python -c "import json; print(json.load(open('$REPORT'))['output_rows'])")
+            DUPES=$(python -c "import json; print(json.load(open('$REPORT'))['duplicates_removed'])")
+            GPS=$(python -c "import json; print(json.load(open('$REPORT'))['gps_coverage'])")
+
+            echo ""
+            echo "Summary: $INPUT input -> $OUTPUT output | $DUPES duplicates removed | GPS: $GPS"
+          else
+            echo "No pipeline report found"
+          fi
+
+      - name: Verify output files
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          JURISDICTION="${{ steps.detect.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Output Files"
+          echo "=========================================="
+
+          for suffix in standardized all_roads county_roads city_roads no_interstate; do
+            FILE="data/CDOT/${JURISDICTION}_${suffix}.csv"
+            if [ -f "$FILE" ]; then
+              ROWS=$(wc -l < "$FILE")
+              SIZE=$(ls -lh "$FILE" | awk '{print $5}')
+              echo "  $FILE: $((ROWS - 1)) rows ($SIZE)"
+            else
+              echo "  $FILE: MISSING"
+            fi
+          done
+
+          echo "Done."
+
+      - name: Generate workflow summary
+        if: steps.detect.outputs.has_files == 'true'
+        run: |
+          JURISDICTION="${{ steps.detect.outputs.jurisdiction }}"
+          REPORT="data/CDOT/.validation/pipeline_report.json"
+
+          {
+            echo "## CDOT Pipeline Results"
+            echo ""
+            echo "| Parameter | Value |"
+            echo "|-----------|-------|"
+            echo "| Jurisdiction | $JURISDICTION |"
+            echo "| Input Files | ${{ steps.detect.outputs.file_count }} |"
+            echo "| Merge Mode | ${{ steps.detect.outputs.merge }} |"
+            echo "| Trigger | ${{ github.event_name }} |"
+            echo ""
+
+            if [ -f "$REPORT" ]; then
+              echo "### Pipeline Report"
+              echo ""
+              echo "| Metric | Value |"
+              echo "|--------|-------|"
+              echo "| Input Rows | $(python -c "import json; print(json.load(open('$REPORT'))['input_rows'])") |"
+              echo "| Output Rows | $(python -c "import json; print(json.load(open('$REPORT'))['output_rows'])") |"
+              echo "| Duplicates Removed | $(python -c "import json; print(json.load(open('$REPORT'))['duplicates_removed'])") |"
+              echo "| GPS Coverage | $(python -c "import json; print(json.load(open('$REPORT'))['gps_coverage'])") |"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload processed CSVs to R2
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/CDOT/${{ steps.detect.outputs.jurisdiction }}_standardized.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/standardized.csv"},
+              {"local_path": "data/CDOT/${{ steps.detect.outputs.jurisdiction }}_all_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/all_roads.csv"},
+              {"local_path": "data/CDOT/${{ steps.detect.outputs.jurisdiction }}_county_roads.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/county_roads.csv"},
+              {"local_path": "data/CDOT/${{ steps.detect.outputs.jurisdiction }}_no_interstate.csv", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/no_interstate.csv"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      # Stage 5: PREDICT — Generate forecasts (runs in parallel with CSV upload above)
+      - name: Generate crash forecasts (Stage 5)
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          JURISDICTION="${{ steps.detect.outputs.jurisdiction }}"
+          echo "=========================================="
+          echo "Stage 5: PREDICT — Generating forecasts"
+          echo "=========================================="
+
+          # Generate forecasts for all 4 road types
+          CMD="python scripts/generate_forecast.py --all-road-types --jurisdiction $JURISDICTION --data data/CDOT/${JURISDICTION}_all_roads.csv"
+
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "WARNING: No AWS credentials — skipping forecast generation."
+            echo "Run the pipeline with valid AWS credentials to generate real Chronos-2 forecasts."
+          else
+            echo "Running: $CMD"
+            $CMD || {
+              echo "WARNING: Forecast generation failed (non-fatal). Check SageMaker endpoint status."
+            }
+          fi
+
+          # Verify forecast outputs
+          for rt in county_roads city_roads no_interstate all_roads; do
+            FFILE="data/CDOT/forecasts_${rt}.json"
+            if [ -f "$FFILE" ]; then
+              SIZE=$(ls -lh "$FFILE" | awk '{print $5}')
+              echo "  $FFILE: $SIZE"
+            else
+              echo "  $FFILE: NOT GENERATED"
+            fi
+          done
+
+      - name: Upload forecast JSONs to R2
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            [
+              {"local_path": "data/CDOT/forecasts_county_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/forecasts_county_roads.json"},
+              {"local_path": "data/CDOT/forecasts_city_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/forecasts_city_roads.json"},
+              {"local_path": "data/CDOT/forecasts_no_interstate.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/forecasts_no_interstate.json"},
+              {"local_path": "data/CDOT/forecasts_all_roads.json", "r2_key": "${{ env.R2_STATE_PREFIX }}/${{ steps.detect.outputs.jurisdiction }}/forecasts_all_roads.json"}
+            ]
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+
+      # Stage 6.5: Generate region/MPO aggregates from county CSVs (bottom-up)
+      - name: Generate region/MPO aggregates (Stage 6.5)
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          STATE="${{ env.R2_STATE_PREFIX }}"
+          echo "=========================================="
+          echo "Stage 6.5: Generating aggregates (bottom-up from county CSVs)"
+          echo "=========================================="
+
+          # Output to data/{STATE}/ so paths match R2 hierarchy: {state}/_statewide/, _region/, _mpo/
+          python scripts/generate_aggregates.py --state "$STATE" --data-dir data/CDOT --output-dir "data/$STATE" || {
+            echo "WARNING: Aggregate generation failed (non-fatal)"
+          }
+
+          python scripts/generate_aggregates.py --federal --output-dir data || {
+            echo "WARNING: Federal aggregate generation failed (non-fatal)"
+          }
+
+          echo "Generated aggregate files:"
+          find data -name "aggregates.json" -o -name "county_summary.json" -o -name "mpo_summary.json" -o -name "hotspots.json" -o -name "state_summary.json" 2>/dev/null | sort
+        continue-on-error: true
+
+      - name: Build aggregate upload manifest (Stage 6.5)
+        id: build-aggregate-manifest
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          STATE="${{ env.R2_STATE_PREFIX }}"
+          python3 -c "
+          import json, os, glob
+
+          state = '$STATE'
+          files = []
+
+          for name in ['aggregates.json', 'county_summary.json', 'mpo_summary.json']:
+              path = f'data/{state}/_statewide/{name}'
+              if os.path.isfile(path):
+                  files.append({'local_path': path, 'r2_key': f'{state}/_statewide/{name}'})
+
+          for agg in glob.glob(f'data/{state}/_region/*/aggregates.json'):
+              region_id = agg.split('/')[-2]
+              files.append({'local_path': agg, 'r2_key': f'{state}/_region/{region_id}/aggregates.json'})
+          for hs in glob.glob(f'data/{state}/_region/*/hotspots.json'):
+              region_id = hs.split('/')[-2]
+              files.append({'local_path': hs, 'r2_key': f'{state}/_region/{region_id}/hotspots.json'})
+
+          for agg in glob.glob(f'data/{state}/_mpo/*/aggregates.json'):
+              mpo_id = agg.split('/')[-2]
+              files.append({'local_path': agg, 'r2_key': f'{state}/_mpo/{mpo_id}/aggregates.json'})
+          for hs in glob.glob(f'data/{state}/_mpo/*/hotspots.json'):
+              mpo_id = hs.split('/')[-2]
+              files.append({'local_path': hs, 'r2_key': f'{state}/_mpo/{mpo_id}/hotspots.json'})
+
+          for name in ['aggregates.json', 'state_summary.json']:
+              path = f'data/_federal/{name}'
+              if os.path.isfile(path):
+                  files.append({'local_path': path, 'r2_key': f'_federal/{name}'})
+
+          print(f'Found {len(files)} aggregate files to upload')
+          with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+              f.write(f'files_json={json.dumps(files)}\n')
+          "
+        continue-on-error: true
+
+      - name: Upload aggregate JSONs to R2 (Stage 6.5)
+        if: steps.build-aggregate-manifest.outputs.files_json != '[]' && steps.detect.outputs.dry_run != 'true'
+        uses: ./.github/actions/upload-r2
+        with:
+          files_json: |
+            ${{ steps.build-aggregate-manifest.outputs.files_json || '[]' }}
+          cf_account_id: ${{ secrets.CF_ACCOUNT_ID }}
+          r2_access_key_id: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          r2_secret_access_key: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          r2_public_url: ${{ vars.R2_PUBLIC_URL }}
+        continue-on-error: true
+
+      - name: Commit manifest and pipeline metadata
+        if: steps.detect.outputs.has_files == 'true' && steps.detect.outputs.dry_run != 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          JURISDICTION="${{ steps.detect.outputs.jurisdiction }}"
+
+          # Stage ONLY manifest + metadata (NOT large CSVs)
+          git add data/r2-manifest.json
+          git add "data/CDOT/.geocode_cache.json" 2>/dev/null || true
+          git add "data/CDOT/.validation/" 2>/dev/null || true
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          REPORT="data/CDOT/.validation/pipeline_report.json"
+          if [ -f "$REPORT" ]; then
+            INPUT=$(python -c "import json; print(json.load(open('$REPORT'))['input_rows'])")
+            OUTPUT=$(python -c "import json; print(json.load(open('$REPORT'))['output_rows'])")
+            GPS=$(python -c "import json; print(json.load(open('$REPORT'))['gps_coverage'])")
+            git commit -m "Auto-process: $STATE_DISPLAY $JURISDICTION pipeline + forecasts -> R2 - $(date +'%Y-%m-%d')
+
+          Pipeline: $INPUT input -> $OUTPUT output | GPS: $GPS
+          Data + forecasts uploaded to Cloudflare R2"
+          else
+            git commit -m "Auto-process: $STATE_DISPLAY $JURISDICTION pipeline + forecasts -> R2 - $(date +'%Y-%m-%d')"
+          fi
+
+          MAX_RETRIES=4
+          for i in $(seq 1 $MAX_RETRIES); do
+            if git push; then
+              echo "Push successful"
+              exit 0
+            fi
+            echo "Push failed (attempt $i/$MAX_RETRIES), pulling latest changes..."
+            sleep $((2 ** i))
+            git fetch origin main
+            git rebase origin/main || {
+              git rebase --abort 2>/dev/null || true
+              git pull --no-edit origin main
+            }
+          done
+
+          echo "ERROR: Push failed after $MAX_RETRIES attempts"
+          exit 1

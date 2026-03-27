@@ -1,0 +1,60 @@
+{
+  "state": "colorado",
+  "stateFips": "08",
+  "stateAbbrev": "CO",
+
+  "dotDistricts": {
+    "name": "CDOT Engineering Regions",
+    "term": "Region",
+    "termPlural": "Regions",
+    "count": 5,
+    "source": "arcgis_rest",
+    "endpoint": "https://dtdapps.coloradodot.info/arcgis/rest/services/CPLAN/open_data_sde/FeatureServer/3",
+    "nameField": "REGION",
+    "codeField": "REGION_ID",
+    "style": {
+      "color": "#2563eb",
+      "weight": 3,
+      "fillOpacity": 0.05,
+      "dashArray": "8, 4"
+    },
+    "fallbackGeojson": "shared/boundaries/colorado_cdot_regions.geojson"
+  },
+
+  "mpo": {
+    "source": "bts_ntad",
+    "stateFilter": "CO",
+    "endpoint": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Metropolitan_Planning_Organizations/FeatureServer/0",
+    "style": {
+      "color": "#7c3aed",
+      "weight": 2,
+      "fillOpacity": 0.08,
+      "dashArray": "6, 3"
+    },
+    "fallbackGeojson": "shared/boundaries/colorado_mpos.geojson"
+  },
+
+  "counties": {
+    "source": "census_tiger",
+    "tigerwebLayer": 82,
+    "tigerwebQuery": "STATE='08'",
+    "geojson": "shared/boundaries/colorado_counties.geojson",
+    "style": {
+      "color": "#334155",
+      "weight": 1.5,
+      "fillOpacity": 0.0
+    }
+  },
+
+  "stateOutline": {
+    "source": "census_tiger",
+    "tigerwebLayer": 80,
+    "tigerwebQuery": "STATE='08'",
+    "style": {
+      "color": "#0f172a",
+      "weight": 2.5,
+      "fillOpacity": 0.0,
+      "dashArray": "none"
+    }
+  }
+}

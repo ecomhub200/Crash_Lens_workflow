@@ -1,0 +1,512 @@
+{
+  "state": {
+    "fips": "09",
+    "name": "Connecticut",
+    "abbreviation": "CT",
+    "dot": "CTDOT",
+    "dotFullName": "Connecticut Department of Transportation",
+    "center": [
+      -72.755371,
+      41.597782
+    ],
+    "zoom": 9,
+    "placesCount": 29
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ct_1": {
+      "name": "District 1 (Rocky Hill)",
+      "shortName": "District 1",
+      "center": [
+        -72.65,
+        41.6
+      ],
+      "zoom": 10,
+      "counties": [
+        "003",
+        "007"
+      ],
+      "countyNames": {
+        "003": "Hartford (partial)",
+        "007": "Middlesex (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          41.35,
+          -73.0
+        ],
+        "ne": [
+          41.85,
+          -72.3
+        ]
+      },
+      "hq": "Rocky Hill"
+    },
+    "ct_2": {
+      "name": "District 2 (Norwich)",
+      "shortName": "District 2",
+      "center": [
+        -72.05,
+        41.55
+      ],
+      "zoom": 10,
+      "counties": [
+        "011",
+        "015"
+      ],
+      "countyNames": {
+        "011": "New London",
+        "015": "Windham"
+      },
+      "mapBounds": {
+        "sw": [
+          41.2,
+          -72.5
+        ],
+        "ne": [
+          42.05,
+          -71.6
+        ]
+      },
+      "hq": "Norwich"
+    },
+    "ct_3": {
+      "name": "District 3 (New Haven)",
+      "shortName": "District 3",
+      "center": [
+        -72.9,
+        41.3
+      ],
+      "zoom": 10,
+      "counties": [
+        "009",
+        "007"
+      ],
+      "countyNames": {
+        "009": "New Haven",
+        "007": "Middlesex (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          41.05,
+          -73.3
+        ],
+        "ne": [
+          41.55,
+          -72.5
+        ]
+      },
+      "hq": "New Haven"
+    },
+    "ct_4": {
+      "name": "District 4 (Bridgeport)",
+      "shortName": "District 4",
+      "center": [
+        -73.2,
+        41.18
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Fairfield"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -73.65
+        ],
+        "ne": [
+          41.35,
+          -72.75
+        ]
+      },
+      "hq": "Bridgeport"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "crcogcrcog": {
+      "name": "CRCOG (Capitol Region COG)",
+      "shortName": "Capitol Region COG",
+      "type": "mpo",
+      "center": [
+        -72.6734,
+        41.7658
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Hartford"
+      },
+      "btsAcronym": "CRC",
+      "mapBounds": {
+        "sw": [
+          41.55,
+          -72.95
+        ],
+        "ne": [
+          42.0,
+          -72.4
+        ]
+      }
+    },
+    "mcoggbv": {
+      "name": "MetroCOG (Greater Bridgeport/Valley)",
+      "shortName": "Greater Bridgeport/Valley",
+      "type": "mpo",
+      "center": [
+        -72.9279,
+        41.3083
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Fairfield (partial)"
+      },
+      "btsAcronym": "MB",
+      "mapBounds": {
+        "sw": [
+          41.1,
+          -73.2
+        ],
+        "ne": [
+          41.5,
+          -72.65
+        ]
+      }
+    },
+    "scrcogscrcog": {
+      "name": "SCRCOG (South Central Regional COG)",
+      "shortName": "South Central Regional COG",
+      "type": "mpo",
+      "center": [
+        -73.1952,
+        41.1865
+      ],
+      "zoom": 10,
+      "counties": [
+        "009"
+      ],
+      "countyNames": {
+        "009": "New Haven"
+      },
+      "btsAcronym": "SCRC",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -73.5
+        ],
+        "ne": [
+          41.4,
+          -72.9
+        ]
+      }
+    },
+    "wcogwctcog": {
+      "name": "WestCOG (Western CT COG)",
+      "shortName": "Western CT COG",
+      "type": "mpo",
+      "center": [
+        -73.5387,
+        41.0534
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "005"
+      ],
+      "countyNames": {
+        "001": "Fairfield (partial)",
+        "005": "Litchfield (partial)"
+      },
+      "btsAcronym": "WCC",
+      "mapBounds": {
+        "sw": [
+          40.85,
+          -73.8
+        ],
+        "ne": [
+          41.25,
+          -73.3
+        ]
+      }
+    },
+    "nvcognvcog": {
+      "name": "NVCOG (Naugatuck Valley COG)",
+      "shortName": "Naugatuck Valley COG",
+      "type": "mpo",
+      "center": [
+        -72.0815,
+        41.5582
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Litchfield (partial)"
+      },
+      "btsAcronym": "NVC",
+      "mapBounds": {
+        "sw": [
+          41.35,
+          -72.35
+        ],
+        "ne": [
+          41.75,
+          -71.8
+        ]
+      }
+    },
+    "lcrvcoglctrvcog": {
+      "name": "LCRVCOG (Lower CT River Valley COG)",
+      "shortName": "Lower CT River Valley COG",
+      "type": "mpo",
+      "center": [
+        -72.806,
+        41.6706
+      ],
+      "zoom": 11,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Middlesex"
+      },
+      "btsAcronym": "LCRVC",
+      "mapBounds": {
+        "sw": [
+          41.55,
+          -73.0
+        ],
+        "ne": [
+          41.8,
+          -72.6
+        ]
+      }
+    },
+    "rcog": {
+      "name": "RiverCOG",
+      "shortName": "RiverCOG",
+      "type": "mpo",
+      "center": [
+        -72.103,
+        41.791
+      ],
+      "zoom": 11,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Middlesex"
+      },
+      "mapBounds": {
+        "sw": [
+          41.65,
+          -72.3
+        ],
+        "ne": [
+          41.95,
+          -71.9
+        ]
+      }
+    },
+    "sccogsctcog": {
+      "name": "SCCOG (Southeastern CT COG)",
+      "shortName": "Southeastern CT COG",
+      "type": "mpo",
+      "center": [
+        -72.68,
+        41.9612
+      ],
+      "zoom": 11,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "New London"
+      },
+      "btsAcronym": "SCC",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -72.9
+        ],
+        "ne": [
+          42.05,
+          -72.5
+        ]
+      }
+    },
+    "neccognctcog": {
+      "name": "NECCOG (Northeastern CT COG)",
+      "shortName": "Northeastern CT COG",
+      "type": "mpo",
+      "center": [
+        -71.96,
+        41.87
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Windham"
+      },
+      "btsAcronym": "NCC",
+      "mapBounds": {
+        "sw": [
+          41.7,
+          -72.2
+        ],
+        "ne": [
+          42.05,
+          -71.75
+        ]
+      }
+    },
+    "south_western_mpo": {
+      "name": "South Western MPO",
+      "shortName": "South Western",
+      "type": "mpo",
+      "btsMpoId": "09198100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -73.506115,
+        41.080263
+      ],
+      "zoom": 10
+    },
+    "housatonic_valley_mpo": {
+      "name": "Housatonic Valley MPO",
+      "shortName": "Housatonic Valley",
+      "type": "mpo",
+      "btsMpoId": "09197504",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -73.346346,
+        41.450547
+      ],
+      "zoom": 10
+    },
+    "capital_region_cog_mpo": {
+      "name": "Capital Region COG",
+      "shortName": "Capital Region COG",
+      "type": "mpo",
+      "btsMpoId": "09197501",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -72.562535,
+        41.763905
+      ],
+      "zoom": 10
+    },
+    "south_central_regional_council_of_governments_scrcog_mpo": {
+      "name": "South Central Regional Council of Governments (SCRCOG)",
+      "shortName": "South Central Regional Council of Governments (SCRCOG)",
+      "type": "mpo",
+      "btsMpoId": "09197401",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -72.791971,
+        41.315273
+      ],
+      "zoom": 10
+    },
+    "lower_connecticut_river_valley_cog_mpo": {
+      "name": "Lower Connecticut River Valley COG",
+      "shortName": "Lower Connecticut River Valley COG",
+      "type": "mpo",
+      "btsMpoId": "09201499",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -72.446388,
+        41.353911
+      ],
+      "zoom": 10
+    },
+    "greater_bridgeport_valley_mpo": {
+      "name": "Greater Bridgeport / Valley MPO",
+      "shortName": "Greater Bridgeport / Valley",
+      "type": "mpo",
+      "btsMpoId": "09198101",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -73.16615,
+        41.276215
+      ],
+      "zoom": 10
+    },
+    "naugatuck_valley_council_of_governments_mpo": {
+      "name": "Naugatuck Valley Council of Governments",
+      "shortName": "Naugatuck Valley Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "09197502",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -73.089898,
+        41.547118
+      ],
+      "zoom": 10
+    },
+    "southeastern_connecticut_council_of_governments_secog_mpo": {
+      "name": "Southeastern Connecticut Council of Governments (SECOG)",
+      "shortName": "Southeastern Connecticut Council of Governments (SECOG)",
+      "type": "mpo",
+      "btsMpoId": "09197402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -72.102344,
+        41.421136
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Fairfield (partial)",
+    "003": "Hartford",
+    "005": "Litchfield (partial)",
+    "007": "Middlesex",
+    "009": "New Haven",
+    "011": "New London",
+    "015": "Windham",
+    "110": "Capitol Planning Region",
+    "120": "Greater Bridgeport Planning Region",
+    "130": "Lower Connecticut River Valley Planning Region",
+    "140": "Naugatuck Valley Planning Region",
+    "150": "Northeastern Connecticut Planning Region",
+    "160": "Northwest Hills Planning Region",
+    "170": "South Central Connecticut Planning Region",
+    "180": "Southeastern Connecticut Planning Region",
+    "190": "Western Connecticut Planning Region"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "part_id": "part6",
+  "part_number": 6,
+  "title": "TEMPORARY TRAFFIC CONTROL",
+  "source": "Virginia MUTCD for Streets and Highways, Version 11.0 (January 2026)",
+  "page_start": 313,
+  "page_end": 314,
+  "note": "For Temporary Traffic Control, please see the Virginia Work Area Protection Manual (VWAPM). The Virginia MUTCD defers to VWAPM for all work zone and temporary traffic control guidance.",
+  "reference": {
+    "document": "Virginia Work Area Protection Manual (VWAPM)",
+    "publisher": "Virginia Department of Transportation",
+    "url": "https://www.virginiadot.org/business/resources/VWAPM.pdf",
+    "description": "Contains all Virginia-specific requirements for temporary traffic control zones, flagging operations, work zone setup, and TTC typical applications."
+  },
+  "chapters": []
+}

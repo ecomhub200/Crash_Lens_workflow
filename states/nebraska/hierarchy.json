@@ -1,0 +1,606 @@
+{
+  "state": {
+    "fips": "31",
+    "name": "Nebraska",
+    "abbreviation": "NE",
+    "dot": "NDOT",
+    "dotFullName": "Nebraska Department of Transportation",
+    "center": [
+      -98.268082,
+      41.12537
+    ],
+    "zoom": 7,
+    "placesCount": 528
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ne_1": {
+      "name": "District 1 (Lincoln)",
+      "shortName": "District 1",
+      "center": [
+        -96.6,
+        40.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "023",
+        "025",
+        "059",
+        "067",
+        "095",
+        "097",
+        "109",
+        "127",
+        "131",
+        "133",
+        "147",
+        "151",
+        "153",
+        "155",
+        "159",
+        "169",
+        "185"
+      ],
+      "countyNames": {
+        "023": "Butler",
+        "025": "Cass",
+        "059": "Fillmore",
+        "067": "Gage",
+        "095": "Jefferson",
+        "097": "Johnson",
+        "109": "Lancaster",
+        "127": "Nemaha",
+        "131": "Otoe",
+        "133": "Pawnee",
+        "147": "Richardson",
+        "151": "Saline",
+        "153": "Sarpy",
+        "155": "Saunders",
+        "159": "Seward",
+        "169": "Thayer",
+        "185": "York"
+      },
+      "mapBounds": {
+        "sw": [
+          40.0,
+          -97.5
+        ],
+        "ne": [
+          41.3,
+          -95.7
+        ]
+      },
+      "hq": "Lincoln"
+    },
+    "ne_2": {
+      "name": "District 2 (Omaha)",
+      "shortName": "District 2",
+      "center": [
+        -96.5,
+        41.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "021",
+        "027",
+        "037",
+        "039",
+        "043",
+        "051",
+        "053",
+        "055",
+        "107",
+        "119",
+        "139",
+        "141",
+        "167",
+        "173",
+        "177",
+        "179"
+      ],
+      "countyNames": {
+        "021": "Burt",
+        "027": "Cedar",
+        "037": "Colfax",
+        "039": "Cuming",
+        "043": "Dakota",
+        "051": "Dixon",
+        "053": "Dodge",
+        "055": "Douglas",
+        "107": "Knox",
+        "119": "Madison",
+        "139": "Pierce",
+        "141": "Platte",
+        "167": "Stanton",
+        "173": "Thurston",
+        "177": "Washington",
+        "179": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -97.3
+        ],
+        "ne": [
+          42.8,
+          -95.7
+        ]
+      },
+      "hq": "Omaha"
+    },
+    "ne_3": {
+      "name": "District 3 (Norfolk)",
+      "shortName": "District 3",
+      "center": [
+        -98.5,
+        42.1
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "011",
+        "015",
+        "017",
+        "031",
+        "071",
+        "077",
+        "089",
+        "093",
+        "103",
+        "115",
+        "121",
+        "125",
+        "149",
+        "175",
+        "183"
+      ],
+      "countyNames": {
+        "003": "Antelope",
+        "011": "Boone",
+        "015": "Boyd",
+        "017": "Brown",
+        "031": "Cherry",
+        "071": "Garfield",
+        "077": "Greeley",
+        "089": "Holt",
+        "093": "Howard",
+        "103": "Keya Paha",
+        "115": "Loup",
+        "121": "Merrick",
+        "125": "Nance",
+        "149": "Rock",
+        "175": "Valley",
+        "183": "Wheeler"
+      },
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -100.0
+        ],
+        "ne": [
+          43.0,
+          -97.0
+        ]
+      },
+      "hq": "Norfolk"
+    },
+    "ne_4": {
+      "name": "District 4 (Grand Island)",
+      "shortName": "District 4",
+      "center": [
+        -98.6,
+        40.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "019",
+        "035",
+        "061",
+        "079",
+        "081",
+        "083",
+        "099",
+        "129",
+        "137",
+        "143",
+        "163",
+        "181"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "019": "Buffalo",
+        "035": "Clay",
+        "061": "Franklin",
+        "079": "Hall",
+        "081": "Hamilton",
+        "083": "Harlan",
+        "099": "Kearney",
+        "129": "Nuckolls",
+        "137": "Phelps",
+        "143": "Polk",
+        "163": "Sherman",
+        "181": "Webster"
+      },
+      "mapBounds": {
+        "sw": [
+          40.0,
+          -99.5
+        ],
+        "ne": [
+          41.2,
+          -97.7
+        ]
+      },
+      "hq": "Grand Island"
+    },
+    "ne_5": {
+      "name": "District 5 (Bridgeport)",
+      "shortName": "District 5",
+      "center": [
+        -103.0,
+        42.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "005",
+        "007",
+        "013",
+        "033",
+        "045",
+        "049",
+        "069",
+        "075",
+        "101",
+        "105",
+        "123",
+        "157",
+        "161",
+        "165"
+      ],
+      "countyNames": {
+        "005": "Arthur",
+        "007": "Banner",
+        "013": "Box Butte",
+        "033": "Cheyenne",
+        "045": "Dawes",
+        "049": "Deuel",
+        "069": "Garden",
+        "075": "Grant",
+        "101": "Keith",
+        "105": "Kimball",
+        "123": "Morrill",
+        "157": "Scotts Bluff",
+        "161": "Sheridan",
+        "165": "Sioux"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -104.1
+        ],
+        "ne": [
+          43.0,
+          -102.0
+        ]
+      },
+      "hq": "Bridgeport"
+    },
+    "ne_6": {
+      "name": "District 6 (North Platte)",
+      "shortName": "District 6",
+      "center": [
+        -100.8,
+        41.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "009",
+        "029",
+        "041",
+        "047",
+        "057",
+        "063",
+        "065",
+        "073",
+        "085",
+        "087",
+        "091",
+        "111",
+        "113",
+        "117",
+        "135",
+        "145",
+        "171"
+      ],
+      "countyNames": {
+        "009": "Blaine",
+        "029": "Chase",
+        "041": "Custer",
+        "047": "Dawson",
+        "057": "Dundy",
+        "063": "Frontier",
+        "065": "Furnas",
+        "073": "Gosper",
+        "085": "Hayes",
+        "087": "Hitchcock",
+        "091": "Hooker",
+        "111": "Lincoln",
+        "113": "Logan",
+        "117": "McPherson",
+        "135": "Perkins",
+        "145": "Red Willow",
+        "171": "Thomas"
+      },
+      "mapBounds": {
+        "sw": [
+          40.0,
+          -102.0
+        ],
+        "ne": [
+          42.0,
+          -99.5
+        ]
+      },
+      "hq": "North Platte"
+    },
+    "ne_7": {
+      "name": "District 7 (McCook)",
+      "shortName": "District 7",
+      "center": [
+        -100.6,
+        40.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "057",
+        "065",
+        "073",
+        "085",
+        "087",
+        "145"
+      ],
+      "countyNames": {
+        "057": "Dundy",
+        "065": "Furnas",
+        "073": "Gosper",
+        "085": "Hayes",
+        "087": "Hitchcock",
+        "145": "Red Willow"
+      },
+      "mapBounds": {
+        "sw": [
+          39.8,
+          -101.5
+        ],
+        "ne": [
+          40.6,
+          -99.7
+        ]
+      },
+      "hq": "McCook"
+    },
+    "ne_8": {
+      "name": "District 8 (Ainsworth)",
+      "shortName": "District 8",
+      "center": [
+        -100.0,
+        42.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "017",
+        "031",
+        "103",
+        "149"
+      ],
+      "countyNames": {
+        "017": "Brown",
+        "031": "Cherry",
+        "103": "Keya Paha",
+        "149": "Rock"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -101.0
+        ],
+        "ne": [
+          43.0,
+          -99.0
+        ]
+      },
+      "hq": "Ainsworth"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mapamapao": {
+      "name": "MAPA (Metropolitan Area Planning Agency / Omaha)",
+      "shortName": "Metropolitan Area Planning Agency / Omaha",
+      "type": "mpo",
+      "center": [
+        -95.9345,
+        41.2565
+      ],
+      "zoom": 9,
+      "counties": [
+        "055",
+        "153",
+        "177"
+      ],
+      "countyNames": {
+        "055": "Douglas",
+        "153": "Sarpy",
+        "177": "Washington"
+      },
+      "btsAcronym": "MAPAO",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -96.3
+        ],
+        "ne": [
+          41.5,
+          -95.55
+        ]
+      }
+    },
+    "lampo": {
+      "name": "Lincoln Area MPO",
+      "shortName": "Lincoln Area",
+      "type": "mpo",
+      "center": [
+        -96.6852,
+        40.8258
+      ],
+      "zoom": 10,
+      "counties": [
+        "109"
+      ],
+      "countyNames": {
+        "109": "Lancaster"
+      },
+      "btsAcronym": "LAM",
+      "mapBounds": {
+        "sw": [
+          40.6,
+          -96.95
+        ],
+        "ne": [
+          41.05,
+          -96.4
+        ]
+      }
+    },
+    "giampo": {
+      "name": "Grand Island Area MPO",
+      "shortName": "Grand Island Area",
+      "type": "mpo",
+      "center": [
+        -98.342,
+        40.9264
+      ],
+      "zoom": 10,
+      "counties": [
+        "079"
+      ],
+      "countyNames": {
+        "079": "Hall"
+      },
+      "btsAcronym": "GIAM",
+      "mapBounds": {
+        "sw": [
+          40.7,
+          -98.6
+        ],
+        "ne": [
+          41.15,
+          -98.1
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Antelope",
+    "005": "Arthur",
+    "007": "Banner",
+    "009": "Blaine",
+    "011": "Boone",
+    "013": "Box Butte",
+    "015": "Boyd",
+    "017": "Brown",
+    "019": "Buffalo",
+    "021": "Burt",
+    "023": "Butler",
+    "025": "Cass",
+    "027": "Cedar",
+    "029": "Chase",
+    "031": "Cherry",
+    "033": "Cheyenne",
+    "035": "Clay",
+    "037": "Colfax",
+    "039": "Cuming",
+    "041": "Custer",
+    "043": "Dakota",
+    "045": "Dawes",
+    "047": "Dawson",
+    "049": "Deuel",
+    "051": "Dixon",
+    "053": "Dodge",
+    "055": "Douglas",
+    "057": "Dundy",
+    "059": "Fillmore",
+    "061": "Franklin",
+    "063": "Frontier",
+    "065": "Furnas",
+    "067": "Gage",
+    "069": "Garden",
+    "071": "Garfield",
+    "073": "Gosper",
+    "075": "Grant",
+    "077": "Greeley",
+    "079": "Hall",
+    "081": "Hamilton",
+    "083": "Harlan",
+    "085": "Hayes",
+    "087": "Hitchcock",
+    "089": "Holt",
+    "091": "Hooker",
+    "093": "Howard",
+    "095": "Jefferson",
+    "097": "Johnson",
+    "099": "Kearney",
+    "101": "Keith",
+    "103": "Keya Paha",
+    "105": "Kimball",
+    "107": "Knox",
+    "109": "Lancaster",
+    "111": "Lincoln",
+    "113": "Logan",
+    "115": "Loup",
+    "117": "McPherson",
+    "119": "Madison",
+    "121": "Merrick",
+    "123": "Morrill",
+    "125": "Nance",
+    "127": "Nemaha",
+    "129": "Nuckolls",
+    "131": "Otoe",
+    "133": "Pawnee",
+    "135": "Perkins",
+    "137": "Phelps",
+    "139": "Pierce",
+    "141": "Platte",
+    "143": "Polk",
+    "145": "Red Willow",
+    "147": "Richardson",
+    "149": "Rock",
+    "151": "Saline",
+    "153": "Sarpy",
+    "155": "Saunders",
+    "157": "Scotts Bluff",
+    "159": "Seward",
+    "161": "Sheridan",
+    "163": "Sherman",
+    "165": "Sioux",
+    "167": "Stanton",
+    "169": "Thayer",
+    "171": "Thomas",
+    "173": "Thurston",
+    "175": "Valley",
+    "177": "Washington",
+    "179": "Wayne",
+    "181": "Webster",
+    "183": "Wheeler",
+    "185": "York"
+  }
+}

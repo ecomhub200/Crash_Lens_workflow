@@ -1,0 +1,465 @@
+{
+  "state": {
+    "fips": "30",
+    "name": "Montana",
+    "abbreviation": "MT",
+    "dot": "MDT",
+    "dotFullName": "Montana Department of Transportation",
+    "center": [
+      -110.454353,
+      46.921925
+    ],
+    "zoom": 6,
+    "placesCount": 126
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "mt_1": {
+      "name": "District 1 (Missoula)",
+      "shortName": "District 1",
+      "center": [
+        -114.5,
+        47.1
+      ],
+      "zoom": 7,
+      "counties": [
+        "039",
+        "047",
+        "061",
+        "063",
+        "081",
+        "089"
+      ],
+      "countyNames": {
+        "039": "Granite",
+        "047": "Lake",
+        "061": "Mineral",
+        "063": "Missoula",
+        "081": "Ravalli",
+        "089": "Sanders"
+      },
+      "mapBounds": {
+        "sw": [
+          45.8,
+          -116.1
+        ],
+        "ne": [
+          48.0,
+          -112.9
+        ]
+      },
+      "hq": "Missoula"
+    },
+    "mt_2": {
+      "name": "District 2 (Butte)",
+      "shortName": "District 2",
+      "center": [
+        -112.5,
+        46.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "001",
+        "023",
+        "031",
+        "043",
+        "049",
+        "057",
+        "067",
+        "077",
+        "093"
+      ],
+      "countyNames": {
+        "001": "Beaverhead",
+        "023": "Deer Lodge",
+        "031": "Gallatin",
+        "043": "Jefferson",
+        "049": "Lewis and Clark",
+        "057": "Madison",
+        "067": "Park",
+        "077": "Powell",
+        "093": "Silver Bow"
+      },
+      "mapBounds": {
+        "sw": [
+          44.5,
+          -113.5
+        ],
+        "ne": [
+          47.0,
+          -111.0
+        ]
+      },
+      "hq": "Butte"
+    },
+    "mt_3": {
+      "name": "District 3 (Great Falls)",
+      "shortName": "District 3",
+      "center": [
+        -110.8,
+        47.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "005",
+        "013",
+        "015",
+        "035",
+        "041",
+        "051",
+        "059",
+        "073",
+        "099",
+        "101",
+        "107"
+      ],
+      "countyNames": {
+        "005": "Blaine",
+        "013": "Cascade",
+        "015": "Chouteau",
+        "035": "Glacier",
+        "041": "Hill",
+        "051": "Liberty",
+        "059": "Meagher",
+        "073": "Pondera",
+        "099": "Teton",
+        "101": "Toole",
+        "107": "Wheatland"
+      },
+      "mapBounds": {
+        "sw": [
+          46.8,
+          -113.0
+        ],
+        "ne": [
+          49.0,
+          -109.0
+        ]
+      },
+      "hq": "Great Falls"
+    },
+    "mt_4": {
+      "name": "District 4 (Glendive)",
+      "shortName": "District 4",
+      "center": [
+        -106.5,
+        47.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "011",
+        "017",
+        "019",
+        "021",
+        "025",
+        "033",
+        "055",
+        "071",
+        "075",
+        "079",
+        "083",
+        "085",
+        "087",
+        "091",
+        "103",
+        "105",
+        "109"
+      ],
+      "countyNames": {
+        "011": "Carter",
+        "017": "Custer",
+        "019": "Daniels",
+        "021": "Dawson",
+        "025": "Fallon",
+        "033": "Garfield",
+        "055": "McCone",
+        "071": "Phillips",
+        "075": "Powder River",
+        "079": "Prairie",
+        "083": "Richland",
+        "085": "Roosevelt",
+        "087": "Rosebud",
+        "091": "Sheridan",
+        "103": "Treasure",
+        "105": "Valley",
+        "109": "Wibaux"
+      },
+      "mapBounds": {
+        "sw": [
+          46.0,
+          -108.0
+        ],
+        "ne": [
+          49.0,
+          -104.0
+        ]
+      },
+      "hq": "Glendive"
+    },
+    "mt_5": {
+      "name": "District 5 (Billings)",
+      "shortName": "District 5",
+      "center": [
+        -109.5,
+        46.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "009",
+        "027",
+        "037",
+        "045",
+        "065",
+        "069",
+        "095",
+        "097",
+        "111"
+      ],
+      "countyNames": {
+        "003": "Big Horn",
+        "009": "Carbon",
+        "027": "Fergus",
+        "037": "Golden Valley",
+        "045": "Judith Basin",
+        "065": "Musselshell",
+        "069": "Petroleum",
+        "095": "Stillwater",
+        "097": "Sweet Grass",
+        "111": "Yellowstone"
+      },
+      "mapBounds": {
+        "sw": [
+          45.0,
+          -110.8
+        ],
+        "ne": [
+          47.5,
+          -107.5
+        ]
+      },
+      "hq": "Billings"
+    },
+    "mt_f": {
+      "name": "Flathead District",
+      "shortName": "Flathead District",
+      "center": [
+        -114.3,
+        48.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "029",
+        "053"
+      ],
+      "countyNames": {
+        "007": "Broadwater",
+        "029": "Flathead",
+        "053": "Lincoln"
+      },
+      "mapBounds": {
+        "sw": [
+          47.5,
+          -115.5
+        ],
+        "ne": [
+          49.0,
+          -113.0
+        ]
+      },
+      "hq": "Kalispell"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mmpo": {
+      "name": "Missoula MPO",
+      "shortName": "Missoula",
+      "type": "mpo",
+      "center": [
+        -108.5007,
+        45.7833
+      ],
+      "zoom": 10,
+      "counties": [
+        "063"
+      ],
+      "countyNames": {
+        "063": "Missoula"
+      },
+      "btsAcronym": "MM",
+      "mapBounds": {
+        "sw": [
+          45.55,
+          -108.75
+        ],
+        "ne": [
+          46.0,
+          -108.25
+        ]
+      }
+    },
+    "gfpd": {
+      "name": "Great Falls Planning Department",
+      "shortName": "Great Falls Planning Department",
+      "type": "mpo",
+      "center": [
+        -111.2966,
+        47.5068
+      ],
+      "zoom": 10,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Cascade"
+      },
+      "btsAcronym": "GFPD",
+      "mapBounds": {
+        "sw": [
+          47.3,
+          -111.55
+        ],
+        "ne": [
+          47.7,
+          -111.05
+        ]
+      }
+    },
+    "ycpbb": {
+      "name": "Yellowstone County Planning Board (Billings)",
+      "shortName": "Billings",
+      "type": "mpo",
+      "center": [
+        -114.0,
+        46.8721
+      ],
+      "zoom": 10,
+      "counties": [
+        "111"
+      ],
+      "countyNames": {
+        "111": "Yellowstone"
+      },
+      "btsAcronym": "YCPB",
+      "mapBounds": {
+        "sw": [
+          46.65,
+          -114.25
+        ],
+        "ne": [
+          47.1,
+          -113.75
+        ]
+      }
+    },
+    "great_falls_planning_and_community_development_department_mpo": {
+      "name": "Great Falls Planning and Community Development Department",
+      "shortName": "Great Falls Planning and Community Development Department",
+      "type": "mpo",
+      "btsMpoId": "30197100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -111.248156,
+        47.477741
+      ],
+      "zoom": 10
+    },
+    "gallatin_valley_metropolitan_planning_organization_mpo": {
+      "name": "Gallatin Valley Metropolitan Planning Organization",
+      "shortName": "Gallatin Valley",
+      "type": "mpo",
+      "btsMpoId": "30202301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -111.141436,
+        45.699139
+      ],
+      "zoom": 10
+    },
+    "greater_helena_area_mpo": {
+      "name": "Greater Helena Area MPO",
+      "shortName": "Greater Helena",
+      "type": "mpo",
+      "btsMpoId": "30202302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -111.97638,
+        46.626988
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Beaverhead",
+    "003": "Big Horn",
+    "005": "Blaine",
+    "007": "Broadwater",
+    "009": "Carbon",
+    "011": "Carter",
+    "013": "Cascade",
+    "015": "Chouteau",
+    "017": "Custer",
+    "019": "Daniels",
+    "021": "Dawson",
+    "023": "Deer Lodge",
+    "025": "Fallon",
+    "027": "Fergus",
+    "029": "Flathead",
+    "031": "Gallatin",
+    "033": "Garfield",
+    "035": "Glacier",
+    "037": "Golden Valley",
+    "039": "Granite",
+    "041": "Hill",
+    "043": "Jefferson",
+    "045": "Judith Basin",
+    "047": "Lake",
+    "049": "Lewis and Clark",
+    "051": "Liberty",
+    "053": "Lincoln",
+    "055": "McCone",
+    "057": "Madison",
+    "059": "Meagher",
+    "061": "Mineral",
+    "063": "Missoula",
+    "065": "Musselshell",
+    "067": "Park",
+    "069": "Petroleum",
+    "071": "Phillips",
+    "073": "Pondera",
+    "075": "Powder River",
+    "077": "Powell",
+    "079": "Prairie",
+    "081": "Ravalli",
+    "083": "Richland",
+    "085": "Roosevelt",
+    "087": "Rosebud",
+    "089": "Sanders",
+    "091": "Sheridan",
+    "093": "Silver Bow",
+    "095": "Stillwater",
+    "097": "Sweet Grass",
+    "099": "Teton",
+    "101": "Toole",
+    "103": "Treasure",
+    "105": "Valley",
+    "107": "Wheatland",
+    "109": "Wibaux",
+    "111": "Yellowstone"
+  }
+}

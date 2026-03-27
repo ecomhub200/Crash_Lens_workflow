@@ -1,0 +1,185 @@
+{
+  "state": {
+    "name": "Maryland",
+    "abbreviation": "MD",
+    "fips": "24",
+    "dotName": "MarylandDOT",
+    "dotFullName": "Maryland Department of Transportation State Highway Administration",
+    "dataSystemName": "ACRS (Automated Crash Reporting System)",
+    "dataPortalUrl": "https://opendata.maryland.gov",
+    "coordinateBounds": {
+      "latMin": 37.91,
+      "latMax": 39.72,
+      "lonMin": -79.49,
+      "lonMax": -75.05
+    }
+  },
+
+  "columnMapping": {
+    "_description": "Maps Maryland ACRS fields to internal codes. Handles both statewide (opendata.maryland.gov) and MoCo (data.montgomerycountymd.gov) field names.",
+
+    "ID": "report_number",
+    "ID_ALT": "report_no",
+    "DATE": "crash_date_time",
+    "DATE_ALT": "acc_date",
+    "TIME": "acc_time",
+    "LAT": "latitude",
+    "LON": "longitude",
+    "SEVERITY_RAW": "acrs_report_type",
+    "ROUTE": "road_name",
+    "CROSS_STREET": "cross_street_name",
+    "ROUTE_TYPE": "route_type",
+    "ROUTE_TYPE_ALT": "route_type_desc",
+    "COLLISION": "collision_type",
+    "COLLISION_ALT": "collision_type_desc",
+    "WEATHER": "weather",
+    "WEATHER_ALT": "weather_desc",
+    "LIGHT": "light",
+    "LIGHT_ALT": "light_desc",
+    "SURFACE": "surface_condition",
+    "SURFACE_ALT": "surf_cond_desc",
+    "JUNCTION": "junction",
+    "JUNCTION_ALT": "junction_desc",
+    "HITRUN": "hit_run",
+    "JURISDICTION": "municipality",
+    "JURISDICTION_ALT": "county_desc",
+    "ROAD_SYSTEM": "route_type",
+    "SPEED_LIMIT": "speed_limit"
+  },
+
+  "derivedFields": {
+    "SEVERITY": {
+      "method": "report_type_map",
+      "source": "acrs_report_type",
+      "mapping": {
+        "Fatal Crash": "K",
+        "Injury Crash": "B",
+        "Property Damage Crash": "O"
+      }
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "crash_date_time"
+    }
+  },
+
+  "roadSystems": {
+    "values": {
+      "Interstate": {
+        "category": "interstate",
+        "isStateDOT": true,
+        "isInterstate": true,
+        "displayName": "Interstate",
+        "standardizedSystem": "Interstate"
+      },
+      "US Route": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "US Route",
+        "standardizedSystem": "Primary"
+      },
+      "US (State)": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "US Route",
+        "standardizedSystem": "Primary"
+      },
+      "Maryland (State)": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "MD State Route",
+        "standardizedSystem": "Primary"
+      },
+      "State Route": {
+        "category": "state",
+        "isStateDOT": true,
+        "isInterstate": false,
+        "displayName": "State Route",
+        "standardizedSystem": "Primary"
+      },
+      "County": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "County Road",
+        "standardizedSystem": "Non-DOT secondary"
+      },
+      "Municipality": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "Municipal Road",
+        "standardizedSystem": "Non-DOT secondary"
+      },
+      "Other Public Roadway": {
+        "category": "local",
+        "isStateDOT": false,
+        "isInterstate": false,
+        "displayName": "Other Public",
+        "standardizedSystem": "Non-DOT secondary"
+      }
+    },
+
+    "splitConfig": {
+      "countyRoads": {
+        "method": "column_value",
+        "column": "SYSTEM",
+        "includeValues": ["Non-DOT secondary"]
+      },
+      "interstateExclusion": {
+        "method": "column_value",
+        "column": "SYSTEM",
+        "excludeValues": ["Interstate"]
+      }
+    },
+
+    "filterProfiles": {
+      "countyOnly": {
+        "name": "County Roads Only",
+        "description": "County-maintained roads only",
+        "systemValues": ["Non-DOT secondary"]
+      },
+      "cityOnly": {
+        "name": "City Roads Only",
+        "description": "City/municipal agency roads only"
+      },
+      "countyPlusVDOT": {
+        "name": "All Roads (No Interstate)",
+        "description": "Local + state roads, excluding interstates",
+        "systemValues": ["Non-DOT secondary", "Primary", "Secondary"]
+      },
+      "allRoads": {
+        "name": "All Roads (Including Interstate)",
+        "description": "All road types",
+        "systemValues": ["Non-DOT secondary", "Primary", "Secondary", "Interstate"]
+      }
+    }
+  },
+
+  "epdoWeights": {
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars",
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1
+  },
+
+  "jurisdictions": {
+    "montgomery": {
+      "name": "Montgomery County",
+      "type": "county",
+      "fips": "031",
+      "namePatterns": ["Montgomery", "MONTGOMERY", "Montgomery County"],
+      "mapCenter": [39.14, -77.15],
+      "mapZoom": 11,
+      "bbox": [-77.53, 38.98, -76.89, 39.35],
+      "maintainsOwnRoads": true,
+      "dataSource": "county_portal",
+      "portalUrl": "https://data.montgomerycountymd.gov"
+    }
+  }
+}

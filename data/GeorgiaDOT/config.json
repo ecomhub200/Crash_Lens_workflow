@@ -1,0 +1,148 @@
+{
+  "state": {
+    "name": "Georgia",
+    "abbreviation": "GA",
+    "fips": "13",
+    "dotName": "GDOT",
+    "dotFullName": "Georgia Department of Transportation",
+    "dataPortalUrl": "https://gdot.aashtowaresafety.net",
+    "coordinateBounds": {
+      "latMin": 30.36,
+      "latMax": 35.0,
+      "lonMin": -85.61,
+      "lonMax": -80.84
+    },
+    "dataDir": "GeorgiaDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Georgia GEARS crash data fields to CRASH LENS field codes",
+    "_note": "RESTRICTED ACCESS: gdot.aashtowaresafety.com requires login. Georgia uses GEARS (Georgia Electronic Accident Reporting System) by LexisNexis. Contact GDOT Crash Reporting Unit at (404) 635-2850 for data access.",
+    "ID": "_TBD_CRASH_ID",
+    "DATE": "_TBD_CRASH_DATE",
+    "TIME": "_TBD_CRASH_TIME",
+    "LAT": "_TBD_LATITUDE",
+    "LON": "_TBD_LONGITUDE",
+    "SEVERITY": "_TBD_SEVERITY",
+    "JURISDICTION": "_TBD_COUNTY",
+    "ROUTE": "_TBD_ROAD_NAME",
+    "COLLISION": "_TBD_COLLISION_TYPE",
+    "WEATHER": "_TBD_WEATHER",
+    "LIGHT": "_TBD_LIGHTING",
+    "SURFACE_CONDITION": "_TBD_SURFACE",
+    "JUNCTION": "_TBD_JUNCTION_TYPE",
+    "HITRUN": "_TBD_HIT_AND_RUN"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_or_derived",
+      "source": "_TBD",
+      "_note": "Update with Georgia-specific severity derivation method"
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "_TBD_CRASH_DATE"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "_TBD_ROAD1",
+        "_TBD_ROAD2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Georgia road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Georgia collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "GDOT GIS Portal",
+    "url": "https://gdot.aashtowaresafety.net",
+    "apiUrl": "https://gdot.aashtowaresafety.com/signin",
+    "_accessRestriction": "REQUIRES LOGIN. AASHTOWare Safety platform behind authentication.",
+    "fileFormat": "GeoJSON/CSV (ArcGIS - authenticated)",
+    "dataDictionary": "GDOT Crash Manual: https://crashmanual.dot.ga.gov/data, Request Form: https://www.dot.ga.gov/PartnerSmart/permits/Documents/Request_for_Crash_Data.pdf",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

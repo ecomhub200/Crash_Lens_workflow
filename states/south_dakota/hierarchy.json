@@ -1,0 +1,381 @@
+{
+  "state": {
+    "fips": "46",
+    "name": "South Dakota",
+    "abbreviation": "SD",
+    "dot": "SDDOT",
+    "dotFullName": "South Dakota Department of Transportation",
+    "center": [
+      -99.438828,
+      44.299782
+    ],
+    "zoom": 7,
+    "placesCount": 310
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "sd_1": {
+      "name": "Region 1 (Sioux Falls/Mitchell)",
+      "shortName": "Region 1",
+      "center": [
+        -97.5,
+        43.6
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "005",
+        "009",
+        "011",
+        "015",
+        "017",
+        "023",
+        "027",
+        "035",
+        "043",
+        "061",
+        "067",
+        "073",
+        "077",
+        "079",
+        "083",
+        "087",
+        "097",
+        "099",
+        "101",
+        "111",
+        "125",
+        "127",
+        "135"
+      ],
+      "countyNames": {
+        "003": "Aurora",
+        "005": "Beadle",
+        "009": "Bon Homme",
+        "011": "Brookings",
+        "015": "Brule",
+        "017": "Buffalo",
+        "023": "Charles Mix",
+        "027": "Clay",
+        "035": "Davison",
+        "043": "Douglas",
+        "061": "Hanson",
+        "067": "Hutchinson",
+        "073": "Jerauld",
+        "077": "Kingsbury",
+        "079": "Lake",
+        "083": "Lincoln",
+        "087": "McCook",
+        "097": "Miner",
+        "099": "Minnehaha",
+        "101": "Moody",
+        "111": "Sanborn",
+        "125": "Turner",
+        "127": "Union",
+        "135": "Yankton"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -99.0
+        ],
+        "ne": [
+          44.4,
+          -96.4
+        ]
+      },
+      "hq": "Mitchell"
+    },
+    "sd_2": {
+      "name": "Region 2 (Huron/Aberdeen)",
+      "shortName": "Region 2",
+      "center": [
+        -99.0,
+        44.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "013",
+        "021",
+        "025",
+        "029",
+        "031",
+        "037",
+        "039",
+        "041",
+        "045",
+        "049",
+        "051",
+        "057",
+        "059",
+        "065",
+        "069",
+        "075",
+        "085",
+        "089",
+        "091",
+        "107",
+        "109",
+        "115",
+        "117",
+        "119",
+        "129",
+        "137"
+      ],
+      "countyNames": {
+        "013": "Brown",
+        "021": "Campbell",
+        "025": "Clark",
+        "029": "Codington",
+        "031": "Corson",
+        "037": "Day",
+        "039": "Deuel",
+        "041": "Dewey",
+        "045": "Edmunds",
+        "049": "Faulk",
+        "051": "Grant",
+        "057": "Hamlin",
+        "059": "Hand",
+        "065": "Hughes",
+        "069": "Hyde",
+        "075": "Jones",
+        "085": "Lyman",
+        "089": "McPherson",
+        "091": "Marshall",
+        "107": "Potter",
+        "109": "Roberts",
+        "115": "Spink",
+        "117": "Stanley",
+        "119": "Sully",
+        "129": "Walworth",
+        "137": "Ziebach"
+      },
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -101.0
+        ],
+        "ne": [
+          46.0,
+          -96.5
+        ]
+      },
+      "hq": "Huron"
+    },
+    "sd_3": {
+      "name": "Region 3 (Pierre)",
+      "shortName": "Region 3",
+      "center": [
+        -101.5,
+        43.6
+      ],
+      "zoom": 7,
+      "counties": [
+        "007",
+        "033",
+        "047",
+        "053",
+        "055",
+        "071",
+        "081",
+        "093",
+        "095",
+        "103",
+        "113",
+        "121",
+        "123"
+      ],
+      "countyNames": {
+        "007": "Bennett",
+        "033": "Custer",
+        "047": "Fall River",
+        "053": "Gregory",
+        "055": "Haakon",
+        "071": "Jackson",
+        "081": "Lawrence",
+        "093": "Meade",
+        "095": "Mellette",
+        "103": "Pennington",
+        "113": "Shannon",
+        "121": "Todd",
+        "123": "Tripp"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -103.5
+        ],
+        "ne": [
+          44.7,
+          -99.5
+        ]
+      },
+      "hq": "Pierre"
+    },
+    "sd_4": {
+      "name": "Region 4 (Rapid City)",
+      "shortName": "Region 4",
+      "center": [
+        -103.5,
+        44.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "019",
+        "063",
+        "105"
+      ],
+      "countyNames": {
+        "019": "Butte",
+        "063": "Harding",
+        "105": "Perkins"
+      },
+      "mapBounds": {
+        "sw": [
+          44.0,
+          -104.1
+        ],
+        "ne": [
+          46.0,
+          -103.0
+        ]
+      },
+      "hq": "Rapid City"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "secog": {
+      "name": "Sioux Falls MPO (SECOG)",
+      "shortName": "SECOG",
+      "type": "mpo",
+      "center": [
+        -96.7311,
+        43.5446
+      ],
+      "zoom": 10,
+      "counties": [
+        "099",
+        "083"
+      ],
+      "countyNames": {
+        "099": "Minnehaha",
+        "083": "Lincoln"
+      },
+      "btsAcronym": "SECOG",
+      "mapBounds": {
+        "sw": [
+          43.35,
+          -96.95
+        ],
+        "ne": [
+          43.75,
+          -96.5
+        ]
+      }
+    },
+    "rcampo": {
+      "name": "Rapid City Area MPO",
+      "shortName": "Rapid City Area",
+      "type": "mpo",
+      "center": [
+        -103.231,
+        44.0805
+      ],
+      "zoom": 10,
+      "counties": [
+        "103"
+      ],
+      "countyNames": {
+        "103": "Pennington"
+      },
+      "btsAcronym": "RCAM",
+      "mapBounds": {
+        "sw": [
+          43.85,
+          -103.5
+        ],
+        "ne": [
+          44.3,
+          -103.0
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "003": "Aurora",
+    "005": "Beadle",
+    "007": "Bennett",
+    "009": "Bon Homme",
+    "011": "Brookings",
+    "013": "Brown",
+    "015": "Brule",
+    "017": "Buffalo",
+    "019": "Butte",
+    "021": "Campbell",
+    "023": "Charles Mix",
+    "025": "Clark",
+    "027": "Clay",
+    "029": "Codington",
+    "031": "Corson",
+    "033": "Custer",
+    "035": "Davison",
+    "037": "Day",
+    "039": "Deuel",
+    "041": "Dewey",
+    "043": "Douglas",
+    "045": "Edmunds",
+    "047": "Fall River",
+    "049": "Faulk",
+    "051": "Grant",
+    "053": "Gregory",
+    "055": "Haakon",
+    "057": "Hamlin",
+    "059": "Hand",
+    "061": "Hanson",
+    "063": "Harding",
+    "065": "Hughes",
+    "067": "Hutchinson",
+    "069": "Hyde",
+    "071": "Jackson",
+    "073": "Jerauld",
+    "075": "Jones",
+    "077": "Kingsbury",
+    "079": "Lake",
+    "081": "Lawrence",
+    "083": "Lincoln",
+    "085": "Lyman",
+    "087": "McCook",
+    "089": "McPherson",
+    "091": "Marshall",
+    "093": "Meade",
+    "095": "Mellette",
+    "097": "Miner",
+    "099": "Minnehaha",
+    "101": "Moody",
+    "102": "Oglala Lakota",
+    "103": "Pennington",
+    "105": "Perkins",
+    "107": "Potter",
+    "109": "Roberts",
+    "111": "Sanborn",
+    "113": "Shannon",
+    "115": "Spink",
+    "117": "Stanley",
+    "119": "Sully",
+    "121": "Todd",
+    "123": "Tripp",
+    "125": "Turner",
+    "127": "Union",
+    "129": "Walworth",
+    "135": "Yankton",
+    "137": "Ziebach"
+  }
+}

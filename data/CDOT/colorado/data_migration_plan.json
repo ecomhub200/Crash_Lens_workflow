@@ -1,0 +1,214 @@
+{
+  "title": "CRASH LENS - Crash Data Migration & Processing Plan",
+  "version": "1.0.0",
+  "created": "2026-02-06",
+  "state": "Colorado",
+  "dotName": "CDOT",
+  "targetJurisdiction": "Douglas County",
+
+  "overview": "End-to-end pipeline for converting raw state crash data exports into validated, standardized, tool-ready CSV files. Triggered from the browser UI via the Upload Crash Data section inside Connect External Data Sources.",
+
+  "pipeline": {
+    "trigger": "User selects State + Jurisdiction from dropdowns, uploads raw CSV in the Upload Crash Data UI section",
+    "stages": [
+      {
+        "stage": 1,
+        "name": "CONVERT",
+        "description": "Auto-detect state format from CSV headers. Normalize all columns to Virginia-compatible standard format (Document Nbr, Crash Severity, x/y coords, boolean flags, etc.)",
+        "input": "Raw state-format CSV (e.g., CDOT 110-column export)",
+        "output": "{jurisdiction}_standardized.csv",
+        "script": "scripts/state_adapter.py",
+        "details": [
+          "Colorado CDOT: Derives KABCO severity from Injury 00-04 counts",
+          "Colorado CDOT: Maps 50+ crash type values to 16 standard collision types",
+          "Colorado CDOT: Derives boolean flags (Pedestrian?, Bike?, Alcohol?, Speed?, etc.) from TU-1/TU-2 fields",
+          "Colorado CDOT: Builds route names from System Code + Rd_Number + Location 1",
+          "Colorado CDOT: Builds intersection Node IDs from Location 1 + Location 2 for intersection crashes",
+          "Virginia TREDS: Passthrough (already in standard format)"
+        ]
+      },
+      {
+        "stage": 2,
+        "name": "VALIDATE",
+        "description": "Run data quality checks with state-specific coordinate bounds, severity validation, duplicate detection, cross-field consistency checks",
+        "input": "{jurisdiction}_standardized.csv",
+        "output": "{jurisdiction}_standardized.csv (corrected in-place)",
+        "script": "scripts/process_crash_data.py (stage_validate) + validation/run_validation.py",
+        "checks": [
+          "Severity values in {K, A, B, C, O}",
+          "Crash dates not in future, not before 2015",
+          "Coordinates within state bounds (Colorado: 36.9-41.1°N, -109.1 to -101.9°W)",
+          "Transposed lat/lon detection and correction",
+          "Boolean field normalization (Y/N/TRUE/FALSE → Yes/No)",
+          "Cross-field: Fatal crash (K) must have K_People > 0",
+          "Cross-field: Pedestrian collision must have Pedestrian? = Yes",
+          "Duplicate detection: same date + GPS + collision type → keep first"
+        ],
+        "autoCorrection": {
+          "confidenceThreshold": 85,
+          "examples": [
+            "F → K (Fatal → KABCO K, 95% confidence)",
+            "P → O (Property → KABCO O, 95% confidence)",
+            "Pedestrian collision without Pedestrian?=Yes → auto-set (98% confidence)"
+          ]
+        }
+      },
+      {
+        "stage": 3,
+        "name": "GEOCODE",
+        "description": "Fill in missing GPS coordinates using free geocoding strategies",
+        "input": "{jurisdiction}_standardized.csv",
+        "output": "{jurisdiction}_standardized.csv (GPS-enhanced in-place)",
+        "strategies": [
+          {
+            "priority": 1,
+            "name": "Node Lookup",
+            "description": "Find coordinates from other crashes at the same intersection (Node ID match)",
+            "cost": "Free, instant",
+            "expectedRecovery": "~80% of missing intersection crashes"
+          },
+          {
+            "priority": 2,
+            "name": "Nominatim/OSM",
+            "description": "Geocode from street names using OpenStreetMap Nominatim service",
+            "cost": "Free, 1 request/second rate limit",
+            "expectedRecovery": "~30-50% of remaining missing coords",
+            "queryFormat": "{Location 1} and {Location 2}, {County}, {State}"
+          }
+        ],
+        "douglasCountyResults": {
+          "before": "186 missing GPS (4.3% of 4,323)",
+          "afterNodeLookup": "39 missing (147 recovered via node lookup)",
+          "afterNominatim": "39 remaining (0.9% - these have UNKNOWN LOC or no cross-street)",
+          "finalCoverage": "99.1%"
+        }
+      },
+      {
+        "stage": 4,
+        "name": "SPLIT",
+        "description": "Split validated data into road-type filter files for the browser tool",
+        "input": "{jurisdiction}_standardized.csv",
+        "output": [
+          "{jurisdiction}_all_roads.csv - Complete dataset",
+          "{jurisdiction}_county_roads.csv - County/city-maintained roads only",
+          "{jurisdiction}_no_interstate.csv - Everything except interstates"
+        ],
+        "filterLogic": {
+          "colorado": {
+            "countyRoads": "_co_agency_id = 'DSO' (Douglas County Sheriff's Office)",
+            "noInterstate": "_co_system_code != 'Interstate Highway'"
+          },
+          "virginia": {
+            "countyRoads": "SYSTEM in {Non-DOT secondary, Non-DOT}",
+            "noInterstate": "SYSTEM != 'Interstate'"
+          }
+        }
+      }
+    ]
+  },
+
+  "folderStructure": {
+    "description": "Output folder is auto-created under data/ using the state DOT abbreviation from states/{state}/config.json → state.dotName",
+    "mapping": {
+      "Colorado (CO)": "data/CDOT/",
+      "Virginia (VA)": "data/TREDS/ or data/VDOT/",
+      "Texas (TX)": "data/TxDOT/",
+      "{Any State}": "data/{dotName}/"
+    },
+    "outputFiles": {
+      "data/CDOT/douglas_standardized.csv": "4,296 rows, 45+ standardized columns",
+      "data/CDOT/douglas_all_roads.csv": "4,296 rows (complete dataset)",
+      "data/CDOT/douglas_county_roads.csv": "1,061 rows (Agency Id = DSO only)",
+      "data/CDOT/douglas_no_interstate.csv": "3,310 rows (excludes Interstate Highway)",
+      "data/CDOT/.validation/pipeline_report.json": "Validation summary and statistics"
+    }
+  },
+
+  "uiIntegration": {
+    "location": "Inside 'Connect External Data Sources (API)' collapsible card, as a new section before the Save/Load config bar",
+    "components": [
+      "Select State dropdown (mirrors existing state selector, all 50 states + DC)",
+      "Select County/Jurisdiction dropdown (dynamically populated based on state)",
+      "CSV file upload zone (drag-and-drop or click to browse)",
+      "Pipeline progress display (4 stages with status indicators)",
+      "Results summary (rows, GPS coverage, corrections, output files)"
+    ],
+    "flow": [
+      "1. User expands Connect External Data Sources card",
+      "2. User selects state from Upload Crash Data → Select State dropdown",
+      "3. Jurisdiction dropdown auto-populates with counties for that state",
+      "4. User selects jurisdiction (e.g., Douglas County)",
+      "5. User uploads raw CSV file (drag-drop or browse)",
+      "6. Browser sends file + state key + jurisdiction key to pipeline server",
+      "7. Pipeline server runs process_crash_data.py with dynamic args",
+      "8. Progress updates stream back to browser",
+      "9. On completion: shows results, auto-loads output files into tool"
+    ]
+  },
+
+  "pipelineServer": {
+    "script": "scripts/pipeline_server.py",
+    "framework": "Flask (lightweight HTTP server)",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/api/pipeline/run",
+        "accepts": "multipart/form-data (file + state + jurisdiction)",
+        "returns": "JSON with pipeline results and output file paths"
+      },
+      {
+        "method": "GET",
+        "path": "/api/pipeline/status",
+        "returns": "Current pipeline stage and progress"
+      }
+    ],
+    "startup": "python scripts/pipeline_server.py (runs on port 5050)"
+  },
+
+  "scripts": {
+    "process_crash_data.py": {
+      "location": "scripts/process_crash_data.py",
+      "description": "Master pipeline orchestrator",
+      "usage": "python scripts/process_crash_data.py -i <file> -s <state> -j <jurisdiction> -o data/<DOT>/",
+      "dynamicArgs": {
+        "-i": "From uploaded file",
+        "-s": "From state dropdown selection (e.g., 'colorado')",
+        "-j": "From jurisdiction dropdown selection (e.g., 'douglas')",
+        "-o": "Auto-derived: data/{dotName}/ from state config"
+      }
+    },
+    "state_adapter.py": {
+      "location": "scripts/state_adapter.py",
+      "description": "Python state format converter (mirrors state_adapter.js)",
+      "supportedStates": ["colorado (CDOT)", "virginia (TREDS)"]
+    },
+    "split_cdot_data.py": {
+      "location": "scripts/split_cdot_data.py",
+      "description": "Road-type splitter (multi-state aware, auto-detects standardized vs raw format)"
+    },
+    "pipeline_server.py": {
+      "location": "scripts/pipeline_server.py",
+      "description": "Lightweight Flask server bridging browser UI to Python pipeline"
+    }
+  },
+
+  "douglasCountyBaseline": {
+    "rawInput": {
+      "file": "Douglas_County.csv",
+      "format": "Colorado CDOT",
+      "columns": 110,
+      "rows": 4323,
+      "years": "2021-2025",
+      "missingGPS": 186
+    },
+    "pipelineOutput": {
+      "rows": 4296,
+      "duplicatesRemoved": 27,
+      "gpsCoverage": "99.1%",
+      "gpsRecovered": 147,
+      "corrections": 0,
+      "issues": 0,
+      "processingTime": "39.3 seconds"
+    }
+  }
+}

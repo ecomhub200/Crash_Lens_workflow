@@ -1,0 +1,635 @@
+# ==============================================================================
+# Crash Lens — Manual Upload + Normalize + Pipeline Trigger
+# ==============================================================================
+# Alternative to automated download workflows. For states where:
+#   - API/Playwright download isn't available yet
+#   - Data must be obtained manually (email, portal download, etc.)
+#   - Quick testing of new state data before automating
+#
+# WORKFLOW:
+#   1. User manually uploads raw crash CSV to R2 at:
+#        {state}/_state/statewide_all_roads.csv.gz  (or .csv)
+#   2. User triggers this workflow
+#   3. Workflow downloads from R2 → normalizes → re-uploads → triggers pipeline
+#
+# This workflow does NOT touch existing automated download workflows.
+# It is manual-only (workflow_dispatch) — never scheduled.
+#
+# R2 upload instructions (using AWS CLI or Cloudflare Dashboard):
+#   aws s3 cp my_crash_data.csv.gz s3://crash-lens-data/{state}/_state/statewide_all_roads.csv.gz \
+#     --endpoint-url https://{CF_ACCOUNT_ID}.r2.cloudflarestorage.com
+# ==============================================================================
+
+name: "Manual Upload: Normalize & Process"
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'State (must exist in download-registry.json and have a normalizer)'
+        required: true
+        type: choice
+        options:
+          - virginia
+          - colorado
+          - maryland
+          - delaware
+          - alaska
+          - arkansas
+          - connecticut
+          - florida
+          - georgia
+          - hawaii
+          - idaho
+          - illinois
+          - iowa
+          - louisiana
+          - massachusetts
+          - mississippi
+          - montana
+          - nevada
+          - new_york
+          - nyc
+          - ohio
+          - oklahoma
+          - oregon
+          - pennsylvania
+          - south_carolina
+          - texas
+          - utah
+          - vermont
+          - washington
+          - west_virginia
+          - wisconsin
+
+      r2_raw_key:
+        description: 'R2 key of uploaded raw CSV (e.g. colorado/_state/statewide_all_roads.csv.gz). Leave blank for default: {state}/_state/statewide_all_roads.csv.gz'
+        required: false
+        default: ''
+        type: string
+
+      scope:
+        description: 'Processing scope'
+        required: true
+        type: choice
+        default: 'statewide'
+        options:
+          - statewide
+          - region
+          - mpo
+          - jurisdiction
+
+      selection:
+        description: 'Jurisdiction/region/MPO name (blank for statewide)'
+        required: false
+        default: ''
+        type: string
+
+      skip_pipeline:
+        description: 'Skip pipeline trigger (normalize + R2 upload only)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_forecasts:
+        description: 'Skip forecast generation in pipeline'
+        required: false
+        type: boolean
+        default: false
+
+      dry_run:
+        description: 'Dry run (no uploads, no pipeline trigger)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  NOTIFICATION_EMAIL: ecomhub200@gmail.com
+
+jobs:
+  # ============================================================
+  # JOB 1: Download from R2 → Normalize → Re-upload
+  # ============================================================
+  normalize:
+    name: "Normalize (${{ github.event.inputs.state }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    outputs:
+      state: ${{ github.event.inputs.state }}
+      scope: ${{ steps.resolve.outputs.scope }}
+      selection: ${{ steps.resolve.outputs.selection }}
+      r2_data_key: ${{ steps.r2_reupload.outputs.r2_data_key }}
+      total_records: ${{ steps.validate.outputs.total_records }}
+      normalized: ${{ steps.normalize.outputs.normalized }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas requests openpyxl
+          fi
+          pip install awscli
+
+      # ── Step 1: Resolve state config from registry ──
+      - name: Resolve from download registry
+        id: registry
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          REGISTRY="states/download-registry.json"
+
+          if [ ! -f "$REGISTRY" ]; then
+            echo "::error::Registry file not found: $REGISTRY"
+            exit 1
+          fi
+
+          python3 -c "
+          import json, sys
+
+          with open('$REGISTRY') as f:
+              reg = json.load(f)
+
+          state = '$STATE'
+          if state not in reg:
+              print(f'::error::State {state} not found in registry. Add it to states/download-registry.json first.', file=sys.stderr)
+              sys.exit(1)
+
+          e = reg[state]
+          outputs = {
+              'display_name': e.get('displayName', state.replace('_', ' ').title()),
+              'r2_prefix': e.get('r2Prefix', state),
+              'dot_dir': e.get('dotDir', f'data/{state}'),
+              'needs_standardization': str(e.get('needsStandardization', True)).lower(),
+          }
+
+          for k, v in outputs.items():
+              print(f'{k}={v}')
+          " >> $GITHUB_OUTPUT
+
+          echo "Registry resolved for $STATE"
+
+      # ── Step 2: Resolve scope ──
+      - name: Resolve scope
+        id: resolve
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          SCOPE="${{ github.event.inputs.scope }}"
+          SELECTION="${{ github.event.inputs.selection }}"
+
+          if [ "$SCOPE" = "statewide" ]; then
+            SELECTION=""
+          elif [ -z "$SELECTION" ]; then
+            echo "::error::Selection required for scope=$SCOPE"
+            exit 1
+          fi
+
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+
+      # ── Step 3: Download raw CSV from R2 ──
+      - name: Download raw CSV from R2
+        id: download
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          R2_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+          R2_RAW_KEY="${{ github.event.inputs.r2_raw_key }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          DOT_DIR="${{ steps.registry.outputs.dot_dir }}"
+
+          # Default R2 key if not provided — uses same naming convention as automated downloads
+          if [ -z "$R2_RAW_KEY" ]; then
+            R2_RAW_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+          fi
+
+          echo "=========================================="
+          echo "Downloading raw CSV from R2"
+          echo "  R2 key: $R2_RAW_KEY"
+          echo "=========================================="
+
+          mkdir -p "$DOT_DIR"
+          LOCAL_PATH="$DOT_DIR/${STATE}_manual_raw.csv"
+
+          # Determine if gzipped
+          IS_GZ="false"
+          if [[ "$R2_RAW_KEY" == *.gz ]]; then
+            IS_GZ="true"
+            LOCAL_PATH="${LOCAL_PATH}.gz"
+          fi
+
+          # Download with retry
+          DOWNLOADED="false"
+          for i in 1 2 3 4; do
+            if aws s3 cp "s3://$R2_BUCKET/$R2_RAW_KEY" "$LOCAL_PATH" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --only-show-errors; then
+              echo "Download succeeded"
+              DOWNLOADED="true"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Download failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+
+          if [ "$DOWNLOADED" != "true" ]; then
+            echo "::error::Failed to download from R2: $R2_RAW_KEY"
+            echo "::error::Make sure you uploaded the file to: s3://$R2_BUCKET/$R2_RAW_KEY"
+            exit 1
+          fi
+
+          # Decompress if gzipped (explicit .gz extension or Content-Encoding: gzip)
+          if [ "$IS_GZ" = "true" ]; then
+            gunzip -f "$LOCAL_PATH"
+            LOCAL_PATH="${LOCAL_PATH%.gz}"
+          elif file "$LOCAL_PATH" | grep -q gzip; then
+            echo "Detected gzip content (Content-Encoding: gzip) — decompressing..."
+            mv "$LOCAL_PATH" "${LOCAL_PATH}.gz"
+            gunzip -f "${LOCAL_PATH}.gz"
+          fi
+
+          # Verify file exists and is non-empty
+          if [ ! -s "$LOCAL_PATH" ]; then
+            echo "::error::Downloaded file is empty: $LOCAL_PATH"
+            exit 1
+          fi
+
+          SIZE=$(ls -lh "$LOCAL_PATH" | awk '{print $5}')
+          ROWS=$(wc -l < "$LOCAL_PATH" | tr -d ' ')
+          echo "Downloaded: $LOCAL_PATH ($((ROWS - 1)) records, $SIZE)"
+
+          echo "raw_path=$LOCAL_PATH" >> $GITHUB_OUTPUT
+          echo "r2_raw_key=$R2_RAW_KEY" >> $GITHUB_OUTPUT
+
+      # ── Step 4: Validate raw data (basic checks) ──
+      - name: Validate raw data
+        id: validate_raw
+        run: |
+          RAW_PATH="${{ steps.download.outputs.raw_path }}"
+          STATE="${{ github.event.inputs.state }}"
+
+          python3 -c "
+          import csv, sys
+
+          with open('$RAW_PATH', 'r', encoding='utf-8-sig') as f:
+              reader = csv.reader(f)
+              headers = next(reader)
+
+          col_count = len(headers)
+          print(f'Columns: {col_count}')
+          print(f'Headers: {headers[:10]}...' if col_count > 10 else f'Headers: {headers}')
+
+          if col_count < 5:
+              print(f'::error::CSV has only {col_count} columns — likely not crash data')
+              sys.exit(1)
+
+          # Count rows (quick check)
+          with open('$RAW_PATH', 'r', encoding='utf-8-sig') as f:
+              row_count = sum(1 for _ in f) - 1  # minus header
+
+          print(f'Rows: {row_count}')
+
+          if row_count < 1:
+              print('::error::CSV has no data rows')
+              sys.exit(1)
+
+          print(f'Raw data validation passed ({col_count} columns, {row_count} rows)')
+          "
+
+      # ── Step 5: Normalize to Virginia standard ──
+      - name: Normalize to Virginia standard
+        id: normalize
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          RAW_PATH="${{ steps.download.outputs.raw_path }}"
+          DOT_DIR="${{ steps.registry.outputs.dot_dir }}"
+          NEEDS_STD="${{ steps.registry.outputs.needs_standardization }}"
+
+          echo "=========================================="
+          echo "Normalizing data for $STATE"
+          echo "  Input: $RAW_PATH"
+          echo "=========================================="
+
+          NORMALIZED_PATH="$DOT_DIR/${STATE}_statewide_all_roads.csv"
+
+          if [ "$NEEDS_STD" != "true" ]; then
+            echo "Registry says needsStandardization=false — data is already in standard format"
+            cp "$RAW_PATH" "$NORMALIZED_PATH"
+            echo "normalized_path=$NORMALIZED_PATH" >> $GITHUB_OUTPUT
+            echo "normalized=passthrough" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Try state_adapter.py first (preferred normalizer)
+          if python scripts/state_adapter.py \
+            --input "$RAW_PATH" \
+            --output "$NORMALIZED_PATH" \
+            --state "$STATE" 2>&1; then
+            echo "Normalized via state_adapter.py"
+            echo "normalized=state_adapter" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::state_adapter.py failed, trying process_crash_data.py..."
+            # Fallback to process_crash_data.py
+            python scripts/process_crash_data.py \
+              -i "$RAW_PATH" \
+              -s "$STATE" -j "statewide" \
+              -o "$DOT_DIR" \
+              --convert-only --force 2>&1 || {
+              echo "::error::Both normalizers failed for $STATE"
+              exit 1
+            }
+
+            if [ -f "$DOT_DIR/statewide_standardized.csv" ]; then
+              mv "$DOT_DIR/statewide_standardized.csv" "$NORMALIZED_PATH"
+            fi
+            echo "normalized=process_crash_data" >> $GITHUB_OUTPUT
+          fi
+
+          echo "normalized_path=$NORMALIZED_PATH" >> $GITHUB_OUTPUT
+
+      # ── Step 6: Validate normalized data ──
+      - name: Validate normalized data
+        id: validate
+        run: |
+          NORMALIZED="${{ steps.normalize.outputs.normalized_path }}"
+          STATE="${{ github.event.inputs.state }}"
+
+          if [ ! -s "$NORMALIZED" ]; then
+            echo "::error::Normalized file is empty or missing: $NORMALIZED"
+            exit 1
+          fi
+
+          python3 -c "
+          import csv, sys
+
+          with open('$NORMALIZED', 'r', encoding='utf-8-sig') as f:
+              reader = csv.reader(f)
+              headers = next(reader)
+
+          # Check for key Virginia-standard columns
+          required = ['Document Nbr', 'Crash Severity', 'Crash Date']
+          missing = [c for c in required if c not in headers]
+
+          if missing:
+              print(f'::error::Normalized CSV missing required columns: {missing}')
+              print(f'Columns present: {headers[:15]}...')
+              sys.exit(1)
+
+          # Count rows and severity distribution
+          severity_dist = {}
+          row_count = 0
+          with open('$NORMALIZED', 'r', encoding='utf-8-sig') as f:
+              reader = csv.DictReader(f)
+              for row in reader:
+                  row_count += 1
+                  sev = row.get('Crash Severity', 'Unknown')
+                  severity_dist[sev] = severity_dist.get(sev, 0) + 1
+
+          print(f'Normalized: {row_count} records')
+          print(f'Severity distribution: {severity_dist}')
+
+          if row_count < 1:
+              print('::error::Normalized CSV has no data rows')
+              sys.exit(1)
+
+          print(f'Validation passed')
+          print(f'total_records={row_count}')
+          " | tee /tmp/validate_output.txt
+
+          TOTAL=$(grep 'total_records=' /tmp/validate_output.txt | cut -d'=' -f2)
+          echo "total_records=${TOTAL:-0}" >> $GITHUB_OUTPUT
+
+      # ── Step 7: Upload normalized CSV to R2 (statewide location) ──
+      - name: Upload normalized CSV to R2
+        id: r2_reupload
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          R2_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+          NORMALIZED="${{ steps.normalize.outputs.normalized_path }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          R2_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
+
+          echo "=========================================="
+          echo "Uploading normalized CSV to R2"
+          echo "  Local: $NORMALIZED"
+          echo "  R2:    s3://$R2_BUCKET/$R2_KEY"
+          echo "=========================================="
+
+          # Gzip the CSV for storage savings
+          GZ_PATH="${NORMALIZED}.gz"
+          gzip -cn "$NORMALIZED" > "$GZ_PATH"
+          GZ_SIZE=$(stat -c%s "$GZ_PATH" 2>/dev/null || stat -f%z "$GZ_PATH")
+          ORIG_SIZE=$(stat -c%s "$NORMALIZED" 2>/dev/null || stat -f%z "$NORMALIZED")
+          echo "  Gzip: ${ORIG_SIZE} -> ${GZ_SIZE} bytes (saved $((ORIG_SIZE - GZ_SIZE)) bytes)"
+
+          # Upload gzipped with Content-Encoding: gzip (retry with exponential backoff)
+          for i in 1 2 3 4; do
+            if aws s3 cp "$GZ_PATH" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "text/csv" \
+              --content-encoding "gzip" \
+              --only-show-errors; then
+              echo "Upload succeeded (gzip-compressed)"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Upload failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+          rm -f "$GZ_PATH"
+
+          # Verify upload
+          SIZE=$(aws s3api head-object \
+            --bucket "$R2_BUCKET" \
+            --key "$R2_KEY" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'ContentLength' --output text 2>/dev/null || echo "0")
+
+          if [ "$SIZE" = "0" ]; then
+            echo "::error::R2 upload verification failed"
+            exit 1
+          fi
+
+          SIZE_MB=$((SIZE / 1048576))
+          echo "Verified: $R2_KEY (${SIZE_MB}MB gzipped on R2)"
+          echo "r2_data_key=$R2_KEY" >> $GITHUB_OUTPUT
+
+      # ── Step 8: Also upload gzipped copy to _state/ ──
+      - name: Upload gzipped copy to R2 (_state/)
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          R2_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+          NORMALIZED="${{ steps.normalize.outputs.normalized_path }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          R2_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+
+          gzip -k -f "$NORMALIZED"
+          GZ_PATH="${NORMALIZED}.gz"
+
+          for i in 1 2 3 4; do
+            if aws s3 cp "$GZ_PATH" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "application/gzip" \
+              --only-show-errors; then
+              echo "Gzip upload succeeded: $R2_KEY"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Upload failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+
+      # ── Job summary ──
+      - name: Job summary
+        if: always()
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          DISPLAY="${{ steps.registry.outputs.display_name }}"
+          SCOPE="${{ steps.resolve.outputs.scope }}"
+          SELECTION="${{ steps.resolve.outputs.selection }}"
+          TOTAL="${{ steps.validate.outputs.total_records }}"
+          NORMALIZED="${{ steps.normalize.outputs.normalized }}"
+          R2_RAW="${{ steps.download.outputs.r2_raw_key }}"
+          R2_KEY="${{ steps.r2_reupload.outputs.r2_data_key }}"
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## ${DISPLAY} — Manual Upload & Normalize
+
+          | Metric | Value |
+          |--------|-------|
+          | State | ${DISPLAY} (${STATE}) |
+          | Scope | ${SCOPE} ${SELECTION:+($SELECTION)} |
+          | Source (R2) | ${R2_RAW} |
+          | Records | ${TOTAL:-N/A} |
+          | Normalizer | ${NORMALIZED:-N/A} |
+          | Normalized (R2) | ${R2_KEY:-'(dry run)'} |
+          | Dry Run | ${{ github.event.inputs.dry_run }} |
+          | Completed | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+
+          ### How to use
+          1. Upload raw crash CSV to R2: \`s3://crash-lens-data/${R2_RAW}\`
+          2. Trigger this workflow with state = \`${STATE}\`
+          3. Workflow normalizes and uploads to: \`s3://crash-lens-data/${R2_KEY}\`
+          4. Pipeline processes the normalized data into per-jurisdiction splits
+          EOF
+
+  # ============================================================
+  # JOB 2: Trigger pipeline (batch-pipeline for statewide, pipeline for jurisdiction)
+  # ============================================================
+  trigger-pipeline:
+    name: "Trigger pipeline (${{ github.event.inputs.scope }})"
+    needs: normalize
+    if: >-
+      github.event.inputs.skip_pipeline != 'true' &&
+      github.event.inputs.dry_run != 'true'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Dispatch pipeline
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const state = '${{ needs.normalize.outputs.state }}';
+            const scope = '${{ needs.normalize.outputs.scope }}';
+            const selection = '${{ needs.normalize.outputs.selection }}';
+            const r2DataKey = '${{ needs.normalize.outputs.r2_data_key }}';
+            const skipForecasts = '${{ github.event.inputs.skip_forecasts }}';
+
+            // Use batch-pipeline for statewide (data in R2), pipeline.yml for jurisdiction
+            const isStagewide = scope === 'statewide' || scope === 'region' || scope === 'mpo';
+            const workflowId = isStagewide ? 'batch-pipeline.yml' : 'pipeline.yml';
+
+            console.log(`Triggering ${workflowId}`);
+            console.log(`  State: ${state}, Scope: ${scope}, Selection: ${selection || '(all)'}`);
+            console.log(`  R2 key: ${r2DataKey}`);
+
+            const inputs = isStagewide
+              ? {
+                  state: state,
+                  scope: scope,
+                  selection: selection || '',
+                  r2_data_key: r2DataKey,
+                  skip_forecasts: skipForecasts || 'false',
+                  dry_run: 'false'
+                }
+              : {
+                  state: state,
+                  scope: 'jurisdiction',
+                  selection: selection,
+                  data_source: '',
+                  skip_forecasts: skipForecasts || 'false',
+                  dry_run: 'false'
+                };
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              ref: 'main',
+              inputs: inputs
+            });
+
+            console.log(`${workflowId} dispatched successfully`);
+
+      - name: Job summary
+        run: |
+          STATE="${{ needs.normalize.outputs.state }}"
+          SCOPE="${{ needs.normalize.outputs.scope }}"
+          SELECTION="${{ needs.normalize.outputs.selection }}"
+          TOTAL="${{ needs.normalize.outputs.total_records }}"
+          R2_KEY="${{ needs.normalize.outputs.r2_data_key }}"
+
+          if [ "$SCOPE" = "statewide" ] || [ "$SCOPE" = "region" ] || [ "$SCOPE" = "mpo" ]; then
+            PIPELINE="batch-pipeline.yml"
+          else
+            PIPELINE="pipeline.yml"
+          fi
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Pipeline Triggered
+
+          | Metric | Value |
+          |--------|-------|
+          | State | ${STATE} |
+          | Scope | ${SCOPE} ${SELECTION:+($SELECTION)} |
+          | Records | ${TOTAL} |
+          | Pipeline | ${PIPELINE} |
+          | R2 Key | ${R2_KEY} |
+          | Skip Forecasts | ${{ github.event.inputs.skip_forecasts }} |
+
+          **Flow:** R2 (manual upload) → Normalize → R2 (standardized) → ${PIPELINE} → Split → Aggregate → Upload → Forecasts
+          EOF

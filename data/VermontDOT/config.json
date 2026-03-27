@@ -1,0 +1,141 @@
+{
+  "state": {
+    "name": "Vermont",
+    "abbreviation": "VT",
+    "fips": "50",
+    "dotName": "VTrans",
+    "dotFullName": "Vermont Agency of Transportation",
+    "dataPortalUrl": "https://apps.vtrans.vermont.gov/crashdata",
+    "coordinateBounds": {
+      "latMin": 42.73,
+      "latMax": 45.02,
+      "lonMin": -73.44,
+      "lonMax": -71.47
+    },
+    "dataDir": "VermontDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Vermont crash data fields to internal CRASH LENS field codes",
+    "_note": "Column names sourced from Vermont data dictionary. Update as API schema is confirmed.",
+    "ID": "_TBD_CRASH_ID",
+    "DATE": "_TBD_CRASH_DATE",
+    "TIME": "_TBD_CRASH_TIME",
+    "LAT": "_TBD_LATITUDE",
+    "LON": "_TBD_LONGITUDE",
+    "SEVERITY": "_TBD_SEVERITY",
+    "JURISDICTION": "_TBD_COUNTY",
+    "ROUTE": "_TBD_ROAD_NAME",
+    "COLLISION": "_TBD_COLLISION_TYPE",
+    "WEATHER": "_TBD_WEATHER",
+    "LIGHT": "_TBD_LIGHTING",
+    "SURFACE_CONDITION": "_TBD_SURFACE",
+    "JUNCTION": "_TBD_JUNCTION_TYPE",
+    "HITRUN": "_TBD_HIT_AND_RUN"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_or_derived",
+      "source": "_TBD",
+      "_note": "Update with Vermont-specific severity derivation method"
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "_TBD_CRASH_DATE"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "_TBD_ROAD1",
+        "_TBD_ROAD2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Vermont road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Vermont collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "VTrans Data Portal",
+    "url": "https://apps.vtrans.vermont.gov/crashdata",
+    "apiUrl": "https://apps.vtrans.vermont.gov/crashdata/api/Accident",
+    "fileFormat": "JSON (REST API)",
+    "dataDictionary": "See apps.vtrans.vermont.gov/crashdata dataset metadata"
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "state": {
+    "name": "Florida",
+    "abbreviation": "FL",
+    "fips": "12",
+    "dotName": "FDOT",
+    "dotFullName": "Florida Department of Transportation",
+    "dataPortalUrl": "https://gis-fdot.opendata.arcgis.com",
+    "coordinateBounds": {
+      "latMin": 24.4,
+      "latMax": 31.0,
+      "lonMin": -87.63,
+      "lonMax": -80.03
+    },
+    "dataDir": "FloridaDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps FDOT Crashes_All FeatureServer fields to CRASH LENS field codes",
+    "_note": "Column names from FDOT State Safety Office Crashes_All FeatureServer/0",
+    "ID": "CRASH_NUMBER",
+    "XID": "XID",
+    "DATE": "CRASH_DATE",
+    "TIME": "CRASH_TIME",
+    "LAT": "OFFICER_LATITUDE",
+    "LON": "OFFICER_LONGITUDE",
+    "SAFETY_LAT": "SAFETYLAT",
+    "SAFETY_LON": "SAFETYLON",
+    "SEVERITY": "_DERIVED",
+    "JURISDICTION": "COUNTY_TXT",
+    "COUNTY_CODE": "DOT_CNTY_CD",
+    "DISTRICT": "DOT_GEOG_DIST_CD",
+    "ROUTE": "ON_ROADWAY_NAME",
+    "CROSS_STREET": "INT_ROADWAY_NAME",
+    "COLLISION": "FRST_HARM_LOC_CD",
+    "WEATHER": "EVNT_WTHR_COND_CD",
+    "LIGHT": "LGHT_COND_CD",
+    "SURFACE_CONDITION": "RD_SRFC_COND_CD",
+    "JUNCTION": "JCT_CD",
+    "INTERSECTION_TYPE": "INTCT_TYP_CD",
+    "HITRUN": "_VEHICLE_LEVEL_FIELD",
+    "_HITRUN_NOTE": "Hit-and-run is derived at vehicle level in Signal4, not directly in Crashes_All crash-level FeatureServer. May need vehicle table join or check for HITRUN_IND field.",
+    "PED_COUNT": "NUMBER_OF_PEDESTRIANS",
+    "BIKE_COUNT": "NUMBER_OF_BICYCLISTS",
+    "VEHICLE_COUNT": "NUMBER_OF_VEHICLES",
+    "TOTAL_PERSONS": "TOTAL_PERSONS",
+    "WRONG_WAY": "WRONGWAY_IND",
+    "WORKZONE": "WORKZONE_IND",
+    "COMMERCIAL_VEHICLE": "COMMERCIAL_VEHICLE_IND",
+    "INTERSECTION": "INTERSECTION_IND",
+    "LANE_DEPARTURE": "LANE_DEPARTURE_IND",
+    "SPEEDING": "SPEEDING_IND",
+    "AGGRESSIVE_DRIVING": "AGGRESSIVE_DRIVING_IND",
+    "YEAR": "CALENDAR_YEAR",
+    "DAY_OF_WEEK": "WEEKDAY_TXT",
+    "ROADWAY_ID": "ROADWAYID",
+    "STATE_ROAD": "STATE_ROAD_NUMBER",
+    "US_ROAD": "US_ROAD_NUMBER",
+    "FUNCTIONAL_CLASS": "FUNCLASS",
+    "ROAD_SYSTEM": "DHSRDSYS",
+    "IN_TOWN": "IN_TOWN_FLAG",
+    "CASE_NUMBER": "CASE_NUMBER",
+    "AGENCY_TYPE": "AGENCY_TYPE_TXT"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_or_derived",
+      "source": "INJSEVER",
+      "_note": "INJSEVER is the crash-level highest injury severity field (string, length 1). Maps to KABCO directly. Also check INJSEVERCD for numeric code."
+    },
+    "YEAR": {
+      "method": "direct",
+      "source": "CALENDAR_YEAR"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "ON_ROADWAY_NAME",
+        "INT_ROADWAY_NAME"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Florida road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Florida collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "FDOT GIS Portal",
+    "url": "https://gis-fdot.opendata.arcgis.com",
+    "apiUrl": "https://gis.fdot.gov/arcgis/rest/services/Crashes_All/FeatureServer/0",
+    "fileFormat": "GeoJSON/CSV (ArcGIS)",
+    "dataDictionary": "FDOT State Safety Office - Signal4 data dictionary",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}
