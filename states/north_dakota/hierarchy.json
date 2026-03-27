@@ -1,0 +1,510 @@
+{
+  "state": {
+    "fips": "38",
+    "name": "North Dakota",
+    "abbreviation": "ND",
+    "dot": "NDDOT",
+    "dotFullName": "North Dakota Department of Transportation",
+    "center": [
+      -99.784012,
+      47.528912
+    ],
+    "zoom": 7,
+    "placesCount": 355
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nd_1": {
+      "name": "District 1 (Bismarck)",
+      "shortName": "District 1",
+      "center": [
+        -101.0,
+        47.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "015",
+        "029",
+        "037",
+        "043",
+        "047",
+        "051",
+        "055",
+        "057",
+        "059",
+        "065",
+        "083",
+        "085"
+      ],
+      "countyNames": {
+        "015": "Burleigh",
+        "029": "Emmons",
+        "037": "Grant",
+        "043": "Kidder",
+        "047": "Logan",
+        "051": "McIntosh",
+        "055": "McLean",
+        "057": "Mercer",
+        "059": "Morton",
+        "065": "Oliver",
+        "083": "Sheridan",
+        "085": "Sioux"
+      },
+      "mapBounds": {
+        "sw": [
+          46.0,
+          -102.5
+        ],
+        "ne": [
+          48.0,
+          -99.5
+        ]
+      },
+      "hq": "Bismarck"
+    },
+    "nd_2": {
+      "name": "District 2 (Devils Lake)",
+      "shortName": "District 2",
+      "center": [
+        -99.5,
+        48.2
+      ],
+      "zoom": 7,
+      "counties": [
+        "005",
+        "019",
+        "027",
+        "031",
+        "063",
+        "067",
+        "069",
+        "071",
+        "079",
+        "095",
+        "099",
+        "103"
+      ],
+      "countyNames": {
+        "005": "Benson",
+        "019": "Cavalier",
+        "027": "Eddy",
+        "031": "Foster",
+        "063": "Nelson",
+        "067": "Pembina",
+        "069": "Pierce",
+        "071": "Ramsey",
+        "079": "Rolette",
+        "095": "Towner",
+        "099": "Walsh",
+        "103": "Wells"
+      },
+      "mapBounds": {
+        "sw": [
+          47.5,
+          -100.8
+        ],
+        "ne": [
+          49.0,
+          -98.0
+        ]
+      },
+      "hq": "Devils Lake"
+    },
+    "nd_3": {
+      "name": "District 3 (Grand Forks)",
+      "shortName": "District 3",
+      "center": [
+        -97.8,
+        46.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "017",
+        "039",
+        "045",
+        "073",
+        "077",
+        "081",
+        "091",
+        "093",
+        "097"
+      ],
+      "countyNames": {
+        "003": "Barnes",
+        "017": "Cass",
+        "039": "Griggs",
+        "045": "LaMoure",
+        "073": "Ransom",
+        "077": "Richland",
+        "081": "Sargent",
+        "091": "Steele",
+        "093": "Stutsman",
+        "097": "Traill"
+      },
+      "mapBounds": {
+        "sw": [
+          46.0,
+          -99.0
+        ],
+        "ne": [
+          47.6,
+          -96.5
+        ]
+      },
+      "hq": "Grand Forks"
+    },
+    "nd_4": {
+      "name": "District 4 (Dickinson)",
+      "shortName": "District 4",
+      "center": [
+        -103.0,
+        46.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "007",
+        "011",
+        "025",
+        "033",
+        "041",
+        "087",
+        "089"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "007": "Billings",
+        "011": "Bowman",
+        "025": "Dunn",
+        "033": "Golden Valley",
+        "041": "Hettinger",
+        "087": "Slope",
+        "089": "Stark"
+      },
+      "mapBounds": {
+        "sw": [
+          46.0,
+          -104.1
+        ],
+        "ne": [
+          47.6,
+          -102.0
+        ]
+      },
+      "hq": "Dickinson"
+    },
+    "nd_5": {
+      "name": "District 5 (Minot)",
+      "shortName": "District 5",
+      "center": [
+        -102.0,
+        48.2
+      ],
+      "zoom": 7,
+      "counties": [
+        "009",
+        "013",
+        "023",
+        "049",
+        "061",
+        "075",
+        "101",
+        "105"
+      ],
+      "countyNames": {
+        "009": "Bottineau",
+        "013": "Burke",
+        "023": "Divide",
+        "049": "McHenry",
+        "061": "Mountrail",
+        "075": "Renville",
+        "101": "Ward",
+        "105": "Williams"
+      },
+      "mapBounds": {
+        "sw": [
+          47.5,
+          -104.1
+        ],
+        "ne": [
+          49.0,
+          -100.0
+        ]
+      },
+      "hq": "Minot"
+    },
+    "nd_6": {
+      "name": "District 6 (Williston)",
+      "shortName": "District 6",
+      "center": [
+        -103.6,
+        48.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "023",
+        "053",
+        "105"
+      ],
+      "countyNames": {
+        "023": "Divide",
+        "053": "McKenzie",
+        "105": "Williams"
+      },
+      "mapBounds": {
+        "sw": [
+          47.5,
+          -104.1
+        ],
+        "ne": [
+          49.0,
+          -103.0
+        ]
+      },
+      "hq": "Williston"
+    },
+    "nd_7": {
+      "name": "District 7 (Valley City)",
+      "shortName": "District 7",
+      "center": [
+        -98.6,
+        46.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "021",
+        "045",
+        "073",
+        "081",
+        "093"
+      ],
+      "countyNames": {
+        "003": "Barnes",
+        "021": "Dickey",
+        "045": "LaMoure",
+        "073": "Ransom",
+        "081": "Sargent",
+        "093": "Stutsman"
+      },
+      "mapBounds": {
+        "sw": [
+          46.2,
+          -99.5
+        ],
+        "ne": [
+          47.5,
+          -97.7
+        ]
+      },
+      "hq": "Valley City"
+    },
+    "nd_8": {
+      "name": "District 8 (Fargo)",
+      "shortName": "District 8",
+      "center": [
+        -96.9,
+        46.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "077",
+        "097"
+      ],
+      "countyNames": {
+        "017": "Cass",
+        "077": "Richland",
+        "097": "Traill"
+      },
+      "mapBounds": {
+        "sw": [
+          46.4,
+          -97.4
+        ],
+        "ne": [
+          47.4,
+          -96.5
+        ]
+      },
+      "hq": "Fargo"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "fmmcog": {
+      "name": "Fargo-Moorhead Metropolitan COG",
+      "shortName": "Fargo-Moorhead",
+      "type": "mpo",
+      "center": [
+        -96.7898,
+        46.8772
+      ],
+      "zoom": 10,
+      "counties": [
+        "017"
+      ],
+      "countyNames": {
+        "017": "Cass"
+      },
+      "btsAcronym": "FMC",
+      "mapBounds": {
+        "sw": [
+          46.65,
+          -97.05
+        ],
+        "ne": [
+          47.1,
+          -96.5
+        ]
+      }
+    },
+    "bmmpo": {
+      "name": "Bismarck-Mandan MPO",
+      "shortName": "Bismarck-Mandan",
+      "type": "mpo",
+      "center": [
+        -97.0329,
+        47.9253
+      ],
+      "zoom": 10,
+      "counties": [
+        "015",
+        "059"
+      ],
+      "countyNames": {
+        "015": "Burleigh",
+        "059": "Morton"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          47.7,
+          -97.3
+        ],
+        "ne": [
+          48.15,
+          -96.75
+        ]
+      }
+    },
+    "gfegfmpo": {
+      "name": "Grand Forks-East Grand Forks MPO",
+      "shortName": "Grand Forks-East Grand Forks",
+      "type": "mpo",
+      "center": [
+        -101.2963,
+        48.233
+      ],
+      "zoom": 10,
+      "counties": [
+        "035"
+      ],
+      "countyNames": {
+        "035": "Grand Forks"
+      },
+      "btsAcronym": "GFGFM",
+      "mapBounds": {
+        "sw": [
+          48.0,
+          -101.55
+        ],
+        "ne": [
+          48.45,
+          -101.05
+        ]
+      }
+    },
+    "bismarck_mandan_metropolitan_planning_organization_mpo": {
+      "name": "Bismarck Mandan Metropolitan Planning Organization",
+      "shortName": "Bismarck Mandan",
+      "type": "mpo",
+      "btsMpoId": "38198201",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -100.807463,
+        46.768807
+      ],
+      "zoom": 10
+    },
+    "central_dakota_mpo": {
+      "name": "Central Dakota MPO",
+      "shortName": "Central Dakota",
+      "type": "mpo",
+      "btsMpoId": "38202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -101.285707,
+        48.250967
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Barnes",
+    "005": "Benson",
+    "007": "Billings",
+    "009": "Bottineau",
+    "011": "Bowman",
+    "013": "Burke",
+    "015": "Burleigh",
+    "017": "Cass",
+    "019": "Cavalier",
+    "021": "Dickey",
+    "023": "Divide",
+    "025": "Dunn",
+    "027": "Eddy",
+    "029": "Emmons",
+    "031": "Foster",
+    "033": "Golden Valley",
+    "035": "Grand Forks",
+    "037": "Grant",
+    "039": "Griggs",
+    "041": "Hettinger",
+    "043": "Kidder",
+    "045": "LaMoure",
+    "047": "Logan",
+    "049": "McHenry",
+    "051": "McIntosh",
+    "053": "McKenzie",
+    "055": "McLean",
+    "057": "Mercer",
+    "059": "Morton",
+    "061": "Mountrail",
+    "063": "Nelson",
+    "065": "Oliver",
+    "067": "Pembina",
+    "069": "Pierce",
+    "071": "Ramsey",
+    "073": "Ransom",
+    "075": "Renville",
+    "077": "Richland",
+    "079": "Rolette",
+    "081": "Sargent",
+    "083": "Sheridan",
+    "085": "Sioux",
+    "087": "Slope",
+    "089": "Stark",
+    "091": "Steele",
+    "093": "Stutsman",
+    "095": "Towner",
+    "097": "Traill",
+    "099": "Walsh",
+    "101": "Ward",
+    "103": "Wells",
+    "105": "Williams"
+  }
+}

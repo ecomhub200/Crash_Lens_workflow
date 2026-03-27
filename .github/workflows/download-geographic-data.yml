@@ -1,0 +1,218 @@
+# ============================================================================
+# Download US Geographic & Administrative Data
+# ============================================================================
+# Fetches comprehensive geographic data from federal APIs to update:
+#   - states/us_counties_db.js (offline county database)
+#   - states/fips_database.js (state FIPS + metadata)
+#   - docs/CDOT/us_states_dot_districts_mpos.json (DOT districts + MPOs)
+#   - states/{state}/hierarchy.json (per-state geographic hierarchy)
+#
+# Data sources:
+#   1. Census TIGERweb API — States, counties, incorporated places, subdivisions
+#   2. BTS/USDOT NTAD — Metropolitan Planning Organization boundaries
+#
+# Output: Raw JSON files in data/geographic/ for post-processing by Claude Code
+#
+# Safe to re-run — overwrites previous downloads with fresh data.
+# ============================================================================
+
+name: Download Geographic Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to download'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all                    # Everything (states, counties, places, subdivisions, MPOs)
+          - states                 # State boundaries only
+          - counties               # County boundaries only
+          - places                 # Incorporated places (cities/towns/villages/CDPs)
+          - subdivisions           # County subdivisions (MCDs, townships)
+          - mpos                   # MPO boundaries from BTS
+          - counties-and-mpos      # Counties + MPOs (most useful combo)
+      state_fips:
+        description: 'Limit to single state (2-digit FIPS, e.g., 51 for VA). Leave blank for nationwide.'
+        required: false
+        default: ''
+        type: string
+      skip_subdivisions:
+        description: 'Skip county subdivisions (saves ~15 min on full download)'
+        required: false
+        default: true
+        type: boolean
+      upload_artifact:
+        description: 'Upload results as workflow artifact'
+        required: false
+        default: true
+        type: boolean
+
+  # Optional: schedule monthly refresh
+  # schedule:
+  #   - cron: '0 6 1 * *'   # 1st of each month at 6am UTC
+
+# Grant write access so the workflow can push to a data branch
+permissions:
+  contents: write
+
+jobs:
+  download:
+    name: Download Geographic Data
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120    # Full nationwide download can take ~60-90 min
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Create output directory
+        run: mkdir -p data/geographic
+
+      # Quick connectivity check — confirm APIs are reachable before long run
+      - name: Test API connectivity
+        run: |
+          echo "=== Testing Census TIGERweb API ==="
+          curl -s -o /tmp/tiger_test.json -w "HTTP %{http_code} (%{size_download} bytes)\n" \
+            "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Census2020/MapServer/82/query?where=STATE%3D%2751%27&outFields=GEOID%2CNAME&returnGeometry=false&resultRecordCount=3&f=json"
+          echo "Response:"
+          python3 -c "
+          import json
+          with open('/tmp/tiger_test.json') as f:
+              data = json.load(f)
+          if 'error' in data:
+              print(f'  ERROR: {data[\"error\"]}')
+          elif 'features' in data:
+              print(f'  OK: {len(data[\"features\"])} features returned')
+              for feat in data['features'][:3]:
+                  print(f'    - {feat[\"attributes\"]}')
+          else:
+              print(f'  UNEXPECTED: keys={list(data.keys())}')
+              print(f'  Full response: {json.dumps(data)[:500]}')
+          "
+
+          echo ""
+          echo "=== Testing BTS MPO API ==="
+          curl -s -o /tmp/bts_test.json -w "HTTP %{http_code} (%{size_download} bytes)\n" \
+            "https://geo.dot.gov/server/rest/services/NTAD/Metropolitan_Planning_Organizations/MapServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&resultRecordCount=3&f=json"
+          echo "Response:"
+          python3 -c "
+          import json
+          with open('/tmp/bts_test.json') as f:
+              data = json.load(f)
+          if 'error' in data:
+              print(f'  ERROR: {data[\"error\"]}')
+          elif 'features' in data:
+              print(f'  OK: {len(data[\"features\"])} features returned')
+              for feat in data['features'][:3]:
+                  attrs = feat['attributes']
+                  # Print first 5 fields to see what's available
+                  sample = dict(list(attrs.items())[:5])
+                  print(f'    - {sample}')
+              print(f'  All fields: {list(data[\"features\"][0][\"attributes\"].keys())}')
+          else:
+              print(f'  UNEXPECTED: keys={list(data.keys())}')
+              print(f'  Full response: {json.dumps(data)[:500]}')
+          "
+
+      - name: Download geographic data
+        run: |
+          ARGS=""
+
+          # Map scope input to --layer flag
+          SCOPE="${{ inputs.scope || 'all' }}"
+
+          # Build state filter arg first (needed by counties-and-mpos case)
+          STATE_FIPS="${{ inputs.state_fips }}"
+          STATE_ARG=""
+          if [ -n "$STATE_FIPS" ]; then
+            STATE_ARG="--state $STATE_FIPS"
+          fi
+
+          case "$SCOPE" in
+            counties-and-mpos)
+              # Run counties first, then MPOs (MPOs need counties for spatial join)
+              echo "=== Downloading counties ==="
+              python scripts/download_geographic_data.py --layer counties $STATE_ARG
+              echo "=== Downloading MPOs ==="
+              python scripts/download_geographic_data.py --layer mpos $STATE_ARG
+              DONE=true
+              ;;
+            *)
+              ARGS="--layer $SCOPE"
+              ;;
+          esac
+
+          # Add state filter if specified
+          if [ -n "$STATE_FIPS" ]; then
+            ARGS="$ARGS --state $STATE_FIPS"
+          fi
+
+          # Skip subdivisions flag
+          if [ "${{ inputs.skip_subdivisions }}" = "true" ]; then
+            ARGS="$ARGS --skip-subdivisions"
+          fi
+
+          # Run download (unless already handled by counties-and-mpos case)
+          if [ "${DONE:-}" != "true" ]; then
+            python scripts/download_geographic_data.py $ARGS
+          fi
+
+      - name: Show output summary
+        run: |
+          echo "=== Downloaded Files ==="
+          ls -lh data/geographic/ 2>/dev/null || echo "No files downloaded"
+          echo ""
+          echo "=== Record Counts ==="
+          for f in data/geographic/*.json; do
+            if [ -f "$f" ]; then
+              COUNT=$(python3 -c "import json; d=json.load(open('$f')); print(d.get('_metadata',{}).get('recordCount','?'))")
+              SIZE=$(du -h "$f" | cut -f1)
+              echo "  $(basename $f): $COUNT records ($SIZE)"
+            fi
+          done
+
+      - name: Upload as artifact
+        if: ${{ inputs.upload_artifact != 'false' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: geographic-data-${{ github.run_number }}
+          path: data/geographic/
+          retention-days: 30
+
+      - name: Commit to branch (optional)
+        if: ${{ inputs.state_fips == '' && inputs.scope == 'all' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create a data branch for the download
+          BRANCH="data/geographic-refresh-$(date +%Y%m%d)"
+          git checkout -b "$BRANCH"
+
+          git add data/geographic/
+          git commit -m "data: refresh nationwide geographic data from Census + BTS
+
+          Downloaded:
+          $(ls -1 data/geographic/*.json 2>/dev/null | while read f; do
+            COUNT=$(python3 -c "import json; d=json.load(open('$f')); print(d.get('_metadata',{}).get('recordCount','?'))")
+            echo "  - $(basename $f): $COUNT records"
+          done)
+
+          Source: Census TIGERweb API + BTS/USDOT NTAD
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          git push -u origin "$BRANCH" || echo "⚠ Push failed — data available as artifact"
+          echo "✓ Committed to branch: $BRANCH"

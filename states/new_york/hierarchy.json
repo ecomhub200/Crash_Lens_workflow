@@ -1,0 +1,958 @@
+{
+  "state": {
+    "fips": "36",
+    "name": "New York",
+    "abbreviation": "NY",
+    "dot": "NYSDOT",
+    "dotFullName": "New York State Department of Transportation",
+    "center": [
+      -74.948051,
+      42.165726
+    ],
+    "zoom": 7,
+    "placesCount": 595
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ny_1": {
+      "name": "Region 1 (Capital District)",
+      "shortName": "Region 1",
+      "center": [
+        -73.8,
+        42.75
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "021",
+        "039",
+        "083",
+        "091",
+        "093",
+        "113",
+        "115"
+      ],
+      "countyNames": {
+        "001": "Albany",
+        "021": "Columbia",
+        "039": "Greene",
+        "083": "Rensselaer",
+        "091": "Saratoga",
+        "093": "Schenectady",
+        "113": "Warren",
+        "115": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          42.2,
+          -74.5
+        ],
+        "ne": [
+          43.5,
+          -73.2
+        ]
+      },
+      "hq": "Albany"
+    },
+    "ny_2": {
+      "name": "Region 2 (Utica)",
+      "shortName": "Region 2",
+      "center": [
+        -75.0,
+        43.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "035",
+        "041",
+        "043",
+        "057",
+        "065",
+        "095"
+      ],
+      "countyNames": {
+        "035": "Fulton",
+        "041": "Hamilton",
+        "043": "Herkimer",
+        "057": "Montgomery",
+        "065": "Oneida",
+        "095": "Schoharie"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -75.6
+        ],
+        "ne": [
+          43.7,
+          -74.4
+        ]
+      },
+      "hq": "Utica"
+    },
+    "ny_3": {
+      "name": "Region 3 (Syracuse)",
+      "shortName": "Region 3",
+      "center": [
+        -76.15,
+        43.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "011",
+        "023",
+        "053",
+        "067",
+        "075",
+        "099",
+        "109"
+      ],
+      "countyNames": {
+        "011": "Cayuga",
+        "023": "Cortland",
+        "053": "Madison",
+        "067": "Onondaga",
+        "075": "Oswego",
+        "099": "Seneca",
+        "109": "Tompkins"
+      },
+      "mapBounds": {
+        "sw": [
+          42.4,
+          -76.8
+        ],
+        "ne": [
+          43.7,
+          -75.5
+        ]
+      },
+      "hq": "Syracuse"
+    },
+    "ny_4": {
+      "name": "Region 4 (Rochester)",
+      "shortName": "Region 4",
+      "center": [
+        -77.4,
+        42.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "037",
+        "051",
+        "055",
+        "069",
+        "073",
+        "117",
+        "123"
+      ],
+      "countyNames": {
+        "037": "Genesee",
+        "051": "Livingston",
+        "055": "Monroe",
+        "069": "Ontario",
+        "073": "Orleans",
+        "117": "Wayne",
+        "123": "Yates"
+      },
+      "mapBounds": {
+        "sw": [
+          42.4,
+          -78.0
+        ],
+        "ne": [
+          43.4,
+          -76.8
+        ]
+      },
+      "hq": "Rochester"
+    },
+    "ny_5": {
+      "name": "Region 5 (Buffalo)",
+      "shortName": "Region 5",
+      "center": [
+        -78.7,
+        42.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "009",
+        "013",
+        "029",
+        "063",
+        "121"
+      ],
+      "countyNames": {
+        "003": "Allegany",
+        "009": "Cattaraugus",
+        "013": "Chautauqua",
+        "029": "Erie",
+        "063": "Niagara",
+        "121": "Wyoming"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -79.8
+        ],
+        "ne": [
+          43.2,
+          -77.6
+        ]
+      },
+      "hq": "Buffalo"
+    },
+    "ny_6": {
+      "name": "Region 6 (Hornell)",
+      "shortName": "Region 6",
+      "center": [
+        -77.0,
+        42.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "015",
+        "017",
+        "025",
+        "077",
+        "097",
+        "101",
+        "107"
+      ],
+      "countyNames": {
+        "007": "Broome",
+        "015": "Chemung",
+        "017": "Chenango",
+        "025": "Delaware",
+        "077": "Otsego",
+        "097": "Schuyler",
+        "101": "Steuben",
+        "107": "Tioga"
+      },
+      "mapBounds": {
+        "sw": [
+          41.7,
+          -77.8
+        ],
+        "ne": [
+          42.8,
+          -76.2
+        ]
+      },
+      "hq": "Hornell"
+    },
+    "ny_7": {
+      "name": "Region 7 (Watertown)",
+      "shortName": "Region 7",
+      "center": [
+        -75.5,
+        44.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "031",
+        "033",
+        "045",
+        "049",
+        "089"
+      ],
+      "countyNames": {
+        "031": "Essex",
+        "033": "Franklin",
+        "045": "Jefferson",
+        "049": "Lewis",
+        "089": "St. Lawrence"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -76.5
+        ],
+        "ne": [
+          45.0,
+          -74.5
+        ]
+      },
+      "hq": "Watertown"
+    },
+    "ny_8": {
+      "name": "Region 8 (Poughkeepsie)",
+      "shortName": "Region 8",
+      "center": [
+        -74.3,
+        41.5
+      ],
+      "zoom": 9,
+      "counties": [
+        "027",
+        "071",
+        "079",
+        "087",
+        "105",
+        "111",
+        "119"
+      ],
+      "countyNames": {
+        "027": "Dutchess",
+        "071": "Orange",
+        "079": "Putnam",
+        "087": "Rockland",
+        "105": "Sullivan",
+        "111": "Ulster",
+        "119": "Westchester"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -75.1
+        ],
+        "ne": [
+          42.1,
+          -73.5
+        ]
+      },
+      "hq": "Poughkeepsie"
+    },
+    "ny_9": {
+      "name": "Region 9 (Binghamton)",
+      "shortName": "Region 9",
+      "center": [
+        -75.7,
+        42.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "017",
+        "025",
+        "077",
+        "107"
+      ],
+      "countyNames": {
+        "007": "Broome",
+        "017": "Chenango",
+        "025": "Delaware",
+        "077": "Otsego",
+        "107": "Tioga"
+      },
+      "mapBounds": {
+        "sw": [
+          41.7,
+          -76.3
+        ],
+        "ne": [
+          42.7,
+          -75.1
+        ]
+      },
+      "hq": "Binghamton"
+    },
+    "ny_10": {
+      "name": "Region 10 (Long Island)",
+      "shortName": "Region 10",
+      "center": [
+        -73.2,
+        40.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "059",
+        "103"
+      ],
+      "countyNames": {
+        "059": "Nassau",
+        "103": "Suffolk"
+      },
+      "mapBounds": {
+        "sw": [
+          40.6,
+          -73.8
+        ],
+        "ne": [
+          41.2,
+          -71.8
+        ]
+      },
+      "hq": "Hauppauge"
+    },
+    "ny_11": {
+      "name": "Region 11 (New York City)",
+      "shortName": "Region 11",
+      "center": [
+        -73.96,
+        40.72
+      ],
+      "zoom": 11,
+      "counties": [
+        "005",
+        "047",
+        "061",
+        "081",
+        "085"
+      ],
+      "countyNames": {
+        "005": "Bronx",
+        "047": "Kings",
+        "061": "New York",
+        "081": "Queens",
+        "085": "Richmond"
+      },
+      "mapBounds": {
+        "sw": [
+          40.5,
+          -74.3
+        ],
+        "ne": [
+          40.92,
+          -73.7
+        ]
+      },
+      "hq": "Long Island City"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "nymtcnymtc": {
+      "name": "NYMTC (New York Metropolitan Transportation Council)",
+      "shortName": "New York Metropolitan Transportation Council",
+      "type": "mpo",
+      "center": [
+        -74.006,
+        40.7128
+      ],
+      "zoom": 10,
+      "counties": [
+        "061",
+        "005",
+        "047",
+        "081",
+        "085",
+        "059",
+        "103",
+        "119",
+        "087",
+        "079"
+      ],
+      "countyNames": {
+        "061": "New York",
+        "005": "Bronx",
+        "047": "Kings",
+        "081": "Queens",
+        "085": "Richmond",
+        "059": "Nassau",
+        "103": "Suffolk",
+        "119": "Westchester",
+        "087": "Rockland",
+        "079": "Putnam"
+      },
+      "btsAcronym": "NYMTC",
+      "mapBounds": {
+        "sw": [
+          40.4,
+          -74.3
+        ],
+        "ne": [
+          40.95,
+          -73.7
+        ]
+      }
+    },
+    "cdtccdtca": {
+      "name": "CDTC (Capital District Transportation Committee / Albany)",
+      "shortName": "Capital District Transportation Committee / Albany",
+      "type": "mpo",
+      "center": [
+        -78.8784,
+        42.8864
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "083",
+        "091",
+        "093"
+      ],
+      "countyNames": {
+        "001": "Albany",
+        "083": "Rensselaer",
+        "091": "Saratoga",
+        "093": "Schenectady"
+      },
+      "btsAcronym": "CDTCA",
+      "mapBounds": {
+        "sw": [
+          42.65,
+          -79.15
+        ],
+        "ne": [
+          43.1,
+          -78.6
+        ]
+      }
+    },
+    "smtcsmtc": {
+      "name": "SMTC (Syracuse Metropolitan Transportation Council)",
+      "shortName": "Syracuse Metropolitan Transportation Council",
+      "type": "mpo",
+      "center": [
+        -76.1474,
+        43.0481
+      ],
+      "zoom": 10,
+      "counties": [
+        "067"
+      ],
+      "countyNames": {
+        "067": "Onondaga"
+      },
+      "btsAcronym": "SMTC",
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -76.4
+        ],
+        "ne": [
+          43.3,
+          -75.9
+        ]
+      }
+    },
+    "gtcgtcr": {
+      "name": "GTC (Genesee Transportation Council / Rochester)",
+      "shortName": "Genesee Transportation Council / Rochester",
+      "type": "mpo",
+      "center": [
+        -77.6109,
+        43.161
+      ],
+      "zoom": 10,
+      "counties": [
+        "055",
+        "037",
+        "051",
+        "069",
+        "073",
+        "117",
+        "121",
+        "099",
+        "123"
+      ],
+      "countyNames": {
+        "055": "Monroe",
+        "037": "Genesee",
+        "051": "Livingston",
+        "069": "Ontario",
+        "073": "Orleans",
+        "117": "Wayne",
+        "121": "Wyoming",
+        "099": "Seneca",
+        "123": "Yates"
+      },
+      "btsAcronym": "GTCR",
+      "mapBounds": {
+        "sw": [
+          42.9,
+          -77.85
+        ],
+        "ne": [
+          43.4,
+          -77.35
+        ]
+      }
+    },
+    "gbnrtcgbnrtc": {
+      "name": "GBNRTC (Greater Buffalo-Niagara Regional Transportation Council)",
+      "shortName": "Greater Buffalo-Niagara Regional Transportation Council",
+      "type": "mpo",
+      "center": [
+        -73.7562,
+        42.6526
+      ],
+      "zoom": 10,
+      "counties": [
+        "029",
+        "063"
+      ],
+      "countyNames": {
+        "029": "Erie",
+        "063": "Niagara"
+      },
+      "btsAcronym": "GBRTC",
+      "mapBounds": {
+        "sw": [
+          42.4,
+          -74.05
+        ],
+        "ne": [
+          42.9,
+          -73.45
+        ]
+      }
+    },
+    "bmtsbmts": {
+      "name": "BMTS (Binghamton Metropolitan Transportation Study)",
+      "shortName": "Binghamton Metropolitan Transportation Study",
+      "type": "mpo",
+      "center": [
+        -75.918,
+        42.0987
+      ],
+      "zoom": 10,
+      "counties": [
+        "007",
+        "107"
+      ],
+      "countyNames": {
+        "007": "Broome",
+        "107": "Tioga"
+      },
+      "btsAcronym": "BMTS",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -76.15
+        ],
+        "ne": [
+          42.35,
+          -75.65
+        ]
+      }
+    },
+    "octcoctc": {
+      "name": "OCTC (Orange County Transportation Council)",
+      "shortName": "Orange County Transportation Council",
+      "type": "mpo",
+      "center": [
+        -75.232,
+        43.0962
+      ],
+      "zoom": 10,
+      "counties": [
+        "071"
+      ],
+      "countyNames": {
+        "071": "Orange"
+      },
+      "btsAcronym": "OCTC",
+      "mapBounds": {
+        "sw": [
+          42.85,
+          -75.5
+        ],
+        "ne": [
+          43.35,
+          -74.95
+        ]
+      }
+    },
+    "uctcuctc": {
+      "name": "UCTC (Ulster County Transportation Council)",
+      "shortName": "Ulster County Transportation Council",
+      "type": "mpo",
+      "center": [
+        -76.5019,
+        42.443
+      ],
+      "zoom": 10,
+      "counties": [
+        "111"
+      ],
+      "countyNames": {
+        "111": "Ulster"
+      },
+      "btsAcronym": "UCTC",
+      "mapBounds": {
+        "sw": [
+          42.25,
+          -76.75
+        ],
+        "ne": [
+          42.65,
+          -76.25
+        ]
+      }
+    },
+    "dctcdctc": {
+      "name": "DCTC (Dutchess County Transportation Council)",
+      "shortName": "Dutchess County Transportation Council",
+      "type": "mpo",
+      "center": [
+        -74.0104,
+        41.5034
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Dutchess"
+      },
+      "btsAcronym": "DCTC",
+      "mapBounds": {
+        "sw": [
+          41.25,
+          -74.3
+        ],
+        "ne": [
+          41.75,
+          -73.7
+        ]
+      }
+    },
+    "hoctchoctsur": {
+      "name": "HOCTC (Herkimer-Oneida County Transportation Study / Utica-Rome)",
+      "shortName": "Herkimer-Oneida County Transportation Study / Utica-Rome",
+      "type": "mpo",
+      "center": [
+        -73.1944,
+        41.2346
+      ],
+      "zoom": 10,
+      "counties": [
+        "065",
+        "043"
+      ],
+      "countyNames": {
+        "065": "Oneida",
+        "043": "Herkimer"
+      },
+      "btsAcronym": "HCTSU",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -73.5
+        ],
+        "ne": [
+          41.45,
+          -72.9
+        ]
+      }
+    },
+    "ithacatompkinsmpoi": {
+      "name": "ITHACA-TOMPKINS MPO (Ithaca)",
+      "shortName": "Ithaca",
+      "type": "mpo",
+      "center": [
+        -79.3139,
+        42.3414
+      ],
+      "zoom": 10,
+      "counties": [
+        "109"
+      ],
+      "countyNames": {
+        "109": "Tompkins"
+      },
+      "btsAcronym": "IM",
+      "mapBounds": {
+        "sw": [
+          42.1,
+          -79.55
+        ],
+        "ne": [
+          42.55,
+          -79.05
+        ]
+      }
+    },
+    "ecmpo": {
+      "name": "Elmira-Chemung MPO",
+      "shortName": "Elmira-Chemung",
+      "type": "mpo",
+      "center": [
+        -73.921,
+        41.7004
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Chemung"
+      },
+      "btsAcronym": "EM",
+      "mapBounds": {
+        "sw": [
+          41.45,
+          -74.15
+        ],
+        "ne": [
+          41.95,
+          -73.65
+        ]
+      }
+    },
+    "gfmpo": {
+      "name": "Glens Falls MPO",
+      "shortName": "Glens Falls",
+      "type": "mpo",
+      "center": [
+        -73.6417,
+        43.3149
+      ],
+      "zoom": 10,
+      "counties": [
+        "113",
+        "115"
+      ],
+      "countyNames": {
+        "113": "Warren",
+        "115": "Washington"
+      },
+      "btsAcronym": "GFM",
+      "mapBounds": {
+        "sw": [
+          43.1,
+          -73.9
+        ],
+        "ne": [
+          43.55,
+          -73.4
+        ]
+      }
+    },
+    "agftc": {
+      "name": "Adirondack/Glens Falls Transportation Council",
+      "shortName": "Adirondack/Glens Falls Transportation Council",
+      "type": "mpo",
+      "center": [
+        -76.8013,
+        42.1007
+      ],
+      "zoom": 10,
+      "counties": [
+        "113",
+        "115"
+      ],
+      "countyNames": {
+        "113": "Warren",
+        "115": "Washington"
+      },
+      "btsAcronym": "AFTC",
+      "mapBounds": {
+        "sw": [
+          41.9,
+          -77.05
+        ],
+        "ne": [
+          42.3,
+          -76.55
+        ]
+      }
+    },
+    "watertown_jefferson_county_transportation_council_mpo": {
+      "name": "Watertown-Jefferson County Transportation Council",
+      "shortName": "Watertown-Jefferson County Transportation Council",
+      "type": "mpo",
+      "btsMpoId": "36201400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -75.821771,
+        44.001483
+      ],
+      "zoom": 10
+    },
+    "herkimer_oneida_counties_transportation_study_mpo": {
+      "name": "Herkimer-Oneida Counties Transportation Study",
+      "shortName": "Herkimer-Oneida Counties Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "36197200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -75.336343,
+        43.208217
+      ],
+      "zoom": 10
+    },
+    "capital_region_transportation_council_mpo": {
+      "name": "Capital Region Transportation Council",
+      "shortName": "Capital Region Transportation Council",
+      "type": "mpo",
+      "btsMpoId": "36197300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -73.847537,
+        42.926741
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Albany",
+    "003": "Allegany",
+    "005": "Bronx",
+    "007": "Broome",
+    "009": "Cattaraugus",
+    "011": "Cayuga",
+    "013": "Chautauqua",
+    "015": "Chemung",
+    "017": "Chenango",
+    "019": "Clinton",
+    "021": "Columbia",
+    "023": "Cortland",
+    "025": "Delaware",
+    "027": "Dutchess",
+    "029": "Erie",
+    "031": "Essex",
+    "033": "Franklin",
+    "035": "Fulton",
+    "037": "Genesee",
+    "039": "Greene",
+    "041": "Hamilton",
+    "043": "Herkimer",
+    "045": "Jefferson",
+    "047": "Kings",
+    "049": "Lewis",
+    "051": "Livingston",
+    "053": "Madison",
+    "055": "Monroe",
+    "057": "Montgomery",
+    "059": "Nassau",
+    "061": "New York",
+    "063": "Niagara",
+    "065": "Oneida",
+    "067": "Onondaga",
+    "069": "Ontario",
+    "071": "Orange",
+    "073": "Orleans",
+    "075": "Oswego",
+    "077": "Otsego",
+    "079": "Putnam",
+    "081": "Queens",
+    "083": "Rensselaer",
+    "085": "Richmond",
+    "087": "Rockland",
+    "089": "St. Lawrence",
+    "091": "Saratoga",
+    "093": "Schenectady",
+    "095": "Schoharie",
+    "097": "Schuyler",
+    "099": "Seneca",
+    "101": "Steuben",
+    "103": "Suffolk",
+    "105": "Sullivan",
+    "107": "Tioga",
+    "109": "Tompkins",
+    "111": "Ulster",
+    "113": "Warren",
+    "115": "Washington",
+    "117": "Wayne",
+    "119": "Westchester",
+    "121": "Wyoming",
+    "123": "Yates"
+  }
+}

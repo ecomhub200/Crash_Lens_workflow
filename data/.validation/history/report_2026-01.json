@@ -1,0 +1,377 @@
+{
+  "metadata": {
+    "generatedAt": "2026-01-26T17:15:55.887730Z",
+    "jurisdiction": "henrico",
+    "validationVersion": "1.2.0",
+    "runType": "full"
+  },
+  "summary": "Validated 48074 records. 44719 clean (93.02%), 3355 records flagged (3355 total issues), 0 auto-corrected.",
+  "totalRecords": 48074,
+  "newRecords": 48074,
+  "autoCorrections": 0,
+  "flaggedRecords": 3355,
+  "totalIssues": 3355,
+  "errors": 0,
+  "duplicates": 14,
+  "cleanRecords": 44719,
+  "cleanRate": 93.02,
+  "errorRate": 0.0,
+  "issuesByCategory": {
+    "potential_duplicate": 14,
+    "outside_jurisdiction_bounds": 2792,
+    "unknown_category": 549
+  },
+  "correctionsByField": {},
+  "flaggedRecordsList": [
+    {
+      "documentNbr": "173285125",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "243385246",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "183455477",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "233445021",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "190675347",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "240605313",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "190745271",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171165092",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "221815351",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "211895344",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "192265440",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "212695032",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "242695453",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172745063",
+      "issues": [
+        "Potential duplicate - same date, location, and severity as another record"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171305195",
+      "issues": [
+        "Longitude -77.6147854719999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173125314",
+      "issues": [
+        "Longitude -77.611512063 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172925022",
+      "issues": [
+        "Unknown Traffic Control Type: 17. Highway Safety Corridor"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171735203",
+      "issues": [
+        "Longitude -77.622755898 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172755346",
+      "issues": [
+        "Longitude -77.638319081 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173565276",
+      "issues": [
+        "Longitude -77.6450211649999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172855380",
+      "issues": [
+        "Longitude -77.636237197 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171005254",
+      "issues": [
+        "Unknown Traffic Control Type: 17. Highway Safety Corridor"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173325423",
+      "issues": [
+        "Longitude -77.6273221559999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170635034",
+      "issues": [
+        "Longitude -77.6312534419999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170555330",
+      "issues": [
+        "Longitude -77.6341598339999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170285056",
+      "issues": [
+        "Longitude -77.619694851 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170675180",
+      "issues": [
+        "Longitude -77.6259866679999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173525288",
+      "issues": [
+        "Longitude -77.622947971 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172275219",
+      "issues": [
+        "Longitude -77.633957803 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171615008",
+      "issues": [
+        "Longitude -77.6382054599999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172725264",
+      "issues": [
+        "Longitude -77.6106928469999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171645460",
+      "issues": [
+        "Longitude -77.611787019 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171925352",
+      "issues": [
+        "Longitude -77.6160023319999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170695295",
+      "issues": [
+        "Longitude -77.629132179 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172705061",
+      "issues": [
+        "Longitude -77.62710068 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172185201",
+      "issues": [
+        "Longitude -77.611076167 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172565368",
+      "issues": [
+        "Longitude -77.620672046 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172835123",
+      "issues": [
+        "Longitude -77.611067267 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173245471",
+      "issues": [
+        "Longitude -77.611064431 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170845024",
+      "issues": [
+        "Longitude -77.615651479 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "170435200",
+      "issues": [
+        "Unknown Traffic Control Type: 17. Highway Safety Corridor"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171705084",
+      "issues": [
+        "Longitude -77.615715678 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172345385",
+      "issues": [
+        "Longitude -77.6383618629999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172595148",
+      "issues": [
+        "Longitude -77.645483633 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171825023",
+      "issues": [
+        "Longitude -77.634152398 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "172885021",
+      "issues": [
+        "Longitude -77.610674928 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173395072",
+      "issues": [
+        "Longitude -77.615589958 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "171955362",
+      "issues": [
+        "Longitude -77.636264587 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173175599",
+      "issues": [
+        "Longitude -77.6211300689999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    },
+    {
+      "documentNbr": "173235235",
+      "issues": [
+        "Longitude -77.6150798469999 outside henrico bounds"
+      ],
+      "severity": "warning"
+    }
+  ]
+}

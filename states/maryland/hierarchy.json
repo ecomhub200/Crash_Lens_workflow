@@ -1,0 +1,482 @@
+{
+  "state": {
+    "fips": "24",
+    "name": "Maryland",
+    "abbreviation": "MD",
+    "dot": "MDOT",
+    "dotFullName": "Maryland Department of Transportation",
+    "center": [
+      -76.802101,
+      39.063946
+    ],
+    "zoom": 8,
+    "placesCount": 157
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "md_1": {
+      "name": "District 1 (Dorchester)",
+      "shortName": "District 1",
+      "center": [
+        -75.7,
+        38.35
+      ],
+      "zoom": 9,
+      "counties": [
+        "019",
+        "039",
+        "045",
+        "047"
+      ],
+      "countyNames": {
+        "019": "Dorchester",
+        "039": "Somerset",
+        "045": "Wicomico",
+        "047": "Worcester"
+      },
+      "mapBounds": {
+        "sw": [
+          37.9,
+          -76.1
+        ],
+        "ne": [
+          38.7,
+          -75.1
+        ]
+      },
+      "hq": "Salisbury"
+    },
+    "md_2": {
+      "name": "District 2 (Kent)",
+      "shortName": "District 2",
+      "center": [
+        -75.9,
+        39.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "011",
+        "015",
+        "029",
+        "035",
+        "041"
+      ],
+      "countyNames": {
+        "011": "Caroline",
+        "015": "Cecil",
+        "029": "Kent",
+        "035": "Queen Anne's",
+        "041": "Talbot"
+      },
+      "mapBounds": {
+        "sw": [
+          38.7,
+          -76.3
+        ],
+        "ne": [
+          39.5,
+          -75.4
+        ]
+      },
+      "hq": "Chestertown"
+    },
+    "md_3": {
+      "name": "District 3 (Prince George's)",
+      "shortName": "District 3",
+      "center": [
+        -76.8,
+        38.55
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "009",
+        "033",
+        "037"
+      ],
+      "countyNames": {
+        "017": "Charles",
+        "009": "Calvert",
+        "033": "Prince George's",
+        "037": "St. Mary's"
+      },
+      "mapBounds": {
+        "sw": [
+          38.0,
+          -77.3
+        ],
+        "ne": [
+          39.1,
+          -76.3
+        ]
+      },
+      "hq": "Greenbelt"
+    },
+    "md_4": {
+      "name": "District 4 (Baltimore Metro)",
+      "shortName": "District 4",
+      "center": [
+        -76.6,
+        39.3
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "005",
+        "510",
+        "025",
+        "027"
+      ],
+      "countyNames": {
+        "003": "Anne Arundel",
+        "005": "Baltimore County",
+        "510": "Baltimore City",
+        "025": "Harford",
+        "027": "Howard"
+      },
+      "mapBounds": {
+        "sw": [
+          39.0,
+          -77.0
+        ],
+        "ne": [
+          39.7,
+          -76.2
+        ]
+      },
+      "hq": "Brooklandville"
+    },
+    "md_5": {
+      "name": "District 5 (Jefferson)",
+      "shortName": "District 5",
+      "center": [
+        -77.3,
+        39.45
+      ],
+      "zoom": 9,
+      "counties": [
+        "013",
+        "021",
+        "031"
+      ],
+      "countyNames": {
+        "013": "Carroll",
+        "021": "Frederick",
+        "031": "Montgomery"
+      },
+      "mapBounds": {
+        "sw": [
+          39.1,
+          -77.7
+        ],
+        "ne": [
+          39.8,
+          -76.9
+        ]
+      },
+      "hq": "Jefferson"
+    },
+    "md_6": {
+      "name": "District 6 (Cumberland)",
+      "shortName": "District 6",
+      "center": [
+        -78.4,
+        39.55
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "023",
+        "043"
+      ],
+      "countyNames": {
+        "001": "Allegany",
+        "023": "Garrett",
+        "043": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          39.2,
+          -79.5
+        ],
+        "ne": [
+          39.8,
+          -77.6
+        ]
+      },
+      "hq": "Cumberland"
+    },
+    "md_7": {
+      "name": "District 7 (Annapolis)",
+      "shortName": "District 7",
+      "center": [
+        -76.49,
+        38.98
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Anne Arundel"
+      },
+      "mapBounds": {
+        "sw": [
+          38.8,
+          -76.7
+        ],
+        "ne": [
+          39.2,
+          -76.3
+        ]
+      },
+      "hq": "Annapolis"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "bmc": {
+      "name": "Baltimore Regional Transportation Board (BMC)",
+      "shortName": "BMC",
+      "type": "mpo",
+      "center": [
+        -76.6122,
+        39.2904
+      ],
+      "zoom": 9,
+      "counties": [
+        "510",
+        "005",
+        "003",
+        "025",
+        "027",
+        "013"
+      ],
+      "countyNames": {
+        "510": "Baltimore City",
+        "005": "Baltimore County",
+        "003": "Anne Arundel",
+        "025": "Harford",
+        "027": "Howard",
+        "013": "Carroll"
+      },
+      "btsAcronym": "BMC",
+      "mapBounds": {
+        "sw": [
+          38.8,
+          -77.1
+        ],
+        "ne": [
+          39.7,
+          -76.1
+        ]
+      }
+    },
+    "mwcog": {
+      "name": "National Capital Region TPB (MWCOG)",
+      "shortName": "MWCOG",
+      "type": "mpo",
+      "center": [
+        -77.72,
+        39.6373
+      ],
+      "zoom": 10,
+      "counties": [
+        "031",
+        "033",
+        "021",
+        "017",
+        "009"
+      ],
+      "countyNames": {
+        "031": "Montgomery",
+        "033": "Prince George's",
+        "021": "Frederick",
+        "017": "Charles",
+        "009": "Calvert"
+      },
+      "btsAcronym": "MWCOG",
+      "mapBounds": {
+        "sw": [
+          39.4,
+          -78.0
+        ],
+        "ne": [
+          39.85,
+          -77.4
+        ]
+      }
+    },
+    "hepmpo": {
+      "name": "Hagerstown/Eastern Panhandle MPO",
+      "shortName": "Hagerstown/Eastern Panhandle",
+      "type": "mpo",
+      "center": [
+        -77.4105,
+        39.4143
+      ],
+      "zoom": 10,
+      "counties": [
+        "043"
+      ],
+      "countyNames": {
+        "043": "Washington"
+      },
+      "btsAcronym": "HPM",
+      "mapBounds": {
+        "sw": [
+          39.2,
+          -77.65
+        ],
+        "ne": [
+          39.6,
+          -77.15
+        ]
+      }
+    },
+    "swmpo": {
+      "name": "Salisbury-Wicomico MPO",
+      "shortName": "Salisbury-Wicomico",
+      "type": "mpo",
+      "center": [
+        -75.5971,
+        39.5684
+      ],
+      "zoom": 10,
+      "counties": [
+        "045"
+      ],
+      "countyNames": {
+        "045": "Wicomico"
+      },
+      "btsAcronym": "SM",
+      "mapBounds": {
+        "sw": [
+          39.35,
+          -75.85
+        ],
+        "ne": [
+          39.75,
+          -75.35
+        ]
+      }
+    },
+    "csmmpo": {
+      "name": "Calvert-St. Mary's MPO",
+      "shortName": "Calvert-St. Mary's",
+      "type": "mpo",
+      "center": [
+        -75.5994,
+        38.3607
+      ],
+      "zoom": 10,
+      "counties": [
+        "009",
+        "037"
+      ],
+      "countyNames": {
+        "009": "Calvert",
+        "037": "St. Mary's"
+      },
+      "btsAcronym": "CMM",
+      "mapBounds": {
+        "sw": [
+          38.1,
+          -75.85
+        ],
+        "ne": [
+          38.55,
+          -75.35
+        ]
+      }
+    },
+    "campo": {
+      "name": "Cumberland Area MPO",
+      "shortName": "Cumberland Area",
+      "type": "mpo",
+      "center": [
+        -78.7653,
+        39.6396
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Allegany"
+      },
+      "btsAcronym": "CAM",
+      "mapBounds": {
+        "sw": [
+          39.4,
+          -79.0
+        ],
+        "ne": [
+          39.85,
+          -78.5
+        ]
+      }
+    },
+    "calvert_st_maryrs_metropolitan_planning_organization_mpo": {
+      "name": "Calvert-St. Maryrs Metropolitan Planning Organization",
+      "shortName": "Calvert-St. Maryrs",
+      "type": "mpo",
+      "btsMpoId": "24201300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -76.476928,
+        38.300746
+      ],
+      "zoom": 10
+    },
+    "hagerstown_eastern_panhandle_mpo": {
+      "name": "Hagerstown-Eastern Panhandle MPO",
+      "shortName": "Hagerstown-Eastern Panhandle",
+      "type": "mpo",
+      "btsMpoId": "24198600",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -77.849975,
+        39.500222
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Allegany",
+    "003": "Anne Arundel",
+    "005": "Baltimore County",
+    "009": "Calvert",
+    "011": "Caroline",
+    "013": "Carroll",
+    "015": "Cecil",
+    "017": "Charles",
+    "019": "Dorchester",
+    "021": "Frederick",
+    "023": "Garrett",
+    "025": "Harford",
+    "027": "Howard",
+    "029": "Kent",
+    "031": "Montgomery",
+    "033": "Prince George's",
+    "035": "Queen Anne's",
+    "037": "St. Mary's",
+    "039": "Somerset",
+    "041": "Talbot",
+    "043": "Washington",
+    "045": "Wicomico",
+    "047": "Worcester",
+    "510": "Baltimore City"
+  }
+}

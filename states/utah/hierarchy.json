@@ -1,0 +1,321 @@
+{
+  "state": {
+    "fips": "49",
+    "name": "Utah",
+    "abbreviation": "UT",
+    "dot": "UDOT",
+    "dotFullName": "Utah Department of Transportation",
+    "center": [
+      -111.093731,
+      39.32198
+    ],
+    "zoom": 7,
+    "placesCount": 255
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ut_1": {
+      "name": "Region 1 (Ogden)",
+      "shortName": "Region 1",
+      "center": [
+        -111.9,
+        41.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "005",
+        "011",
+        "029",
+        "033",
+        "057"
+      ],
+      "countyNames": {
+        "003": "Box Elder",
+        "005": "Cache",
+        "011": "Davis",
+        "029": "Morgan",
+        "033": "Rich",
+        "057": "Weber"
+      },
+      "mapBounds": {
+        "sw": [
+          40.7,
+          -112.5
+        ],
+        "ne": [
+          42.0,
+          -111.0
+        ]
+      },
+      "hq": "Ogden"
+    },
+    "ut_2": {
+      "name": "Region 2 (Salt Lake)",
+      "shortName": "Region 2",
+      "center": [
+        -111.8,
+        40.7
+      ],
+      "zoom": 9,
+      "counties": [
+        "035",
+        "043",
+        "045"
+      ],
+      "countyNames": {
+        "035": "Salt Lake",
+        "043": "Summit",
+        "045": "Tooele"
+      },
+      "mapBounds": {
+        "sw": [
+          40.4,
+          -112.5
+        ],
+        "ne": [
+          41.1,
+          -110.6
+        ]
+      },
+      "hq": "Salt Lake City"
+    },
+    "ut_3": {
+      "name": "Region 3 (Orem)",
+      "shortName": "Region 3",
+      "center": [
+        -111.5,
+        40.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "023",
+        "049",
+        "051"
+      ],
+      "countyNames": {
+        "023": "Juab",
+        "049": "Utah",
+        "051": "Wasatch"
+      },
+      "mapBounds": {
+        "sw": [
+          39.7,
+          -112.0
+        ],
+        "ne": [
+          40.7,
+          -111.0
+        ]
+      },
+      "hq": "Orem"
+    },
+    "ut_4": {
+      "name": "Region 4 (Richfield)",
+      "shortName": "Region 4",
+      "center": [
+        -112.5,
+        38.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "001",
+        "017",
+        "021",
+        "025",
+        "027",
+        "031",
+        "039",
+        "041",
+        "053",
+        "055"
+      ],
+      "countyNames": {
+        "001": "Beaver",
+        "017": "Garfield",
+        "021": "Iron",
+        "025": "Kane",
+        "027": "Millard",
+        "031": "Piute",
+        "039": "Sanpete",
+        "041": "Sevier",
+        "053": "Washington",
+        "055": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -114.1
+        ],
+        "ne": [
+          39.6,
+          -110.5
+        ]
+      },
+      "hq": "Richfield"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "wfrcwfrc": {
+      "name": "WFRC (Wasatch Front Regional Council)",
+      "shortName": "Wasatch Front Regional Council",
+      "type": "mpo",
+      "center": [
+        -111.891,
+        40.7608
+      ],
+      "zoom": 9,
+      "counties": [
+        "035",
+        "011",
+        "057",
+        "029",
+        "003",
+        "045"
+      ],
+      "countyNames": {
+        "035": "Salt Lake",
+        "011": "Davis",
+        "057": "Weber",
+        "029": "Morgan",
+        "003": "Box Elder",
+        "045": "Tooele"
+      },
+      "btsAcronym": "WFRC",
+      "mapBounds": {
+        "sw": [
+          40.3,
+          -112.3
+        ],
+        "ne": [
+          41.2,
+          -111.5
+        ]
+      }
+    },
+    "magmag": {
+      "name": "MAG (Mountainland Association of Governments)",
+      "shortName": "Mountainland Association of Governments",
+      "type": "mpo",
+      "center": [
+        -111.9738,
+        41.223
+      ],
+      "zoom": 10,
+      "counties": [
+        "049",
+        "051",
+        "043"
+      ],
+      "countyNames": {
+        "049": "Utah",
+        "051": "Wasatch",
+        "043": "Summit"
+      },
+      "btsAcronym": "MAG",
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -112.2
+        ],
+        "ne": [
+          41.45,
+          -111.75
+        ]
+      }
+    },
+    "cmpo": {
+      "name": "Cache MPO",
+      "shortName": "Cache",
+      "type": "mpo",
+      "center": [
+        -111.6585,
+        40.2338
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Cache"
+      },
+      "btsAcronym": "CM",
+      "mapBounds": {
+        "sw": [
+          40.0,
+          -111.9
+        ],
+        "ne": [
+          40.45,
+          -111.4
+        ]
+      }
+    },
+    "dmposg": {
+      "name": "Dixie MPO (St. George)",
+      "shortName": "St. George",
+      "type": "mpo",
+      "center": [
+        -113.5841,
+        37.1041
+      ],
+      "zoom": 10,
+      "counties": [
+        "053"
+      ],
+      "countyNames": {
+        "053": "Washington"
+      },
+      "btsAcronym": "DMG",
+      "mapBounds": {
+        "sw": [
+          36.85,
+          -113.85
+        ],
+        "ne": [
+          37.35,
+          -113.3
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Beaver",
+    "003": "Box Elder",
+    "005": "Cache",
+    "007": "Carbon",
+    "009": "Daggett",
+    "011": "Davis",
+    "013": "Duchesne",
+    "015": "Emery",
+    "017": "Garfield",
+    "019": "Grand",
+    "021": "Iron",
+    "023": "Juab",
+    "025": "Kane",
+    "027": "Millard",
+    "029": "Morgan",
+    "031": "Piute",
+    "033": "Rich",
+    "035": "Salt Lake",
+    "037": "San Juan",
+    "039": "Sanpete",
+    "041": "Sevier",
+    "043": "Summit",
+    "045": "Tooele",
+    "047": "Uintah",
+    "049": "Utah",
+    "051": "Wasatch",
+    "053": "Washington",
+    "055": "Wayne",
+    "057": "Weber"
+  }
+}

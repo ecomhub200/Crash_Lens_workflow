@@ -1,0 +1,136 @@
+name: Generate Social Media Posts
+
+on:
+  # Run weekly on Monday at 8 AM EST (13:00 UTC)
+  schedule:
+    - cron: '0 13 * * 1'
+
+  # Manual trigger with options
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Target platform (leave empty for all)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - linkedin
+          - twitter
+          - facebook
+          - instagram
+          - youtube
+          - tiktok
+          - bluesky
+      pillar:
+        description: 'Content pillar (leave empty for weighted random)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - safety_statistics
+          - product_features
+          - industry_news
+          - success_stories
+          - educational
+          - behind_the_scenes
+      count:
+        description: 'Posts per platform'
+        required: false
+        default: '3'
+        type: string
+      topic:
+        description: 'Custom topic (optional)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  generate-posts:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install anthropic
+
+      - name: Generate social media posts
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          cd social_media
+          ARGS=""
+          if [ -n "${{ github.event.inputs.platform }}" ]; then
+            ARGS="$ARGS --platform ${{ github.event.inputs.platform }}"
+          fi
+          if [ -n "${{ github.event.inputs.pillar }}" ]; then
+            ARGS="$ARGS --pillar ${{ github.event.inputs.pillar }}"
+          fi
+          if [ -n "${{ github.event.inputs.count }}" ]; then
+            ARGS="$ARGS --count ${{ github.event.inputs.count }}"
+          else
+            ARGS="$ARGS --count 3"
+          fi
+          if [ -n "${{ github.event.inputs.topic }}" ]; then
+            ARGS="$ARGS --topic '${{ github.event.inputs.topic }}'"
+          fi
+
+          echo "Running: python generate_posts.py $ARGS"
+          eval python generate_posts.py $ARGS
+
+      - name: Get generated file name
+        id: get-file
+        run: |
+          LATEST=$(ls -t social_media/output/posts_*.json 2>/dev/null | head -1)
+          echo "file=$LATEST" >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request with generated posts
+        if: steps.get-file.outputs.file != ''
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "social media: generate posts for week of ${{ steps.get-file.outputs.date }}"
+          title: "Social Media Posts - Week of ${{ steps.get-file.outputs.date }}"
+          body: |
+            ## Auto-Generated Social Media Posts
+
+            This PR contains AI-generated social media posts for the week of **${{ steps.get-file.outputs.date }}**.
+
+            ### Review Checklist
+            - [ ] Review all post content for accuracy
+            - [ ] Verify crash statistics are correct
+            - [ ] Check that all posts meet platform character limits
+            - [ ] Ensure alt text is provided for suggested images
+            - [ ] Verify tone is appropriate for each platform
+            - [ ] Approve posts by changing status from `pending_review` to `approved`
+
+            ### Generated File
+            `${{ steps.get-file.outputs.file }}`
+
+            ### How to Post
+            After merging this PR, run the posting script:
+            ```bash
+            python social_media/scripts/post_to_platforms.py ${{ steps.get-file.outputs.file }} --approve-all
+            python social_media/scripts/post_to_platforms.py ${{ steps.get-file.outputs.file }} --via postiz
+            ```
+
+            ---
+            *Generated automatically by the CRASH LENS Social Media Pipeline*
+          branch: social-media/posts-${{ steps.get-file.outputs.date }}
+          base: main
+          labels: |
+            social-media
+            auto-generated
+          reviewers: ${{ github.repository_owner }}

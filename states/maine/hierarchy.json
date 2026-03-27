@@ -1,0 +1,296 @@
+{
+  "state": {
+    "fips": "23",
+    "name": "Maine",
+    "abbreviation": "ME",
+    "dot": "MaineDOT",
+    "dotFullName": "Maine Department of Transportation",
+    "center": [
+      -69.381927,
+      44.693947
+    ],
+    "zoom": 7,
+    "placesCount": 23
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "me_1": {
+      "name": "Region 1 (Southern)",
+      "shortName": "Region 1",
+      "center": [
+        -70.4,
+        43.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "031"
+      ],
+      "countyNames": {
+        "005": "Cumberland",
+        "031": "York"
+      },
+      "mapBounds": {
+        "sw": [
+          43.1,
+          -71.0
+        ],
+        "ne": [
+          44.1,
+          -69.8
+        ]
+      },
+      "hq": "Scarborough"
+    },
+    "me_2": {
+      "name": "Region 2 (Midcoast)",
+      "shortName": "Region 2",
+      "center": [
+        -70.0,
+        44.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "007",
+        "011",
+        "013",
+        "015",
+        "017",
+        "023",
+        "025",
+        "027"
+      ],
+      "countyNames": {
+        "001": "Androscoggin",
+        "007": "Franklin",
+        "011": "Kennebec",
+        "013": "Knox",
+        "015": "Lincoln",
+        "017": "Oxford",
+        "023": "Sagadahoc",
+        "025": "Somerset",
+        "027": "Waldo"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -71.0
+        ],
+        "ne": [
+          45.5,
+          -69.0
+        ]
+      },
+      "hq": "Augusta"
+    },
+    "me_3": {
+      "name": "Region 3 (Downeast)",
+      "shortName": "Region 3",
+      "center": [
+        -68.5,
+        45.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "019",
+        "021",
+        "029"
+      ],
+      "countyNames": {
+        "009": "Hancock",
+        "019": "Penobscot",
+        "021": "Piscataquis",
+        "029": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          44.0,
+          -69.5
+        ],
+        "ne": [
+          46.0,
+          -67.5
+        ]
+      },
+      "hq": "Bangor"
+    },
+    "me_4": {
+      "name": "Region 4 (Aroostook)",
+      "shortName": "Region 4",
+      "center": [
+        -68.5,
+        46.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Aroostook"
+      },
+      "mapBounds": {
+        "sw": [
+          45.8,
+          -69.9
+        ],
+        "ne": [
+          47.5,
+          -67.0
+        ]
+      },
+      "hq": "Presque Isle"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "pacts": {
+      "name": "Portland Area Comprehensive Transportation System (PACTS)",
+      "shortName": "PACTS",
+      "type": "mpo",
+      "center": [
+        -70.2568,
+        43.6591
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Cumberland"
+      },
+      "btsAcronym": "PACTS",
+      "mapBounds": {
+        "sw": [
+          43.4,
+          -70.5
+        ],
+        "ne": [
+          43.9,
+          -70.0
+        ]
+      }
+    },
+    "kacts": {
+      "name": "Kittery Area Comprehensive Transportation Study (KACTS)",
+      "shortName": "KACTS",
+      "type": "mpo",
+      "center": [
+        -68.7712,
+        44.8016
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "York"
+      },
+      "btsAcronym": "KACTS",
+      "mapBounds": {
+        "sw": [
+          44.55,
+          -69.05
+        ],
+        "ne": [
+          45.05,
+          -68.5
+        ]
+      }
+    },
+    "bacts": {
+      "name": "Bangor Area Comprehensive Transportation System (BACTS)",
+      "shortName": "BACTS",
+      "type": "mpo",
+      "center": [
+        -68.7712,
+        44.8016
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Penobscot"
+      },
+      "btsAcronym": "BACTS",
+      "mapBounds": {
+        "sw": [
+          44.55,
+          -69.05
+        ],
+        "ne": [
+          45.05,
+          -68.5
+        ]
+      }
+    },
+    "atrc": {
+      "name": "Androscoggin Transportation Resource Center (ATRC)",
+      "shortName": "ATRC",
+      "type": "mpo",
+      "center": [
+        -70.2148,
+        44.1004
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Androscoggin"
+      },
+      "btsAcronym": "ATRC",
+      "mapBounds": {
+        "sw": [
+          43.85,
+          -70.5
+        ],
+        "ne": [
+          44.35,
+          -69.95
+        ]
+      }
+    },
+    "kittery_area_comprehensive_transportation_system_mpo": {
+      "name": "Kittery Area Comprehensive Transportation System",
+      "shortName": "Kittery Comprehensive Transportation System",
+      "type": "mpo",
+      "btsMpoId": "23198202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -70.720751,
+        43.157252
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Androscoggin",
+    "003": "Aroostook",
+    "005": "Cumberland",
+    "007": "Franklin",
+    "009": "Hancock",
+    "011": "Kennebec",
+    "013": "Knox",
+    "015": "Lincoln",
+    "017": "Oxford",
+    "019": "Penobscot",
+    "021": "Piscataquis",
+    "023": "Sagadahoc",
+    "025": "Somerset",
+    "027": "Waldo",
+    "029": "Washington",
+    "031": "York"
+  }
+}

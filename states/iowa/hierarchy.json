@@ -1,0 +1,747 @@
+{
+  "state": {
+    "fips": "19",
+    "name": "Iowa",
+    "abbreviation": "IA",
+    "dot": "Iowa DOT",
+    "dotFullName": "Iowa Department of Transportation",
+    "center": [
+      -93.210526,
+      42.011539
+    ],
+    "zoom": 7,
+    "placesCount": 940
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ia_1": {
+      "name": "District 1 (Ames)",
+      "shortName": "District 1",
+      "center": [
+        -93.6,
+        41.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "025",
+        "027",
+        "049",
+        "073",
+        "077",
+        "079",
+        "083",
+        "091",
+        "099",
+        "121",
+        "125",
+        "127",
+        "153",
+        "157",
+        "169",
+        "181",
+        "187",
+        "197"
+      ],
+      "countyNames": {
+        "015": "Boone",
+        "025": "Calhoun",
+        "027": "Carroll",
+        "049": "Dallas",
+        "073": "Greene",
+        "077": "Guthrie",
+        "079": "Hamilton",
+        "083": "Hardin",
+        "091": "Humboldt",
+        "099": "Jasper",
+        "121": "Madison",
+        "125": "Marion",
+        "127": "Marshall",
+        "153": "Polk",
+        "157": "Poweshiek",
+        "169": "Story",
+        "181": "Warren",
+        "187": "Webster",
+        "197": "Wright"
+      },
+      "mapBounds": {
+        "sw": [
+          41.2,
+          -94.6
+        ],
+        "ne": [
+          42.6,
+          -92.6
+        ]
+      },
+      "hq": "Ames"
+    },
+    "ia_2": {
+      "name": "District 2 (Mason City)",
+      "shortName": "District 2",
+      "center": [
+        -92.5,
+        43.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "017",
+        "023",
+        "033",
+        "037",
+        "043",
+        "063",
+        "065",
+        "067",
+        "069",
+        "081",
+        "089",
+        "109",
+        "131",
+        "147",
+        "151",
+        "189",
+        "191",
+        "195"
+      ],
+      "countyNames": {
+        "005": "Allamakee",
+        "017": "Bremer",
+        "023": "Butler",
+        "033": "Cerro Gordo",
+        "037": "Chickasaw",
+        "043": "Clayton",
+        "063": "Emmet",
+        "065": "Fayette",
+        "067": "Floyd",
+        "069": "Franklin",
+        "081": "Hancock",
+        "089": "Howard",
+        "109": "Kossuth",
+        "131": "Mitchell",
+        "147": "Palo Alto",
+        "151": "Pocahontas",
+        "189": "Winnebago",
+        "191": "Winneshiek",
+        "195": "Worth"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -93.5
+        ],
+        "ne": [
+          43.5,
+          -91.5
+        ]
+      },
+      "hq": "Mason City"
+    },
+    "ia_3": {
+      "name": "District 3 (Sioux City)",
+      "shortName": "District 3",
+      "center": [
+        -95.5,
+        42.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "021",
+        "035",
+        "041",
+        "047",
+        "059",
+        "085",
+        "093",
+        "119",
+        "133",
+        "141",
+        "143",
+        "149",
+        "161",
+        "165",
+        "167",
+        "193"
+      ],
+      "countyNames": {
+        "021": "Buena Vista",
+        "035": "Cherokee",
+        "041": "Clay",
+        "047": "Crawford",
+        "059": "Dickinson",
+        "085": "Harrison",
+        "093": "Ida",
+        "119": "Lyon",
+        "133": "Monona",
+        "141": "O'Brien",
+        "143": "Osceola",
+        "149": "Plymouth",
+        "161": "Sac",
+        "165": "Shelby",
+        "167": "Sioux",
+        "193": "Woodbury"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -96.6
+        ],
+        "ne": [
+          43.5,
+          -94.4
+        ]
+      },
+      "hq": "Sioux City"
+    },
+    "ia_4": {
+      "name": "District 4 (Atlantic)",
+      "shortName": "District 4",
+      "center": [
+        -95.3,
+        41.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "009",
+        "029",
+        "039",
+        "053",
+        "071",
+        "117",
+        "129",
+        "137",
+        "145",
+        "155",
+        "159",
+        "173",
+        "175",
+        "185"
+      ],
+      "countyNames": {
+        "001": "Adair",
+        "003": "Adams",
+        "009": "Audubon",
+        "029": "Cass",
+        "039": "Clarke",
+        "053": "Decatur",
+        "071": "Fremont",
+        "117": "Lucas",
+        "129": "Mills",
+        "137": "Montgomery",
+        "145": "Page",
+        "155": "Pottawattamie",
+        "159": "Ringgold",
+        "173": "Taylor",
+        "175": "Union",
+        "185": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          40.4,
+          -96.0
+        ],
+        "ne": [
+          42.0,
+          -94.6
+        ]
+      },
+      "hq": "Atlantic"
+    },
+    "ia_5": {
+      "name": "District 5 (Fairfield)",
+      "shortName": "District 5",
+      "center": [
+        -91.8,
+        41.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "051",
+        "057",
+        "087",
+        "101",
+        "107",
+        "111",
+        "115",
+        "123",
+        "135",
+        "177",
+        "179",
+        "183"
+      ],
+      "countyNames": {
+        "007": "Appanoose",
+        "051": "Davis",
+        "057": "Des Moines",
+        "087": "Henry",
+        "101": "Jefferson",
+        "107": "Keokuk",
+        "111": "Lee",
+        "115": "Louisa",
+        "123": "Mahaska",
+        "135": "Monroe",
+        "177": "Van Buren",
+        "179": "Wapello",
+        "183": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          40.4,
+          -92.7
+        ],
+        "ne": [
+          41.6,
+          -90.9
+        ]
+      },
+      "hq": "Fairfield"
+    },
+    "ia_6": {
+      "name": "District 6 (Cedar Rapids)",
+      "shortName": "District 6",
+      "center": [
+        -91.0,
+        42.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "013",
+        "019",
+        "031",
+        "045",
+        "055",
+        "061",
+        "075",
+        "095",
+        "097",
+        "103",
+        "105",
+        "113",
+        "139",
+        "163",
+        "171"
+      ],
+      "countyNames": {
+        "011": "Benton",
+        "013": "Black Hawk",
+        "019": "Buchanan",
+        "031": "Cedar",
+        "045": "Clinton",
+        "055": "Delaware",
+        "061": "Dubuque",
+        "075": "Grundy",
+        "095": "Iowa",
+        "097": "Jackson",
+        "103": "Johnson",
+        "105": "Jones",
+        "113": "Linn",
+        "139": "Muscatine",
+        "163": "Scott",
+        "171": "Tama"
+      },
+      "mapBounds": {
+        "sw": [
+          41.5,
+          -92.0
+        ],
+        "ne": [
+          42.8,
+          -90.0
+        ]
+      },
+      "hq": "Cedar Rapids"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "dmampo": {
+      "name": "Des Moines Area MPO",
+      "shortName": "Des Moines Area",
+      "type": "mpo",
+      "center": [
+        -93.625,
+        41.5868
+      ],
+      "zoom": 10,
+      "counties": [
+        "153",
+        "049",
+        "181"
+      ],
+      "countyNames": {
+        "153": "Polk",
+        "049": "Dallas",
+        "181": "Warren"
+      },
+      "btsAcronym": "DMAM",
+      "mapBounds": {
+        "sw": [
+          41.3,
+          -93.95
+        ],
+        "ne": [
+          41.85,
+          -93.3
+        ]
+      }
+    },
+    "bsrcqc": {
+      "name": "Bi-State Regional Commission (Quad Cities)",
+      "shortName": "Quad Cities",
+      "type": "mpo",
+      "center": [
+        -96.4003,
+        42.4999
+      ],
+      "zoom": 10,
+      "counties": [
+        "163"
+      ],
+      "countyNames": {
+        "163": "Scott"
+      },
+      "btsAcronym": "BRCC",
+      "mapBounds": {
+        "sw": [
+          42.25,
+          -96.65
+        ],
+        "ne": [
+          42.75,
+          -96.15
+        ]
+      }
+    },
+    "bhmatpbw": {
+      "name": "Black Hawk Metro Area Transportation Policy Board (Waterloo)",
+      "shortName": "Waterloo",
+      "type": "mpo",
+      "center": [
+        -93.458,
+        42.0308
+      ],
+      "zoom": 11,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Black Hawk"
+      },
+      "btsAcronym": "BHMATPB",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -93.7
+        ],
+        "ne": [
+          42.2,
+          -93.2
+        ]
+      }
+    },
+    "jccogic": {
+      "name": "Johnson County COG (Iowa City)",
+      "shortName": "Iowa City",
+      "type": "mpo",
+      "center": [
+        -91.6656,
+        41.9779
+      ],
+      "zoom": 10,
+      "counties": [
+        "103"
+      ],
+      "countyNames": {
+        "103": "Johnson"
+      },
+      "btsAcronym": "JCCC",
+      "mapBounds": {
+        "sw": [
+          41.75,
+          -91.9
+        ],
+        "ne": [
+          42.2,
+          -91.4
+        ]
+      }
+    },
+    "scmpo": {
+      "name": "Sioux City MPO",
+      "shortName": "Sioux City",
+      "type": "mpo",
+      "center": [
+        -90.6648,
+        42.5003
+      ],
+      "zoom": 10,
+      "counties": [
+        "193"
+      ],
+      "countyNames": {
+        "193": "Woodbury"
+      },
+      "btsAcronym": "SCM",
+      "mapBounds": {
+        "sw": [
+          42.25,
+          -90.95
+        ],
+        "ne": [
+          42.75,
+          -90.4
+        ]
+      }
+    },
+    "aampo": {
+      "name": "Ames Area MPO",
+      "shortName": "Ames Area",
+      "type": "mpo",
+      "center": [
+        -92.908,
+        42.0497
+      ],
+      "zoom": 11,
+      "counties": [
+        "169"
+      ],
+      "countyNames": {
+        "169": "Story"
+      },
+      "btsAcronym": "AAM",
+      "mapBounds": {
+        "sw": [
+          41.85,
+          -93.15
+        ],
+        "ne": [
+          42.25,
+          -92.65
+        ]
+      }
+    },
+    "cmpocr": {
+      "name": "Corridor MPO (Cedar Rapids)",
+      "shortName": "Cedar Rapids",
+      "type": "mpo",
+      "center": [
+        -91.5302,
+        41.6611
+      ],
+      "zoom": 11,
+      "counties": [
+        "113"
+      ],
+      "countyNames": {
+        "113": "Linn"
+      },
+      "btsAcronym": "CMR",
+      "mapBounds": {
+        "sw": [
+          41.45,
+          -91.8
+        ],
+        "ne": [
+          41.85,
+          -91.25
+        ]
+      }
+    },
+    "dmpo": {
+      "name": "Dubuque MPO",
+      "shortName": "Dubuque",
+      "type": "mpo",
+      "center": [
+        -93.6091,
+        42.3342
+      ],
+      "zoom": 11,
+      "counties": [
+        "061"
+      ],
+      "countyNames": {
+        "061": "Dubuque"
+      },
+      "btsAcronym": "DM",
+      "mapBounds": {
+        "sw": [
+          42.15,
+          -93.85
+        ],
+        "ne": [
+          42.5,
+          -93.35
+        ]
+      }
+    },
+    "corridor_metropolitan_planning_organization_mpo": {
+      "name": "Corridor Metropolitan Planning Organization",
+      "shortName": "Corridor",
+      "type": "mpo",
+      "btsMpoId": "19196400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -91.74975,
+        42.022629
+      ],
+      "zoom": 10
+    },
+    "east_central_intergovernmental_association_mpo": {
+      "name": "East Central Intergovernmental Association",
+      "shortName": "East Central Intergovernmental Association",
+      "type": "mpo",
+      "btsMpoId": "19197400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -90.665099,
+        42.49988
+      ],
+      "zoom": 10
+    },
+    "black_hawk_metropolitan_area_transportation_policy_board_mpo": {
+      "name": "Black Hawk Metropolitan Area Transportation Policy Board",
+      "shortName": "Black Hawk Metropolitan Transportation Policy Board",
+      "type": "mpo",
+      "btsMpoId": "19197300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -92.385852,
+        42.512319
+      ],
+      "zoom": 10
+    },
+    "metropolitan_planning_organization_of_johnson_mpo": {
+      "name": "Metropolitan Planning Organization of Johnson County",
+      "shortName": "Metropolitan Planning Organization of Johnson County",
+      "type": "mpo",
+      "btsMpoId": "19198000",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -91.56818,
+        41.717181
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adair",
+    "003": "Adams",
+    "005": "Allamakee",
+    "007": "Appanoose",
+    "009": "Audubon",
+    "011": "Benton",
+    "013": "Black Hawk",
+    "015": "Boone",
+    "017": "Bremer",
+    "019": "Buchanan",
+    "021": "Buena Vista",
+    "023": "Butler",
+    "025": "Calhoun",
+    "027": "Carroll",
+    "029": "Cass",
+    "031": "Cedar",
+    "033": "Cerro Gordo",
+    "035": "Cherokee",
+    "037": "Chickasaw",
+    "039": "Clarke",
+    "041": "Clay",
+    "043": "Clayton",
+    "045": "Clinton",
+    "047": "Crawford",
+    "049": "Dallas",
+    "051": "Davis",
+    "053": "Decatur",
+    "055": "Delaware",
+    "057": "Des Moines",
+    "059": "Dickinson",
+    "061": "Dubuque",
+    "063": "Emmet",
+    "065": "Fayette",
+    "067": "Floyd",
+    "069": "Franklin",
+    "071": "Fremont",
+    "073": "Greene",
+    "075": "Grundy",
+    "077": "Guthrie",
+    "079": "Hamilton",
+    "081": "Hancock",
+    "083": "Hardin",
+    "085": "Harrison",
+    "087": "Henry",
+    "089": "Howard",
+    "091": "Humboldt",
+    "093": "Ida",
+    "095": "Iowa",
+    "097": "Jackson",
+    "099": "Jasper",
+    "101": "Jefferson",
+    "103": "Johnson",
+    "105": "Jones",
+    "107": "Keokuk",
+    "109": "Kossuth",
+    "111": "Lee",
+    "113": "Linn",
+    "115": "Louisa",
+    "117": "Lucas",
+    "119": "Lyon",
+    "121": "Madison",
+    "123": "Mahaska",
+    "125": "Marion",
+    "127": "Marshall",
+    "129": "Mills",
+    "131": "Mitchell",
+    "133": "Monona",
+    "135": "Monroe",
+    "137": "Montgomery",
+    "139": "Muscatine",
+    "141": "O'Brien",
+    "143": "Osceola",
+    "145": "Page",
+    "147": "Palo Alto",
+    "149": "Plymouth",
+    "151": "Pocahontas",
+    "153": "Polk",
+    "155": "Pottawattamie",
+    "157": "Poweshiek",
+    "159": "Ringgold",
+    "161": "Sac",
+    "163": "Scott",
+    "165": "Shelby",
+    "167": "Sioux",
+    "169": "Story",
+    "171": "Tama",
+    "173": "Taylor",
+    "175": "Union",
+    "177": "Van Buren",
+    "179": "Wapello",
+    "181": "Warren",
+    "183": "Washington",
+    "185": "Wayne",
+    "187": "Webster",
+    "189": "Winnebago",
+    "191": "Winneshiek",
+    "193": "Woodbury",
+    "195": "Worth",
+    "197": "Wright"
+  }
+}

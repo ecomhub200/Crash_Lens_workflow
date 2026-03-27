@@ -1,0 +1,154 @@
+{
+  "state": {
+    "name": "New York",
+    "abbreviation": "NY",
+    "fips": "36",
+    "dotName": "NYSDOT",
+    "dotFullName": "New York State Department of Transportation",
+    "dataPortalUrl": "https://data.ny.gov",
+    "coordinateBounds": {
+      "latMin": 40.5,
+      "latMax": 45.02,
+      "lonMin": -79.76,
+      "lonMax": -71.86
+    },
+    "dataDir": "NewYorkDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps NYSDOT Motor Vehicle Crashes (Socrata e8ky-4vqe) to CRASH LENS field codes",
+    "_note": "18 columns available. CRITICAL LIMITATION: NO latitude/longitude fields and NO crash ID field. Dataset is aggregate crash-level with county, date, and descriptors only.",
+    "ID": "_NO_CRASH_ID_FIELD",
+    "DATE": "date",
+    "TIME": "time",
+    "LAT": "_NOT_IN_DATASET",
+    "LON": "_NOT_IN_DATASET",
+    "SEVERITY": "crash_descriptor",
+    "JURISDICTION": "county_name",
+    "ROUTE": "_NOT_IN_DATASET",
+    "COLLISION": "collision_type_descriptor",
+    "WEATHER": "weather_conditions",
+    "LIGHT": "lighting_conditions",
+    "SURFACE_CONDITION": "road_surface_conditions",
+    "JUNCTION": "_NOT_IN_DATASET",
+    "HITRUN": "_NOT_IN_DATASET",
+    "YEAR": "year",
+    "EVENT_DESCRIPTOR": "event_descriptor",
+    "NUM_KILLED": "number_of_persons_killed",
+    "NUM_INJURED": "number_of_persons_injured",
+    "NUM_MOTORISTS_KILLED": "number_of_motorists_killed",
+    "NUM_MOTORISTS_INJURED": "number_of_motorists_injured"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "text_to_kabco",
+      "source": "crash_descriptor",
+      "_note": "NY provides crash_descriptor as text (e.g., 'Fatal Collision', 'Injury Collision', 'Property Damage Collision'). Map to KABCO. Also number_of_persons_killed/injured available for validation."
+    },
+    "YEAR": {
+      "method": "direct",
+      "source": "year"
+    },
+    "NODE": {
+      "method": "not_available",
+      "sources": [],
+      "_note": "No route/road name or intersection fields. Location-based analysis requires geocoding from county only."
+    },
+    "_LIMITATION": {
+      "_note": "This dataset lacks lat/lon coordinates. Map-based visualization and hotspot analysis are NOT possible with this dataset alone. Consider supplementing with NYSDOT's GIS crash data if available."
+    }
+  },
+  "roadSystems": {
+    "_description": "New York road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps New York collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "NYSDOT Open Data Portal",
+    "url": "https://data.ny.gov",
+    "apiUrl": "https://data.ny.gov/resource/e8ky-4vqe.json",
+    "fileFormat": "JSON/CSV (Socrata SODA API)",
+    "dataDictionary": "See data.ny.gov dataset e8ky-4vqe metadata. LIMITATION: No lat/lon or crash ID. 18 columns with county-level crash descriptors.",
+    "resourceId": "e8ky-4vqe",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 50000,
+      "paramLimit": "$limit",
+      "paramOffset": "$offset"
+    }
+  }
+}

@@ -1,0 +1,556 @@
+{
+  "state": {
+    "fips": "40",
+    "name": "Oklahoma",
+    "abbreviation": "OK",
+    "dot": "ODOT",
+    "dotFullName": "Oklahoma Department of Transportation",
+    "center": [
+      -96.928917,
+      35.565342
+    ],
+    "zoom": 7,
+    "placesCount": 591
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ok_1": {
+      "name": "Division 1 (Northwest)",
+      "shortName": "Division 1",
+      "center": [
+        -99.3,
+        35.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "011",
+        "039",
+        "043",
+        "045",
+        "059",
+        "093",
+        "129",
+        "149",
+        "153"
+      ],
+      "countyNames": {
+        "009": "Beckham",
+        "011": "Blaine",
+        "039": "Custer",
+        "043": "Dewey",
+        "045": "Ellis",
+        "059": "Harper",
+        "093": "Major",
+        "129": "Roger Mills",
+        "149": "Washita",
+        "153": "Woodward"
+      },
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -100.0
+        ],
+        "ne": [
+          36.5,
+          -98.5
+        ]
+      },
+      "hq": "Arapaho"
+    },
+    "ok_2": {
+      "name": "Division 2 (North Central)",
+      "shortName": "Division 2",
+      "center": [
+        -97.5,
+        36.4
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "047",
+        "053",
+        "071",
+        "073",
+        "083",
+        "103",
+        "119"
+      ],
+      "countyNames": {
+        "003": "Alfalfa",
+        "047": "Garfield",
+        "053": "Grant",
+        "071": "Kay",
+        "073": "Kingfisher",
+        "083": "Logan",
+        "103": "Noble",
+        "119": "Payne"
+      },
+      "mapBounds": {
+        "sw": [
+          35.7,
+          -98.3
+        ],
+        "ne": [
+          37.0,
+          -96.7
+        ]
+      },
+      "hq": "Enid"
+    },
+    "ok_3": {
+      "name": "Division 3 (Central)",
+      "shortName": "Division 3",
+      "center": [
+        -97.3,
+        35.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "027",
+        "051",
+        "081",
+        "087",
+        "109",
+        "125"
+      ],
+      "countyNames": {
+        "017": "Canadian",
+        "027": "Cleveland",
+        "051": "Grady",
+        "081": "Lincoln",
+        "087": "McClain",
+        "109": "Oklahoma",
+        "125": "Pottawatomie"
+      },
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -98.0
+        ],
+        "ne": [
+          36.0,
+          -96.6
+        ]
+      },
+      "hq": "Oklahoma City"
+    },
+    "ok_4": {
+      "name": "Division 4 (Southwest)",
+      "shortName": "Division 4",
+      "center": [
+        -98.8,
+        34.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "031",
+        "033",
+        "055",
+        "057",
+        "065",
+        "067",
+        "075",
+        "137",
+        "141"
+      ],
+      "countyNames": {
+        "015": "Caddo",
+        "031": "Comanche",
+        "033": "Cotton",
+        "055": "Greer",
+        "057": "Harmon",
+        "065": "Jackson",
+        "067": "Jefferson",
+        "075": "Kiowa",
+        "137": "Stephens",
+        "141": "Tillman"
+      },
+      "mapBounds": {
+        "sw": [
+          33.9,
+          -100.0
+        ],
+        "ne": [
+          35.1,
+          -97.6
+        ]
+      },
+      "hq": "Duncan"
+    },
+    "ok_5": {
+      "name": "Division 5 (South Central)",
+      "shortName": "Division 5",
+      "center": [
+        -96.6,
+        34.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "013",
+        "019",
+        "029",
+        "049",
+        "063",
+        "069",
+        "085",
+        "095",
+        "099",
+        "123",
+        "133"
+      ],
+      "countyNames": {
+        "005": "Atoka",
+        "013": "Bryan",
+        "019": "Carter",
+        "029": "Coal",
+        "049": "Garvin",
+        "063": "Hughes",
+        "069": "Johnston",
+        "085": "Love",
+        "095": "Marshall",
+        "099": "Murray",
+        "123": "Pontotoc",
+        "133": "Seminole"
+      },
+      "mapBounds": {
+        "sw": [
+          33.9,
+          -97.5
+        ],
+        "ne": [
+          35.1,
+          -95.7
+        ]
+      },
+      "hq": "Durant"
+    },
+    "ok_6": {
+      "name": "Division 6 (Southeast)",
+      "shortName": "Division 6",
+      "center": [
+        -95.3,
+        34.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "023",
+        "061",
+        "077",
+        "079",
+        "089",
+        "091",
+        "121",
+        "127"
+      ],
+      "countyNames": {
+        "023": "Choctaw",
+        "061": "Haskell",
+        "077": "Latimer",
+        "079": "Le Flore",
+        "089": "McCurtain",
+        "091": "McIntosh",
+        "121": "Pittsburg",
+        "127": "Pushmataha"
+      },
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -96.0
+        ],
+        "ne": [
+          35.5,
+          -94.5
+        ]
+      },
+      "hq": "Poteau"
+    },
+    "ok_7": {
+      "name": "Division 7 (Northeast)",
+      "shortName": "Division 7",
+      "center": [
+        -96.0,
+        36.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "037",
+        "101",
+        "111",
+        "113",
+        "117",
+        "131",
+        "143",
+        "145"
+      ],
+      "countyNames": {
+        "037": "Creek",
+        "101": "Muskogee",
+        "111": "Okmulgee",
+        "113": "Osage",
+        "117": "Pawnee",
+        "131": "Rogers",
+        "143": "Tulsa",
+        "145": "Wagoner"
+      },
+      "mapBounds": {
+        "sw": [
+          35.4,
+          -96.8
+        ],
+        "ne": [
+          36.8,
+          -95.2
+        ]
+      },
+      "hq": "Tulsa"
+    },
+    "ok_8": {
+      "name": "Division 8 (Far Northeast)",
+      "shortName": "Division 8",
+      "center": [
+        -95.0,
+        36.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "021",
+        "035",
+        "041",
+        "097",
+        "105",
+        "115",
+        "135",
+        "147"
+      ],
+      "countyNames": {
+        "001": "Adair",
+        "021": "Cherokee",
+        "035": "Craig",
+        "041": "Delaware",
+        "097": "Mayes",
+        "105": "Nowata",
+        "115": "Ottawa",
+        "135": "Sequoyah",
+        "147": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          35.6,
+          -95.6
+        ],
+        "ne": [
+          37.0,
+          -94.4
+        ]
+      },
+      "hq": "Vinita"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "acogacog": {
+      "name": "ACOG (Association of Central Oklahoma Governments)",
+      "shortName": "Association of Central Oklahoma Governments",
+      "type": "mpo",
+      "center": [
+        -97.5164,
+        35.4676
+      ],
+      "zoom": 9,
+      "counties": [
+        "109",
+        "017",
+        "027",
+        "083",
+        "087",
+        "051"
+      ],
+      "countyNames": {
+        "109": "Oklahoma",
+        "017": "Canadian",
+        "027": "Cleveland",
+        "083": "Logan",
+        "087": "McClain",
+        "051": "Grady"
+      },
+      "btsAcronym": "ACOG",
+      "mapBounds": {
+        "sw": [
+          35.1,
+          -97.9
+        ],
+        "ne": [
+          35.8,
+          -97.1
+        ]
+      }
+    },
+    "incogincogt": {
+      "name": "INCOG (Indian Nations COG / Tulsa)",
+      "shortName": "Indian Nations COG / Tulsa",
+      "type": "mpo",
+      "center": [
+        -95.9928,
+        36.154
+      ],
+      "zoom": 9,
+      "counties": [
+        "143",
+        "037",
+        "113",
+        "131",
+        "145"
+      ],
+      "countyNames": {
+        "143": "Tulsa",
+        "037": "Creek",
+        "113": "Osage",
+        "131": "Rogers",
+        "145": "Wagoner"
+      },
+      "btsAcronym": "INCT",
+      "mapBounds": {
+        "sw": [
+          35.85,
+          -96.35
+        ],
+        "ne": [
+          36.45,
+          -95.65
+        ]
+      }
+    },
+    "lmpo": {
+      "name": "Lawton MPO",
+      "shortName": "Lawton",
+      "type": "mpo",
+      "center": [
+        -98.3959,
+        34.6036
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "Comanche"
+      },
+      "btsAcronym": "LM",
+      "mapBounds": {
+        "sw": [
+          34.35,
+          -98.65
+        ],
+        "ne": [
+          34.85,
+          -98.15
+        ]
+      }
+    },
+    "chisholm_trail_mpo": {
+      "name": "Chisholm Trail MPO",
+      "shortName": "Chisholm Trail",
+      "type": "mpo",
+      "btsMpoId": "40202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -97.874737,
+        36.393025
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adair",
+    "003": "Alfalfa",
+    "005": "Atoka",
+    "007": "Beaver",
+    "009": "Beckham",
+    "011": "Blaine",
+    "013": "Bryan",
+    "015": "Caddo",
+    "017": "Canadian",
+    "019": "Carter",
+    "021": "Cherokee",
+    "023": "Choctaw",
+    "025": "Cimarron",
+    "027": "Cleveland",
+    "029": "Coal",
+    "031": "Comanche",
+    "033": "Cotton",
+    "035": "Craig",
+    "037": "Creek",
+    "039": "Custer",
+    "041": "Delaware",
+    "043": "Dewey",
+    "045": "Ellis",
+    "047": "Garfield",
+    "049": "Garvin",
+    "051": "Grady",
+    "053": "Grant",
+    "055": "Greer",
+    "057": "Harmon",
+    "059": "Harper",
+    "061": "Haskell",
+    "063": "Hughes",
+    "065": "Jackson",
+    "067": "Jefferson",
+    "069": "Johnston",
+    "071": "Kay",
+    "073": "Kingfisher",
+    "075": "Kiowa",
+    "077": "Latimer",
+    "079": "Le Flore",
+    "081": "Lincoln",
+    "083": "Logan",
+    "085": "Love",
+    "087": "McClain",
+    "089": "McCurtain",
+    "091": "McIntosh",
+    "093": "Major",
+    "095": "Marshall",
+    "097": "Mayes",
+    "099": "Murray",
+    "101": "Muskogee",
+    "103": "Noble",
+    "105": "Nowata",
+    "107": "Okfuskee",
+    "109": "Oklahoma",
+    "111": "Okmulgee",
+    "113": "Osage",
+    "115": "Ottawa",
+    "117": "Pawnee",
+    "119": "Payne",
+    "121": "Pittsburg",
+    "123": "Pontotoc",
+    "125": "Pottawatomie",
+    "127": "Pushmataha",
+    "129": "Roger Mills",
+    "131": "Rogers",
+    "133": "Seminole",
+    "135": "Sequoyah",
+    "137": "Stephens",
+    "139": "Texas",
+    "141": "Tillman",
+    "143": "Tulsa",
+    "145": "Wagoner",
+    "147": "Washington",
+    "149": "Washita",
+    "151": "Woods",
+    "153": "Woodward"
+  }
+}

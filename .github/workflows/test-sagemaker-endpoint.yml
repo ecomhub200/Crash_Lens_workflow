@@ -1,0 +1,149 @@
+# ==============================================================================
+# Test SageMaker Chronos-2 Endpoint
+# ==============================================================================
+# Manual workflow to manage and test the SageMaker endpoint.
+#
+# COST WARNING:
+#   - "serverless" mode scales to zero when idle — NO charges when not in use
+#   - "realtime" mode charges ~$0.23/hr (~$166/month) EVEN WHEN IDLE
+#   - Default is "serverless" to avoid unexpected charges
+# ==============================================================================
+
+name: "Test: SageMaker Endpoint"
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - status
+          - deploy
+          - delete
+        default: status
+      mode:
+        description: 'Deploy mode (only used with deploy action)'
+        required: false
+        type: choice
+        options:
+          - serverless
+          - realtime
+        default: serverless
+
+jobs:
+  test-endpoint:
+    name: "Test SageMaker Endpoint"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install boto3 "sagemaker>=2.200,<3"
+
+      - name: Verify AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          python3 -c "
+          import boto3, sys
+
+          session = boto3.Session(
+              aws_access_key_id='${{ secrets.AWS_ACCESS_KEY_ID }}',
+              aws_secret_access_key='${{ secrets.AWS_SECRET_ACCESS_KEY }}',
+              region_name='${{ secrets.AWS_REGION }}'
+          )
+          sts = session.client('sts')
+          try:
+              identity = sts.get_caller_identity()
+              print('AWS credentials are valid!')
+              print(f'  Account: {identity[\"Account\"]}')
+              print(f'  User ARN: {identity[\"Arn\"]}')
+              print(f'  Region: ${{ secrets.AWS_REGION }}')
+          except Exception as e:
+              print(f'ERROR: AWS credentials invalid: {e}')
+              sys.exit(1)
+          "
+
+      - name: Run endpoint action (${{ github.event.inputs.action }})
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: python scripts/deploy_chronos_endpoint.py --action ${{ github.event.inputs.action }} --mode ${{ github.event.inputs.mode || 'serverless' }}
+
+      - name: Test sample prediction
+        if: github.event.inputs.action == 'status' || github.event.inputs.action == 'deploy'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          python3 -c "
+          import boto3, json, sys
+
+          session = boto3.Session(
+              aws_access_key_id='${{ secrets.AWS_ACCESS_KEY_ID }}',
+              aws_secret_access_key='${{ secrets.AWS_SECRET_ACCESS_KEY }}',
+              region_name='${{ secrets.AWS_REGION }}'
+          )
+
+          endpoint_name = 'crashlens-chronos2-endpoint'
+          sm = session.client('sagemaker')
+
+          # Check status first
+          try:
+              resp = sm.describe_endpoint(EndpointName=endpoint_name)
+              status = resp['EndpointStatus']
+              print(f'Endpoint status: {status}')
+              if status != 'InService':
+                  print(f'Endpoint is not InService, skipping prediction test.')
+                  sys.exit(0)
+          except Exception as e:
+              print(f'Endpoint not found: {e}')
+              print('Run this workflow with action=deploy to create it.')
+              sys.exit(1)
+
+          # Send test prediction
+          runtime = session.client('sagemaker-runtime')
+          test_payload = {
+              'inputs': [{'target': [100, 110, 105, 115, 108, 120, 112, 125, 118, 130, 122, 135]}],
+              'parameters': {
+                  'prediction_length': 6,
+                  'quantile_levels': [0.1, 0.5, 0.9]
+              }
+          }
+
+          try:
+              response = runtime.invoke_endpoint(
+                  EndpointName=endpoint_name,
+                  ContentType='application/json',
+                  Body=json.dumps(test_payload)
+              )
+              result = json.loads(response['Body'].read().decode('utf-8'))
+              print('Sample prediction SUCCESS!')
+              print(f'Response keys: {list(result.keys())}')
+              print(json.dumps(result, indent=2)[:500])
+          except Exception as e:
+              print(f'Prediction test FAILED: {e}')
+              sys.exit(1)
+          "
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## SageMaker Endpoint Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: ${{ github.event.inputs.mode || 'serverless' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ secrets.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Endpoint**: crashlens-chronos2-endpoint" >> $GITHUB_STEP_SUMMARY

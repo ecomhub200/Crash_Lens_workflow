@@ -1,0 +1,340 @@
+{
+  "state": {
+    "fips": "33",
+    "name": "New Hampshire",
+    "abbreviation": "NH",
+    "dot": "NHDOT",
+    "dotFullName": "New Hampshire Department of Transportation",
+    "center": [
+      -71.563896,
+      43.452492
+    ],
+    "zoom": 8,
+    "placesCount": 13
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nh_1": {
+      "name": "District 1 (Lancaster)",
+      "shortName": "District 1",
+      "center": [
+        -71.5,
+        44.5
+      ],
+      "zoom": 9,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Coos"
+      },
+      "mapBounds": {
+        "sw": [
+          44.0,
+          -72.0
+        ],
+        "ne": [
+          45.3,
+          -71.0
+        ]
+      },
+      "hq": "Lancaster"
+    },
+    "nh_2": {
+      "name": "District 2 (Lebanon)",
+      "shortName": "District 2",
+      "center": [
+        -72.2,
+        43.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "009",
+        "019"
+      ],
+      "countyNames": {
+        "009": "Grafton",
+        "019": "Sullivan"
+      },
+      "mapBounds": {
+        "sw": [
+          43.1,
+          -72.6
+        ],
+        "ne": [
+          44.1,
+          -71.8
+        ]
+      },
+      "hq": "Lebanon"
+    },
+    "nh_3": {
+      "name": "District 3 (Laconia)",
+      "shortName": "District 3",
+      "center": [
+        -71.3,
+        43.5
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "003"
+      ],
+      "countyNames": {
+        "001": "Belknap",
+        "003": "Carroll"
+      },
+      "mapBounds": {
+        "sw": [
+          43.2,
+          -71.7
+        ],
+        "ne": [
+          44.1,
+          -70.9
+        ]
+      },
+      "hq": "Laconia"
+    },
+    "nh_4": {
+      "name": "District 4 (Swanzey)",
+      "shortName": "District 4",
+      "center": [
+        -72.1,
+        42.95
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "011"
+      ],
+      "countyNames": {
+        "005": "Cheshire",
+        "011": "Hillsborough (partial)"
+      },
+      "mapBounds": {
+        "sw": [
+          42.7,
+          -72.5
+        ],
+        "ne": [
+          43.3,
+          -71.7
+        ]
+      },
+      "hq": "Swanzey"
+    },
+    "nh_5": {
+      "name": "District 5 (Concord)",
+      "shortName": "District 5",
+      "center": [
+        -71.54,
+        43.2
+      ],
+      "zoom": 10,
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Merrimack"
+      },
+      "mapBounds": {
+        "sw": [
+          43.0,
+          -71.8
+        ],
+        "ne": [
+          43.5,
+          -71.3
+        ]
+      },
+      "hq": "Concord"
+    },
+    "nh_6": {
+      "name": "District 6 (Durham)",
+      "shortName": "District 6",
+      "center": [
+        -70.9,
+        43.1
+      ],
+      "zoom": 10,
+      "counties": [
+        "015",
+        "017"
+      ],
+      "countyNames": {
+        "015": "Rockingham",
+        "017": "Strafford"
+      },
+      "mapBounds": {
+        "sw": [
+          42.85,
+          -71.2
+        ],
+        "ne": [
+          43.4,
+          -70.6
+        ]
+      },
+      "hq": "Durham"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "nrpcmpo": {
+      "name": "Nashua Regional Planning Commission MPO",
+      "shortName": "Nashua Regional Planning Commission",
+      "type": "mpo",
+      "center": [
+        -71.4548,
+        42.9956
+      ],
+      "zoom": 10,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Hillsborough"
+      },
+      "btsAcronym": "NRPCM",
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -71.7
+        ],
+        "ne": [
+          43.2,
+          -71.2
+        ]
+      }
+    },
+    "snhpcm": {
+      "name": "Southern NH Planning Commission (Manchester)",
+      "shortName": "Manchester",
+      "type": "mpo",
+      "center": [
+        -71.5376,
+        43.2081
+      ],
+      "zoom": 10,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Hillsborough"
+      },
+      "btsAcronym": "SNPC",
+      "mapBounds": {
+        "sw": [
+          43.0,
+          -71.8
+        ],
+        "ne": [
+          43.4,
+          -71.3
+        ]
+      }
+    },
+    "rpcp": {
+      "name": "Rockingham Planning Commission (Portsmouth)",
+      "shortName": "Portsmouth",
+      "type": "mpo",
+      "center": [
+        -70.7626,
+        43.0718
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Rockingham"
+      },
+      "btsAcronym": "RPC",
+      "mapBounds": {
+        "sw": [
+          42.85,
+          -71.0
+        ],
+        "ne": [
+          43.3,
+          -70.55
+        ]
+      }
+    },
+    "smpod": {
+      "name": "Strafford MPO (Dover)",
+      "shortName": "Dover",
+      "type": "mpo",
+      "center": [
+        -70.8737,
+        43.1979
+      ],
+      "zoom": 10,
+      "counties": [
+        "017"
+      ],
+      "countyNames": {
+        "017": "Strafford"
+      },
+      "btsAcronym": "SM",
+      "mapBounds": {
+        "sw": [
+          43.0,
+          -71.1
+        ],
+        "ne": [
+          43.4,
+          -70.65
+        ]
+      }
+    },
+    "southern_new_hampshire_planning_commission_mpo": {
+      "name": "Southern New Hampshire Planning Commission",
+      "shortName": "Southern New Hampshire Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "33197301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -71.400189,
+        42.982141
+      ],
+      "zoom": 10
+    },
+    "strafford_regional_planning_commission_mpo": {
+      "name": "Strafford Regional Planning Commission",
+      "shortName": "Strafford Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "33198200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -70.994627,
+        43.260889
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Belknap",
+    "003": "Carroll",
+    "005": "Cheshire",
+    "007": "Coos",
+    "009": "Grafton",
+    "011": "Hillsborough",
+    "013": "Merrimack",
+    "015": "Rockingham",
+    "017": "Strafford",
+    "019": "Sullivan"
+  }
+}

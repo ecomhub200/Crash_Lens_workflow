@@ -1,0 +1,696 @@
+# ==============================================================================
+# Virginia Batch Pipeline (Statewide Processing)
+# ==============================================================================
+# Virginia-specific version of batch-pipeline.yml.
+# Processes Virginia statewide crash data through the generic pipeline.
+# Triggered by virginia-batch-download.yml after it uploads statewide CSV to R2.
+#
+# Stage order: Download from R2 → Init Cache → Split Jurisdiction →
+#              Split Road Type → Aggregate (CSV) → Upload → Predict → Manifest
+# ==============================================================================
+
+name: "Virginia Batch Pipeline"
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'State to process'
+        required: false
+        default: 'virginia'
+        type: string
+
+      scope:
+        description: 'Processing scope (always statewide for batch)'
+        required: false
+        default: 'statewide'
+        type: string
+
+      selection:
+        description: 'Selection (blank for statewide)'
+        required: false
+        default: ''
+        type: string
+
+      r2_data_key:
+        description: 'R2 key for statewide CSV (e.g., virginia/statewide/virginia_statewide_all_roads.csv)'
+        required: true
+        type: string
+
+      skip_forecasts:
+        description: 'Skip forecast generation'
+        required: false
+        default: 'false'
+        type: string
+
+      skip_validation:
+        description: 'Skip headless validation (Stage 4.5)'
+        required: false
+        default: 'false'
+        type: string
+
+      dry_run:
+        description: 'Dry run (no uploads, no commits)'
+        required: false
+        default: 'false'
+        type: string
+
+env:
+  NOTIFICATION_EMAIL: ecomhub200@gmail.com
+
+jobs:
+  # ============================================================
+  # JOB 1: Resolve scope + Download from R2
+  # ============================================================
+  prepare:
+    name: "Prepare (virginia)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      state: ${{ steps.resolve.outputs.state }}
+      scope: ${{ steps.resolve.outputs.scope }}
+      selection: ${{ steps.resolve.outputs.selection }}
+      dot_name: ${{ steps.resolve.outputs.dot_name }}
+      data_dir: ${{ steps.resolve.outputs.data_dir }}
+      r2_prefix: ${{ steps.resolve.outputs.r2_prefix }}
+      download_mode: ${{ steps.resolve.outputs.download_mode }}
+      jurisdiction_count: ${{ steps.resolve.outputs.jurisdiction_count }}
+      jurisdictions_json: ${{ steps.resolve.outputs.jurisdictions_json }}
+      input_csv: ${{ steps.download_r2.outputs.input_csv }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas requests openpyxl awscli
+
+      - name: Resolve scope
+        id: resolve
+        run: |
+          STATE="${{ github.event.inputs.state || 'virginia' }}"
+          SCOPE="${{ github.event.inputs.scope || 'statewide' }}"
+          SELECTION="${{ github.event.inputs.selection }}"
+
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state "$STATE" --scope "$SCOPE" --selection "$SELECTION" --json)
+
+          DOT_NAME=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['dot_name'])")
+          DATA_DIR=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['data_dir'])")
+          R2_PREFIX=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['r2_prefix'])")
+          DOWNLOAD_MODE=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['download_mode'])")
+          JCOUNT=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['jurisdiction_count'])")
+          JURISDICTIONS=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.dumps(json.load(sys.stdin)['jurisdictions']))")
+
+          echo "state=$STATE" >> $GITHUB_OUTPUT
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+          echo "dot_name=$DOT_NAME" >> $GITHUB_OUTPUT
+          echo "data_dir=$DATA_DIR" >> $GITHUB_OUTPUT
+          echo "r2_prefix=$R2_PREFIX" >> $GITHUB_OUTPUT
+          echo "download_mode=$DOWNLOAD_MODE" >> $GITHUB_OUTPUT
+          echo "jurisdiction_count=$JCOUNT" >> $GITHUB_OUTPUT
+          echo "jurisdictions_json=$JURISDICTIONS" >> $GITHUB_OUTPUT
+
+      # ── Download statewide CSV from R2 ──
+      - name: "Download statewide CSV from R2"
+        id: download_r2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ steps.resolve.outputs.state }}"
+          DATA_DIR="${{ steps.resolve.outputs.data_dir }}"
+          R2_KEY="${{ github.event.inputs.r2_data_key }}"
+          R2_PREFIX="${{ steps.resolve.outputs.r2_prefix }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          # Canonical path: _state/statewide_all_roads.csv.gz
+          PRIMARY_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+
+          echo "=========================================="
+          echo "Downloading statewide CSV from R2"
+          echo "  Primary: $PRIMARY_KEY"
+          echo "  Fallback: $R2_KEY"
+          echo "=========================================="
+
+          mkdir -p "$DATA_DIR"
+
+          LOCAL_CSV="$DATA_DIR/${STATE}_statewide_all_roads.csv"
+          DOWNLOADED=false
+
+          # Try canonical _state/ gzip path first
+          for i in 1 2 3 4; do
+            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "${LOCAL_CSV}.gz" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --only-show-errors; then
+              echo "Download succeeded from _state/"
+              gunzip -f "${LOCAL_CSV}.gz"
+              DOWNLOADED=true
+              break
+            fi
+            echo "Download failed (attempt $i/4), retrying in $((2 ** i))s..."
+            sleep $((2 ** i))
+          done
+
+          # Fallback: try the r2_data_key input (legacy statewide/ path)
+          if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
+            echo "Primary key failed — trying fallback: $R2_KEY"
+            for i in 1 2 3; do
+              if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$LOCAL_CSV" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --only-show-errors; then
+                echo "Fallback download succeeded"
+                DOWNLOADED=true
+                break
+              fi
+              echo "Fallback failed (attempt $i/3), retrying in $((2 ** i))s..."
+              sleep $((2 ** i))
+            done
+          fi
+
+          if [ "$DOWNLOADED" = "false" ] || [ ! -f "$LOCAL_CSV" ]; then
+            echo "::error::Failed to download statewide CSV from R2 (tried $PRIMARY_KEY and $R2_KEY)"
+            exit 1
+          fi
+
+          # Decompress if R2 object was stored with Content-Encoding: gzip
+          if file "$LOCAL_CSV" | grep -q gzip; then
+            echo "Detected gzip content — decompressing..."
+            mv "$LOCAL_CSV" "${LOCAL_CSV}.gz"
+            gunzip -f "${LOCAL_CSV}.gz"
+          fi
+
+          TOTAL=$(wc -l < "$LOCAL_CSV" | tr -d ' ')
+          SIZE=$(ls -lh "$LOCAL_CSV" | awk '{print $5}')
+          echo "Downloaded: $LOCAL_CSV ($((TOTAL - 1)) records, $SIZE)"
+          echo "input_csv=$LOCAL_CSV" >> $GITHUB_OUTPUT
+
+  # ============================================================
+  # JOB 2: Process (Stages 0-6)
+  # ============================================================
+  process:
+    name: "Process (virginia)"
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas requests openpyxl awscli
+
+      # ── Download statewide CSV from R2 (process job needs its own copy) ──
+      - name: "Download statewide CSV from R2"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          R2_KEY="${{ github.event.inputs.r2_data_key }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          # Canonical path: _state/statewide_all_roads.csv.gz
+          PRIMARY_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+
+          mkdir -p "$DATA_DIR"
+          LOCAL_CSV="$DATA_DIR/${STATE}_statewide_all_roads.csv"
+          DOWNLOADED=false
+
+          echo "Downloading statewide CSV from R2..."
+          for i in 1 2 3 4; do
+            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "${LOCAL_CSV}.gz" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --only-show-errors; then
+              echo "Download succeeded from _state/"
+              gunzip -f "${LOCAL_CSV}.gz"
+              DOWNLOADED=true
+              break
+            fi
+            echo "Retry $i/4..."
+            sleep $((2 ** i))
+          done
+
+          # Fallback: try the r2_data_key input (legacy statewide/ path)
+          if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
+            echo "Primary failed — trying fallback: $R2_KEY"
+            for i in 1 2 3; do
+              if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$LOCAL_CSV" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --only-show-errors; then
+                echo "Fallback download succeeded"
+                DOWNLOADED=true
+                break
+              fi
+              echo "Fallback retry $i/3..."
+              sleep $((2 ** i))
+            done
+          fi
+
+          # Decompress if R2 object was stored with Content-Encoding: gzip
+          if [ -f "$LOCAL_CSV" ] && file "$LOCAL_CSV" | grep -q gzip; then
+            echo "Detected gzip content — decompressing..."
+            mv "$LOCAL_CSV" "${LOCAL_CSV}.gz"
+            gunzip -f "${LOCAL_CSV}.gz"
+          fi
+
+          TOTAL=$(wc -l < "$LOCAL_CSV" | tr -d ' ')
+          echo "Ready: $LOCAL_CSV ($((TOTAL - 1)) records)"
+
+      # ── Stage 0: Initialize Cache ──
+      - name: "Stage 0: Initialize cache"
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+
+          echo "=========================================="
+          echo "Stage 0: Initialize state-isolated cache"
+          echo "State: $STATE"
+          echo "=========================================="
+
+          python scripts/init_cache.py --state "$STATE"
+
+      # ── Stage 1: Split by Jurisdiction ──
+      - name: "Stage 1: Split by jurisdiction"
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          INPUT_CSV="${{ needs.prepare.outputs.input_csv }}"
+          JURISDICTIONS='${{ needs.prepare.outputs.jurisdictions_json }}'
+
+          echo "=========================================="
+          echo "Stage 1: Split CSV into jurisdictions"
+          echo "=========================================="
+
+          SPLIT_INPUT="$INPUT_CSV"
+
+          if [ -z "$SPLIT_INPUT" ] || [ ! -f "$SPLIT_INPUT" ]; then
+            echo "WARNING: No input CSV found for splitting"
+            exit 0
+          fi
+
+          ARGS="--state $STATE --input $SPLIT_INPUT --output-dir $DATA_DIR"
+
+          JCOUNT="${{ needs.prepare.outputs.jurisdiction_count }}"
+          TOTAL_STATE=$(python scripts/resolve_scope.py --state $STATE --scope statewide --json | \
+                        python3 -c "import json,sys; print(json.load(sys.stdin)['jurisdiction_count'])")
+
+          if [ "$JCOUNT" != "$TOTAL_STATE" ]; then
+            JURIS_LIST=$(echo "$JURISDICTIONS" | python3 -c "import json,sys; print(' '.join(json.load(sys.stdin)))")
+            ARGS="$ARGS --jurisdictions $JURIS_LIST"
+          fi
+
+          python scripts/split_jurisdictions.py $ARGS
+
+      # ── Stage 2: Split by Road Type ──
+      - name: "Stage 2: Split by road type"
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          JURISDICTIONS='${{ needs.prepare.outputs.jurisdictions_json }}'
+
+          echo "=========================================="
+          echo "Stage 2: Split by road type (4 CSVs per jurisdiction)"
+          echo "=========================================="
+
+          JURIS_LIST=$(echo "$JURISDICTIONS" | python3 -c "import json,sys; print(' '.join(json.load(sys.stdin)))")
+
+          python scripts/split_road_type.py \
+            --state "$STATE" \
+            --jurisdictions $JURIS_LIST \
+            --data-dir "$DATA_DIR" || {
+            echo "WARNING: Road-type split had issues (non-fatal)"
+          }
+
+      # ── Stage 3: Aggregate by Scope (CSV) ──
+      - name: "Stage 3: Aggregate by scope (CSV)"
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          SCOPE="${{ needs.prepare.outputs.scope }}"
+          SELECTION="${{ needs.prepare.outputs.selection }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+
+          echo "=========================================="
+          echo "Stage 3: Aggregate by scope (scope=$SCOPE, format=CSV)"
+          echo "=========================================="
+
+          # Scope-aware CSV aggregation
+          python scripts/aggregate_by_scope.py \
+            --state "$STATE" \
+            --scope "$SCOPE" \
+            --selection "$SELECTION" \
+            --data-dir "$DATA_DIR" \
+            --output-format csv \
+            --output-dir "$DATA_DIR" || {
+            echo "WARNING: State aggregates failed (non-fatal)"
+          }
+
+          # Federal cross-state aggregates (only for statewide scope)
+          if [ "$SCOPE" = "statewide" ]; then
+            python scripts/aggregate_by_scope.py \
+              --federal \
+              --output-format csv \
+              --data-dir "$DATA_DIR" \
+              --output-dir data || {
+              echo "WARNING: Federal aggregates failed (non-fatal)"
+            }
+          fi
+
+      # ── Stage 4: Upload to R2 ──
+      - name: "Stage 4: Upload to R2"
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          SCOPE="${{ needs.prepare.outputs.scope }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          echo "=========================================="
+          echo "Stage 4: Upload to R2 (all CSVs)"
+          echo "=========================================="
+
+          # 4a: Upload jurisdiction CSVs (county-level road-type splits) — gzip-compressed
+          MANIFEST=$(python scripts/split_jurisdictions.py \
+            --state "$STATE" --r2-manifest --r2-prefix "$R2_PREFIX" --output-dir "$DATA_DIR")
+
+          echo "$MANIFEST" | python3 -c "
+          import json, sys, subprocess, os, gzip as gz, shutil
+          files = json.load(sys.stdin)
+          endpoint = '$R2_ENDPOINT'
+          bucket = '$R2_BUCKET'
+          success = failed = skipped = 0
+          saved_bytes = 0
+          for i, entry in enumerate(files):
+              local = entry['local_path']
+              r2_key = entry['r2_key']
+              if not os.path.exists(local):
+                  skipped += 1
+                  continue
+              try:
+                  # Gzip the CSV before uploading
+                  gz_path = local + '.gz'
+                  orig_size = os.path.getsize(local)
+                  with open(local, 'rb') as f_in:
+                      with gz.open(gz_path, 'wb', compresslevel=6) as f_out:
+                          shutil.copyfileobj(f_in, f_out)
+                  gz_size = os.path.getsize(gz_path)
+                  saved_bytes += (orig_size - gz_size)
+                  subprocess.run([
+                      'aws', 's3', 'cp', gz_path, f's3://{bucket}/{r2_key}',
+                      '--endpoint-url', endpoint,
+                      '--content-type', 'text/csv',
+                      '--content-encoding', 'gzip',
+                      '--only-show-errors'
+                  ], check=True, capture_output=True, timeout=120)
+                  os.remove(gz_path)
+                  success += 1
+              except Exception as e:
+                  print(f'  FAIL: {r2_key}: {e}')
+                  failed += 1
+                  if os.path.exists(local + '.gz'):
+                      os.remove(local + '.gz')
+              if (i + 1) % 50 == 0 or (i + 1) == len(files):
+                  print(f'  Progress: {i+1}/{len(files)} ({success} ok, {failed} fail, {skipped} skip)')
+          print(f'County CSV upload: {success} ok, {failed} fail, {skipped} skip')
+          print(f'  Gzip savings: {saved_bytes / 1024 / 1024:.1f} MB saved')
+          "
+
+          # 4b: Upload region/MPO aggregate CSVs (gzip-compressed)
+          find "$DATA_DIR" -path "*/_region/*" -name "*.csv" -o -path "*/_mpo/*" -name "*.csv" 2>/dev/null | while read f; do
+            REL="${f#$DATA_DIR/}"
+            R2_KEY="$R2_PREFIX/$REL"
+            GZ_FILE="${f}.gz"
+            gzip -c "$f" > "$GZ_FILE"
+            aws s3 cp "$GZ_FILE" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "text/csv" \
+              --content-encoding "gzip" \
+              --only-show-errors || echo "  WARN: failed to upload $R2_KEY"
+            rm -f "$GZ_FILE"
+          done
+
+          # 4c: Upload federal aggregate CSVs (statewide scope only, gzip-compressed)
+          if [ "$SCOPE" = "statewide" ]; then
+            find "data/_federal" -name "*.csv" 2>/dev/null | while read f; do
+              R2_KEY="_federal/${f#data/_federal/}"
+              GZ_FILE="${f}.gz"
+              gzip -c "$f" > "$GZ_FILE"
+              aws s3 cp "$GZ_FILE" "s3://$R2_BUCKET/$R2_KEY" \
+                --endpoint-url "$R2_ENDPOINT" \
+                --content-type "text/csv" \
+                --content-encoding "gzip" \
+                --only-show-errors || true
+              rm -f "$GZ_FILE"
+            done
+          fi
+
+      # ── Stage 4.5: Validate & Auto-Correct (Headless) ──
+      - name: "Stage 4.5: Validate & auto-correct (headless)"
+        if: github.event.inputs.skip_validation != 'true' && github.event.inputs.dry_run != 'true'
+        timeout-minutes: 30
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          echo "=========================================="
+          echo "Stage 4.5: Headless validation & auto-correct"
+          echo "=========================================="
+
+          # Install Playwright if not cached
+          pip install playwright --quiet 2>/dev/null
+          playwright install chromium --with-deps 2>/dev/null
+
+          # Run headless validator against data already in R2
+          python scripts/run-validator-headless.py \
+            --state "$STATE" \
+            --auto \
+            --data-dir "$DATA_DIR" \
+            --timeout 300 || {
+            echo "::warning::Stage 4.5: Validation had issues (non-fatal)"
+          }
+
+          # Re-upload corrected CSVs to R2 (overwrite originals with validated versions)
+          CORRECTED_COUNT=0
+          for csv_file in "$DATA_DIR"/*_all_roads.csv "$DATA_DIR"/*_county_roads.csv \
+                          "$DATA_DIR"/*_city_roads.csv "$DATA_DIR"/*_no_interstate.csv; do
+            [ -f "$csv_file" ] || continue
+            BASENAME=$(basename "$csv_file")
+            JURIS=$(echo "$BASENAME" | sed -E 's/_(all_roads|county_roads|city_roads|no_interstate)\.csv$//')
+            R2_KEY="${R2_PREFIX}/${JURIS}/${BASENAME#${JURIS}_}"
+            GZ_FILE="${csv_file}.gz"
+            gzip -c "$csv_file" > "$GZ_FILE"
+            aws s3 cp "$GZ_FILE" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "text/csv" \
+              --content-encoding "gzip" \
+              --only-show-errors || true
+            rm -f "$GZ_FILE"
+            CORRECTED_COUNT=$((CORRECTED_COUNT + 1))
+          done
+
+          # Upload validation reports to R2
+          for report in "$DATA_DIR"/validation_report_*.json; do
+            [ -f "$report" ] || continue
+            BASENAME=$(basename "$report")
+            JURIS=$(echo "$BASENAME" | sed -E 's/^validation_report_//; s/_(all_roads|county_roads|city_roads|no_interstate)\.json$//')
+            R2_KEY="${R2_PREFIX}/${JURIS}/${BASENAME}"
+            aws s3 cp "$report" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "application/json" \
+              --only-show-errors || true
+          done
+
+          # Upload summary
+          if [ -f "$DATA_DIR/validation_summary.json" ]; then
+            aws s3 cp "$DATA_DIR/validation_summary.json" \
+              "s3://$R2_BUCKET/${R2_PREFIX}/validation_summary.json" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "application/json" \
+              --only-show-errors || true
+          fi
+
+          echo "Stage 4.5 complete: re-uploaded $CORRECTED_COUNT corrected CSVs + validation reports"
+
+      # ── Stage 5: Predict (Forecasts) ──
+      - name: "Stage 5: Generate forecasts"
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        timeout-minutes: 60
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          JURISDICTIONS='${{ needs.prepare.outputs.jurisdictions_json }}'
+
+          echo "=========================================="
+          echo "Stage 5: Forecast generation (per county only)"
+          echo "=========================================="
+
+          echo "$JURISDICTIONS" | python3 -c "
+          import json, sys, subprocess
+          jurisdictions = json.load(sys.stdin)
+          state = '$STATE'
+          data_dir = '$DATA_DIR'
+          success = 0
+          for j in jurisdictions:
+              cmd = ['python', 'scripts/generate_forecast.py',
+                     '--all-road-types', '--jurisdiction', j, '--data-dir', data_dir,
+                     '--state', state, '--source', 'r2']
+              result = subprocess.run(cmd, capture_output=True)
+              if result.returncode == 0:
+                  success += 1
+              else:
+                  print(f'    WARNING: Forecast failed for {j} (non-fatal)')
+          print(f'Forecasts: {success}/{len(jurisdictions)} jurisdictions')
+          "
+
+      # ── Stage 5b: Upload forecast JSONs to R2 ──
+      - name: "Stage 5b: Upload forecast JSONs to R2"
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          JURISDICTIONS='${{ needs.prepare.outputs.jurisdictions_json }}'
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          echo "=========================================="
+          echo "Stage 5b: Upload forecast JSONs to R2"
+          echo "=========================================="
+
+          echo "$JURISDICTIONS" | python3 -c "
+          import json, sys, subprocess, os, gzip as gz, shutil
+
+          jurisdictions = json.load(sys.stdin)
+          data_dir = '$DATA_DIR'
+          r2_prefix = '$R2_PREFIX'
+          endpoint = '$R2_ENDPOINT'
+          bucket = '$R2_BUCKET'
+          uploaded = 0
+          skipped = 0
+          saved_bytes = 0
+
+          for j in jurisdictions:
+              for rt in ['county_roads', 'city_roads', 'no_interstate', 'all_roads']:
+                  local_path = os.path.join(data_dir, f'forecasts_{rt}.json')
+                  # Also check jurisdiction-prefixed path
+                  if not os.path.exists(local_path):
+                      local_path = os.path.join(data_dir, j, f'forecasts_{rt}.json')
+                  if not os.path.exists(local_path):
+                      skipped += 1
+                      continue
+
+                  r2_key = f'{r2_prefix}/{j}/forecasts_{rt}.json'
+                  try:
+                      # Gzip the JSON before uploading
+                      gz_path = local_path + '.gz'
+                      orig_size = os.path.getsize(local_path)
+                      with open(local_path, 'rb') as f_in:
+                          with gz.open(gz_path, 'wb', compresslevel=6) as f_out:
+                              shutil.copyfileobj(f_in, f_out)
+                      gz_size = os.path.getsize(gz_path)
+                      saved_bytes += (orig_size - gz_size)
+                      subprocess.run([
+                          'aws', 's3', 'cp', gz_path, f's3://{bucket}/{r2_key}',
+                          '--endpoint-url', endpoint,
+                          '--content-type', 'application/json',
+                          '--content-encoding', 'gzip',
+                          '--only-show-errors'
+                      ], check=True, capture_output=True, timeout=120)
+                      os.remove(gz_path)
+                      print(f'  Uploaded: {r2_key} ({orig_size:,} -> {gz_size:,} bytes)')
+                      uploaded += 1
+                  except Exception as e:
+                      print(f'  FAIL: {r2_key}: {e}')
+                      if os.path.exists(local_path + '.gz'):
+                          os.remove(local_path + '.gz')
+
+          print(f'Forecast upload: {uploaded} uploaded, {skipped} skipped')
+          print(f'  Gzip savings: {saved_bytes / 1024 / 1024:.1f} MB saved')
+          "
+
+      # ── Stage 6: Commit ──
+      - name: "Stage 6: Commit manifest and metadata"
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          SCOPE="${{ needs.prepare.outputs.scope }}"
+          SELECTION="${{ needs.prepare.outputs.selection || 'all' }}"
+          JCOUNT="${{ needs.prepare.outputs.jurisdiction_count }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/r2-manifest.json 2>/dev/null || true
+          git add data/*/.split_report.json 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No metadata changes to commit"
+          else
+            git commit -m "virginia-batch-pipeline: ${STATE} ${SCOPE}/${SELECTION} — ${JCOUNT} jurisdictions ($(date -u '+%Y-%m-%d'))"
+
+            for i in 1 2 3 4; do
+              if git push origin main; then
+                echo "Push succeeded"
+                break
+              fi
+              sleep $((2 ** i))
+              git fetch origin main
+              git rebase origin/main || git pull --no-edit origin main
+            done
+          fi
+
+      # ── Summary ──
+      - name: Job summary
+        if: always()
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          SCOPE="${{ needs.prepare.outputs.scope }}"
+          SELECTION="${{ needs.prepare.outputs.selection || 'all' }}"
+          echo "## Virginia Batch Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| State | $STATE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Scope | $SCOPE ($SELECTION) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Jurisdictions | ${{ needs.prepare.outputs.jurisdiction_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Data Source | R2: ${{ github.event.inputs.r2_data_key }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | ${{ github.event.inputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stages | R2 Download → Init Cache → Split Jurisdiction → Split Road Type → Aggregate (CSV) → Upload → Predict → Manifest |" >> $GITHUB_STEP_SUMMARY

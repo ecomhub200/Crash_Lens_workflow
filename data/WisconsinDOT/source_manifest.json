@@ -1,0 +1,24 @@
+{
+  "_description": "WisDOT crash data registry. 72 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Wisconsin Department of Transportation",
+    "base_url": "https://data-wisdot.opendata.arcgis.com",
+    "api_url": "https://data-wisdot.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 72 Wisconsin counties. FIPS codes are 5-digit (state 55 + 3-digit county).",
+    "_placeholder": "Populate with all 72 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data-wisdot.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

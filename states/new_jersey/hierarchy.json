@@ -1,0 +1,282 @@
+{
+  "state": {
+    "fips": "34",
+    "name": "New Jersey",
+    "abbreviation": "NJ",
+    "dot": "NJDOT",
+    "dotFullName": "New Jersey Department of Transportation",
+    "center": [
+      -74.521011,
+      40.298904
+    ],
+    "zoom": 8,
+    "placesCount": 323
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nj_n": {
+      "name": "North Region",
+      "shortName": "North Region",
+      "center": [
+        -74.5,
+        40.85
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "013",
+        "017",
+        "027",
+        "031",
+        "037",
+        "039",
+        "041"
+      ],
+      "countyNames": {
+        "003": "Bergen",
+        "013": "Essex",
+        "017": "Hudson",
+        "027": "Morris",
+        "031": "Passaic",
+        "037": "Sussex",
+        "039": "Union",
+        "041": "Warren"
+      },
+      "mapBounds": {
+        "sw": [
+          40.5,
+          -75.1
+        ],
+        "ne": [
+          41.35,
+          -73.9
+        ]
+      },
+      "hq": "Cedar Knolls"
+    },
+    "nj_c": {
+      "name": "Central Region",
+      "shortName": "Central Region",
+      "center": [
+        -74.45,
+        40.25
+      ],
+      "zoom": 9,
+      "counties": [
+        "019",
+        "021",
+        "023",
+        "025",
+        "029",
+        "035"
+      ],
+      "countyNames": {
+        "019": "Hunterdon",
+        "021": "Mercer",
+        "023": "Middlesex",
+        "025": "Monmouth",
+        "029": "Ocean",
+        "035": "Somerset"
+      },
+      "mapBounds": {
+        "sw": [
+          39.8,
+          -75.0
+        ],
+        "ne": [
+          40.7,
+          -73.9
+        ]
+      },
+      "hq": "Ewing"
+    },
+    "nj_s": {
+      "name": "South Region",
+      "shortName": "South Region",
+      "center": [
+        -74.8,
+        39.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "005",
+        "007",
+        "009",
+        "011",
+        "015",
+        "033"
+      ],
+      "countyNames": {
+        "001": "Atlantic",
+        "005": "Burlington",
+        "007": "Camden",
+        "009": "Cape May",
+        "011": "Cumberland",
+        "015": "Gloucester",
+        "033": "Salem"
+      },
+      "mapBounds": {
+        "sw": [
+          39.0,
+          -75.6
+        ],
+        "ne": [
+          40.1,
+          -74.0
+        ]
+      },
+      "hq": "Cherry Hill"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "njtpanjtpa": {
+      "name": "NJTPA (North Jersey Transportation Planning Authority)",
+      "shortName": "North Jersey Transportation Planning Authority",
+      "type": "mpo",
+      "center": [
+        -74.0776,
+        40.7282
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "013",
+        "017",
+        "019",
+        "023",
+        "025",
+        "027",
+        "029",
+        "031",
+        "035",
+        "037",
+        "039",
+        "041"
+      ],
+      "countyNames": {
+        "003": "Bergen",
+        "013": "Essex",
+        "017": "Hudson",
+        "019": "Hunterdon",
+        "023": "Middlesex",
+        "025": "Monmouth",
+        "027": "Morris",
+        "029": "Ocean",
+        "031": "Passaic",
+        "035": "Somerset",
+        "037": "Sussex",
+        "039": "Union",
+        "041": "Warren"
+      },
+      "btsAcronym": "NJTPA",
+      "mapBounds": {
+        "sw": [
+          40.4,
+          -74.5
+        ],
+        "ne": [
+          41.1,
+          -73.8
+        ]
+      }
+    },
+    "dvrpcdvrpc": {
+      "name": "DVRPC (Delaware Valley Regional Planning Commission)",
+      "shortName": "Delaware Valley Regional Planning Commission",
+      "type": "mpo",
+      "center": [
+        -74.7597,
+        40.2206
+      ],
+      "zoom": 10,
+      "counties": [
+        "005",
+        "007",
+        "015",
+        "021"
+      ],
+      "countyNames": {
+        "005": "Burlington",
+        "007": "Camden",
+        "015": "Gloucester",
+        "021": "Mercer"
+      },
+      "btsAcronym": "DVRPC",
+      "mapBounds": {
+        "sw": [
+          39.95,
+          -75.05
+        ],
+        "ne": [
+          40.45,
+          -74.45
+        ]
+      }
+    },
+    "sjtposjtpo": {
+      "name": "SJTPO (South Jersey Transportation Planning Organization)",
+      "shortName": "South Jersey Transportation Planning Organization",
+      "type": "mpo",
+      "center": [
+        -74.9271,
+        39.488
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "009",
+        "011",
+        "033"
+      ],
+      "countyNames": {
+        "001": "Atlantic",
+        "009": "Cape May",
+        "011": "Cumberland",
+        "033": "Salem"
+      },
+      "btsAcronym": "SJTPO",
+      "mapBounds": {
+        "sw": [
+          39.1,
+          -75.3
+        ],
+        "ne": [
+          39.85,
+          -74.55
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Atlantic",
+    "003": "Bergen",
+    "005": "Burlington",
+    "007": "Camden",
+    "009": "Cape May",
+    "011": "Cumberland",
+    "013": "Essex",
+    "015": "Gloucester",
+    "017": "Hudson",
+    "019": "Hunterdon",
+    "021": "Mercer",
+    "023": "Middlesex",
+    "025": "Monmouth",
+    "027": "Morris",
+    "029": "Ocean",
+    "031": "Passaic",
+    "033": "Salem",
+    "035": "Somerset",
+    "037": "Sussex",
+    "039": "Union",
+    "041": "Warren"
+  }
+}

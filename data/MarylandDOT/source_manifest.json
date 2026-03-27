@@ -1,0 +1,77 @@
+{
+  "_description": "Maryland ACRS crash data registry via Socrata SODA API. Dataset includes all approved crash reports statewide.",
+  "_note": "Maryland has 23 counties + Baltimore City (independent city). Filter using county_desc or county_no in SoQL queries.",
+  "_updated": "2026-02-15",
+
+  "source": {
+    "name": "Maryland Open Data Portal (Socrata)",
+    "base_url": "https://opendata.maryland.gov",
+    "resource_id": "65du-s3qu",
+    "api_url": "https://opendata.maryland.gov/resource/65du-s3qu.json",
+    "csv_url": "https://opendata.maryland.gov/api/views/65du-s3qu/rows.csv?accessType=DOWNLOAD",
+    "file_format": "JSON/CSV (Socrata SODA API)"
+  },
+
+  "jurisdiction_filters": {
+    "_description": "All 23 Maryland counties + Baltimore City. Filter using county_desc field in SoQL. FIPS codes are 5-digit (state 24 + 3-digit county).",
+
+    "allegany":       {"county": "Allegany",       "fips": "24001", "display_name": "Allegany County"},
+    "anne_arundel":   {"county": "Anne Arundel",   "fips": "24003", "display_name": "Anne Arundel County"},
+    "baltimore_county": {"county": "Baltimore County", "fips": "24005", "display_name": "Baltimore County"},
+    "calvert":        {"county": "Calvert",        "fips": "24009", "display_name": "Calvert County"},
+    "caroline":       {"county": "Caroline",       "fips": "24011", "display_name": "Caroline County"},
+    "carroll":        {"county": "Carroll",        "fips": "24013", "display_name": "Carroll County"},
+    "cecil":          {"county": "Cecil",          "fips": "24015", "display_name": "Cecil County"},
+    "charles":        {"county": "Charles",        "fips": "24017", "display_name": "Charles County"},
+    "dorchester":     {"county": "Dorchester",     "fips": "24019", "display_name": "Dorchester County"},
+    "frederick":      {"county": "Frederick",      "fips": "24021", "display_name": "Frederick County"},
+    "garrett":        {"county": "Garrett",        "fips": "24023", "display_name": "Garrett County"},
+    "harford":        {"county": "Harford",        "fips": "24025", "display_name": "Harford County"},
+    "howard":         {"county": "Howard",         "fips": "24027", "display_name": "Howard County"},
+    "kent":           {"county": "Kent",           "fips": "24029", "display_name": "Kent County"},
+    "montgomery":     {"county": "Montgomery",     "fips": "24031", "display_name": "Montgomery County"},
+    "prince_georges": {"county": "Prince George's", "fips": "24033", "display_name": "Prince George's County"},
+    "queen_annes":    {"county": "Queen Anne's",   "fips": "24035", "display_name": "Queen Anne's County"},
+    "st_marys":       {"county": "St. Mary's",     "fips": "24037", "display_name": "St. Mary's County"},
+    "somerset":       {"county": "Somerset",       "fips": "24039", "display_name": "Somerset County"},
+    "talbot":         {"county": "Talbot",         "fips": "24041", "display_name": "Talbot County"},
+    "washington":     {"county": "Washington",     "fips": "24043", "display_name": "Washington County"},
+    "wicomico":       {"county": "Wicomico",       "fips": "24045", "display_name": "Wicomico County"},
+    "worcester":      {"county": "Worcester",      "fips": "24047", "display_name": "Worcester County"},
+    "baltimore_city": {"county": "Baltimore City", "fips": "24510", "display_name": "Baltimore City"}
+  },
+
+  "api": {
+    "endpoint": "https://opendata.maryland.gov/resource/65du-s3qu.json",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "max_per_request": 50000
+    },
+    "filtering": {
+      "county_field": "county_desc",
+      "county_code_field": "county_no",
+      "date_field": "acc_date",
+      "example_query": "$where=county_desc='Montgomery' AND acc_date>='2023-01-01T00:00:00.000'"
+    }
+  },
+
+  "related_datasets": {
+    "person_details": {
+      "resource_id": "py4c-dicf",
+      "description": "Individual person-level injury data with KABCO severity",
+      "join_key": "report_no"
+    },
+    "vehicle_details": {
+      "resource_id": "mhft-5t5y",
+      "description": "Vehicle-level data per crash",
+      "join_key": "report_no"
+    },
+    "pedestrian_details": {
+      "resource_id": "yhmz-gxyw",
+      "description": "Pedestrian-specific crash details",
+      "join_key": "report_no"
+    }
+  }
+}

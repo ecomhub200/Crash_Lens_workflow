@@ -1,0 +1,5580 @@
+{
+  "appName": "CRASH LENS",
+  "appSubtitle": "Crash Analysis Tool",
+  "version": "2.0.0",
+  "apis": {
+    "mapbox": {
+      "accessToken": "REDACTED_MAPBOX_TOKEN",
+      "geocodingEndpoint": "https://api.mapbox.com/geocoding/v5/mapbox.places"
+    },
+    "google": {
+      "mapsApiKey": "AIzaSyAMgu9WO10fkz1yd8NcejMVX-yThL5hIe8"
+    },
+    "mapillary": {
+      "accessToken": "MLY|25428927243443196|cf3f7b843e2e19051fd3783899db7f07",
+      "enabled": true,
+      "organizationId": "crash-lens",
+      "graphApiUrl": "https://graph.mapillary.com",
+      "tilesApiUrl": "https://tiles.mapillary.com",
+      "searchRadius": 50,
+      "maxImagesPerLocation": 8,
+      "rateLimitPerMinute": 60000,
+      "tileLimitPerDay": 50000
+    },
+    "firebase": {
+      "apiKey": "AIzaSyBg1QtvbcYxyrhbw0tmpyBiD-zzoCWbxyM",
+      "authDomain": "crash-lens-f50e7.firebaseapp.com",
+      "projectId": "crash-lens-f50e7",
+      "storageBucket": "crash-lens-f50e7.firebasestorage.app",
+      "messagingSenderId": "345091421318",
+      "appId": "1:345091421318:web:88f99469eb0ce73c734d07"
+    },
+    "tigerweb": {
+      "enabled": true,
+      "baseUrl": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Census2020/MapServer",
+      "countySubdivisionsUrl": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Places_CouSub_ConCity_SubMCD/MapServer",
+      "stateFips": null,
+      "_comment": "stateFips is resolved at runtime from the active state config. Set to null to force dynamic resolution.",
+      "layers": {
+        "counties": 82,
+        "tracts": 14,
+        "blockGroups": 16,
+        "countySubdivisions": 1
+      },
+      "defaultEnabled": true,
+      "boundaryStyle": {
+        "color": "#1e3a8a",
+        "weight": 3,
+        "fillColor": "#1e3a8a",
+        "fillOpacity": 0.05,
+        "dashArray": "8, 4"
+      },
+      "districtStyle": {
+        "color": "#7c3aed",
+        "weight": 2,
+        "fillColor": "#7c3aed",
+        "fillOpacity": 0.08,
+        "dashArray": null
+      },
+      "districtColors": [
+        "#ef4444",
+        "#f97316",
+        "#eab308",
+        "#22c55e",
+        "#06b6d4",
+        "#3b82f6",
+        "#8b5cf6",
+        "#ec4899"
+      ]
+    },
+    "r2Worker": {
+      "workerUrl": "https://r2-upload.ecomhub200.workers.dev",
+      "publicUrl": "https://data.aicreatesai.com",
+      "_comment": "R2 Worker upload secret is server-side only (R2_WORKER_SECRET env var). Never expose in client config."
+    }
+  },
+  "jurisdictions": {
+    "accomack": {
+      "name": "Accomack County",
+      "type": "county",
+      "fips": "001",
+      "jurisCode": "1",
+      "namePatterns": [
+        "ACCOMACK",
+        "001. Accomack County"
+      ],
+      "mapCenter": [
+        37.76,
+        -75.66
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100060",
+        "districtName": "Accomack County Public Schools"
+      },
+      "bbox": [
+        -76.0533,
+        37.2918,
+        -75.2429,
+        38.0274
+      ],
+      "state": "VA"
+    },
+    "albemarle": {
+      "name": "Albemarle County",
+      "type": "county",
+      "fips": "003",
+      "jurisCode": "2",
+      "namePatterns": [
+        "ALBEMARLE",
+        "002. Albemarle County"
+      ],
+      "mapCenter": [
+        38.02,
+        -78.56
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100090",
+        "districtName": "Albemarle County Public Schools"
+      },
+      "bbox": [
+        -78.8399,
+        37.7273,
+        -78.2637,
+        38.3034
+      ],
+      "state": "VA"
+    },
+    "alleghany": {
+      "name": "Alleghany County",
+      "type": "county",
+      "fips": "005",
+      "jurisCode": "3",
+      "namePatterns": [
+        "ALLEGHANY",
+        "003. Alleghany County"
+      ],
+      "mapCenter": [
+        37.79,
+        -79.95
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100152",
+        "districtName": "Alleghany County Public Schools"
+      },
+      "bbox": [
+        -80.2213,
+        37.5672,
+        -79.6473,
+        38.0134
+      ],
+      "state": "VA"
+    },
+    "amelia": {
+      "name": "Amelia County",
+      "type": "county",
+      "fips": "007",
+      "jurisCode": "4",
+      "namePatterns": [
+        "AMELIA",
+        "004. Amelia County"
+      ],
+      "mapCenter": [
+        37.34,
+        -77.98
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.1777,
+        37.1458,
+        -77.6553,
+        37.4678
+      ],
+      "state": "VA"
+    },
+    "amherst": {
+      "name": "Amherst County",
+      "type": "county",
+      "fips": "009",
+      "jurisCode": "5",
+      "namePatterns": [
+        "AMHERST",
+        "005. Amherst County"
+      ],
+      "mapCenter": [
+        37.6,
+        -79.14
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100210",
+        "districtName": "Amherst County Public Schools"
+      },
+      "bbox": [
+        -79.4745,
+        37.3962,
+        -78.8591,
+        37.806
+      ],
+      "state": "VA"
+    },
+    "appomattox": {
+      "name": "Appomattox County",
+      "type": "county",
+      "fips": "011",
+      "jurisCode": "6",
+      "namePatterns": [
+        "APPOMATTOX",
+        "006. Appomattox County"
+      ],
+      "mapCenter": [
+        37.37,
+        -78.81
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100240",
+        "districtName": "Appomattox County Public Schools"
+      },
+      "bbox": [
+        -79.0929,
+        37.2061,
+        -78.5716,
+        37.5494
+      ],
+      "state": "VA"
+    },
+    "arlington": {
+      "name": "Arlington County",
+      "type": "county",
+      "fips": "013",
+      "jurisCode": "0",
+      "namePatterns": [
+        "ARLINGTON",
+        "000. Arlington County"
+      ],
+      "mapCenter": [
+        38.88,
+        -77.1
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": true,
+      "education": {
+        "leaId": "5100180",
+        "districtName": "Arlington County Public Schools"
+      },
+      "bbox": [
+        -77.1722,
+        38.8275,
+        -77.032,
+        38.9341
+      ],
+      "state": "VA"
+    },
+    "augusta": {
+      "name": "Augusta County",
+      "type": "county",
+      "fips": "015",
+      "jurisCode": "7",
+      "namePatterns": [
+        "AUGUSTA",
+        "007. Augusta County"
+      ],
+      "mapCenter": [
+        38.16,
+        -79.13
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100300",
+        "districtName": "Augusta County Public Schools"
+      },
+      "bbox": [
+        -79.5431,
+        37.8873,
+        -78.8617,
+        38.4767
+      ],
+      "state": "VA"
+    },
+    "bath": {
+      "name": "Bath County",
+      "type": "county",
+      "fips": "017",
+      "jurisCode": "8",
+      "namePatterns": [
+        "BATH",
+        "008. Bath County"
+      ],
+      "mapCenter": [
+        38.07,
+        -79.73
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.0564,
+        37.8573,
+        -79.4479,
+        38.3947
+      ],
+      "state": "VA"
+    },
+    "bedford_county": {
+      "name": "Bedford County",
+      "type": "county",
+      "fips": "019",
+      "jurisCode": "9",
+      "namePatterns": [
+        "BEDFORD",
+        "009. Bedford County"
+      ],
+      "mapCenter": [
+        37.31,
+        -79.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100360",
+        "districtName": "Bedford County Public Schools"
+      },
+      "bbox": [
+        -79.7888,
+        37.0341,
+        -79.2507,
+        37.513
+      ],
+      "state": "VA"
+    },
+    "bland": {
+      "name": "Bland County",
+      "type": "county",
+      "fips": "021",
+      "jurisCode": "10",
+      "namePatterns": [
+        "BLAND",
+        "010. Bland County"
+      ],
+      "mapCenter": [
+        37.1,
+        -81.12
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -81.3447,
+        36.9649,
+        -80.8546,
+        37.2462
+      ],
+      "state": "VA"
+    },
+    "botetourt": {
+      "name": "Botetourt County",
+      "type": "county",
+      "fips": "023",
+      "jurisCode": "11",
+      "namePatterns": [
+        "BOTETOURT",
+        "011. Botetourt County"
+      ],
+      "mapCenter": [
+        37.55,
+        -79.81
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.0746,
+        37.2621,
+        -79.5384,
+        37.7892
+      ],
+      "state": "VA"
+    },
+    "brunswick": {
+      "name": "Brunswick County",
+      "type": "county",
+      "fips": "025",
+      "jurisCode": "12",
+      "namePatterns": [
+        "BRUNSWICK",
+        "012. Brunswick County"
+      ],
+      "mapCenter": [
+        36.76,
+        -77.85
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.0045,
+        36.5437,
+        -77.3991,
+        36.9601
+      ],
+      "state": "VA"
+    },
+    "buchanan": {
+      "name": "Buchanan County",
+      "type": "county",
+      "fips": "027",
+      "jurisCode": "13",
+      "namePatterns": [
+        "BUCHANAN",
+        "013. Buchanan County"
+      ],
+      "mapCenter": [
+        37.27,
+        -82.03
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.3145,
+        37.0199,
+        -81.7292,
+        37.5137
+      ],
+      "state": "VA"
+    },
+    "buckingham": {
+      "name": "Buckingham County",
+      "type": "county",
+      "fips": "029",
+      "jurisCode": "14",
+      "namePatterns": [
+        "BUCKINGHAM",
+        "014. Buckingham County"
+      ],
+      "mapCenter": [
+        37.55,
+        -78.55
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.8693,
+        37.3051,
+        -78.2554,
+        37.7318
+      ],
+      "state": "VA"
+    },
+    "campbell": {
+      "name": "Campbell County",
+      "type": "county",
+      "fips": "031",
+      "jurisCode": "15",
+      "namePatterns": [
+        "CAMPBELL",
+        "015. Campbell County"
+      ],
+      "mapCenter": [
+        37.2,
+        -79.09
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.4361,
+        36.9684,
+        -78.9035,
+        37.4249
+      ],
+      "state": "VA"
+    },
+    "caroline": {
+      "name": "Caroline County",
+      "type": "county",
+      "fips": "033",
+      "jurisCode": "16",
+      "namePatterns": [
+        "CAROLINE",
+        "016. Caroline County"
+      ],
+      "mapCenter": [
+        38.03,
+        -77.35
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100660",
+        "districtName": "Caroline County Public Schools"
+      },
+      "bbox": [
+        -77.6421,
+        37.7538,
+        -76.9722,
+        38.241
+      ],
+      "state": "VA"
+    },
+    "carroll": {
+      "name": "Carroll County",
+      "type": "county",
+      "fips": "035",
+      "jurisCode": "17",
+      "namePatterns": [
+        "CARROLL",
+        "017. Carroll County"
+      ],
+      "mapCenter": [
+        36.73,
+        -80.73
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.9618,
+        36.5454,
+        -80.4409,
+        36.9417
+      ],
+      "state": "VA"
+    },
+    "charles_city": {
+      "name": "Charles City County",
+      "type": "county",
+      "fips": "036",
+      "jurisCode": "18",
+      "namePatterns": [
+        "CHARLES CITY",
+        "018. Charles City County"
+      ],
+      "mapCenter": [
+        37.36,
+        -77.06
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100720",
+        "districtName": "Charles City County Public Schools"
+      },
+      "bbox": [
+        -77.3504,
+        37.2247,
+        -76.8551,
+        37.4756
+      ],
+      "state": "VA"
+    },
+    "charlotte": {
+      "name": "Charlotte County",
+      "type": "county",
+      "fips": "037",
+      "jurisCode": "19",
+      "namePatterns": [
+        "CHARLOTTE",
+        "019. Charlotte County"
+      ],
+      "mapCenter": [
+        37.01,
+        -78.66
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100750",
+        "districtName": "Charlotte County Public Schools"
+      },
+      "bbox": [
+        -79.0418,
+        36.8483,
+        -78.4394,
+        37.241
+      ],
+      "state": "VA"
+    },
+    "chesterfield": {
+      "name": "Chesterfield County",
+      "type": "county",
+      "fips": "041",
+      "jurisCode": "20",
+      "namePatterns": [
+        "CHESTERFIELD",
+        "020. Chesterfield County"
+      ],
+      "mapCenter": [
+        37.38,
+        -77.5
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100840",
+        "districtName": "Chesterfield County Public Schools"
+      },
+      "bbox": [
+        -77.808,
+        37.1524,
+        -77.3744,
+        37.5559
+      ],
+      "state": "VA"
+    },
+    "clarke": {
+      "name": "Clarke County",
+      "type": "county",
+      "fips": "043",
+      "jurisCode": "21",
+      "namePatterns": [
+        "CLARKE",
+        "021. Clarke County"
+      ],
+      "mapCenter": [
+        39.11,
+        -77.99
+      ],
+      "mapZoom": 11,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.1355,
+        39.0059,
+        -77.8276,
+        39.2321
+      ],
+      "state": "VA"
+    },
+    "craig": {
+      "name": "Craig County",
+      "type": "county",
+      "fips": "045",
+      "jurisCode": "22",
+      "namePatterns": [
+        "CRAIG",
+        "022. Craig County"
+      ],
+      "mapCenter": [
+        37.47,
+        -80.23
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.4591,
+        37.2311,
+        -79.9754,
+        37.5958
+      ],
+      "state": "VA"
+    },
+    "culpeper": {
+      "name": "Culpeper County",
+      "type": "county",
+      "fips": "047",
+      "jurisCode": "23",
+      "namePatterns": [
+        "CULPEPER",
+        "023. Culpeper County"
+      ],
+      "mapCenter": [
+        38.49,
+        -77.96
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101050",
+        "districtName": "Culpeper County Public Schools"
+      },
+      "bbox": [
+        -78.1631,
+        38.2803,
+        -77.6158,
+        38.7127
+      ],
+      "state": "VA"
+    },
+    "cumberland": {
+      "name": "Cumberland County",
+      "type": "county",
+      "fips": "049",
+      "jurisCode": "24",
+      "namePatterns": [
+        "CUMBERLAND",
+        "024. Cumberland County"
+      ],
+      "mapCenter": [
+        37.51,
+        -78.24
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.4641,
+        37.2972,
+        -78.0659,
+        37.6791
+      ],
+      "state": "VA"
+    },
+    "dickenson": {
+      "name": "Dickenson County",
+      "type": "county",
+      "fips": "051",
+      "jurisCode": "25",
+      "namePatterns": [
+        "DICKENSON",
+        "025. Dickenson County"
+      ],
+      "mapCenter": [
+        37.12,
+        -82.35
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.5638,
+        36.963,
+        -82.0936,
+        37.3028
+      ],
+      "state": "VA"
+    },
+    "dinwiddie": {
+      "name": "Dinwiddie County",
+      "type": "county",
+      "fips": "053",
+      "jurisCode": "26",
+      "namePatterns": [
+        "DINWIDDIE",
+        "026. Dinwiddie County"
+      ],
+      "mapCenter": [
+        37.08,
+        -77.58
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101170",
+        "districtName": "Dinwiddie County Public Schools"
+      },
+      "bbox": [
+        -77.8651,
+        36.8633,
+        -77.3139,
+        37.2789
+      ],
+      "state": "VA"
+    },
+    "essex": {
+      "name": "Essex County",
+      "type": "county",
+      "fips": "057",
+      "jurisCode": "28",
+      "namePatterns": [
+        "ESSEX",
+        "028. Essex County"
+      ],
+      "mapCenter": [
+        37.94,
+        -76.94
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101200",
+        "districtName": "Essex County Public Schools"
+      },
+      "bbox": [
+        -77.1551,
+        37.7641,
+        -76.708,
+        38.0844
+      ],
+      "state": "VA"
+    },
+    "fairfax_county": {
+      "name": "Fairfax County",
+      "type": "county",
+      "fips": "059",
+      "jurisCode": "29",
+      "namePatterns": [
+        "FAIRFAX COUNTY",
+        "029. Fairfax County"
+      ],
+      "mapCenter": [
+        38.83,
+        -77.28
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101260",
+        "districtName": "Fairfax County Public Schools"
+      },
+      "bbox": [
+        -77.5351,
+        38.5943,
+        -77.0492,
+        39.0003
+      ],
+      "state": "VA"
+    },
+    "fauquier": {
+      "name": "Fauquier County",
+      "type": "county",
+      "fips": "061",
+      "jurisCode": "30",
+      "namePatterns": [
+        "FAUQUIER",
+        "030. Fauquier County"
+      ],
+      "mapCenter": [
+        38.72,
+        -77.81
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101320",
+        "districtName": "Fauquier County Public Schools"
+      },
+      "bbox": [
+        -78.0057,
+        38.4541,
+        -77.5286,
+        38.9303
+      ],
+      "state": "VA"
+    },
+    "floyd": {
+      "name": "Floyd County",
+      "type": "county",
+      "fips": "063",
+      "jurisCode": "31",
+      "namePatterns": [
+        "FLOYD",
+        "031. Floyd County"
+      ],
+      "mapCenter": [
+        36.93,
+        -80.36
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101350",
+        "districtName": "Floyd County Public Schools"
+      },
+      "bbox": [
+        -80.5399,
+        36.7413,
+        -80.1345,
+        37.1089
+      ],
+      "state": "VA"
+    },
+    "fluvanna": {
+      "name": "Fluvanna County",
+      "type": "county",
+      "fips": "065",
+      "jurisCode": "32",
+      "namePatterns": [
+        "FLUVANNA",
+        "032. Fluvanna County"
+      ],
+      "mapCenter": [
+        37.84,
+        -78.28
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101380",
+        "districtName": "Fluvanna County Public Schools"
+      },
+      "bbox": [
+        -78.531,
+        37.7032,
+        -78.1074,
+        38.0281
+      ],
+      "state": "VA"
+    },
+    "franklin_county": {
+      "name": "Franklin County",
+      "type": "county",
+      "fips": "067",
+      "jurisCode": "33",
+      "namePatterns": [
+        "FRANKLIN COUNTY",
+        "033. Franklin County"
+      ],
+      "mapCenter": [
+        37.0,
+        -79.89
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101440",
+        "districtName": "Franklin County Public Schools"
+      },
+      "bbox": [
+        -80.1426,
+        36.742,
+        -79.5912,
+        37.1818
+      ],
+      "state": "VA"
+    },
+    "frederick": {
+      "name": "Frederick County",
+      "type": "county",
+      "fips": "069",
+      "jurisCode": "34",
+      "namePatterns": [
+        "FREDERICK",
+        "034. Frederick County"
+      ],
+      "mapCenter": [
+        39.28,
+        -78.27
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101470",
+        "districtName": "Frederick County Public Schools"
+      },
+      "bbox": [
+        -78.5259,
+        39.0585,
+        -78.0039,
+        39.466
+      ],
+      "state": "VA"
+    },
+    "giles": {
+      "name": "Giles County",
+      "type": "county",
+      "fips": "071",
+      "jurisCode": "35",
+      "namePatterns": [
+        "GILES",
+        "035. Giles County"
+      ],
+      "mapCenter": [
+        37.32,
+        -80.66
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101590",
+        "districtName": "Giles County Public Schools"
+      },
+      "bbox": [
+        -80.8632,
+        37.1159,
+        -80.359,
+        37.4871
+      ],
+      "state": "VA"
+    },
+    "gloucester": {
+      "name": "Gloucester County",
+      "type": "county",
+      "fips": "073",
+      "jurisCode": "36",
+      "namePatterns": [
+        "GLOUCESTER",
+        "036. Gloucester County"
+      ],
+      "mapCenter": [
+        37.41,
+        -76.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101620",
+        "districtName": "Gloucester County Public Schools"
+      },
+      "bbox": [
+        -76.7568,
+        37.2188,
+        -76.3505,
+        37.5575
+      ],
+      "state": "VA"
+    },
+    "goochland": {
+      "name": "Goochland County",
+      "type": "county",
+      "fips": "075",
+      "jurisCode": "37",
+      "namePatterns": [
+        "GOOCHLAND",
+        "037. Goochland County"
+      ],
+      "mapCenter": [
+        37.72,
+        -77.93
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101650",
+        "districtName": "Goochland County Public Schools"
+      },
+      "bbox": [
+        -78.1058,
+        37.5484,
+        -77.6555,
+        37.898
+      ],
+      "state": "VA"
+    },
+    "grayson": {
+      "name": "Grayson County",
+      "type": "county",
+      "fips": "077",
+      "jurisCode": "38",
+      "namePatterns": [
+        "GRAYSON",
+        "038. Grayson County"
+      ],
+      "mapCenter": [
+        36.66,
+        -81.22
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101690",
+        "districtName": "Grayson County Public Schools"
+      },
+      "bbox": [
+        -81.5319,
+        36.538,
+        -80.9013,
+        36.8579
+      ],
+      "state": "VA"
+    },
+    "greene": {
+      "name": "Greene County",
+      "type": "county",
+      "fips": "079",
+      "jurisCode": "39",
+      "namePatterns": [
+        "GREENE",
+        "039. Greene County"
+      ],
+      "mapCenter": [
+        38.3,
+        -78.47
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101710",
+        "districtName": "Greene County Public Schools"
+      },
+      "bbox": [
+        -78.6421,
+        38.1407,
+        -78.3229,
+        38.4529
+      ],
+      "state": "VA"
+    },
+    "greensville": {
+      "name": "Greensville County",
+      "type": "county",
+      "fips": "081",
+      "jurisCode": "40",
+      "namePatterns": [
+        "GREENSVILLE",
+        "040. Greensville County"
+      ],
+      "mapCenter": [
+        36.68,
+        -77.56
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101740",
+        "districtName": "Greensville County Public Schools"
+      },
+      "bbox": [
+        -77.7425,
+        36.5443,
+        -77.3553,
+        36.8526
+      ],
+      "state": "VA"
+    },
+    "halifax": {
+      "name": "Halifax County",
+      "type": "county",
+      "fips": "083",
+      "jurisCode": "41",
+      "namePatterns": [
+        "HALIFAX",
+        "041. Halifax County"
+      ],
+      "mapCenter": [
+        36.77,
+        -78.93
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101770",
+        "districtName": "Halifax County Public Schools"
+      },
+      "bbox": [
+        -79.2234,
+        36.5413,
+        -78.6479,
+        37.0302
+      ],
+      "state": "VA"
+    },
+    "hanover": {
+      "name": "Hanover County",
+      "type": "county",
+      "fips": "085",
+      "jurisCode": "42",
+      "namePatterns": [
+        "HANOVER",
+        "042. Hanover County"
+      ],
+      "mapCenter": [
+        37.76,
+        -77.48
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.7551,
+        37.5679,
+        -77.1941,
+        37.9853
+      ],
+      "state": "VA"
+    },
+    "henrico": {
+      "name": "Henrico County",
+      "type": "county",
+      "fips": "087",
+      "jurisCode": "43",
+      "namePatterns": [
+        "HENRICO",
+        "043. Henrico County"
+      ],
+      "mapCenter": [
+        37.55,
+        -77.45
+      ],
+      "mapZoom": 11,
+      "maintainsOwnRoads": true,
+      "education": {
+        "leaId": "5101890",
+        "districtName": "Henrico County Public Schools"
+      },
+      "bbox": [
+        -77.6604,
+        37.3862,
+        -77.1462,
+        37.7234
+      ],
+      "state": "VA"
+    },
+    "henry": {
+      "name": "Henry County",
+      "type": "county",
+      "fips": "089",
+      "jurisCode": "44",
+      "namePatterns": [
+        "HENRY",
+        "044. Henry County"
+      ],
+      "mapCenter": [
+        36.68,
+        -79.87
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.1432,
+        36.5407,
+        -79.5969,
+        36.9396
+      ],
+      "state": "VA"
+    },
+    "highland": {
+      "name": "Highland County",
+      "type": "county",
+      "fips": "091",
+      "jurisCode": "45",
+      "namePatterns": [
+        "HIGHLAND",
+        "045. Highland County"
+      ],
+      "mapCenter": [
+        38.37,
+        -79.56
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.8929,
+        38.1456,
+        -79.3181,
+        38.666
+      ],
+      "state": "VA"
+    },
+    "isle_of_wight": {
+      "name": "Isle of Wight County",
+      "type": "county",
+      "fips": "093",
+      "jurisCode": "46",
+      "namePatterns": [
+        "ISLE OF WIGHT",
+        "046. Isle of Wight County"
+      ],
+      "mapCenter": [
+        36.9,
+        -76.71
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.9361,
+        36.7049,
+        -76.431,
+        37.1191
+      ],
+      "state": "VA"
+    },
+    "james_city": {
+      "name": "James City County",
+      "type": "county",
+      "fips": "095",
+      "jurisCode": "47",
+      "namePatterns": [
+        "JAMES CITY",
+        "047. James City County"
+      ],
+      "mapCenter": [
+        37.31,
+        -76.78
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.9305,
+        37.1685,
+        -76.5451,
+        37.4485
+      ],
+      "state": "VA"
+    },
+    "king_and_queen": {
+      "name": "King and Queen County",
+      "type": "county",
+      "fips": "097",
+      "jurisCode": "49",
+      "namePatterns": [
+        "KING AND QUEEN",
+        "049. King & Queen County"
+      ],
+      "mapCenter": [
+        37.72,
+        -76.88
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102070",
+        "districtName": "King and Queen County Public Schools"
+      },
+      "bbox": [
+        -77.1684,
+        37.5453,
+        -76.7006,
+        37.9027
+      ],
+      "state": "VA"
+    },
+    "king_george": {
+      "name": "King George County",
+      "type": "county",
+      "fips": "099",
+      "jurisCode": "48",
+      "namePatterns": [
+        "KING GEORGE",
+        "048. King George County"
+      ],
+      "mapCenter": [
+        38.27,
+        -77.16
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102100",
+        "districtName": "King George County Public Schools"
+      },
+      "bbox": [
+        -77.3689,
+        38.1634,
+        -76.9934,
+        38.4512
+      ],
+      "state": "VA"
+    },
+    "king_william": {
+      "name": "King William County",
+      "type": "county",
+      "fips": "101",
+      "jurisCode": "50",
+      "namePatterns": [
+        "KING WILLIAM",
+        "050. King William County"
+      ],
+      "mapCenter": [
+        37.7,
+        -77.08
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102120",
+        "districtName": "King William County Public Schools"
+      },
+      "bbox": [
+        -77.3271,
+        37.5423,
+        -76.8961,
+        37.901
+      ],
+      "state": "VA"
+    },
+    "lancaster": {
+      "name": "Lancaster County",
+      "type": "county",
+      "fips": "103",
+      "jurisCode": "51",
+      "namePatterns": [
+        "LANCASTER",
+        "051. Lancaster County"
+      ],
+      "mapCenter": [
+        37.7,
+        -76.46
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102160",
+        "districtName": "Lancaster County Public Schools"
+      },
+      "bbox": [
+        -76.6048,
+        37.5893,
+        -76.2782,
+        37.8506
+      ],
+      "state": "VA"
+    },
+    "lee": {
+      "name": "Lee County",
+      "type": "county",
+      "fips": "105",
+      "jurisCode": "52",
+      "namePatterns": [
+        "LEE",
+        "052. Lee County"
+      ],
+      "mapCenter": [
+        36.7,
+        -83.12
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102190",
+        "districtName": "Lee County Public Schools"
+      },
+      "bbox": [
+        -83.4754,
+        36.5404,
+        -82.7318,
+        36.8935
+      ],
+      "state": "VA"
+    },
+    "loudoun": {
+      "name": "Loudoun County",
+      "type": "county",
+      "fips": "107",
+      "jurisCode": "53",
+      "namePatterns": [
+        "LOUDOUN",
+        "053. Loudoun County"
+      ],
+      "mapCenter": [
+        39.08,
+        -77.64
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102250",
+        "districtName": "Loudoun County Public Schools"
+      },
+      "bbox": [
+        -77.9622,
+        38.8416,
+        -77.3253,
+        39.3218
+      ],
+      "state": "VA"
+    },
+    "louisa": {
+      "name": "Louisa County",
+      "type": "county",
+      "fips": "109",
+      "jurisCode": "54",
+      "namePatterns": [
+        "LOUISA",
+        "054. Louisa County"
+      ],
+      "mapCenter": [
+        38.0,
+        -78.0
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102280",
+        "districtName": "Louisa County Public Schools"
+      },
+      "bbox": [
+        -78.2012,
+        37.7918,
+        -77.6586,
+        38.1958
+      ],
+      "state": "VA"
+    },
+    "lunenburg": {
+      "name": "Lunenburg County",
+      "type": "county",
+      "fips": "111",
+      "jurisCode": "55",
+      "namePatterns": [
+        "LUNENBURG",
+        "055. Lunenburg County"
+      ],
+      "mapCenter": [
+        36.95,
+        -78.26
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102310",
+        "districtName": "Lunenburg County Public Schools"
+      },
+      "bbox": [
+        -78.5518,
+        36.7891,
+        -78.0337,
+        37.1497
+      ],
+      "state": "VA"
+    },
+    "madison": {
+      "name": "Madison County",
+      "type": "county",
+      "fips": "113",
+      "jurisCode": "56",
+      "namePatterns": [
+        "MADISON",
+        "056. Madison County"
+      ],
+      "mapCenter": [
+        38.41,
+        -78.28
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102370",
+        "districtName": "Madison County Public Schools"
+      },
+      "bbox": [
+        -78.5416,
+        38.2169,
+        -78.1528,
+        38.5316
+      ],
+      "state": "VA"
+    },
+    "mathews": {
+      "name": "Mathews County",
+      "type": "county",
+      "fips": "115",
+      "jurisCode": "57",
+      "namePatterns": [
+        "MATHEWS",
+        "057. Mathews County"
+      ],
+      "mapCenter": [
+        37.43,
+        -76.32
+      ],
+      "mapZoom": 11,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102430",
+        "districtName": "Mathews County Public Schools"
+      },
+      "bbox": [
+        -76.4665,
+        37.2818,
+        -76.2155,
+        37.5237
+      ],
+      "state": "VA"
+    },
+    "mecklenburg": {
+      "name": "Mecklenburg County",
+      "type": "county",
+      "fips": "117",
+      "jurisCode": "58",
+      "namePatterns": [
+        "MECKLENBURG",
+        "058. Mecklenburg County"
+      ],
+      "mapCenter": [
+        36.68,
+        -78.37
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102460",
+        "districtName": "Mecklenburg County Public Schools"
+      },
+      "bbox": [
+        -78.6531,
+        36.5414,
+        -78.0275,
+        36.9606
+      ],
+      "state": "VA"
+    },
+    "middlesex": {
+      "name": "Middlesex County",
+      "type": "county",
+      "fips": "119",
+      "jurisCode": "59",
+      "namePatterns": [
+        "MIDDLESEX",
+        "059. Middlesex County"
+      ],
+      "mapCenter": [
+        37.61,
+        -76.55
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102490",
+        "districtName": "Middlesex County Public Schools"
+      },
+      "bbox": [
+        -76.7098,
+        37.4643,
+        -76.2919,
+        37.7337
+      ],
+      "state": "VA"
+    },
+    "montgomery": {
+      "name": "Montgomery County",
+      "type": "county",
+      "fips": "121",
+      "jurisCode": "60",
+      "namePatterns": [
+        "MONTGOMERY",
+        "060. Montgomery County"
+      ],
+      "mapCenter": [
+        37.18,
+        -80.39
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102520",
+        "districtName": "Montgomery County Public Schools"
+      },
+      "bbox": [
+        -80.5867,
+        36.9718,
+        -80.1184,
+        37.3914
+      ],
+      "state": "VA"
+    },
+    "nelson": {
+      "name": "Nelson County",
+      "type": "county",
+      "fips": "125",
+      "jurisCode": "62",
+      "namePatterns": [
+        "NELSON",
+        "062. Nelson County"
+      ],
+      "mapCenter": [
+        37.79,
+        -78.88
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102580",
+        "districtName": "Nelson County Public Schools"
+      },
+      "bbox": [
+        -79.2247,
+        37.5678,
+        -78.6433,
+        37.9992
+      ],
+      "state": "VA"
+    },
+    "new_kent": {
+      "name": "New Kent County",
+      "type": "county",
+      "fips": "127",
+      "jurisCode": "63",
+      "namePatterns": [
+        "NEW KENT",
+        "063. New Kent County"
+      ],
+      "mapCenter": [
+        37.52,
+        -76.98
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.213,
+        37.3288,
+        -76.7552,
+        37.6295
+      ],
+      "state": "VA"
+    },
+    "northampton": {
+      "name": "Northampton County",
+      "type": "county",
+      "fips": "131",
+      "jurisCode": "65",
+      "namePatterns": [
+        "NORTHAMPTON",
+        "065. Northampton County"
+      ],
+      "mapCenter": [
+        37.3,
+        -75.93
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.1716,
+        37.0541,
+        -75.7659,
+        37.4714
+      ],
+      "state": "VA"
+    },
+    "northumberland": {
+      "name": "Northumberland County",
+      "type": "county",
+      "fips": "133",
+      "jurisCode": "66",
+      "namePatterns": [
+        "NORTHUMBERLAND",
+        "066. Northumberland County"
+      ],
+      "mapCenter": [
+        37.87,
+        -76.43
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.6094,
+        37.764,
+        -76.2527,
+        38.0688
+      ],
+      "state": "VA"
+    },
+    "nottoway": {
+      "name": "Nottoway County",
+      "type": "county",
+      "fips": "135",
+      "jurisCode": "67",
+      "namePatterns": [
+        "NOTTOWAY",
+        "067. Nottoway County"
+      ],
+      "mapCenter": [
+        37.14,
+        -78.05
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.267,
+        36.947,
+        -77.8561,
+        37.2634
+      ],
+      "state": "VA"
+    },
+    "orange": {
+      "name": "Orange County",
+      "type": "county",
+      "fips": "137",
+      "jurisCode": "68",
+      "namePatterns": [
+        "ORANGE",
+        "068. Orange County"
+      ],
+      "mapCenter": [
+        38.24,
+        -78.01
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.3831,
+        38.074,
+        -77.8684,
+        38.4453
+      ],
+      "state": "VA"
+    },
+    "page": {
+      "name": "Page County",
+      "type": "county",
+      "fips": "139",
+      "jurisCode": "69",
+      "namePatterns": [
+        "PAGE",
+        "069. Page County"
+      ],
+      "mapCenter": [
+        38.62,
+        -78.47
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.6817,
+        38.4416,
+        -78.2908,
+        38.8225
+      ],
+      "state": "VA"
+    },
+    "patrick": {
+      "name": "Patrick County",
+      "type": "county",
+      "fips": "141",
+      "jurisCode": "70",
+      "namePatterns": [
+        "PATRICK",
+        "070. Patrick County"
+      ],
+      "mapCenter": [
+        36.68,
+        -80.28
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.4623,
+        36.5407,
+        -79.9991,
+        36.8503
+      ],
+      "state": "VA"
+    },
+    "pittsylvania": {
+      "name": "Pittsylvania County",
+      "type": "county",
+      "fips": "143",
+      "jurisCode": "71",
+      "namePatterns": [
+        "PITTSYLVANIA",
+        "071. Pittsylvania County"
+      ],
+      "mapCenter": [
+        36.82,
+        -79.39
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.7448,
+        36.5413,
+        -79.0905,
+        37.0725
+      ],
+      "state": "VA"
+    },
+    "powhatan": {
+      "name": "Powhatan County",
+      "type": "county",
+      "fips": "145",
+      "jurisCode": "72",
+      "namePatterns": [
+        "POWHATAN",
+        "072. Powhatan County"
+      ],
+      "mapCenter": [
+        37.55,
+        -77.92
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.0212,
+        37.3789,
+        -77.6353,
+        37.6749
+      ],
+      "state": "VA"
+    },
+    "prince_edward": {
+      "name": "Prince Edward County",
+      "type": "county",
+      "fips": "147",
+      "jurisCode": "73",
+      "namePatterns": [
+        "PRINCE EDWARD",
+        "073. Prince Edward County"
+      ],
+      "mapCenter": [
+        37.23,
+        -78.44
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.6825,
+        36.9928,
+        -78.2324,
+        37.3519
+      ],
+      "state": "VA"
+    },
+    "prince_george": {
+      "name": "Prince George County",
+      "type": "county",
+      "fips": "149",
+      "jurisCode": "74",
+      "namePatterns": [
+        "PRINCE GEORGE",
+        "074. Prince George County"
+      ],
+      "mapCenter": [
+        37.19,
+        -77.22
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.4321,
+        36.9881,
+        -76.9171,
+        37.3412
+      ],
+      "state": "VA"
+    },
+    "prince_william": {
+      "name": "Prince William County",
+      "type": "county",
+      "fips": "153",
+      "jurisCode": "76",
+      "namePatterns": [
+        "PRINCE WILLIAM",
+        "076. Prince William County"
+      ],
+      "mapCenter": [
+        38.7,
+        -77.48
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103130",
+        "districtName": "Prince William County Public Schools"
+      },
+      "bbox": [
+        -77.7903,
+        38.5193,
+        -77.285,
+        38.8824
+      ],
+      "state": "VA"
+    },
+    "pulaski": {
+      "name": "Pulaski County",
+      "type": "county",
+      "fips": "155",
+      "jurisCode": "77",
+      "namePatterns": [
+        "PULASKI",
+        "077. Pulaski County"
+      ],
+      "mapCenter": [
+        37.06,
+        -80.72
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.8855,
+        36.9352,
+        -80.4493,
+        37.2352
+      ],
+      "state": "VA"
+    },
+    "rappahannock": {
+      "name": "Rappahannock County",
+      "type": "county",
+      "fips": "157",
+      "jurisCode": "78",
+      "namePatterns": [
+        "RAPPAHANNOCK",
+        "078. Rappahannock County"
+      ],
+      "mapCenter": [
+        38.68,
+        -78.16
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.3816,
+        38.4816,
+        -77.9796,
+        38.8102
+      ],
+      "state": "VA"
+    },
+    "richmond_county": {
+      "name": "Richmond County",
+      "type": "county",
+      "fips": "159",
+      "jurisCode": "79",
+      "namePatterns": [
+        "RICHMOND COUNTY",
+        "079. Richmond County"
+      ],
+      "mapCenter": [
+        37.94,
+        -76.73
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.0159,
+        37.7959,
+        -76.6448,
+        38.0986
+      ],
+      "state": "VA"
+    },
+    "roanoke_county": {
+      "name": "Roanoke County",
+      "type": "county",
+      "fips": "161",
+      "jurisCode": "80",
+      "namePatterns": [
+        "ROANOKE COUNTY",
+        "080. Roanoke County"
+      ],
+      "mapCenter": [
+        37.28,
+        -80.05
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.2179,
+        37.0999,
+        -79.7768,
+        37.4247
+      ],
+      "state": "VA"
+    },
+    "rockbridge": {
+      "name": "Rockbridge County",
+      "type": "county",
+      "fips": "163",
+      "jurisCode": "81",
+      "namePatterns": [
+        "ROCKBRIDGE",
+        "081. Rockbridge County"
+      ],
+      "mapCenter": [
+        37.81,
+        -79.45
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.8282,
+        37.5341,
+        -79.25,
+        38.0142
+      ],
+      "state": "VA"
+    },
+    "rockingham": {
+      "name": "Rockingham County",
+      "type": "county",
+      "fips": "165",
+      "jurisCode": "82",
+      "namePatterns": [
+        "ROCKINGHAM",
+        "082. Rockingham County"
+      ],
+      "mapCenter": [
+        38.52,
+        -78.88
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103390",
+        "districtName": "Rockingham County Public Schools"
+      },
+      "bbox": [
+        -79.3377,
+        38.2024,
+        -78.6603,
+        38.8128
+      ],
+      "state": "VA"
+    },
+    "russell": {
+      "name": "Russell County",
+      "type": "county",
+      "fips": "167",
+      "jurisCode": "83",
+      "namePatterns": [
+        "RUSSELL",
+        "083. Russell County"
+      ],
+      "mapCenter": [
+        36.93,
+        -82.1
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.3508,
+        36.7946,
+        -81.7422,
+        37.1537
+      ],
+      "state": "VA"
+    },
+    "scott": {
+      "name": "Scott County",
+      "type": "county",
+      "fips": "169",
+      "jurisCode": "84",
+      "namePatterns": [
+        "SCOTT",
+        "084. Scott County"
+      ],
+      "mapCenter": [
+        36.71,
+        -82.61
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -83.0936,
+        36.5944,
+        -82.4581,
+        36.9024
+      ],
+      "state": "VA"
+    },
+    "shenandoah": {
+      "name": "Shenandoah County",
+      "type": "county",
+      "fips": "171",
+      "jurisCode": "85",
+      "namePatterns": [
+        "SHENANDOAH",
+        "085. Shenandoah County"
+      ],
+      "mapCenter": [
+        38.86,
+        -78.57
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.8293,
+        38.6566,
+        -78.4681,
+        39.1178
+      ],
+      "state": "VA"
+    },
+    "smyth": {
+      "name": "Smyth County",
+      "type": "county",
+      "fips": "173",
+      "jurisCode": "86",
+      "namePatterns": [
+        "SMYTH",
+        "086. Smyth County"
+      ],
+      "mapCenter": [
+        36.85,
+        -81.54
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -81.8504,
+        36.7056,
+        -81.2617,
+        37.0053
+      ],
+      "state": "VA"
+    },
+    "southampton": {
+      "name": "Southampton County",
+      "type": "county",
+      "fips": "175",
+      "jurisCode": "87",
+      "namePatterns": [
+        "SOUTHAMPTON",
+        "087. Southampton County"
+      ],
+      "mapCenter": [
+        36.72,
+        -77.1
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.4304,
+        36.5449,
+        -76.7696,
+        36.9574
+      ],
+      "state": "VA"
+    },
+    "spotsylvania": {
+      "name": "Spotsylvania County",
+      "type": "county",
+      "fips": "177",
+      "jurisCode": "88",
+      "namePatterns": [
+        "SPOTSYLVANIA",
+        "088. Spotsylvania County"
+      ],
+      "mapCenter": [
+        38.18,
+        -77.65
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.8389,
+        37.979,
+        -77.366,
+        38.3904
+      ],
+      "state": "VA"
+    },
+    "stafford": {
+      "name": "Stafford County",
+      "type": "county",
+      "fips": "179",
+      "jurisCode": "89",
+      "namePatterns": [
+        "STAFFORD",
+        "089. Stafford County"
+      ],
+      "mapCenter": [
+        38.42,
+        -77.45
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.6582,
+        38.2602,
+        -77.2842,
+        38.559
+      ],
+      "state": "VA"
+    },
+    "surry": {
+      "name": "Surry County",
+      "type": "county",
+      "fips": "181",
+      "jurisCode": "90",
+      "namePatterns": [
+        "SURRY",
+        "090. Surry County"
+      ],
+      "mapCenter": [
+        37.12,
+        -76.88
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.1678,
+        36.8979,
+        -76.6375,
+        37.2714
+      ],
+      "state": "VA"
+    },
+    "sussex": {
+      "name": "Sussex County",
+      "type": "county",
+      "fips": "183",
+      "jurisCode": "91",
+      "namePatterns": [
+        "SUSSEX",
+        "091. Sussex County"
+      ],
+      "mapCenter": [
+        36.92,
+        -77.27
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.5269,
+        36.7085,
+        -76.9319,
+        37.1173
+      ],
+      "state": "VA"
+    },
+    "tazewell": {
+      "name": "Tazewell County",
+      "type": "county",
+      "fips": "185",
+      "jurisCode": "92",
+      "namePatterns": [
+        "TAZEWELL",
+        "092. Tazewell County"
+      ],
+      "mapCenter": [
+        37.12,
+        -81.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -81.8019,
+        36.8786,
+        -81.2139,
+        37.3024
+      ],
+      "state": "VA"
+    },
+    "warren": {
+      "name": "Warren County",
+      "type": "county",
+      "fips": "187",
+      "jurisCode": "93",
+      "namePatterns": [
+        "WARREN",
+        "093. Warren County"
+      ],
+      "mapCenter": [
+        38.91,
+        -78.21
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.4148,
+        38.8102,
+        -78.0468,
+        39.1127
+      ],
+      "state": "VA"
+    },
+    "washington": {
+      "name": "Washington County",
+      "type": "county",
+      "fips": "191",
+      "jurisCode": "95",
+      "namePatterns": [
+        "WASHINGTON",
+        "095. Washington County"
+      ],
+      "mapCenter": [
+        36.75,
+        -81.95
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.3155,
+        36.5943,
+        -81.6462,
+        37.0133
+      ],
+      "state": "VA"
+    },
+    "westmoreland": {
+      "name": "Westmoreland County",
+      "type": "county",
+      "fips": "193",
+      "jurisCode": "96",
+      "namePatterns": [
+        "WESTMORELAND",
+        "096. Westmoreland County"
+      ],
+      "mapCenter": [
+        38.11,
+        -76.8
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.1053,
+        37.9651,
+        -76.5167,
+        38.2655
+      ],
+      "state": "VA"
+    },
+    "wise": {
+      "name": "Wise County",
+      "type": "county",
+      "fips": "195",
+      "jurisCode": "97",
+      "namePatterns": [
+        "WISE",
+        "097. Wise County"
+      ],
+      "mapCenter": [
+        36.97,
+        -82.62
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.9515,
+        36.8541,
+        -82.3498,
+        37.1872
+      ],
+      "state": "VA"
+    },
+    "wythe": {
+      "name": "Wythe County",
+      "type": "county",
+      "fips": "197",
+      "jurisCode": "98",
+      "namePatterns": [
+        "WYTHE",
+        "098. Wythe County"
+      ],
+      "mapCenter": [
+        36.92,
+        -81.08
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -81.3556,
+        36.7544,
+        -80.855,
+        37.1051
+      ],
+      "state": "VA"
+    },
+    "york": {
+      "name": "York County",
+      "type": "county",
+      "fips": "199",
+      "jurisCode": "99",
+      "namePatterns": [
+        "YORK",
+        "099. York County"
+      ],
+      "mapCenter": [
+        37.22,
+        -76.54
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.6992,
+        37.1009,
+        -76.3817,
+        37.4154
+      ],
+      "state": "VA"
+    },
+    "alexandria": {
+      "name": "Alexandria City",
+      "type": "city",
+      "fips": "510",
+      "jurisCode": "100",
+      "namePatterns": [
+        "ALEXANDRIA",
+        "100. City of Alexandria"
+      ],
+      "mapCenter": [
+        38.82,
+        -77.08
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100120",
+        "districtName": "Alexandria City Public Schools"
+      },
+      "bbox": [
+        -77.1445,
+        38.7852,
+        -77.0381,
+        38.8452
+      ],
+      "state": "VA"
+    },
+    "bristol": {
+      "name": "Bristol City",
+      "type": "city",
+      "fips": "520",
+      "jurisCode": "102",
+      "namePatterns": [
+        "BRISTOL",
+        "102. City of Bristol"
+      ],
+      "mapCenter": [
+        36.6,
+        -82.19
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.2218,
+        36.5612,
+        -82.1109,
+        36.6338
+      ],
+      "state": "VA"
+    },
+    "buena_vista": {
+      "name": "Buena Vista City",
+      "type": "city",
+      "fips": "530",
+      "jurisCode": "103",
+      "namePatterns": [
+        "BUENA VISTA",
+        "103. City of Buena Vista"
+      ],
+      "mapCenter": [
+        37.73,
+        -79.35
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100560",
+        "districtName": "Buena Vista City Public Schools"
+      },
+      "bbox": [
+        -79.3796,
+        37.7062,
+        -79.332,
+        37.7573
+      ],
+      "state": "VA"
+    },
+    "charlottesville": {
+      "name": "Charlottesville City",
+      "type": "city",
+      "fips": "540",
+      "jurisCode": "104",
+      "namePatterns": [
+        "CHARLOTTESVILLE",
+        "104. City of Charlottesville"
+      ],
+      "mapCenter": [
+        38.03,
+        -78.48
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.5228,
+        38.0007,
+        -78.4475,
+        38.0653
+      ],
+      "state": "VA"
+    },
+    "chesapeake": {
+      "name": "Chesapeake City",
+      "type": "city",
+      "fips": "550",
+      "jurisCode": "131",
+      "namePatterns": [
+        "CHESAPEAKE",
+        "131. City of Chesapeake"
+      ],
+      "mapCenter": [
+        36.77,
+        -76.29
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100810",
+        "districtName": "Chesapeake City Public Schools"
+      },
+      "bbox": [
+        -76.4914,
+        36.5413,
+        -76.1332,
+        36.866
+      ],
+      "state": "VA"
+    },
+    "colonial_heights": {
+      "name": "Colonial Heights City",
+      "type": "city",
+      "fips": "570",
+      "jurisCode": "106",
+      "namePatterns": [
+        "COLONIAL HEIGHTS",
+        "106. City of Colonial Heights"
+      ],
+      "mapCenter": [
+        37.26,
+        -77.4
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5100960",
+        "districtName": "Colonial Heights City Public Schools"
+      },
+      "bbox": [
+        -77.4381,
+        37.2245,
+        -77.3666,
+        37.2819
+      ],
+      "state": "VA"
+    },
+    "covington": {
+      "name": "Covington City",
+      "type": "city",
+      "fips": "580",
+      "jurisCode": "107",
+      "namePatterns": [
+        "COVINGTON",
+        "107. City of Covington"
+      ],
+      "mapCenter": [
+        37.79,
+        -79.99
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.0175,
+        37.7633,
+        -79.9567,
+        37.8078
+      ],
+      "state": "VA"
+    },
+    "de_kent": {
+      "name": "Kent County",
+      "type": "county",
+      "fips": "001",
+      "state": "DE",
+      "namePatterns": [
+        "Kent",
+        "Kent County"
+      ],
+      "mapCenter": [
+        39.15,
+        -75.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "de_new_castle": {
+      "name": "New Castle County",
+      "type": "county",
+      "fips": "003",
+      "state": "DE",
+      "namePatterns": [
+        "New Castle",
+        "New Castle County"
+      ],
+      "mapCenter": [
+        39.6,
+        -75.6
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "de_sussex": {
+      "name": "Sussex County",
+      "type": "county",
+      "fips": "005",
+      "state": "DE",
+      "namePatterns": [
+        "Sussex",
+        "Sussex County"
+      ],
+      "mapCenter": [
+        38.68,
+        -75.38
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -75.65,
+        38.45,
+        -75.05,
+        38.95
+      ]
+    },
+    "danville": {
+      "name": "Danville City",
+      "type": "city",
+      "fips": "590",
+      "jurisCode": "108",
+      "namePatterns": [
+        "DANVILLE",
+        "108. City of Danville"
+      ],
+      "mapCenter": [
+        36.59,
+        -79.39
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101110",
+        "districtName": "Danville City Public Schools"
+      },
+      "bbox": [
+        -79.4691,
+        36.5556,
+        -79.3358,
+        36.6404
+      ],
+      "state": "VA"
+    },
+    "emporia": {
+      "name": "Emporia City",
+      "type": "city",
+      "fips": "595",
+      "jurisCode": "109",
+      "namePatterns": [
+        "EMPORIA",
+        "109. City of Emporia"
+      ],
+      "mapCenter": [
+        36.69,
+        -77.54
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.5628,
+        36.6739,
+        -77.511,
+        36.7185
+      ],
+      "state": "VA"
+    },
+    "fairfax_city": {
+      "name": "Fairfax City",
+      "type": "city",
+      "fips": "600",
+      "jurisCode": "151",
+      "namePatterns": [
+        "CITY OF FAIRFAX",
+        "FAIRFAX CITY",
+        "151. City of Fairfax"
+      ],
+      "mapCenter": [
+        38.85,
+        -77.3
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101230",
+        "districtName": "City of Fairfax Public Schools"
+      },
+      "bbox": [
+        -77.3309,
+        38.8274,
+        -77.2672,
+        38.8726
+      ],
+      "state": "VA"
+    },
+    "falls_church": {
+      "name": "Falls Church City",
+      "type": "city",
+      "fips": "610",
+      "jurisCode": "110",
+      "namePatterns": [
+        "FALLS CHURCH",
+        "110. City of Falls Church"
+      ],
+      "mapCenter": [
+        38.88,
+        -77.17
+      ],
+      "mapZoom": 14,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.2063,
+        38.8631,
+        -77.1561,
+        38.892
+      ],
+      "state": "VA"
+    },
+    "franklin_city": {
+      "name": "Franklin City",
+      "type": "city",
+      "fips": "620",
+      "jurisCode": "145",
+      "namePatterns": [
+        "CITY OF FRANKLIN",
+        "FRANKLIN CITY",
+        "145. City of Franklin"
+      ],
+      "mapCenter": [
+        36.68,
+        -76.92
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101410",
+        "districtName": "Franklin City Public Schools"
+      },
+      "bbox": [
+        -76.9566,
+        36.6545,
+        -76.895,
+        36.7002
+      ],
+      "state": "VA"
+    },
+    "fredericksburg": {
+      "name": "Fredericksburg City",
+      "type": "city",
+      "fips": "630",
+      "jurisCode": "111",
+      "namePatterns": [
+        "FREDERICKSBURG",
+        "111. City of Fredericksburg"
+      ],
+      "mapCenter": [
+        38.3,
+        -77.46
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101510",
+        "districtName": "Fredericksburg City Public Schools"
+      },
+      "bbox": [
+        -77.514,
+        38.2803,
+        -77.423,
+        38.3383
+      ],
+      "state": "VA"
+    },
+    "galax": {
+      "name": "Galax City",
+      "type": "city",
+      "fips": "640",
+      "jurisCode": "113",
+      "namePatterns": [
+        "GALAX",
+        "113. City of Galax"
+      ],
+      "mapCenter": [
+        36.66,
+        -80.92
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.9432,
+        36.6389,
+        -80.8871,
+        36.6839
+      ],
+      "state": "VA"
+    },
+    "hampton": {
+      "name": "Hampton City",
+      "type": "city",
+      "fips": "650",
+      "jurisCode": "114",
+      "namePatterns": [
+        "HAMPTON",
+        "114. City of Hampton"
+      ],
+      "mapCenter": [
+        37.03,
+        -76.35
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5101800",
+        "districtName": "Hampton City Public Schools"
+      },
+      "bbox": [
+        -76.4599,
+        36.9745,
+        -76.2597,
+        37.1414
+      ],
+      "state": "VA"
+    },
+    "harrisonburg": {
+      "name": "Harrisonburg City",
+      "type": "city",
+      "fips": "660",
+      "jurisCode": "115",
+      "namePatterns": [
+        "HARRISONBURG",
+        "115. City of Harrisonburg"
+      ],
+      "mapCenter": [
+        38.45,
+        -78.87
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.9268,
+        38.3979,
+        -78.8248,
+        38.4806
+      ],
+      "state": "VA"
+    },
+    "hopewell": {
+      "name": "Hopewell City",
+      "type": "city",
+      "fips": "670",
+      "jurisCode": "116",
+      "namePatterns": [
+        "HOPEWELL",
+        "116. City of Hopewell"
+      ],
+      "mapCenter": [
+        37.3,
+        -77.29
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.3346,
+        37.2658,
+        -77.2607,
+        37.3307
+      ],
+      "state": "VA"
+    },
+    "lexington": {
+      "name": "Lexington City",
+      "type": "city",
+      "fips": "678",
+      "jurisCode": "117",
+      "namePatterns": [
+        "LEXINGTON",
+        "117. City of Lexington"
+      ],
+      "mapCenter": [
+        37.78,
+        -79.44
+      ],
+      "mapZoom": 14,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.4621,
+        37.7657,
+        -79.4266,
+        37.7994
+      ],
+      "state": "VA"
+    },
+    "lynchburg": {
+      "name": "Lynchburg City",
+      "type": "city",
+      "fips": "680",
+      "jurisCode": "118",
+      "namePatterns": [
+        "LYNCHBURG",
+        "118. City of Lynchburg"
+      ],
+      "mapCenter": [
+        37.41,
+        -79.14
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102340",
+        "districtName": "Lynchburg City Public Schools"
+      },
+      "bbox": [
+        -79.2574,
+        37.3505,
+        -79.0831,
+        37.4679
+      ],
+      "state": "VA"
+    },
+    "manassas": {
+      "name": "Manassas City",
+      "type": "city",
+      "fips": "683",
+      "jurisCode": "155",
+      "namePatterns": [
+        "MANASSAS",
+        "155. City of Manassas"
+      ],
+      "mapCenter": [
+        38.75,
+        -77.47
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.5132,
+        38.7218,
+        -77.4456,
+        38.7816
+      ],
+      "state": "VA"
+    },
+    "manassas_park": {
+      "name": "Manassas Park City",
+      "type": "city",
+      "fips": "685",
+      "jurisCode": "152",
+      "namePatterns": [
+        "MANASSAS PARK",
+        "152. City of Manassas Park"
+      ],
+      "mapCenter": [
+        38.77,
+        -77.47
+      ],
+      "mapZoom": 14,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.4813,
+        38.7588,
+        -77.4382,
+        38.7885
+      ],
+      "state": "VA"
+    },
+    "martinsville": {
+      "name": "Martinsville City",
+      "type": "city",
+      "fips": "690",
+      "jurisCode": "120",
+      "namePatterns": [
+        "MARTINSVILLE",
+        "120. City of Martinsville"
+      ],
+      "mapCenter": [
+        36.69,
+        -79.87
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.9095,
+        36.6526,
+        -79.8296,
+        36.7211
+      ],
+      "state": "VA"
+    },
+    "newport_news": {
+      "name": "Newport News City",
+      "type": "city",
+      "fips": "700",
+      "jurisCode": "121",
+      "namePatterns": [
+        "NEWPORT NEWS",
+        "121. City of Newport News"
+      ],
+      "mapCenter": [
+        37.09,
+        -76.47
+      ],
+      "mapZoom": 11,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102640",
+        "districtName": "Newport News City Public Schools"
+      },
+      "bbox": [
+        -76.6212,
+        36.9597,
+        -76.3351,
+        37.22
+      ],
+      "state": "VA"
+    },
+    "norfolk": {
+      "name": "Norfolk City",
+      "type": "city",
+      "fips": "710",
+      "jurisCode": "122",
+      "namePatterns": [
+        "NORFOLK",
+        "122. City of Norfolk"
+      ],
+      "mapCenter": [
+        36.85,
+        -76.29
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5102670",
+        "districtName": "Norfolk City Public Schools"
+      },
+      "bbox": [
+        -76.345,
+        36.82,
+        -76.18,
+        36.97
+      ],
+      "state": "VA"
+    },
+    "norton": {
+      "name": "Norton City",
+      "type": "city",
+      "fips": "720",
+      "jurisCode": "146",
+      "namePatterns": [
+        "NORTON",
+        "146. City of Norton"
+      ],
+      "mapCenter": [
+        36.93,
+        -82.63
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -82.6547,
+        36.907,
+        -82.6036,
+        36.9498
+      ],
+      "state": "VA"
+    },
+    "petersburg": {
+      "name": "Petersburg City",
+      "type": "city",
+      "fips": "730",
+      "jurisCode": "123",
+      "namePatterns": [
+        "PETERSBURG",
+        "123. City of Petersburg"
+      ],
+      "mapCenter": [
+        37.23,
+        -77.4
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -77.4529,
+        37.1879,
+        -77.3481,
+        37.252
+      ],
+      "state": "VA"
+    },
+    "poquoson": {
+      "name": "Poquoson City",
+      "type": "city",
+      "fips": "735",
+      "jurisCode": "147",
+      "namePatterns": [
+        "POQUOSON",
+        "147. City of Poquoson"
+      ],
+      "mapCenter": [
+        37.12,
+        -76.35
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.4087,
+        37.0959,
+        -76.2816,
+        37.1781
+      ],
+      "state": "VA"
+    },
+    "portsmouth": {
+      "name": "Portsmouth City",
+      "type": "city",
+      "fips": "740",
+      "jurisCode": "124",
+      "namePatterns": [
+        "PORTSMOUTH",
+        "124. City of Portsmouth"
+      ],
+      "mapCenter": [
+        36.84,
+        -76.35
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103000",
+        "districtName": "Portsmouth City Public Schools"
+      },
+      "bbox": [
+        -76.4203,
+        36.7879,
+        -76.2931,
+        36.8918
+      ],
+      "state": "VA"
+    },
+    "radford": {
+      "name": "Radford City",
+      "type": "city",
+      "fips": "750",
+      "jurisCode": "126",
+      "namePatterns": [
+        "RADFORD",
+        "126. City of Radford"
+      ],
+      "mapCenter": [
+        37.13,
+        -80.58
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.6076,
+        37.1063,
+        -80.5225,
+        37.1633
+      ],
+      "state": "VA"
+    },
+    "richmond_city": {
+      "name": "Richmond City",
+      "type": "city",
+      "fips": "760",
+      "jurisCode": "127",
+      "namePatterns": [
+        "CITY OF RICHMOND",
+        "RICHMOND CITY",
+        "127. City of Richmond"
+      ],
+      "mapCenter": [
+        37.54,
+        -77.44
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103240",
+        "districtName": "Richmond City Public Schools"
+      },
+      "bbox": [
+        -77.5775,
+        37.4464,
+        -77.3853,
+        37.6011
+      ],
+      "state": "VA"
+    },
+    "roanoke_city": {
+      "name": "Roanoke City",
+      "type": "city",
+      "fips": "770",
+      "jurisCode": "128",
+      "namePatterns": [
+        "CITY OF ROANOKE",
+        "ROANOKE CITY",
+        "128. City of Roanoke"
+      ],
+      "mapCenter": [
+        37.27,
+        -79.94
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.0203,
+        37.2259,
+        -79.8797,
+        37.3246
+      ],
+      "state": "VA"
+    },
+    "salem": {
+      "name": "Salem City",
+      "type": "city",
+      "fips": "775",
+      "jurisCode": "129",
+      "namePatterns": [
+        "SALEM",
+        "129. City of Salem"
+      ],
+      "mapCenter": [
+        37.29,
+        -80.05
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -80.1085,
+        37.2579,
+        -80.0053,
+        37.3285
+      ],
+      "state": "VA"
+    },
+    "staunton": {
+      "name": "Staunton City",
+      "type": "city",
+      "fips": "790",
+      "jurisCode": "132",
+      "namePatterns": [
+        "STAUNTON",
+        "132. City of Staunton"
+      ],
+      "mapCenter": [
+        38.15,
+        -79.07
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -79.1073,
+        38.1097,
+        -79.02,
+        38.1839
+      ],
+      "state": "VA"
+    },
+    "suffolk": {
+      "name": "Suffolk City",
+      "type": "city",
+      "fips": "800",
+      "jurisCode": "133",
+      "namePatterns": [
+        "SUFFOLK",
+        "133. City of Suffolk"
+      ],
+      "mapCenter": [
+        36.73,
+        -76.58
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.923,
+        36.5453,
+        -76.4038,
+        36.9384
+      ],
+      "state": "VA"
+    },
+    "virginia_beach": {
+      "name": "Virginia Beach City",
+      "type": "city",
+      "fips": "810",
+      "jurisCode": "134",
+      "namePatterns": [
+        "VIRGINIA BEACH",
+        "134. City of Virginia Beach"
+      ],
+      "mapCenter": [
+        36.85,
+        -75.98
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103840",
+        "districtName": "Virginia Beach City Public Schools"
+      },
+      "bbox": [
+        -76.2269,
+        36.5516,
+        -75.8589,
+        36.933
+      ],
+      "state": "VA"
+    },
+    "waynesboro": {
+      "name": "Waynesboro City",
+      "type": "city",
+      "fips": "820",
+      "jurisCode": "136",
+      "namePatterns": [
+        "WAYNESBORO",
+        "136. City of Waynesboro"
+      ],
+      "mapCenter": [
+        38.07,
+        -78.89
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "education": {
+        "leaId": "5103930",
+        "districtName": "Waynesboro City Public Schools"
+      },
+      "bbox": [
+        -78.9409,
+        38.0412,
+        -78.8546,
+        38.1003
+      ],
+      "state": "VA"
+    },
+    "williamsburg": {
+      "name": "Williamsburg City",
+      "type": "city",
+      "fips": "830",
+      "jurisCode": "137",
+      "namePatterns": [
+        "WILLIAMSBURG",
+        "137. City of Williamsburg"
+      ],
+      "mapCenter": [
+        37.27,
+        -76.71
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -76.7421,
+        37.2498,
+        -76.683,
+        37.2972
+      ],
+      "state": "VA"
+    },
+    "winchester": {
+      "name": "Winchester City",
+      "type": "city",
+      "fips": "840",
+      "jurisCode": "138",
+      "namePatterns": [
+        "WINCHESTER",
+        "138. City of Winchester"
+      ],
+      "mapCenter": [
+        39.19,
+        -78.17
+      ],
+      "mapZoom": 13,
+      "maintainsOwnRoads": false,
+      "bbox": [
+        -78.2074,
+        39.1383,
+        -78.1252,
+        39.213
+      ],
+      "state": "VA"
+    },
+    "_colorado_separator": "--- Colorado Counties (64) ---",
+    "co_adams": {
+      "name": "Adams County",
+      "type": "county",
+      "fips": "001",
+      "state": "CO",
+      "namePatterns": [
+        "ADAMS",
+        "Adams",
+        "Adams County"
+      ],
+      "mapCenter": [
+        39.8737,
+        -104.7624
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.0534,
+        39.7404,
+        -104.461,
+        40.0015
+      ]
+    },
+    "co_alamosa": {
+      "name": "Alamosa County",
+      "type": "county",
+      "fips": "003",
+      "state": "CO",
+      "namePatterns": [
+        "ALAMOSA",
+        "Alamosa",
+        "Alamosa County"
+      ],
+      "mapCenter": [
+        37.57,
+        -105.79
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_arapahoe": {
+      "name": "Arapahoe County",
+      "type": "county",
+      "fips": "005",
+      "state": "CO",
+      "namePatterns": [
+        "ARAPAHOE",
+        "Arapahoe",
+        "Arapahoe County"
+      ],
+      "mapCenter": [
+        39.6498,
+        -104.3389
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.0534,
+        39.5638,
+        -103.7064,
+        39.7404
+      ]
+    },
+    "co_archuleta": {
+      "name": "Archuleta County",
+      "type": "county",
+      "fips": "007",
+      "state": "CO",
+      "namePatterns": [
+        "ARCHULETA",
+        "Archuleta",
+        "Archuleta County"
+      ],
+      "mapCenter": [
+        37.19,
+        -107.05
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_baca": {
+      "name": "Baca County",
+      "type": "county",
+      "fips": "009",
+      "state": "CO",
+      "namePatterns": [
+        "BACA",
+        "Baca",
+        "Baca County"
+      ],
+      "mapCenter": [
+        37.32,
+        -102.56
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_bent": {
+      "name": "Bent County",
+      "type": "county",
+      "fips": "011",
+      "state": "CO",
+      "namePatterns": [
+        "BENT",
+        "Bent",
+        "Bent County"
+      ],
+      "mapCenter": [
+        38.07,
+        -103.01
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_boulder": {
+      "name": "Boulder County",
+      "type": "county",
+      "fips": "013",
+      "state": "CO",
+      "namePatterns": [
+        "BOULDER",
+        "Boulder",
+        "Boulder County"
+      ],
+      "mapCenter": [
+        40.09,
+        -105.36
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_broomfield": {
+      "name": "Broomfield County (City and County)",
+      "type": "county",
+      "fips": "014",
+      "state": "CO",
+      "namePatterns": [
+        "BROOMFIELD",
+        "Broomfield",
+        "Broomfield County"
+      ],
+      "mapCenter": [
+        39.92,
+        -105.09
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": false
+    },
+    "co_chaffee": {
+      "name": "Chaffee County",
+      "type": "county",
+      "fips": "015",
+      "state": "CO",
+      "namePatterns": [
+        "CHAFFEE",
+        "Chaffee",
+        "Chaffee County"
+      ],
+      "mapCenter": [
+        38.75,
+        -106.19
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_cheyenne": {
+      "name": "Cheyenne County",
+      "type": "county",
+      "fips": "017",
+      "state": "CO",
+      "namePatterns": [
+        "CHEYENNE",
+        "Cheyenne",
+        "Cheyenne County"
+      ],
+      "mapCenter": [
+        38.83,
+        -102.6
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_clear_creek": {
+      "name": "Clear Creek County",
+      "type": "county",
+      "fips": "019",
+      "state": "CO",
+      "namePatterns": [
+        "CLEAR CREEK",
+        "Clear Creek",
+        "Clear Creek County"
+      ],
+      "mapCenter": [
+        39.69,
+        -105.68
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_conejos": {
+      "name": "Conejos County",
+      "type": "county",
+      "fips": "021",
+      "state": "CO",
+      "namePatterns": [
+        "CONEJOS",
+        "Conejos",
+        "Conejos County"
+      ],
+      "mapCenter": [
+        37.15,
+        -106.02
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_costilla": {
+      "name": "Costilla County",
+      "type": "county",
+      "fips": "023",
+      "state": "CO",
+      "namePatterns": [
+        "COSTILLA",
+        "Costilla",
+        "Costilla County"
+      ],
+      "mapCenter": [
+        37.18,
+        -105.43
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_crowley": {
+      "name": "Crowley County",
+      "type": "county",
+      "fips": "025",
+      "state": "CO",
+      "namePatterns": [
+        "CROWLEY",
+        "Crowley",
+        "Crowley County"
+      ],
+      "mapCenter": [
+        38.3,
+        -103.79
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_custer": {
+      "name": "Custer County",
+      "type": "county",
+      "fips": "027",
+      "state": "CO",
+      "namePatterns": [
+        "CUSTER",
+        "Custer",
+        "Custer County"
+      ],
+      "mapCenter": [
+        38.11,
+        -105.37
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_delta": {
+      "name": "Delta County",
+      "type": "county",
+      "fips": "029",
+      "state": "CO",
+      "namePatterns": [
+        "DELTA",
+        "Delta",
+        "Delta County"
+      ],
+      "mapCenter": [
+        38.86,
+        -107.86
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_denver": {
+      "name": "Denver County (City and County)",
+      "type": "county",
+      "fips": "031",
+      "state": "CO",
+      "namePatterns": [
+        "DENVER",
+        "Denver",
+        "Denver County"
+      ],
+      "mapCenter": [
+        39.7392,
+        -104.9903
+      ],
+      "mapZoom": 12,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.1098,
+        39.6144,
+        -104.5996,
+        39.9142
+      ]
+    },
+    "co_dolores": {
+      "name": "Dolores County",
+      "type": "county",
+      "fips": "033",
+      "state": "CO",
+      "namePatterns": [
+        "DOLORES",
+        "Dolores",
+        "Dolores County"
+      ],
+      "mapCenter": [
+        37.75,
+        -108.51
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "douglas": {
+      "name": "Douglas County",
+      "type": "county",
+      "fips": "035",
+      "state": "CO",
+      "namePatterns": [
+        "DOUGLAS",
+        "Douglas",
+        "Douglas County"
+      ],
+      "mapCenter": [
+        39.3298,
+        -104.9253
+      ],
+      "mapZoom": 11,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.0543,
+        39.1298,
+        -104.6014,
+        39.5624
+      ]
+    },
+    "co_eagle": {
+      "name": "Eagle County",
+      "type": "county",
+      "fips": "037",
+      "state": "CO",
+      "namePatterns": [
+        "EAGLE",
+        "Eagle",
+        "Eagle County"
+      ],
+      "mapCenter": [
+        39.63,
+        -106.83
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_elbert": {
+      "name": "Elbert County",
+      "type": "county",
+      "fips": "039",
+      "state": "CO",
+      "namePatterns": [
+        "ELBERT",
+        "Elbert",
+        "Elbert County"
+      ],
+      "mapCenter": [
+        39.29,
+        -104.14
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_el_paso": {
+      "name": "El Paso County",
+      "type": "county",
+      "fips": "041",
+      "state": "CO",
+      "namePatterns": [
+        "EL PASO",
+        "El Paso",
+        "El Paso County"
+      ],
+      "mapCenter": [
+        38.8339,
+        -104.7581
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.0286,
+        38.5157,
+        -104.0534,
+        39.1298
+      ]
+    },
+    "co_fremont": {
+      "name": "Fremont County",
+      "type": "county",
+      "fips": "043",
+      "state": "CO",
+      "namePatterns": [
+        "FREMONT",
+        "Fremont",
+        "Fremont County"
+      ],
+      "mapCenter": [
+        38.47,
+        -105.34
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_garfield": {
+      "name": "Garfield County",
+      "type": "county",
+      "fips": "045",
+      "state": "CO",
+      "namePatterns": [
+        "GARFIELD",
+        "Garfield",
+        "Garfield County"
+      ],
+      "mapCenter": [
+        39.6,
+        -107.32
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_gilpin": {
+      "name": "Gilpin County",
+      "type": "county",
+      "fips": "047",
+      "state": "CO",
+      "namePatterns": [
+        "GILPIN",
+        "Gilpin",
+        "Gilpin County"
+      ],
+      "mapCenter": [
+        39.86,
+        -105.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_grand": {
+      "name": "Grand County",
+      "type": "county",
+      "fips": "049",
+      "state": "CO",
+      "namePatterns": [
+        "GRAND",
+        "Grand",
+        "Grand County"
+      ],
+      "mapCenter": [
+        40.09,
+        -105.99
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_gunnison": {
+      "name": "Gunnison County",
+      "type": "county",
+      "fips": "051",
+      "state": "CO",
+      "namePatterns": [
+        "GUNNISON",
+        "Gunnison",
+        "Gunnison County"
+      ],
+      "mapCenter": [
+        38.66,
+        -106.85
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_hinsdale": {
+      "name": "Hinsdale County",
+      "type": "county",
+      "fips": "053",
+      "state": "CO",
+      "namePatterns": [
+        "HINSDALE",
+        "Hinsdale",
+        "Hinsdale County"
+      ],
+      "mapCenter": [
+        37.82,
+        -107.3
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_huerfano": {
+      "name": "Huerfano County",
+      "type": "county",
+      "fips": "055",
+      "state": "CO",
+      "namePatterns": [
+        "HUERFANO",
+        "Huerfano",
+        "Huerfano County"
+      ],
+      "mapCenter": [
+        37.68,
+        -105
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_jackson": {
+      "name": "Jackson County",
+      "type": "county",
+      "fips": "057",
+      "state": "CO",
+      "namePatterns": [
+        "JACKSON",
+        "Jackson",
+        "Jackson County"
+      ],
+      "mapCenter": [
+        40.67,
+        -106.34
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_jefferson": {
+      "name": "Jefferson County",
+      "type": "county",
+      "fips": "059",
+      "state": "CO",
+      "namePatterns": [
+        "JEFFERSON",
+        "Jefferson",
+        "Jefferson County"
+      ],
+      "mapCenter": [
+        39.5866,
+        -105.2508
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": true,
+      "bbox": [
+        -105.6798,
+        39.3677,
+        -105.0534,
+        39.8282
+      ]
+    },
+    "co_kiowa": {
+      "name": "Kiowa County",
+      "type": "county",
+      "fips": "061",
+      "state": "CO",
+      "namePatterns": [
+        "KIOWA",
+        "Kiowa",
+        "Kiowa County"
+      ],
+      "mapCenter": [
+        38.36,
+        -102.74
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_kit_carson": {
+      "name": "Kit Carson County",
+      "type": "county",
+      "fips": "063",
+      "state": "CO",
+      "namePatterns": [
+        "KIT CARSON",
+        "Kit Carson",
+        "Kit Carson County"
+      ],
+      "mapCenter": [
+        39.08,
+        -102.6
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_lake": {
+      "name": "Lake County",
+      "type": "county",
+      "fips": "065",
+      "state": "CO",
+      "namePatterns": [
+        "LAKE",
+        "Lake",
+        "Lake County"
+      ],
+      "mapCenter": [
+        39.22,
+        -106.34
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_la_plata": {
+      "name": "La Plata County",
+      "type": "county",
+      "fips": "067",
+      "state": "CO",
+      "namePatterns": [
+        "LA PLATA",
+        "La Plata",
+        "La Plata County"
+      ],
+      "mapCenter": [
+        37.29,
+        -107.84
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_larimer": {
+      "name": "Larimer County",
+      "type": "county",
+      "fips": "069",
+      "state": "CO",
+      "namePatterns": [
+        "LARIMER",
+        "Larimer",
+        "Larimer County"
+      ],
+      "mapCenter": [
+        40.66,
+        -105.46
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_las_animas": {
+      "name": "Las Animas County",
+      "type": "county",
+      "fips": "071",
+      "state": "CO",
+      "namePatterns": [
+        "LAS ANIMAS",
+        "Las Animas",
+        "Las Animas County"
+      ],
+      "mapCenter": [
+        37.31,
+        -104.04
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_lincoln": {
+      "name": "Lincoln County",
+      "type": "county",
+      "fips": "073",
+      "state": "CO",
+      "namePatterns": [
+        "LINCOLN",
+        "Lincoln",
+        "Lincoln County"
+      ],
+      "mapCenter": [
+        39.04,
+        -103.52
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_logan": {
+      "name": "Logan County",
+      "type": "county",
+      "fips": "075",
+      "state": "CO",
+      "namePatterns": [
+        "LOGAN",
+        "Logan",
+        "Logan County"
+      ],
+      "mapCenter": [
+        40.66,
+        -103.11
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_mesa": {
+      "name": "Mesa County",
+      "type": "county",
+      "fips": "077",
+      "state": "CO",
+      "namePatterns": [
+        "MESA",
+        "Mesa",
+        "Mesa County"
+      ],
+      "mapCenter": [
+        39.02,
+        -108.46
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_mineral": {
+      "name": "Mineral County",
+      "type": "county",
+      "fips": "079",
+      "state": "CO",
+      "namePatterns": [
+        "MINERAL",
+        "Mineral",
+        "Mineral County"
+      ],
+      "mapCenter": [
+        37.77,
+        -106.93
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_moffat": {
+      "name": "Moffat County",
+      "type": "county",
+      "fips": "081",
+      "state": "CO",
+      "namePatterns": [
+        "MOFFAT",
+        "Moffat",
+        "Moffat County"
+      ],
+      "mapCenter": [
+        40.62,
+        -108.21
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_montezuma": {
+      "name": "Montezuma County",
+      "type": "county",
+      "fips": "083",
+      "state": "CO",
+      "namePatterns": [
+        "MONTEZUMA",
+        "Montezuma",
+        "Montezuma County"
+      ],
+      "mapCenter": [
+        37.34,
+        -108.59
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_montrose": {
+      "name": "Montrose County",
+      "type": "county",
+      "fips": "085",
+      "state": "CO",
+      "namePatterns": [
+        "MONTROSE",
+        "Montrose",
+        "Montrose County"
+      ],
+      "mapCenter": [
+        38.4,
+        -107.88
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_morgan": {
+      "name": "Morgan County",
+      "type": "county",
+      "fips": "087",
+      "state": "CO",
+      "namePatterns": [
+        "MORGAN",
+        "Morgan",
+        "Morgan County"
+      ],
+      "mapCenter": [
+        40.26,
+        -103.81
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_otero": {
+      "name": "Otero County",
+      "type": "county",
+      "fips": "089",
+      "state": "CO",
+      "namePatterns": [
+        "OTERO",
+        "Otero",
+        "Otero County"
+      ],
+      "mapCenter": [
+        38,
+        -103.72
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_ouray": {
+      "name": "Ouray County",
+      "type": "county",
+      "fips": "091",
+      "state": "CO",
+      "namePatterns": [
+        "OURAY",
+        "Ouray",
+        "Ouray County"
+      ],
+      "mapCenter": [
+        38.15,
+        -107.77
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_park": {
+      "name": "Park County",
+      "type": "county",
+      "fips": "093",
+      "state": "CO",
+      "namePatterns": [
+        "PARK",
+        "Park",
+        "Park County"
+      ],
+      "mapCenter": [
+        39.12,
+        -105.78
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_phillips": {
+      "name": "Phillips County",
+      "type": "county",
+      "fips": "095",
+      "state": "CO",
+      "namePatterns": [
+        "PHILLIPS",
+        "Phillips",
+        "Phillips County"
+      ],
+      "mapCenter": [
+        40.6,
+        -102.36
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_pitkin": {
+      "name": "Pitkin County",
+      "type": "county",
+      "fips": "097",
+      "state": "CO",
+      "namePatterns": [
+        "PITKIN",
+        "Pitkin",
+        "Pitkin County"
+      ],
+      "mapCenter": [
+        39.22,
+        -106.95
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_prowers": {
+      "name": "Prowers County",
+      "type": "county",
+      "fips": "099",
+      "state": "CO",
+      "namePatterns": [
+        "PROWERS",
+        "Prowers",
+        "Prowers County"
+      ],
+      "mapCenter": [
+        37.96,
+        -102.39
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_pueblo": {
+      "name": "Pueblo County",
+      "type": "county",
+      "fips": "101",
+      "state": "CO",
+      "namePatterns": [
+        "PUEBLO",
+        "Pueblo",
+        "Pueblo County"
+      ],
+      "mapCenter": [
+        38.28,
+        -104.61
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_rio_blanco": {
+      "name": "Rio Blanco County",
+      "type": "county",
+      "fips": "103",
+      "state": "CO",
+      "namePatterns": [
+        "RIO BLANCO",
+        "Rio Blanco",
+        "Rio Blanco County"
+      ],
+      "mapCenter": [
+        40.07,
+        -108.37
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_rio_grande": {
+      "name": "Rio Grande County",
+      "type": "county",
+      "fips": "105",
+      "state": "CO",
+      "namePatterns": [
+        "RIO GRANDE",
+        "Rio Grande",
+        "Rio Grande County"
+      ],
+      "mapCenter": [
+        37.57,
+        -106.38
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_routt": {
+      "name": "Routt County",
+      "type": "county",
+      "fips": "107",
+      "state": "CO",
+      "namePatterns": [
+        "ROUTT",
+        "Routt",
+        "Routt County"
+      ],
+      "mapCenter": [
+        40.49,
+        -106.83
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_saguache": {
+      "name": "Saguache County",
+      "type": "county",
+      "fips": "109",
+      "state": "CO",
+      "namePatterns": [
+        "SAGUACHE",
+        "Saguache",
+        "Saguache County"
+      ],
+      "mapCenter": [
+        38.08,
+        -106.28
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_san_juan": {
+      "name": "San Juan County",
+      "type": "county",
+      "fips": "111",
+      "state": "CO",
+      "namePatterns": [
+        "SAN JUAN",
+        "San Juan",
+        "San Juan County"
+      ],
+      "mapCenter": [
+        37.77,
+        -107.68
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_san_miguel": {
+      "name": "San Miguel County",
+      "type": "county",
+      "fips": "113",
+      "state": "CO",
+      "namePatterns": [
+        "SAN MIGUEL",
+        "San Miguel",
+        "San Miguel County"
+      ],
+      "mapCenter": [
+        37.93,
+        -108.43
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_sedgwick": {
+      "name": "Sedgwick County",
+      "type": "county",
+      "fips": "115",
+      "state": "CO",
+      "namePatterns": [
+        "SEDGWICK",
+        "Sedgwick",
+        "Sedgwick County"
+      ],
+      "mapCenter": [
+        40.88,
+        -102.35
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_summit": {
+      "name": "Summit County",
+      "type": "county",
+      "fips": "117",
+      "state": "CO",
+      "namePatterns": [
+        "SUMMIT",
+        "Summit",
+        "Summit County"
+      ],
+      "mapCenter": [
+        39.63,
+        -106.12
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_teller": {
+      "name": "Teller County",
+      "type": "county",
+      "fips": "119",
+      "state": "CO",
+      "namePatterns": [
+        "TELLER",
+        "Teller",
+        "Teller County"
+      ],
+      "mapCenter": [
+        38.88,
+        -105.16
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_washington": {
+      "name": "Washington County",
+      "type": "county",
+      "fips": "121",
+      "state": "CO",
+      "namePatterns": [
+        "WASHINGTON",
+        "Washington",
+        "Washington County"
+      ],
+      "mapCenter": [
+        39.97,
+        -103.2
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_weld": {
+      "name": "Weld County",
+      "type": "county",
+      "fips": "123",
+      "state": "CO",
+      "namePatterns": [
+        "WELD",
+        "Weld",
+        "Weld County"
+      ],
+      "mapCenter": [
+        40.55,
+        -104.39
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    },
+    "co_yuma": {
+      "name": "Yuma County",
+      "type": "county",
+      "fips": "125",
+      "state": "CO",
+      "namePatterns": [
+        "YUMA",
+        "Yuma",
+        "Yuma County"
+      ],
+      "mapCenter": [
+        40,
+        -102.43
+      ],
+      "mapZoom": 10,
+      "maintainsOwnRoads": false
+    }
+  },
+  "filterProfiles": {
+    "countyOnly": {
+      "name": "County Roads Only",
+      "description": "County-maintained roads only",
+      "systemValues": [
+        "Non-DOT secondary",
+        "Non-DOT"
+      ]
+    },
+    "countyPlusVDOT": {
+      "name": "All Roads (No Interstate)",
+      "description": "Local roads plus DOT primary/secondary, excluding interstates",
+      "systemValues": [
+        "Non-DOT secondary",
+        "Non-DOT",
+        "Primary",
+        "Secondary"
+      ],
+      "excludeRoutePatterns": [
+        "^I-\\d+",
+        "^I-64",
+        "^I-95",
+        "^I-295",
+        "^I-85",
+        "^I-81",
+        "^I-77",
+        "^I-66",
+        "^I-664"
+      ]
+    },
+    "allRoads": {
+      "name": "All Roads (Including Interstate)",
+      "description": "All road types including interstates",
+      "systemValues": [
+        "Non-DOT secondary",
+        "Non-DOT",
+        "Primary",
+        "Secondary",
+        "Interstate"
+      ]
+    },
+    "cityOnly": {
+      "name": "City Roads Only",
+      "description": "City/town agency-maintained roads only",
+      "ownershipValues": [
+        "3. City or Town Hwy Agency"
+      ]
+    }
+  },
+  "states": {
+    "_comment": "Registry of supported states. Each key maps to a states/{key}/config.json with column mappings, jurisdictions, and road system definitions.",
+    "alabama": {
+      "fips": "01",
+      "name": "Alabama",
+      "abbreviation": "AL",
+      "dotName": "ALDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "alabama",
+      "appSubtitle": "Alabama Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "alaska": {
+      "fips": "02",
+      "name": "Alaska",
+      "abbreviation": "AK",
+      "dotName": "AKDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "alaska",
+      "appSubtitle": "Alaska Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "arizona": {
+      "fips": "04",
+      "name": "Arizona",
+      "abbreviation": "AZ",
+      "dotName": "ADOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "arizona",
+      "appSubtitle": "Arizona Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "arkansas": {
+      "fips": "05",
+      "name": "Arkansas",
+      "abbreviation": "AR",
+      "dotName": "ArDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "arkansas",
+      "appSubtitle": "Arkansas Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "california": {
+      "fips": "06",
+      "name": "California",
+      "abbreviation": "CA",
+      "dotName": "Caltrans",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "california",
+      "appSubtitle": "California Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "colorado": {
+      "fips": "08",
+      "name": "Colorado",
+      "abbreviation": "CO",
+      "dotName": "CDOT",
+      "defaultJurisdiction": "douglas",
+      "dataDir": "CDOT",
+      "r2Prefix": "colorado",
+      "appSubtitle": "Colorado Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "connecticut": {
+      "fips": "09",
+      "name": "Connecticut",
+      "abbreviation": "CT",
+      "dotName": "CTDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "connecticut",
+      "appSubtitle": "Connecticut Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "delaware": {
+      "fips": "10",
+      "name": "Delaware",
+      "abbreviation": "DE",
+      "dotName": "DelDOT",
+      "defaultJurisdiction": "de_sussex",
+      "dataDir": "DelawareDOT",
+      "r2Prefix": "delaware",
+      "appSubtitle": "Delaware Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "district_of_columbia": {
+      "fips": "11",
+      "name": "District of Columbia",
+      "abbreviation": "DC",
+      "dotName": "DDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "district_of_columbia",
+      "appSubtitle": "District of Columbia Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "florida": {
+      "fips": "12",
+      "name": "Florida",
+      "abbreviation": "FL",
+      "dotName": "FDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "florida",
+      "appSubtitle": "Florida Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "georgia": {
+      "fips": "13",
+      "name": "Georgia",
+      "abbreviation": "GA",
+      "dotName": "GDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "georgia",
+      "appSubtitle": "Georgia Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "hawaii": {
+      "fips": "15",
+      "name": "Hawaii",
+      "abbreviation": "HI",
+      "dotName": "HDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "hawaii",
+      "appSubtitle": "Hawaii Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "idaho": {
+      "fips": "16",
+      "name": "Idaho",
+      "abbreviation": "ID",
+      "dotName": "ITD",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "idaho",
+      "appSubtitle": "Idaho Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "illinois": {
+      "fips": "17",
+      "name": "Illinois",
+      "abbreviation": "IL",
+      "dotName": "IDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "illinois",
+      "appSubtitle": "Illinois Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "indiana": {
+      "fips": "18",
+      "name": "Indiana",
+      "abbreviation": "IN",
+      "dotName": "INDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "indiana",
+      "appSubtitle": "Indiana Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "iowa": {
+      "fips": "19",
+      "name": "Iowa",
+      "abbreviation": "IA",
+      "dotName": "IowaDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "iowa",
+      "appSubtitle": "Iowa Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "kansas": {
+      "fips": "20",
+      "name": "Kansas",
+      "abbreviation": "KS",
+      "dotName": "KDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "kansas",
+      "appSubtitle": "Kansas Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "kentucky": {
+      "fips": "21",
+      "name": "Kentucky",
+      "abbreviation": "KY",
+      "dotName": "KYTC",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "kentucky",
+      "appSubtitle": "Kentucky Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "louisiana": {
+      "fips": "22",
+      "name": "Louisiana",
+      "abbreviation": "LA",
+      "dotName": "LaDOTD",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "louisiana",
+      "appSubtitle": "Louisiana Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "maine": {
+      "fips": "23",
+      "name": "Maine",
+      "abbreviation": "ME",
+      "dotName": "MaineDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "maine",
+      "appSubtitle": "Maine Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "maryland": {
+      "fips": "24",
+      "name": "Maryland",
+      "abbreviation": "MD",
+      "dotName": "MDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "maryland",
+      "appSubtitle": "Maryland Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "massachusetts": {
+      "fips": "25",
+      "name": "Massachusetts",
+      "abbreviation": "MA",
+      "dotName": "MassDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "massachusetts",
+      "appSubtitle": "Massachusetts Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "michigan": {
+      "fips": "26",
+      "name": "Michigan",
+      "abbreviation": "MI",
+      "dotName": "MDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "michigan",
+      "appSubtitle": "Michigan Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "minnesota": {
+      "fips": "27",
+      "name": "Minnesota",
+      "abbreviation": "MN",
+      "dotName": "MnDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "minnesota",
+      "appSubtitle": "Minnesota Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "mississippi": {
+      "fips": "28",
+      "name": "Mississippi",
+      "abbreviation": "MS",
+      "dotName": "MDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "mississippi",
+      "appSubtitle": "Mississippi Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "missouri": {
+      "fips": "29",
+      "name": "Missouri",
+      "abbreviation": "MO",
+      "dotName": "MoDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "missouri",
+      "appSubtitle": "Missouri Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "montana": {
+      "fips": "30",
+      "name": "Montana",
+      "abbreviation": "MT",
+      "dotName": "MDT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "montana",
+      "appSubtitle": "Montana Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "nebraska": {
+      "fips": "31",
+      "name": "Nebraska",
+      "abbreviation": "NE",
+      "dotName": "NDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "nebraska",
+      "appSubtitle": "Nebraska Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "nevada": {
+      "fips": "32",
+      "name": "Nevada",
+      "abbreviation": "NV",
+      "dotName": "NDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "nevada",
+      "appSubtitle": "Nevada Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "new_hampshire": {
+      "fips": "33",
+      "name": "New Hampshire",
+      "abbreviation": "NH",
+      "dotName": "NHDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "new_hampshire",
+      "appSubtitle": "New Hampshire Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "new_jersey": {
+      "fips": "34",
+      "name": "New Jersey",
+      "abbreviation": "NJ",
+      "dotName": "NJDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "new_jersey",
+      "appSubtitle": "New Jersey Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "new_mexico": {
+      "fips": "35",
+      "name": "New Mexico",
+      "abbreviation": "NM",
+      "dotName": "NMDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "new_mexico",
+      "appSubtitle": "New Mexico Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "new_york": {
+      "fips": "36",
+      "name": "New York",
+      "abbreviation": "NY",
+      "dotName": "NYSDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "new_york",
+      "appSubtitle": "New York Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "north_carolina": {
+      "fips": "37",
+      "name": "North Carolina",
+      "abbreviation": "NC",
+      "dotName": "NCDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "north_carolina",
+      "appSubtitle": "North Carolina Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "north_dakota": {
+      "fips": "38",
+      "name": "North Dakota",
+      "abbreviation": "ND",
+      "dotName": "NDDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "north_dakota",
+      "appSubtitle": "North Dakota Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "ohio": {
+      "fips": "39",
+      "name": "Ohio",
+      "abbreviation": "OH",
+      "dotName": "ODOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "ohio",
+      "appSubtitle": "Ohio Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "oklahoma": {
+      "fips": "40",
+      "name": "Oklahoma",
+      "abbreviation": "OK",
+      "dotName": "ODOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "oklahoma",
+      "appSubtitle": "Oklahoma Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "oregon": {
+      "fips": "41",
+      "name": "Oregon",
+      "abbreviation": "OR",
+      "dotName": "ODOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "oregon",
+      "appSubtitle": "Oregon Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "pennsylvania": {
+      "fips": "42",
+      "name": "Pennsylvania",
+      "abbreviation": "PA",
+      "dotName": "PennDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "pennsylvania",
+      "appSubtitle": "Pennsylvania Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "rhode_island": {
+      "fips": "44",
+      "name": "Rhode Island",
+      "abbreviation": "RI",
+      "dotName": "RIDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "rhode_island",
+      "appSubtitle": "Rhode Island Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "south_carolina": {
+      "fips": "45",
+      "name": "South Carolina",
+      "abbreviation": "SC",
+      "dotName": "SCDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "south_carolina",
+      "appSubtitle": "South Carolina Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "south_dakota": {
+      "fips": "46",
+      "name": "South Dakota",
+      "abbreviation": "SD",
+      "dotName": "SDDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "south_dakota",
+      "appSubtitle": "South Dakota Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "tennessee": {
+      "fips": "47",
+      "name": "Tennessee",
+      "abbreviation": "TN",
+      "dotName": "TDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "tennessee",
+      "appSubtitle": "Tennessee Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "texas": {
+      "fips": "48",
+      "name": "Texas",
+      "abbreviation": "TX",
+      "dotName": "TxDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "texas",
+      "appSubtitle": "Texas Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "utah": {
+      "fips": "49",
+      "name": "Utah",
+      "abbreviation": "UT",
+      "dotName": "UDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "utah",
+      "appSubtitle": "Utah Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "vermont": {
+      "fips": "50",
+      "name": "Vermont",
+      "abbreviation": "VT",
+      "dotName": "VTrans",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "vermont",
+      "appSubtitle": "Vermont Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "virginia": {
+      "fips": "51",
+      "name": "Virginia",
+      "abbreviation": "VA",
+      "dotName": "VDOT",
+      "defaultJurisdiction": "henrico",
+      "dataDir": null,
+      "r2Prefix": "virginia",
+      "appSubtitle": "Virginia Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "washington": {
+      "fips": "53",
+      "name": "Washington",
+      "abbreviation": "WA",
+      "dotName": "WSDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "washington",
+      "appSubtitle": "Washington Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "west_virginia": {
+      "fips": "54",
+      "name": "West Virginia",
+      "abbreviation": "WV",
+      "dotName": "WVDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "west_virginia",
+      "appSubtitle": "West Virginia Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "wisconsin": {
+      "fips": "55",
+      "name": "Wisconsin",
+      "abbreviation": "WI",
+      "dotName": "WisDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "wisconsin",
+      "appSubtitle": "Wisconsin Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    },
+    "wyoming": {
+      "fips": "56",
+      "name": "Wyoming",
+      "abbreviation": "WY",
+      "dotName": "WYDOT",
+      "defaultJurisdiction": null,
+      "dataDir": null,
+      "r2Prefix": "wyoming",
+      "appSubtitle": "Wyoming Crash Analysis Tool",
+      "tiers": [
+        "state",
+        "region",
+        "mpo",
+        "county",
+        "city"
+      ]
+    }
+  },
+  "defaultState": "colorado",
+  "defaults": {
+    "jurisdiction": null,
+    "filterProfile": "allRoads",
+    "_comment": "jurisdiction is resolved from the active state's defaultJurisdiction at runtime"
+  },
+  "dataSources": {
+    "_comment": "State-specific data source configurations. Keyed by state key.",
+    "virginia": {
+      "name": "Virginia Roads",
+      "url": "https://www.virginiaroads.org",
+      "apiUrl": "https://services.arcgis.com/p5v98VHDX9Atv3l7/arcgis/rest/services/CrashData_Basic_Updated/FeatureServer/0/query",
+      "apiUrlAlternatives": [
+        "https://services.arcgis.com/p5v98VHDX9Atv3l7/arcgis/rest/services/Crash_Data_Updated/FeatureServer/0/query",
+        "https://services.arcgis.com/p5v98VHDX9Atv3l7/arcgis/rest/services/CrashData/FeatureServer/0/query",
+        "https://services.arcgis.com/p5v98VHDX9Atv3l7/arcgis/rest/services/CrashData_test/FeatureServer/0/query"
+      ],
+      "fallbackUrl": "https://www.virginiaroads.org/api/download/v1/items/1a96a2f31b4f4d77991471b6cabb38ba/csv?layers=0",
+      "fallbackUrlAlternatives": [
+        "https://www.virginiaroads.org/api/download/v1/items/3bd854bff90d49eaa85bdc68acf952e0/csv?layers=0",
+        "https://www.virginiaroads.org/api/download/v1/items/101101cecac34f28b38c0846e847bd0b/csv?layers=1"
+      ],
+      "datasetId": "1a96a2f31b4f4d77991471b6cabb38ba"
+    },
+    "colorado": {
+      "name": "CDOT OnBase Portal",
+      "url": "https://www.codot.gov/safety/traffic-safety/crash-data",
+      "downloadMethod": "playwright",
+      "description": "Colorado DOT crash data via OnBase web portal"
+    }
+  },
+  "transitStops": {
+    "enabled": true,
+    "serviceUrls": [
+      "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0"
+    ],
+    "grtcApiUrl": "https://data.richmondgov.com/resource/dt8y-2apj.json",
+    "serviceUrl": "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/NTAD_National_Transit_Map_Stops/FeatureServer/0",
+    "description": "BTS National Transit Map - Federal dataset with all US transit stops",
+    "dataSource": "https://data-usdot.opendata.arcgis.com/",
+    "fields": {
+      "county": "COUNTY",
+      "agency": "agency_name",
+      "stopName": "stop_name",
+      "stopId": "stop_id",
+      "lat": "stop_lat",
+      "lng": "stop_lon"
+    },
+    "alternateFields": {
+      "county": [
+        "COUNTY",
+        "county",
+        "County",
+        "JURISDICTION"
+      ],
+      "agency": [
+        "agency_name",
+        "AGENCY",
+        "agency",
+        "Agency",
+        "OPERATOR"
+      ],
+      "stopName": [
+        "stop_name",
+        "STOP_NAME",
+        "StopName",
+        "NAME"
+      ],
+      "stopId": [
+        "stop_id",
+        "STOP_ID",
+        "StopId",
+        "ID"
+      ],
+      "lat": [
+        "stop_lat",
+        "LAT",
+        "lat",
+        "Lat",
+        "LATITUDE",
+        "Y"
+      ],
+      "lng": [
+        "stop_lon",
+        "LON",
+        "lon",
+        "Lon",
+        "LNG",
+        "lng",
+        "LONGITUDE",
+        "X"
+      ]
+    },
+    "defaultRadius": 300,
+    "defaultCrashFilter": "ped_bike",
+    "enableDemoFallback": true
+  }
+}

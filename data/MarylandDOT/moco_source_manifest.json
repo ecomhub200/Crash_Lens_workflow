@@ -1,0 +1,76 @@
+{
+  "_description": "Montgomery County MD crash data registry — county-level Socrata portal (separate from statewide opendata.maryland.gov)",
+  "_note": "MoCo uses the same ACRS system as statewide Maryland but publishes via its own data portal with slightly different field names (e.g., crash_date_time vs acc_date, collision_type vs collision_type_desc).",
+  "_updated": "2026-02-17",
+
+  "source": {
+    "name": "Montgomery County Open Data (Socrata)",
+    "base_url": "https://data.montgomerycountymd.gov",
+    "portal_url": "https://data.montgomerycountymd.gov/Public-Safety/Crash-Reporting-Incidents-Data/bhju-22kf",
+    "file_format": "JSON/CSV (Socrata SODA2 API)",
+    "authentication": "none (public)",
+    "cors": "permissive (Access-Control-Allow-Origin: *)"
+  },
+
+  "datasets": {
+    "crashes": {
+      "resource_id": "bhju-22kf",
+      "name": "Crash Reporting - Incidents Data",
+      "description": "Main crash-level records with location, severity, conditions",
+      "api_url": "https://data.montgomerycountymd.gov/resource/bhju-22kf.json",
+      "date_field": "crash_date_time",
+      "id_field": "report_number",
+      "has_geo": true,
+      "approx_rows": 119394,
+      "file_prefix": "moco_crashes"
+    },
+    "drivers": {
+      "resource_id": "mmzv-x632",
+      "name": "Crash Reporting - Drivers Data",
+      "description": "Driver-level data per crash (vehicle type, actions, contributing factors)",
+      "api_url": "https://data.montgomerycountymd.gov/resource/mmzv-x632.json",
+      "date_field": "crash_date_time",
+      "id_field": "report_number",
+      "has_geo": false,
+      "file_prefix": "moco_drivers"
+    },
+    "nonmotorists": {
+      "resource_id": "n7fk-dce5",
+      "name": "Crash Reporting - Non-Motorists Data",
+      "description": "Pedestrian and cyclist involvement data per crash",
+      "api_url": "https://data.montgomerycountymd.gov/resource/n7fk-dce5.json",
+      "date_field": "crash_date_time",
+      "id_field": "report_number",
+      "has_geo": false,
+      "file_prefix": "moco_nonmotorists"
+    }
+  },
+
+  "api": {
+    "endpoint_template": "https://data.montgomerycountymd.gov/resource/{resource_id}.json",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "recommended_page_size": 1000,
+      "max_per_request": 50000
+    },
+    "filtering": {
+      "date_field": "crash_date_time",
+      "severity_field": "acrs_report_type",
+      "municipality_field": "municipality",
+      "year_field": "year",
+      "example_where": "$where=crash_date_time >= '2023-01-01T00:00:00.000' AND crash_date_time < '2024-01-01T00:00:00.000'"
+    },
+    "join_key": "report_number"
+  },
+
+  "jurisdiction": {
+    "name": "Montgomery County",
+    "state": "Maryland",
+    "fips_state": "24",
+    "fips_county": "031",
+    "fips_full": "24031",
+    "r2_path": "maryland/montgomery"
+  }
+}

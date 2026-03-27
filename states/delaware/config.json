@@ -1,0 +1,162 @@
+{
+  "state": {
+    "name": "Delaware",
+    "abbreviation": "DE",
+    "fips": "10",
+    "dotName": "DelDOT",
+    "dotFullName": "Delaware Department of Transportation",
+    "dataSystemName": "Socrata Open Data Portal",
+    "dataPortalUrl": "https://data.delaware.gov",
+    "coordinateBounds": {
+      "latMin": 38.45,
+      "latMax": 39.84,
+      "lonMin": -75.79,
+      "lonMax": -75.05
+    }
+  },
+
+  "columnMapping": {
+    "_description": "Maps Delaware Socrata CSV column names to internal field codes",
+
+    "ID": "_COMPOSITE_KEY",
+    "YEAR": "_DERIVED_FROM_DATETIME",
+    "DATE": "crash_datetime",
+    "TIME": "_DERIVED_FROM_DATETIME",
+    "SEVERITY": "crash_classification_description",
+    "K": "_DERIVED",
+    "A": "_DERIVED",
+    "B": "_NOT_AVAILABLE",
+    "C": "_NOT_AVAILABLE",
+    "COLLISION": "manner_of_impact_description",
+    "WEATHER": "weather_1_description",
+    "LIGHT": "lighting_condition_description",
+    "SURFACE": "road_surface_description",
+    "ALIGNMENT": "_NOT_AVAILABLE",
+    "ROAD_DESC": "_NOT_AVAILABLE",
+    "INT_TYPE": "_NOT_AVAILABLE",
+    "TRAFFIC_CTRL": "_NOT_AVAILABLE",
+    "CTRL_STATUS": "_NOT_AVAILABLE",
+    "WORKZONE": "work_zone",
+    "SCHOOL": "_NOT_AVAILABLE",
+    "ALCOHOL": "alcohol_involved",
+    "BIKE": "bicycled_involved",
+    "PED": "pedestrian_involved",
+    "SPEED": "_DERIVED_FROM_CONTRIB_CODE",
+    "DISTRACTED": "_DERIVED_FROM_CONTRIB_CODE",
+    "DROWSY": "_NOT_AVAILABLE",
+    "HITRUN": "_NOT_AVAILABLE",
+    "SENIOR": "_NOT_AVAILABLE",
+    "YOUNG": "_NOT_AVAILABLE",
+    "NIGHT": "_DERIVED_FROM_LIGHT",
+    "UNRESTRAINED": "seatbelt_used",
+    "MOTORCYCLE": "motorcycle_involved",
+    "FUNC_CLASS": "_NOT_AVAILABLE",
+    "AREA_TYPE": "_NOT_AVAILABLE",
+    "ROUTE": "_NOT_AVAILABLE",
+    "NODE": "_NOT_AVAILABLE",
+    "MP": "_NOT_AVAILABLE",
+    "X": "longitude",
+    "Y": "latitude",
+    "JURISDICTION": "county_name",
+    "FACILITY_TYPE": "_NOT_AVAILABLE",
+    "ROAD_SYSTEM": "_NOT_AVAILABLE",
+    "OWNERSHIP": "_NOT_AVAILABLE",
+    "DRUG": "drug_involved",
+    "GUARDRAIL": "_NOT_AVAILABLE",
+    "LGTRUCK": "_NOT_AVAILABLE",
+    "FIRST_HARMFUL": "_NOT_AVAILABLE",
+    "FIRST_HARMFUL_LOC": "_NOT_AVAILABLE",
+    "RELATION_TO_ROAD": "_NOT_AVAILABLE",
+    "VEHICLE_COUNT": "_NOT_AVAILABLE",
+    "PERSONS_INJURED": "_NOT_AVAILABLE"
+  },
+
+  "derivedFields": {
+    "_description": "Fields derived during normalization",
+    "SEVERITY": {
+      "method": "text_to_kabco",
+      "source": "crash_classification_description",
+      "_note": "3-level only: Fatal→K, Personal Injury→A (per FHWA), PDO→O"
+    },
+    "ID": {
+      "method": "composite_key",
+      "sources": ["crash_datetime", "row_index"],
+      "_note": "No crash ID in dataset. Format: DE-{YYYYMMDD}-{HHMM}-{NNNNNNN} (sequential row number)"
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "crash_datetime"
+    }
+  },
+
+  "roadSystems": {
+    "_description": "Delaware road classification — not available in public crash data",
+    "_note": "Road system/functional class not in dataset. RTE Name empty until geocoding populates it."
+  },
+
+  "splitConfig": {
+    "_description": "Road type split config for pipeline. Limited until geocoding provides road data.",
+    "countyRoads": {
+      "method": "not_available",
+      "_note": "No road system/ownership field in Delaware public data"
+    },
+    "interstateExclusion": {
+      "method": "not_available",
+      "_note": "No functional class field in Delaware public data"
+    }
+  },
+
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars ($16.0M K / $18.1K O)"
+  },
+
+  "jurisdictions": {
+    "kent": {
+      "name": "Kent County",
+      "type": "county",
+      "fips": "001",
+      "namePatterns": ["Kent"],
+      "mapCenter": [39.15, -75.52],
+      "mapZoom": 10,
+      "state": "DE"
+    },
+    "new_castle": {
+      "name": "New Castle County",
+      "type": "county",
+      "fips": "003",
+      "namePatterns": ["New Castle"],
+      "mapCenter": [39.6, -75.6],
+      "mapZoom": 10,
+      "state": "DE"
+    },
+    "sussex": {
+      "name": "Sussex County",
+      "type": "county",
+      "fips": "005",
+      "namePatterns": ["Sussex"],
+      "mapCenter": [38.68, -75.38],
+      "mapZoom": 10,
+      "state": "DE"
+    }
+  },
+
+  "dataSource": {
+    "name": "DelDOT Open Data Portal",
+    "url": "https://data.delaware.gov",
+    "apiUrl": "https://data.delaware.gov/resource/827n-m6xc.json",
+    "resourceId": "827n-m6xc"
+  },
+
+  "knownLimitations": {
+    "severity": "3-level only (K/A/O). Personal Injury → A per FHWA guidance. No B/C granularity.",
+    "routeName": "Not in dataset. Requires reverse geocoding (deferred).",
+    "node": "Not in dataset. Requires spatial analysis (deferred).",
+    "crashId": "Not in dataset. Composite key generated.",
+    "injuryCounts": "K_People/A_People set to 0/1. B_People/C_People always 0."
+  }
+}

@@ -1,0 +1,658 @@
+{
+  "state": {
+    "fips": "45",
+    "name": "South Carolina",
+    "abbreviation": "SC",
+    "dot": "SCDOT",
+    "dotFullName": "South Carolina Department of Transportation",
+    "center": [
+      -80.945007,
+      33.856892
+    ],
+    "zoom": 7,
+    "placesCount": 271
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "sc_1": {
+      "name": "District 1 (Columbia)",
+      "shortName": "District 1",
+      "center": [
+        -80.6,
+        33.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "055",
+        "061",
+        "063",
+        "079",
+        "085"
+      ],
+      "countyNames": {
+        "055": "Kershaw",
+        "061": "Lee",
+        "063": "Lexington",
+        "079": "Richland",
+        "085": "Sumter"
+      },
+      "mapBounds": {
+        "sw": [
+          33.4,
+          -81.3
+        ],
+        "ne": [
+          34.4,
+          -79.9
+        ]
+      },
+      "hq": "Columbia"
+    },
+    "sc_2": {
+      "name": "District 2 (Greenwood)",
+      "shortName": "District 2",
+      "center": [
+        -82.0,
+        34.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "037",
+        "047",
+        "059",
+        "065",
+        "071",
+        "081"
+      ],
+      "countyNames": {
+        "001": "Abbeville",
+        "037": "Edgefield",
+        "047": "Greenwood",
+        "059": "Laurens",
+        "065": "McCormick",
+        "071": "Newberry",
+        "081": "Saluda"
+      },
+      "mapBounds": {
+        "sw": [
+          33.7,
+          -82.5
+        ],
+        "ne": [
+          34.5,
+          -81.5
+        ]
+      },
+      "hq": "Greenwood"
+    },
+    "sc_3": {
+      "name": "District 3 (Greenville)",
+      "shortName": "District 3",
+      "center": [
+        -82.4,
+        34.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "045",
+        "073",
+        "077",
+        "083"
+      ],
+      "countyNames": {
+        "007": "Anderson",
+        "045": "Greenville",
+        "073": "Oconee",
+        "077": "Pickens",
+        "083": "Spartanburg"
+      },
+      "mapBounds": {
+        "sw": [
+          34.3,
+          -83.2
+        ],
+        "ne": [
+          35.2,
+          -81.6
+        ]
+      },
+      "hq": "Greenville"
+    },
+    "sc_4": {
+      "name": "District 4 (Chester)",
+      "shortName": "District 4",
+      "center": [
+        -81.1,
+        34.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "021",
+        "023",
+        "025",
+        "039",
+        "057",
+        "087",
+        "091"
+      ],
+      "countyNames": {
+        "021": "Cherokee",
+        "023": "Chester",
+        "025": "Chesterfield",
+        "039": "Fairfield",
+        "057": "Lancaster",
+        "087": "Union",
+        "091": "York"
+      },
+      "mapBounds": {
+        "sw": [
+          34.3,
+          -81.6
+        ],
+        "ne": [
+          35.2,
+          -80.6
+        ]
+      },
+      "hq": "Chester"
+    },
+    "sc_5": {
+      "name": "District 5 (Florence)",
+      "shortName": "District 5",
+      "center": [
+        -79.4,
+        33.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "027",
+        "031",
+        "033",
+        "041",
+        "043",
+        "051",
+        "067",
+        "069",
+        "089"
+      ],
+      "countyNames": {
+        "027": "Clarendon",
+        "031": "Darlington",
+        "033": "Dillon",
+        "041": "Florence",
+        "043": "Georgetown",
+        "051": "Horry",
+        "067": "Marion",
+        "069": "Marlboro",
+        "089": "Williamsburg"
+      },
+      "mapBounds": {
+        "sw": [
+          33.4,
+          -80.3
+        ],
+        "ne": [
+          34.4,
+          -78.5
+        ]
+      },
+      "hq": "Florence"
+    },
+    "sc_6": {
+      "name": "District 6 (Charleston)",
+      "shortName": "District 6",
+      "center": [
+        -80.0,
+        33.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "015",
+        "019",
+        "035"
+      ],
+      "countyNames": {
+        "015": "Berkeley",
+        "019": "Charleston",
+        "035": "Dorchester"
+      },
+      "mapBounds": {
+        "sw": [
+          32.5,
+          -80.5
+        ],
+        "ne": [
+          33.5,
+          -79.5
+        ]
+      },
+      "hq": "Charleston"
+    },
+    "sc_7": {
+      "name": "District 7 (Orangeburg)",
+      "shortName": "District 7",
+      "center": [
+        -80.9,
+        33.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "009",
+        "011",
+        "013",
+        "017",
+        "029",
+        "049",
+        "053",
+        "075"
+      ],
+      "countyNames": {
+        "005": "Allendale",
+        "009": "Bamberg",
+        "011": "Barnwell",
+        "013": "Beaufort",
+        "017": "Calhoun",
+        "029": "Colleton",
+        "049": "Hampton",
+        "053": "Jasper",
+        "075": "Orangeburg"
+      },
+      "mapBounds": {
+        "sw": [
+          32.2,
+          -81.6
+        ],
+        "ne": [
+          33.6,
+          -80.2
+        ]
+      },
+      "hq": "Orangeburg"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "chatscats": {
+      "name": "CHATS (Charleston Area Transportation Study)",
+      "shortName": "Charleston Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -82.394,
+        34.8526
+      ],
+      "zoom": 10,
+      "counties": [
+        "019",
+        "015",
+        "035"
+      ],
+      "countyNames": {
+        "019": "Charleston",
+        "015": "Berkeley",
+        "035": "Dorchester"
+      },
+      "btsAcronym": "CATS",
+      "mapBounds": {
+        "sw": [
+          34.6,
+          -82.65
+        ],
+        "ne": [
+          35.1,
+          -82.1
+        ]
+      }
+    },
+    "gsatsgpa": {
+      "name": "GSATS (Greenville-Pickens Area)",
+      "shortName": "Greenville-Pickens Area",
+      "type": "mpo",
+      "center": [
+        -79.9311,
+        32.7765
+      ],
+      "zoom": 10,
+      "counties": [
+        "045",
+        "077"
+      ],
+      "countyNames": {
+        "045": "Greenville",
+        "077": "Pickens"
+      },
+      "btsAcronym": "GA",
+      "mapBounds": {
+        "sw": [
+          32.5,
+          -80.2
+        ],
+        "ne": [
+          33.05,
+          -79.65
+        ]
+      }
+    },
+    "coatscats": {
+      "name": "COATS (Columbia Area Transportation Study)",
+      "shortName": "Columbia Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -81.0348,
+        34.0007
+      ],
+      "zoom": 10,
+      "counties": [
+        "079",
+        "063"
+      ],
+      "countyNames": {
+        "079": "Richland",
+        "063": "Lexington"
+      },
+      "btsAcronym": "CATS",
+      "mapBounds": {
+        "sw": [
+          33.75,
+          -81.3
+        ],
+        "ne": [
+          34.25,
+          -80.75
+        ]
+      }
+    },
+    "spatssa": {
+      "name": "SPATS (Spartanburg Area)",
+      "shortName": "Spartanburg Area",
+      "type": "mpo",
+      "center": [
+        -78.8867,
+        33.6891
+      ],
+      "zoom": 10,
+      "counties": [
+        "083"
+      ],
+      "countyNames": {
+        "083": "Spartanburg"
+      },
+      "btsAcronym": "SA",
+      "mapBounds": {
+        "sw": [
+          33.45,
+          -79.15
+        ],
+        "ne": [
+          33.9,
+          -78.6
+        ]
+      }
+    },
+    "rfatsrhfmay": {
+      "name": "RFATS (Rock Hill-Fort Mill Area / York)",
+      "shortName": "Rock Hill-Fort Mill Area / York",
+      "type": "mpo",
+      "center": [
+        -81.932,
+        34.9496
+      ],
+      "zoom": 10,
+      "counties": [
+        "091"
+      ],
+      "countyNames": {
+        "091": "York"
+      },
+      "btsAcronym": "RHMAY",
+      "mapBounds": {
+        "sw": [
+          34.7,
+          -82.2
+        ],
+        "ne": [
+          35.15,
+          -81.65
+        ]
+      }
+    },
+    "anatsaa": {
+      "name": "ANATS (Anderson Area)",
+      "shortName": "Anderson Area",
+      "type": "mpo",
+      "center": [
+        -80.3813,
+        34.1876
+      ],
+      "zoom": 10,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Anderson"
+      },
+      "btsAcronym": "AA",
+      "mapBounds": {
+        "sw": [
+          33.95,
+          -80.65
+        ],
+        "ne": [
+          34.4,
+          -80.1
+        ]
+      }
+    },
+    "flatsfa": {
+      "name": "FLATS (Florence Area)",
+      "shortName": "Florence Area",
+      "type": "mpo",
+      "center": [
+        -82.0121,
+        35.0468
+      ],
+      "zoom": 10,
+      "counties": [
+        "041"
+      ],
+      "countyNames": {
+        "041": "Florence"
+      },
+      "btsAcronym": "FA",
+      "mapBounds": {
+        "sw": [
+          34.85,
+          -82.25
+        ],
+        "ne": [
+          35.25,
+          -81.75
+        ]
+      }
+    },
+    "gsatsgsamb": {
+      "name": "GSATS (Grand Strand Area / Myrtle Beach)",
+      "shortName": "Grand Strand Area / Myrtle Beach",
+      "type": "mpo",
+      "center": [
+        -80.6069,
+        34.2438
+      ],
+      "zoom": 10,
+      "counties": [
+        "051",
+        "043"
+      ],
+      "countyNames": {
+        "051": "Horry",
+        "043": "Georgetown"
+      },
+      "btsAcronym": "GSAMB",
+      "mapBounds": {
+        "sw": [
+          34.05,
+          -80.85
+        ],
+        "ne": [
+          34.45,
+          -80.35
+        ]
+      }
+    },
+    "latsla": {
+      "name": "LATS (Lowcountry Area)",
+      "shortName": "Lowcountry Area",
+      "type": "mpo",
+      "center": [
+        -80.6698,
+        32.431
+      ],
+      "zoom": 10,
+      "counties": [
+        "013",
+        "053"
+      ],
+      "countyNames": {
+        "013": "Beaufort",
+        "053": "Jasper"
+      },
+      "btsAcronym": "LA",
+      "mapBounds": {
+        "sw": [
+          32.2,
+          -80.9
+        ],
+        "ne": [
+          32.65,
+          -80.4
+        ]
+      }
+    },
+    "sampo": {
+      "name": "Sumter Area MPO",
+      "shortName": "Sumter Area",
+      "type": "mpo",
+      "center": [
+        -79.7626,
+        34.1954
+      ],
+      "zoom": 10,
+      "counties": [
+        "085"
+      ],
+      "countyNames": {
+        "085": "Sumter"
+      },
+      "btsAcronym": "SAM",
+      "mapBounds": {
+        "sw": [
+          34.0,
+          -80.0
+        ],
+        "ne": [
+          34.4,
+          -79.5
+        ]
+      }
+    },
+    "grand_strand_area_transportation_study_mpo": {
+      "name": "Grand-Strand Area Transportation Study",
+      "shortName": "Grand-Strand Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "45199200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -78.812013,
+        33.817826
+      ],
+      "zoom": 10
+    },
+    "rock_hill_fort_mill_area_transportation_study_mpo": {
+      "name": "Rock Hill-Fort Mill Area Transportation Study",
+      "shortName": "Rock Hill-Fort Mill Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "45198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.956884,
+        34.939743
+      ],
+      "zoom": 10
+    },
+    "sumter_urban_area_transportation_study_mpo": {
+      "name": "Sumter Urban Area Transportation Study",
+      "shortName": "Sumter Urban Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "45199100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.400485,
+        33.92185
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Abbeville",
+    "003": "Aiken",
+    "005": "Allendale",
+    "007": "Anderson",
+    "009": "Bamberg",
+    "011": "Barnwell",
+    "013": "Beaufort",
+    "015": "Berkeley",
+    "017": "Calhoun",
+    "019": "Charleston",
+    "021": "Cherokee",
+    "023": "Chester",
+    "025": "Chesterfield",
+    "027": "Clarendon",
+    "029": "Colleton",
+    "031": "Darlington",
+    "033": "Dillon",
+    "035": "Dorchester",
+    "037": "Edgefield",
+    "039": "Fairfield",
+    "041": "Florence",
+    "043": "Georgetown",
+    "045": "Greenville",
+    "047": "Greenwood",
+    "049": "Hampton",
+    "051": "Horry",
+    "053": "Jasper",
+    "055": "Kershaw",
+    "057": "Lancaster",
+    "059": "Laurens",
+    "061": "Lee",
+    "063": "Lexington",
+    "065": "McCormick",
+    "067": "Marion",
+    "069": "Marlboro",
+    "071": "Newberry",
+    "073": "Oconee",
+    "075": "Orangeburg",
+    "077": "Pickens",
+    "079": "Richland",
+    "081": "Saluda",
+    "083": "Spartanburg",
+    "085": "Sumter",
+    "087": "Union",
+    "089": "Williamsburg",
+    "091": "York"
+  }
+}

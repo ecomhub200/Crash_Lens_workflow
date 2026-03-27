@@ -1,0 +1,24 @@
+{
+  "_description": "ArDOT crash data registry. 75 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Arkansas Department of Transportation",
+    "base_url": "https://gis.arkansas.gov",
+    "api_url": "https://gis.arkansas.gov/arcgis/rest/services/ARDOT/CrashData/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 75 Arkansas counties. FIPS codes are 5-digit (state 05 + 3-digit county).",
+    "_placeholder": "Populate with all 75 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://gis.arkansas.gov/arcgis/rest/services/ARDOT/CrashData/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

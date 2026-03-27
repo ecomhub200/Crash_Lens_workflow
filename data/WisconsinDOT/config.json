@@ -1,0 +1,156 @@
+{
+  "state": {
+    "name": "Wisconsin",
+    "abbreviation": "WI",
+    "fips": "55",
+    "dotName": "WisDOT",
+    "dotFullName": "Wisconsin Department of Transportation",
+    "dataPortalUrl": "https://data-wisdot.opendata.arcgis.com",
+    "coordinateBounds": {
+      "latMin": 42.49,
+      "latMax": 47.08,
+      "lonMin": -92.89,
+      "lonMax": -86.25
+    },
+    "dataDir": "WisconsinDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps WisDOT DT4000 crash data fields to CRASH LENS field codes",
+    "_note": "Column names from WisDOT DT4000 Crash Data User Guide. Community Maps data updated nightly.",
+    "ID": "_TBD_CRASH_ID",
+    "DATE": "_TBD_CRASH_DATE",
+    "TIME": "_TBD_CRASH_TIME",
+    "LAT": "_TBD_LATITUDE",
+    "LON": "_TBD_LONGITUDE",
+    "SEVERITY": "CRASH_SEVERITY",
+    "JURISDICTION": "CNTYNAME",
+    "ROUTE": "_TBD_ROAD_NAME",
+    "COLLISION": "MOST_HARMFUL_CRASH_EVENT_CD",
+    "FIRST_EVENT": "FIRST_CRASH_EVENT_CD",
+    "WEATHER": "_TBD_WEATHER",
+    "LIGHT": "_TBD_LIGHTING",
+    "SURFACE_CONDITION": "_TBD_SURFACE",
+    "JUNCTION": "RLTNJNIC",
+    "JUNCTION_LOCATION": "RLTNJNLC",
+    "ROADWAY_RELATION": "RLTNRDWY",
+    "HITRUN": "HITRUN",
+    "CONSTRUCTION_ZONE": "CONSZONE",
+    "REGION": "REGION",
+    "FUNCTIONAL_CLASS": "FUNCLASS",
+    "HIGHWAY_CLASS": "HWYCLASS",
+    "IMPAIRED": "IMPAIRED",
+    "DIRECTION_OF_TRAVEL": "DIRECTION_OF_TRAVEL_CD"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_kabco",
+      "source": "CRASH_SEVERITY",
+      "_note": "Wisconsin uses direct KABCO codes: K=Fatal, A=Suspected Serious Injury, B=Suspected Minor Injury, C=Possible Injury, O=No Apparent Injury"
+    },
+    "YEAR": {
+      "method": "direct",
+      "source": "CRASH_YEAR"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "_TBD_ROAD1",
+        "_TBD_ROAD2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Wisconsin road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Wisconsin collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "WisDOT GIS Portal",
+    "url": "https://data-wisdot.opendata.arcgis.com",
+    "apiUrl": "https://data-wisdot.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "fileFormat": "GeoJSON/CSV (ArcGIS)",
+    "dataDictionary": "https://transportal.cee.wisc.edu/documents/applications/crash-data/TOPS_DT4000_Data_Guide.pdf",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

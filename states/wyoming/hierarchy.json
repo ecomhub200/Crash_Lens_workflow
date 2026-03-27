@@ -1,0 +1,277 @@
+{
+  "state": {
+    "fips": "56",
+    "name": "Wyoming",
+    "abbreviation": "WY",
+    "dot": "WYDOT",
+    "dotFullName": "Wyoming Department of Transportation",
+    "center": [
+      -107.30249,
+      42.755966
+    ],
+    "zoom": 7,
+    "placesCount": 99
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "wy_1": {
+      "name": "District 1 (Laramie)",
+      "shortName": "District 1",
+      "center": [
+        -105.4,
+        42.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "007",
+        "015",
+        "021",
+        "031"
+      ],
+      "countyNames": {
+        "001": "Albany",
+        "007": "Carbon",
+        "015": "Goshen",
+        "021": "Laramie",
+        "031": "Platte"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -106.3
+        ],
+        "ne": [
+          43.0,
+          -104.0
+        ]
+      },
+      "hq": "Laramie"
+    },
+    "wy_2": {
+      "name": "District 2 (Casper)",
+      "shortName": "District 2",
+      "center": [
+        -107.0,
+        43.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "009",
+        "013",
+        "017",
+        "019",
+        "025",
+        "043"
+      ],
+      "countyNames": {
+        "003": "Big Horn",
+        "009": "Converse",
+        "013": "Fremont",
+        "017": "Hot Springs",
+        "019": "Johnson",
+        "025": "Natrona",
+        "043": "Washakie"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -109.5
+        ],
+        "ne": [
+          44.7,
+          -105.5
+        ]
+      },
+      "hq": "Casper"
+    },
+    "wy_3": {
+      "name": "District 3 (Rock Springs)",
+      "shortName": "District 3",
+      "center": [
+        -110.0,
+        42.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "023",
+        "035",
+        "037",
+        "039",
+        "041"
+      ],
+      "countyNames": {
+        "023": "Lincoln",
+        "035": "Sublette",
+        "037": "Sweetwater",
+        "039": "Teton",
+        "041": "Uinta"
+      },
+      "mapBounds": {
+        "sw": [
+          41.0,
+          -111.1
+        ],
+        "ne": [
+          44.0,
+          -109.0
+        ]
+      },
+      "hq": "Rock Springs"
+    },
+    "wy_4": {
+      "name": "District 4 (Sheridan)",
+      "shortName": "District 4",
+      "center": [
+        -105.5,
+        44.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "011",
+        "027",
+        "033",
+        "045"
+      ],
+      "countyNames": {
+        "005": "Campbell",
+        "011": "Crook",
+        "027": "Niobrara",
+        "033": "Sheridan",
+        "045": "Weston"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -106.5
+        ],
+        "ne": [
+          45.0,
+          -104.0
+        ]
+      },
+      "hq": "Sheridan"
+    },
+    "wy_5": {
+      "name": "District 5 (Basin)",
+      "shortName": "District 5",
+      "center": [
+        -108.5,
+        44.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "029",
+        "043"
+      ],
+      "countyNames": {
+        "003": "Big Horn",
+        "029": "Park",
+        "043": "Washakie"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -109.5
+        ],
+        "ne": [
+          45.0,
+          -107.5
+        ]
+      },
+      "hq": "Basin"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "cmpo": {
+      "name": "Cheyenne MPO",
+      "shortName": "Cheyenne",
+      "type": "mpo",
+      "center": [
+        -104.8197,
+        41.14
+      ],
+      "zoom": 10,
+      "counties": [
+        "021"
+      ],
+      "countyNames": {
+        "021": "Laramie"
+      },
+      "btsAcronym": "CM",
+      "mapBounds": {
+        "sw": [
+          40.9,
+          -105.1
+        ],
+        "ne": [
+          41.35,
+          -104.55
+        ]
+      }
+    },
+    "campo": {
+      "name": "Casper Area MPO",
+      "shortName": "Casper Area",
+      "type": "mpo",
+      "center": [
+        -106.3131,
+        42.8666
+      ],
+      "zoom": 10,
+      "counties": [
+        "025"
+      ],
+      "countyNames": {
+        "025": "Natrona"
+      },
+      "btsAcronym": "CAM",
+      "mapBounds": {
+        "sw": [
+          42.65,
+          -106.55
+        ],
+        "ne": [
+          43.1,
+          -106.05
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Albany",
+    "003": "Big Horn",
+    "005": "Campbell",
+    "007": "Carbon",
+    "009": "Converse",
+    "011": "Crook",
+    "013": "Fremont",
+    "015": "Goshen",
+    "017": "Hot Springs",
+    "019": "Johnson",
+    "021": "Laramie",
+    "023": "Lincoln",
+    "025": "Natrona",
+    "027": "Niobrara",
+    "029": "Park",
+    "031": "Platte",
+    "033": "Sheridan",
+    "035": "Sublette",
+    "037": "Sweetwater",
+    "039": "Teton",
+    "041": "Uinta",
+    "043": "Washakie",
+    "045": "Weston"
+  }
+}

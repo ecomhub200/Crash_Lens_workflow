@@ -1,0 +1,398 @@
+{
+  "state": {
+    "fips": "35",
+    "name": "New Mexico",
+    "abbreviation": "NM",
+    "dot": "NMDOT",
+    "dotFullName": "New Mexico Department of Transportation",
+    "center": [
+      -106.248482,
+      34.840515
+    ],
+    "zoom": 7,
+    "placesCount": 105
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nm_1": {
+      "name": "District 1 (Deming)",
+      "shortName": "District 1",
+      "center": [
+        -108.3,
+        32.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "017",
+        "023",
+        "029",
+        "051"
+      ],
+      "countyNames": {
+        "017": "Grant",
+        "023": "Hidalgo",
+        "029": "Luna",
+        "051": "Sierra"
+      },
+      "mapBounds": {
+        "sw": [
+          31.8,
+          -109.1
+        ],
+        "ne": [
+          33.5,
+          -107.2
+        ]
+      },
+      "hq": "Deming"
+    },
+    "nm_2": {
+      "name": "District 2 (Roswell)",
+      "shortName": "District 2",
+      "center": [
+        -105.5,
+        32.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "015",
+        "025",
+        "027",
+        "035"
+      ],
+      "countyNames": {
+        "005": "Chaves",
+        "015": "Eddy",
+        "025": "Lea",
+        "027": "Lincoln",
+        "035": "Otero"
+      },
+      "mapBounds": {
+        "sw": [
+          32.0,
+          -106.5
+        ],
+        "ne": [
+          33.9,
+          -103.0
+        ]
+      },
+      "hq": "Roswell"
+    },
+    "nm_3": {
+      "name": "District 3 (Albuquerque)",
+      "shortName": "District 3",
+      "center": [
+        -106.8,
+        34.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "006",
+        "043",
+        "053",
+        "057",
+        "061"
+      ],
+      "countyNames": {
+        "001": "Bernalillo",
+        "006": "Cibola",
+        "043": "Sandoval",
+        "053": "Socorro",
+        "057": "Torrance",
+        "061": "Valencia"
+      },
+      "mapBounds": {
+        "sw": [
+          33.8,
+          -107.8
+        ],
+        "ne": [
+          35.5,
+          -105.8
+        ]
+      },
+      "hq": "Albuquerque"
+    },
+    "nm_4": {
+      "name": "District 4 (Las Vegas)",
+      "shortName": "District 4",
+      "center": [
+        -104.8,
+        35.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "019",
+        "021",
+        "033",
+        "037",
+        "047",
+        "059"
+      ],
+      "countyNames": {
+        "007": "Colfax",
+        "019": "Guadalupe",
+        "021": "Harding",
+        "033": "Mora",
+        "037": "Quay",
+        "047": "San Miguel",
+        "059": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -105.7
+        ],
+        "ne": [
+          37.0,
+          -103.0
+        ]
+      },
+      "hq": "Las Vegas"
+    },
+    "nm_5": {
+      "name": "District 5 (Santa Fe)",
+      "shortName": "District 5",
+      "center": [
+        -105.9,
+        36.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "028",
+        "039",
+        "049",
+        "055"
+      ],
+      "countyNames": {
+        "028": "Los Alamos",
+        "039": "Rio Arriba",
+        "049": "Santa Fe",
+        "055": "Taos"
+      },
+      "mapBounds": {
+        "sw": [
+          35.5,
+          -106.8
+        ],
+        "ne": [
+          37.0,
+          -105.0
+        ]
+      },
+      "hq": "Santa Fe"
+    },
+    "nm_6": {
+      "name": "District 6 (Gallup)",
+      "shortName": "District 6",
+      "center": [
+        -108.7,
+        35.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "031",
+        "045"
+      ],
+      "countyNames": {
+        "003": "Catron",
+        "031": "McKinley",
+        "045": "San Juan"
+      },
+      "mapBounds": {
+        "sw": [
+          33.5,
+          -109.1
+        ],
+        "ne": [
+          37.0,
+          -107.5
+        ]
+      },
+      "hq": "Gallup"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mrcoga": {
+      "name": "Mid-Region COG (Albuquerque)",
+      "shortName": "Albuquerque",
+      "type": "mpo",
+      "center": [
+        -106.6504,
+        35.0844
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "043",
+        "061",
+        "057"
+      ],
+      "countyNames": {
+        "001": "Bernalillo",
+        "043": "Sandoval",
+        "061": "Valencia",
+        "057": "Torrance"
+      },
+      "btsAcronym": "MC",
+      "mapBounds": {
+        "sw": [
+          34.8,
+          -106.95
+        ],
+        "ne": [
+          35.35,
+          -106.35
+        ]
+      }
+    },
+    "mvmpolc": {
+      "name": "Mesilla Valley MPO (Las Cruces)",
+      "shortName": "Las Cruces",
+      "type": "mpo",
+      "center": [
+        -105.9378,
+        35.6869
+      ],
+      "zoom": 10,
+      "counties": [],
+      "countyNames": {},
+      "btsAcronym": "MVMC",
+      "mapBounds": {
+        "sw": [
+          35.45,
+          -106.2
+        ],
+        "ne": [
+          35.9,
+          -105.65
+        ]
+      }
+    },
+    "sfmpo": {
+      "name": "Santa Fe MPO",
+      "shortName": "Santa Fe",
+      "type": "mpo",
+      "center": [
+        -106.7637,
+        32.3199
+      ],
+      "zoom": 10,
+      "counties": [
+        "049"
+      ],
+      "countyNames": {
+        "049": "Santa Fe"
+      },
+      "btsAcronym": "SFM",
+      "mapBounds": {
+        "sw": [
+          32.05,
+          -107.05
+        ],
+        "ne": [
+          32.55,
+          -106.45
+        ]
+      }
+    },
+    "fmpo": {
+      "name": "Farmington MPO",
+      "shortName": "Farmington",
+      "type": "mpo",
+      "center": [
+        -105.573,
+        36.4064
+      ],
+      "zoom": 10,
+      "counties": [
+        "045"
+      ],
+      "countyNames": {
+        "045": "San Juan"
+      },
+      "btsAcronym": "FM",
+      "mapBounds": {
+        "sw": [
+          36.2,
+          -105.8
+        ],
+        "ne": [
+          36.6,
+          -105.35
+        ]
+      }
+    },
+    "epmponm": {
+      "name": "El Paso MPO (NM portion)",
+      "shortName": "NM portion",
+      "type": "mpo",
+      "center": [
+        -106.485,
+        31.7619
+      ],
+      "zoom": 10,
+      "counties": [],
+      "countyNames": {},
+      "btsAcronym": "EPMP",
+      "mapBounds": {
+        "sw": [
+          31.5,
+          -106.8
+        ],
+        "ne": [
+          32.0,
+          -106.15
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Bernalillo",
+    "003": "Catron",
+    "005": "Chaves",
+    "006": "Cibola",
+    "007": "Colfax",
+    "009": "Curry",
+    "011": "De Baca",
+    "013": "Do\u00f1a Ana",
+    "015": "Eddy",
+    "017": "Grant",
+    "019": "Guadalupe",
+    "021": "Harding",
+    "023": "Hidalgo",
+    "025": "Lea",
+    "027": "Lincoln",
+    "028": "Los Alamos",
+    "029": "Luna",
+    "031": "McKinley",
+    "033": "Mora",
+    "035": "Otero",
+    "037": "Quay",
+    "039": "Rio Arriba",
+    "041": "Roosevelt",
+    "043": "Sandoval",
+    "045": "San Juan",
+    "047": "San Miguel",
+    "049": "Santa Fe",
+    "051": "Sierra",
+    "053": "Socorro",
+    "055": "Taos",
+    "057": "Torrance",
+    "059": "Union",
+    "061": "Valencia"
+  }
+}

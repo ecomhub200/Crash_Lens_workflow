@@ -1,0 +1,482 @@
+{
+  "state": {
+    "fips": "41",
+    "name": "Oregon",
+    "abbreviation": "OR",
+    "dot": "ODOT",
+    "dotFullName": "Oregon Department of Transportation",
+    "center": [
+      -122.070938,
+      44.572021
+    ],
+    "zoom": 7,
+    "placesCount": 240
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "or_1": {
+      "name": "Region 1 (Portland Metro)",
+      "shortName": "Region 1",
+      "center": [
+        -122.3,
+        45.4
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "027",
+        "051",
+        "067"
+      ],
+      "countyNames": {
+        "005": "Clackamas",
+        "027": "Hood River",
+        "051": "Multnomah",
+        "067": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          45.0,
+          -123.0
+        ],
+        "ne": [
+          45.8,
+          -121.3
+        ]
+      },
+      "hq": "Portland"
+    },
+    "or_2": {
+      "name": "Region 2 (Salem)",
+      "shortName": "Region 2",
+      "center": [
+        -122.7,
+        44.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "007",
+        "009",
+        "039",
+        "041",
+        "043",
+        "047",
+        "053",
+        "057",
+        "071"
+      ],
+      "countyNames": {
+        "003": "Benton",
+        "007": "Clatsop",
+        "009": "Columbia",
+        "039": "Lane",
+        "041": "Lincoln",
+        "043": "Linn",
+        "047": "Marion",
+        "053": "Polk",
+        "057": "Tillamook",
+        "071": "Yamhill"
+      },
+      "mapBounds": {
+        "sw": [
+          43.7,
+          -124.0
+        ],
+        "ne": [
+          46.2,
+          -121.5
+        ]
+      },
+      "hq": "Salem"
+    },
+    "or_3": {
+      "name": "Region 3 (Roseburg)",
+      "shortName": "Region 3",
+      "center": [
+        -123.3,
+        42.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "015",
+        "019",
+        "029",
+        "033"
+      ],
+      "countyNames": {
+        "011": "Coos",
+        "015": "Curry",
+        "019": "Douglas",
+        "029": "Jackson",
+        "033": "Josephine"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -124.6
+        ],
+        "ne": [
+          43.8,
+          -122.0
+        ]
+      },
+      "hq": "Roseburg"
+    },
+    "or_4": {
+      "name": "Region 4 (Bend)",
+      "shortName": "Region 4",
+      "center": [
+        -121.3,
+        44.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "013",
+        "017",
+        "021",
+        "031",
+        "035",
+        "037",
+        "055",
+        "065",
+        "069"
+      ],
+      "countyNames": {
+        "013": "Crook",
+        "017": "Deschutes",
+        "021": "Gilliam",
+        "031": "Jefferson",
+        "035": "Klamath",
+        "037": "Lake",
+        "055": "Sherman",
+        "065": "Wasco",
+        "069": "Wheeler"
+      },
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -122.0
+        ],
+        "ne": [
+          45.6,
+          -119.5
+        ]
+      },
+      "hq": "Bend"
+    },
+    "or_5": {
+      "name": "Region 5 (La Grande)",
+      "shortName": "Region 5",
+      "center": [
+        -118.5,
+        45.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "001",
+        "023",
+        "025",
+        "045",
+        "049",
+        "059",
+        "061",
+        "063"
+      ],
+      "countyNames": {
+        "001": "Baker",
+        "023": "Grant",
+        "025": "Harney",
+        "045": "Malheur",
+        "049": "Morrow",
+        "059": "Umatilla",
+        "061": "Union",
+        "063": "Wallowa"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -120.0
+        ],
+        "ne": [
+          46.2,
+          -116.5
+        ]
+      },
+      "hq": "La Grande"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mpa": {
+      "name": "Metro (Portland Area)",
+      "shortName": "Portland Area",
+      "type": "mpo",
+      "center": [
+        -122.6784,
+        45.5152
+      ],
+      "zoom": 9,
+      "counties": [
+        "051",
+        "005",
+        "067"
+      ],
+      "countyNames": {
+        "051": "Multnomah",
+        "005": "Clackamas",
+        "067": "Washington"
+      },
+      "btsAcronym": "MA",
+      "mapBounds": {
+        "sw": [
+          45.2,
+          -123.0
+        ],
+        "ne": [
+          45.8,
+          -122.3
+        ]
+      }
+    },
+    "skats": {
+      "name": "Salem-Keizer Area Transportation Study (SKATS)",
+      "shortName": "SKATS",
+      "type": "mpo",
+      "center": [
+        -123.0351,
+        44.9429
+      ],
+      "zoom": 10,
+      "counties": [
+        "047",
+        "053"
+      ],
+      "countyNames": {
+        "047": "Marion",
+        "053": "Polk"
+      },
+      "btsAcronym": "SKATS",
+      "mapBounds": {
+        "sw": [
+          44.7,
+          -123.3
+        ],
+        "ne": [
+          45.15,
+          -122.75
+        ]
+      }
+    },
+    "clmpoes": {
+      "name": "Central Lane MPO (Eugene-Springfield)",
+      "shortName": "Eugene-Springfield",
+      "type": "mpo",
+      "center": [
+        -123.0868,
+        44.0521
+      ],
+      "zoom": 10,
+      "counties": [
+        "039"
+      ],
+      "countyNames": {
+        "039": "Lane"
+      },
+      "btsAcronym": "CLM",
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -123.35
+        ],
+        "ne": [
+          44.3,
+          -122.8
+        ]
+      }
+    },
+    "rvmpom": {
+      "name": "Rogue Valley MPO (Medford)",
+      "shortName": "Medford",
+      "type": "mpo",
+      "center": [
+        -122.8756,
+        42.3265
+      ],
+      "zoom": 10,
+      "counties": [
+        "029"
+      ],
+      "countyNames": {
+        "029": "Jackson"
+      },
+      "btsAcronym": "RVM",
+      "mapBounds": {
+        "sw": [
+          42.1,
+          -123.15
+        ],
+        "ne": [
+          42.55,
+          -122.6
+        ]
+      }
+    },
+    "bmpo": {
+      "name": "Bend MPO",
+      "shortName": "Bend",
+      "type": "mpo",
+      "center": [
+        -121.3153,
+        44.0582
+      ],
+      "zoom": 10,
+      "counties": [
+        "017"
+      ],
+      "countyNames": {
+        "017": "Deschutes"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          43.85,
+          -121.55
+        ],
+        "ne": [
+          44.25,
+          -121.05
+        ]
+      }
+    },
+    "campo": {
+      "name": "Corvallis Area MPO",
+      "shortName": "Corvallis Area",
+      "type": "mpo",
+      "center": [
+        -124.0535,
+        44.6365
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Benton"
+      },
+      "btsAcronym": "CAM",
+      "mapBounds": {
+        "sw": [
+          44.45,
+          -124.3
+        ],
+        "ne": [
+          44.85,
+          -123.8
+        ]
+      }
+    },
+    "aampo": {
+      "name": "Albany Area MPO",
+      "shortName": "Albany Area",
+      "type": "mpo",
+      "center": [
+        -123.1059,
+        44.6365
+      ],
+      "zoom": 10,
+      "counties": [
+        "043"
+      ],
+      "countyNames": {
+        "043": "Linn"
+      },
+      "btsAcronym": "AAM",
+      "mapBounds": {
+        "sw": [
+          44.4,
+          -123.35
+        ],
+        "ne": [
+          44.85,
+          -122.85
+        ]
+      }
+    },
+    "mrmpo": {
+      "name": "Middle Rogue MPO",
+      "shortName": "Middle Rogue",
+      "type": "mpo",
+      "center": [
+        -123.3424,
+        42.4393
+      ],
+      "zoom": 10,
+      "counties": [
+        "029",
+        "033"
+      ],
+      "countyNames": {
+        "029": "Jackson",
+        "033": "Josephine"
+      },
+      "btsAcronym": "MRM",
+      "mapBounds": {
+        "sw": [
+          42.2,
+          -123.6
+        ],
+        "ne": [
+          42.65,
+          -123.1
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Baker",
+    "003": "Benton",
+    "005": "Clackamas",
+    "007": "Clatsop",
+    "009": "Columbia",
+    "011": "Coos",
+    "013": "Crook",
+    "015": "Curry",
+    "017": "Deschutes",
+    "019": "Douglas",
+    "021": "Gilliam",
+    "023": "Grant",
+    "025": "Harney",
+    "027": "Hood River",
+    "029": "Jackson",
+    "031": "Jefferson",
+    "033": "Josephine",
+    "035": "Klamath",
+    "037": "Lake",
+    "039": "Lane",
+    "041": "Lincoln",
+    "043": "Linn",
+    "045": "Malheur",
+    "047": "Marion",
+    "049": "Morrow",
+    "051": "Multnomah",
+    "053": "Polk",
+    "055": "Sherman",
+    "057": "Tillamook",
+    "059": "Umatilla",
+    "061": "Union",
+    "063": "Wallowa",
+    "065": "Wasco",
+    "067": "Washington",
+    "069": "Wheeler",
+    "071": "Yamhill"
+  }
+}

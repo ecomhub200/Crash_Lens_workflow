@@ -1,0 +1,861 @@
+{
+  "state": {
+    "fips": "01",
+    "name": "Alabama",
+    "abbreviation": "AL",
+    "dot": "ALDOT",
+    "dotFullName": "Alabama Department of Transportation",
+    "center": [
+      -86.79113,
+      32.806671
+    ],
+    "zoom": 7,
+    "placesCount": 463
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "al_1": {
+      "name": "Southwest (Mobile)",
+      "shortName": "Southwest",
+      "center": [
+        -87.91,
+        30.94
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "023",
+        "025",
+        "035",
+        "053",
+        "097",
+        "099",
+        "129"
+      ],
+      "countyNames": {
+        "003": "Baldwin",
+        "023": "Choctaw",
+        "025": "Clarke",
+        "035": "Conecuh",
+        "053": "Escambia",
+        "097": "Mobile",
+        "099": "Monroe",
+        "129": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          30.22,
+          -88.47
+        ],
+        "ne": [
+          31.77,
+          -87.35
+        ]
+      },
+      "hq": "Mobile"
+    },
+    "al_2": {
+      "name": "Southeast (Troy)",
+      "shortName": "Southeast",
+      "center": [
+        -85.72,
+        31.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "031",
+        "039",
+        "041",
+        "045",
+        "061",
+        "067",
+        "069",
+        "109"
+      ],
+      "countyNames": {
+        "005": "Barbour",
+        "031": "Coffee",
+        "039": "Covington",
+        "041": "Crenshaw",
+        "045": "Dale",
+        "061": "Geneva",
+        "067": "Henry",
+        "069": "Houston",
+        "109": "Pike"
+      },
+      "mapBounds": {
+        "sw": [
+          30.97,
+          -86.39
+        ],
+        "ne": [
+          31.8,
+          -85.05
+        ]
+      },
+      "hq": "Troy"
+    },
+    "al_3": {
+      "name": "East Central (Alexander City)",
+      "shortName": "East Central",
+      "center": [
+        -85.6,
+        33.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "017",
+        "027",
+        "029",
+        "081",
+        "087",
+        "111",
+        "113",
+        "123"
+      ],
+      "countyNames": {
+        "011": "Bullock",
+        "017": "Chambers",
+        "027": "Clay",
+        "029": "Cleburne",
+        "081": "Lee",
+        "087": "Macon",
+        "111": "Randolph",
+        "113": "Russell",
+        "123": "Tallapoosa"
+      },
+      "mapBounds": {
+        "sw": [
+          32.4,
+          -86.18
+        ],
+        "ne": [
+          33.75,
+          -85.02
+        ]
+      },
+      "hq": "Alexander City"
+    },
+    "al_4": {
+      "name": "West Central (Tuscaloosa)",
+      "shortName": "West Central",
+      "center": [
+        -87.8,
+        33.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "057",
+        "063",
+        "065",
+        "075",
+        "091",
+        "105",
+        "107",
+        "119",
+        "125"
+      ],
+      "countyNames": {
+        "007": "Bibb",
+        "057": "Fayette",
+        "063": "Greene",
+        "065": "Hale",
+        "075": "Lamar",
+        "091": "Marengo",
+        "105": "Perry",
+        "107": "Pickens",
+        "119": "Sumter",
+        "125": "Tuscaloosa"
+      },
+      "mapBounds": {
+        "sw": [
+          32.24,
+          -88.47
+        ],
+        "ne": [
+          33.8,
+          -87.13
+        ]
+      },
+      "hq": "Tuscaloosa"
+    },
+    "al_5": {
+      "name": "Central (Calera)",
+      "shortName": "Central",
+      "center": [
+        -86.6,
+        32.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "021",
+        "047",
+        "051",
+        "085",
+        "101",
+        "117",
+        "131"
+      ],
+      "countyNames": {
+        "001": "Autauga",
+        "021": "Chilton",
+        "047": "Dallas",
+        "051": "Elmore",
+        "085": "Lowndes",
+        "101": "Montgomery",
+        "117": "Shelby",
+        "131": "Wilcox"
+      },
+      "mapBounds": {
+        "sw": [
+          31.78,
+          -87.2
+        ],
+        "ne": [
+          33.22,
+          -86.0
+        ]
+      },
+      "hq": "Calera"
+    },
+    "al_6": {
+      "name": "North Central (Falkville)",
+      "shortName": "North Central",
+      "center": [
+        -86.85,
+        33.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "043",
+        "073",
+        "115",
+        "127",
+        "133"
+      ],
+      "countyNames": {
+        "009": "Blount",
+        "043": "Cullman",
+        "073": "Jefferson",
+        "115": "St. Clair",
+        "127": "Walker",
+        "133": "Winston"
+      },
+      "mapBounds": {
+        "sw": [
+          33.25,
+          -87.43
+        ],
+        "ne": [
+          34.35,
+          -86.27
+        ]
+      },
+      "hq": "Falkville"
+    },
+    "al_7": {
+      "name": "Northwest (Hamilton)",
+      "shortName": "Northwest",
+      "center": [
+        -87.35,
+        34.55
+      ],
+      "zoom": 8,
+      "counties": [
+        "033",
+        "059",
+        "077",
+        "079",
+        "083",
+        "093",
+        "103"
+      ],
+      "countyNames": {
+        "033": "Colbert",
+        "059": "Franklin",
+        "077": "Lauderdale",
+        "079": "Lawrence",
+        "083": "Limestone",
+        "093": "Marion",
+        "103": "Morgan"
+      },
+      "mapBounds": {
+        "sw": [
+          34.07,
+          -88.02
+        ],
+        "ne": [
+          35.0,
+          -86.68
+        ]
+      },
+      "hq": "Hamilton"
+    },
+    "al_8": {
+      "name": "Northeast (Gadsden)",
+      "shortName": "Northeast",
+      "center": [
+        -86.1,
+        34.25
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "019",
+        "049",
+        "055",
+        "071",
+        "089",
+        "095",
+        "121"
+      ],
+      "countyNames": {
+        "015": "Calhoun",
+        "019": "Cherokee",
+        "049": "DeKalb",
+        "055": "Etowah",
+        "071": "Jackson",
+        "089": "Madison",
+        "095": "Marshall",
+        "121": "Talladega"
+      },
+      "mapBounds": {
+        "sw": [
+          33.6,
+          -86.75
+        ],
+        "ne": [
+          34.99,
+          -85.45
+        ]
+      },
+      "hq": "Gadsden"
+    },
+    "al_9": {
+      "name": "Butler County",
+      "shortName": "Butler County",
+      "center": [
+        -86.5,
+        31.85
+      ],
+      "zoom": 9,
+      "counties": [
+        "013",
+        "037"
+      ],
+      "countyNames": {
+        "013": "Butler",
+        "037": "Coosa"
+      },
+      "mapBounds": {
+        "sw": [
+          31.52,
+          -86.85
+        ],
+        "ne": [
+          32.18,
+          -86.15
+        ]
+      },
+      "hq": "Greenville"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "bmpo": {
+      "name": "Birmingham MPO",
+      "shortName": "Birmingham",
+      "type": "mpo",
+      "center": [
+        -86.8104,
+        33.5186
+      ],
+      "zoom": 10,
+      "counties": [
+        "073",
+        "117",
+        "115",
+        "009",
+        "021",
+        "127"
+      ],
+      "countyNames": {
+        "073": "Jefferson",
+        "117": "Shelby",
+        "115": "St. Clair",
+        "009": "Blount",
+        "021": "Chilton",
+        "127": "Walker"
+      },
+      "btsAcronym": "RPCGB",
+      "mapBounds": {
+        "sw": [
+          33.15,
+          -87.3
+        ],
+        "ne": [
+          33.85,
+          -86.3
+        ]
+      }
+    },
+    "mmpo": {
+      "name": "Montgomery MPO",
+      "shortName": "Montgomery",
+      "type": "mpo",
+      "center": [
+        -86.5861,
+        34.7304
+      ],
+      "zoom": 10,
+      "counties": [
+        "101",
+        "051",
+        "001"
+      ],
+      "countyNames": {
+        "101": "Montgomery",
+        "051": "Elmore",
+        "001": "Autauga"
+      },
+      "btsAcronym": "MM",
+      "mapBounds": {
+        "sw": [
+          34.45,
+          -86.95
+        ],
+        "ne": [
+          34.95,
+          -86.25
+        ]
+      }
+    },
+    "mats": {
+      "name": "Mobile Area Transportation Study (MATS)",
+      "shortName": "MATS",
+      "type": "mpo",
+      "center": [
+        -88.0399,
+        30.6954
+      ],
+      "zoom": 10,
+      "counties": [
+        "097"
+      ],
+      "countyNames": {
+        "097": "Mobile"
+      },
+      "btsAcronym": "MATS",
+      "mapBounds": {
+        "sw": [
+          30.4,
+          -88.4
+        ],
+        "ne": [
+          30.95,
+          -87.55
+        ]
+      }
+    },
+    "hampo": {
+      "name": "Huntsville Area MPO",
+      "shortName": "Huntsville Area",
+      "type": "mpo",
+      "center": [
+        -86.2999,
+        32.3668
+      ],
+      "zoom": 10,
+      "counties": [
+        "089",
+        "083",
+        "103"
+      ],
+      "countyNames": {
+        "089": "Madison",
+        "083": "Limestone",
+        "103": "Morgan"
+      },
+      "btsAcronym": "HAMPO",
+      "mapBounds": {
+        "sw": [
+          32.1,
+          -86.65
+        ],
+        "ne": [
+          32.6,
+          -85.85
+        ]
+      }
+    },
+    "tampo": {
+      "name": "Tuscaloosa Area MPO",
+      "shortName": "Tuscaloosa Area",
+      "type": "mpo",
+      "center": [
+        -87.5692,
+        33.2098
+      ],
+      "zoom": 10,
+      "counties": [
+        "125"
+      ],
+      "countyNames": {
+        "125": "Tuscaloosa"
+      },
+      "btsAcronym": "WACOG",
+      "mapBounds": {
+        "sw": [
+          33.0,
+          -87.85
+        ],
+        "ne": [
+          33.4,
+          -87.3
+        ]
+      }
+    },
+    "aompo": {
+      "name": "Auburn-Opelika MPO",
+      "shortName": "Auburn-Opelika",
+      "type": "mpo",
+      "center": [
+        -85.9786,
+        34.0154
+      ],
+      "zoom": 10,
+      "counties": [
+        "081"
+      ],
+      "countyNames": {
+        "081": "Lee"
+      },
+      "btsAcronym": "AM",
+      "mapBounds": {
+        "sw": [
+          33.8,
+          -86.25
+        ],
+        "ne": [
+          34.2,
+          -85.7
+        ]
+      }
+    },
+    "swampo": {
+      "name": "Southeast Wiregrass Area MPO",
+      "shortName": "Southeast Wiregrass Area",
+      "type": "mpo",
+      "center": [
+        -85.8322,
+        33.6604
+      ],
+      "zoom": 10,
+      "counties": [
+        "069",
+        "045"
+      ],
+      "countyNames": {
+        "069": "Houston",
+        "045": "Dale"
+      },
+      "btsAcronym": "SWAM",
+      "mapBounds": {
+        "sw": [
+          33.45,
+          -86.05
+        ],
+        "ne": [
+          33.85,
+          -85.6
+        ]
+      }
+    },
+    "esmpo": {
+      "name": "Eastern Shore MPO",
+      "shortName": "Eastern Shore",
+      "type": "mpo",
+      "center": [
+        -85.4808,
+        32.6099
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Baldwin"
+      },
+      "btsAcronym": "ESM",
+      "mapBounds": {
+        "sw": [
+          32.4,
+          -85.7
+        ],
+        "ne": [
+          32.8,
+          -85.25
+        ]
+      }
+    },
+    "cpcmpo": {
+      "name": "Columbus-Phenix City MPO",
+      "shortName": "Columbus-Phenix City",
+      "type": "mpo",
+      "center": [
+        -87.6836,
+        30.396
+      ],
+      "zoom": 10,
+      "counties": [
+        "113"
+      ],
+      "countyNames": {
+        "113": "Russell"
+      },
+      "btsAcronym": "CVRPC",
+      "mapBounds": {
+        "sw": [
+          30.2,
+          -87.85
+        ],
+        "ne": [
+          30.55,
+          -87.5
+        ]
+      }
+    },
+    "gempo": {
+      "name": "Gadsden-Etowah MPO",
+      "shortName": "Gadsden-Etowah",
+      "type": "mpo",
+      "center": [
+        -85.3905,
+        31.2279
+      ],
+      "zoom": 10,
+      "counties": [
+        "055"
+      ],
+      "countyNames": {
+        "055": "Etowah"
+      },
+      "btsAcronym": "GM",
+      "mapBounds": {
+        "sw": [
+          31.05,
+          -85.6
+        ],
+        "ne": [
+          31.4,
+          -85.15
+        ]
+      }
+    },
+    "dmcmpo": {
+      "name": "Decatur-Morgan County MPO",
+      "shortName": "Decatur-Morgan County",
+      "type": "mpo",
+      "center": [
+        -86.9838,
+        34.6037
+      ],
+      "zoom": 10,
+      "counties": [
+        "103"
+      ],
+      "countyNames": {
+        "103": "Morgan"
+      },
+      "btsAcronym": "DCM",
+      "mapBounds": {
+        "sw": [
+          34.4,
+          -87.2
+        ],
+        "ne": [
+          34.8,
+          -86.75
+        ]
+      }
+    },
+    "acmpo": {
+      "name": "Anniston-Calhoun MPO",
+      "shortName": "Anniston-Calhoun",
+      "type": "mpo",
+      "center": [
+        -87.6769,
+        34.7587
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Calhoun"
+      },
+      "btsAcronym": "AM",
+      "mapBounds": {
+        "sw": [
+          34.55,
+          -87.9
+        ],
+        "ne": [
+          34.95,
+          -87.45
+        ]
+      }
+    },
+    "shoals_area_mpo": {
+      "name": "Shoals Area MPO",
+      "shortName": "Shoals",
+      "type": "mpo",
+      "btsMpoId": "01197402",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.615542,
+        34.771512
+      ],
+      "zoom": 10
+    },
+    "huntsville_mpo": {
+      "name": "Huntsville MPO",
+      "shortName": "Huntsville",
+      "type": "mpo",
+      "btsMpoId": "01197601",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -86.523452,
+        34.691636
+      ],
+      "zoom": 10
+    },
+    "decatur_area_mpo": {
+      "name": "Decatur Area MPO",
+      "shortName": "Decatur",
+      "type": "mpo",
+      "btsMpoId": "01198200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.025912,
+        34.531337
+      ],
+      "zoom": 10
+    },
+    "calhoun_area_metropolitan_planning_organization_mpo": {
+      "name": "Calhoun Area Metropolitan Planning Organization",
+      "shortName": "Calhoun",
+      "type": "mpo",
+      "btsMpoId": "01197602",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.841465,
+        33.660379
+      ],
+      "zoom": 10
+    },
+    "auburn_opelika_mpo": {
+      "name": "Auburn - Opelika MPO",
+      "shortName": "Auburn - Opelika",
+      "type": "mpo",
+      "btsMpoId": "01197502",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.398352,
+        32.595005
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Autauga",
+    "003": "Baldwin",
+    "005": "Barbour",
+    "007": "Bibb",
+    "009": "Blount",
+    "011": "Bullock",
+    "013": "Butler",
+    "015": "Calhoun",
+    "017": "Chambers",
+    "019": "Cherokee",
+    "021": "Chilton",
+    "023": "Choctaw",
+    "025": "Clarke",
+    "027": "Clay",
+    "029": "Cleburne",
+    "031": "Coffee",
+    "033": "Colbert",
+    "035": "Conecuh",
+    "037": "Coosa",
+    "039": "Covington",
+    "041": "Crenshaw",
+    "043": "Cullman",
+    "045": "Dale",
+    "047": "Dallas",
+    "049": "DeKalb",
+    "051": "Elmore",
+    "053": "Escambia",
+    "055": "Etowah",
+    "057": "Fayette",
+    "059": "Franklin",
+    "061": "Geneva",
+    "063": "Greene",
+    "065": "Hale",
+    "067": "Henry",
+    "069": "Houston",
+    "071": "Jackson",
+    "073": "Jefferson",
+    "075": "Lamar",
+    "077": "Lauderdale",
+    "079": "Lawrence",
+    "081": "Lee",
+    "083": "Limestone",
+    "085": "Lowndes",
+    "087": "Macon",
+    "089": "Madison",
+    "091": "Marengo",
+    "093": "Marion",
+    "095": "Marshall",
+    "097": "Mobile",
+    "099": "Monroe",
+    "101": "Montgomery",
+    "103": "Morgan",
+    "105": "Perry",
+    "107": "Pickens",
+    "109": "Pike",
+    "111": "Randolph",
+    "113": "Russell",
+    "115": "St. Clair",
+    "117": "Shelby",
+    "119": "Sumter",
+    "121": "Talladega",
+    "123": "Tallapoosa",
+    "125": "Tuscaloosa",
+    "127": "Walker",
+    "129": "Washington",
+    "131": "Wilcox",
+    "133": "Winston"
+  }
+}

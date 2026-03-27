@@ -1,0 +1,60 @@
+{
+  "state": "virginia",
+  "stateFips": "51",
+  "stateAbbrev": "VA",
+
+  "dotDistricts": {
+    "name": "VDOT Construction Districts",
+    "term": "District",
+    "termPlural": "Districts",
+    "count": 9,
+    "source": "arcgis_rest",
+    "endpoint": "https://services.arcgis.com/p5v98VHDX9Atv3l7/arcgis/rest/services/VDOTAdministrativeBoundaries/FeatureServer/2",
+    "nameField": "DISTRICT_NAME",
+    "codeField": "DISTRICT_CODE",
+    "style": {
+      "color": "#dc2626",
+      "weight": 3,
+      "fillOpacity": 0.05,
+      "dashArray": "8, 4"
+    },
+    "fallbackGeojson": "shared/boundaries/virginia_vdot_districts.geojson"
+  },
+
+  "mpo": {
+    "source": "bts_ntad",
+    "stateFilter": "VA",
+    "endpoint": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Metropolitan_Planning_Organizations/FeatureServer/0",
+    "style": {
+      "color": "#7c3aed",
+      "weight": 2,
+      "fillOpacity": 0.08,
+      "dashArray": "6, 3"
+    },
+    "fallbackGeojson": "shared/boundaries/virginia_mpos.geojson"
+  },
+
+  "counties": {
+    "source": "census_tiger",
+    "tigerwebLayer": 82,
+    "tigerwebQuery": "STATE='51'",
+    "geojson": "shared/boundaries/virginia_counties.geojson",
+    "style": {
+      "color": "#334155",
+      "weight": 1.5,
+      "fillOpacity": 0.0
+    }
+  },
+
+  "stateOutline": {
+    "source": "census_tiger",
+    "tigerwebLayer": 80,
+    "tigerwebQuery": "STATE='51'",
+    "style": {
+      "color": "#0f172a",
+      "weight": 2.5,
+      "fillOpacity": 0.0,
+      "dashArray": "none"
+    }
+  }
+}

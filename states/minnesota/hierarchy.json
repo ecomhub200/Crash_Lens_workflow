@@ -1,0 +1,710 @@
+{
+  "state": {
+    "fips": "27",
+    "name": "Minnesota",
+    "abbreviation": "MN",
+    "dot": "MnDOT",
+    "dotFullName": "Minnesota Department of Transportation",
+    "center": [
+      -93.900192,
+      45.694454
+    ],
+    "zoom": 7,
+    "placesCount": 855
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "mn_1": {
+      "name": "District 1 (Duluth)",
+      "shortName": "District 1",
+      "center": [
+        -92.1,
+        47.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "001",
+        "017",
+        "031",
+        "061",
+        "071",
+        "075",
+        "115",
+        "137"
+      ],
+      "countyNames": {
+        "001": "Aitkin",
+        "017": "Carlton",
+        "031": "Cook",
+        "061": "Itasca",
+        "071": "Koochiching",
+        "075": "Lake",
+        "115": "Pine",
+        "137": "St. Louis"
+      },
+      "mapBounds": {
+        "sw": [
+          46.5,
+          -93.8
+        ],
+        "ne": [
+          48.6,
+          -89.5
+        ]
+      },
+      "hq": "Duluth"
+    },
+    "mn_2": {
+      "name": "District 2 (Bemidji)",
+      "shortName": "District 2",
+      "center": [
+        -94.5,
+        46.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "007",
+        "021",
+        "029",
+        "035",
+        "057",
+        "077",
+        "087",
+        "097",
+        "135",
+        "153",
+        "159"
+      ],
+      "countyNames": {
+        "007": "Beltrami",
+        "021": "Cass",
+        "029": "Clearwater",
+        "035": "Crow Wing",
+        "057": "Hubbard",
+        "077": "Lake of the Woods",
+        "087": "Mahnomen",
+        "097": "Morrison",
+        "135": "Roseau",
+        "153": "Todd",
+        "159": "Wadena"
+      },
+      "mapBounds": {
+        "sw": [
+          45.8,
+          -95.6
+        ],
+        "ne": [
+          49.0,
+          -93.4
+        ]
+      },
+      "hq": "Bemidji"
+    },
+    "mn_3": {
+      "name": "District 3 (Brainerd)",
+      "shortName": "District 3",
+      "center": [
+        -94.0,
+        45.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "059",
+        "065",
+        "095",
+        "141",
+        "145",
+        "171"
+      ],
+      "countyNames": {
+        "009": "Benton",
+        "059": "Isanti",
+        "065": "Kanabec",
+        "095": "Mille Lacs",
+        "141": "Sherburne",
+        "145": "Stearns",
+        "171": "Wright"
+      },
+      "mapBounds": {
+        "sw": [
+          44.8,
+          -94.8
+        ],
+        "ne": [
+          46.0,
+          -93.2
+        ]
+      },
+      "hq": "Brainerd"
+    },
+    "mn_4": {
+      "name": "District 4 (Detroit Lakes)",
+      "shortName": "District 4",
+      "center": [
+        -96.0,
+        46.3
+      ],
+      "zoom": 7,
+      "counties": [
+        "005",
+        "027",
+        "041",
+        "051",
+        "107",
+        "111",
+        "119",
+        "121",
+        "149",
+        "155",
+        "167"
+      ],
+      "countyNames": {
+        "005": "Becker",
+        "027": "Clay",
+        "041": "Douglas",
+        "051": "Grant",
+        "107": "Norman",
+        "111": "Otter Tail",
+        "119": "Polk",
+        "121": "Pope",
+        "149": "Stevens",
+        "155": "Traverse",
+        "167": "Wilkin"
+      },
+      "mapBounds": {
+        "sw": [
+          45.5,
+          -96.9
+        ],
+        "ne": [
+          47.9,
+          -95.1
+        ]
+      },
+      "hq": "Detroit Lakes"
+    },
+    "mn_6": {
+      "name": "District 6 (Rochester)",
+      "shortName": "District 6",
+      "center": [
+        -92.4,
+        44.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "039",
+        "045",
+        "047",
+        "049",
+        "055",
+        "099",
+        "109",
+        "131",
+        "147",
+        "157",
+        "161",
+        "169"
+      ],
+      "countyNames": {
+        "039": "Dodge",
+        "045": "Fillmore",
+        "047": "Freeborn",
+        "049": "Goodhue",
+        "055": "Houston",
+        "099": "Mower",
+        "109": "Olmsted",
+        "131": "Rice",
+        "147": "Steele",
+        "157": "Wabasha",
+        "161": "Waseca",
+        "169": "Winona"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -93.0
+        ],
+        "ne": [
+          44.7,
+          -91.5
+        ]
+      },
+      "hq": "Rochester"
+    },
+    "mn_7": {
+      "name": "District 7 (Mankato)",
+      "shortName": "District 7",
+      "center": [
+        -94.7,
+        44.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "013",
+        "015",
+        "033",
+        "043",
+        "063",
+        "079",
+        "091",
+        "101",
+        "103",
+        "105",
+        "117",
+        "133",
+        "143",
+        "165"
+      ],
+      "countyNames": {
+        "013": "Blue Earth",
+        "015": "Brown",
+        "033": "Cottonwood",
+        "043": "Faribault",
+        "063": "Jackson",
+        "079": "Le Sueur",
+        "091": "Martin",
+        "101": "Murray",
+        "103": "Nicollet",
+        "105": "Nobles",
+        "117": "Pipestone",
+        "133": "Rock",
+        "143": "Sibley",
+        "165": "Watonwan"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -96.0
+        ],
+        "ne": [
+          44.5,
+          -93.6
+        ]
+      },
+      "hq": "Mankato"
+    },
+    "mn_8": {
+      "name": "District 8 (Willmar)",
+      "shortName": "District 8",
+      "center": [
+        -95.4,
+        44.9
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "023",
+        "067",
+        "073",
+        "081",
+        "083",
+        "085",
+        "093",
+        "127",
+        "129",
+        "151",
+        "173"
+      ],
+      "countyNames": {
+        "011": "Big Stone",
+        "023": "Chippewa",
+        "067": "Kandiyohi",
+        "073": "Lac qui Parle",
+        "081": "Lincoln",
+        "083": "Lyon",
+        "085": "McLeod",
+        "093": "Meeker",
+        "127": "Redwood",
+        "129": "Renville",
+        "151": "Swift",
+        "173": "Yellow Medicine"
+      },
+      "mapBounds": {
+        "sw": [
+          44.2,
+          -96.5
+        ],
+        "ne": [
+          45.4,
+          -94.3
+        ]
+      },
+      "hq": "Willmar"
+    },
+    "mn_m": {
+      "name": "Metro District",
+      "shortName": "Metro District",
+      "center": [
+        -93.27,
+        44.97
+      ],
+      "zoom": 9,
+      "counties": [
+        "003",
+        "019",
+        "025",
+        "037",
+        "053",
+        "123",
+        "139",
+        "163"
+      ],
+      "countyNames": {
+        "003": "Anoka",
+        "019": "Carver",
+        "025": "Chisago",
+        "037": "Dakota",
+        "053": "Hennepin",
+        "123": "Ramsey",
+        "139": "Scott",
+        "163": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          44.5,
+          -93.9
+        ],
+        "ne": [
+          45.4,
+          -92.7
+        ]
+      },
+      "hq": "Roseville"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mctc": {
+      "name": "Metropolitan Council (Twin Cities)",
+      "shortName": "Twin Cities",
+      "type": "mpo",
+      "center": [
+        -93.265,
+        44.9778
+      ],
+      "zoom": 9,
+      "counties": [
+        "053",
+        "123",
+        "003",
+        "037",
+        "163",
+        "139",
+        "019"
+      ],
+      "countyNames": {
+        "053": "Hennepin",
+        "123": "Ramsey",
+        "003": "Anoka",
+        "037": "Dakota",
+        "163": "Washington",
+        "139": "Scott",
+        "019": "Carver"
+      },
+      "btsAcronym": "MCC",
+      "mapBounds": {
+        "sw": [
+          44.6,
+          -93.8
+        ],
+        "ne": [
+          45.35,
+          -92.7
+        ]
+      }
+    },
+    "rocog": {
+      "name": "Rochester-Olmsted COG",
+      "shortName": "Rochester-Olmsted COG",
+      "type": "mpo",
+      "center": [
+        -92.1005,
+        46.7867
+      ],
+      "zoom": 10,
+      "counties": [
+        "109"
+      ],
+      "countyNames": {
+        "109": "Olmsted"
+      },
+      "btsAcronym": "RC",
+      "mapBounds": {
+        "sw": [
+          46.55,
+          -92.35
+        ],
+        "ne": [
+          47.05,
+          -91.85
+        ]
+      }
+    },
+    "scapo": {
+      "name": "St. Cloud APO",
+      "shortName": "St. Cloud APO",
+      "type": "mpo",
+      "center": [
+        -92.4802,
+        44.0121
+      ],
+      "zoom": 10,
+      "counties": [
+        "145",
+        "009",
+        "141"
+      ],
+      "countyNames": {
+        "145": "Stearns",
+        "009": "Benton",
+        "141": "Sherburne"
+      },
+      "btsAcronym": "SCA",
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -92.7
+        ],
+        "ne": [
+          44.25,
+          -92.25
+        ]
+      }
+    },
+    "fmmcog": {
+      "name": "Fargo-Moorhead Metropolitan COG",
+      "shortName": "Fargo-Moorhead",
+      "type": "mpo",
+      "center": [
+        -94.1632,
+        45.5579
+      ],
+      "zoom": 10,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Clay"
+      },
+      "btsAcronym": "FMC",
+      "mapBounds": {
+        "sw": [
+          45.35,
+          -94.4
+        ],
+        "ne": [
+          45.75,
+          -93.9
+        ]
+      }
+    },
+    "micd": {
+      "name": "Metropolitan Interstate Council (Duluth)",
+      "shortName": "Duluth",
+      "type": "mpo",
+      "center": [
+        -96.769,
+        46.873
+      ],
+      "zoom": 10,
+      "counties": [
+        "137"
+      ],
+      "countyNames": {
+        "137": "St. Louis"
+      },
+      "btsAcronym": "MIC",
+      "mapBounds": {
+        "sw": [
+          46.65,
+          -97.05
+        ],
+        "ne": [
+          47.1,
+          -96.5
+        ]
+      }
+    },
+    "mnmapo": {
+      "name": "Mankato/North Mankato APO",
+      "shortName": "Mankato/North Mankato APO",
+      "type": "mpo",
+      "center": [
+        -93.9994,
+        44.1636
+      ],
+      "zoom": 10,
+      "counties": [
+        "013",
+        "103"
+      ],
+      "countyNames": {
+        "013": "Blue Earth",
+        "103": "Nicollet"
+      },
+      "btsAcronym": "MMA",
+      "mapBounds": {
+        "sw": [
+          43.95,
+          -94.25
+        ],
+        "ne": [
+          44.4,
+          -93.75
+        ]
+      }
+    },
+    "lcapc": {
+      "name": "La Crosse Area Planning Committee",
+      "shortName": "La Crosse Area Planning Committee",
+      "type": "mpo",
+      "center": [
+        -93.35,
+        45.0629
+      ],
+      "zoom": 11,
+      "counties": [
+        "055"
+      ],
+      "countyNames": {
+        "055": "Houston"
+      },
+      "btsAcronym": "LCAPC",
+      "mapBounds": {
+        "sw": [
+          44.9,
+          -93.55
+        ],
+        "ne": [
+          45.2,
+          -93.15
+        ]
+      }
+    },
+    "mankato_north_mankato_area_planning_organization_mpo": {
+      "name": "Mankato / North Mankato Area Planning Organization",
+      "shortName": "Mankato / North Mankato Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "27201300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -93.982434,
+        44.178602
+      ],
+      "zoom": 10
+    },
+    "st_cloud_area_planning_organization_mpo": {
+      "name": "St. Cloud Area Planning Organization",
+      "shortName": "St. Cloud Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "27197000",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -94.187842,
+        45.609293
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Aitkin",
+    "003": "Anoka",
+    "005": "Becker",
+    "007": "Beltrami",
+    "009": "Benton",
+    "011": "Big Stone",
+    "013": "Blue Earth",
+    "015": "Brown",
+    "017": "Carlton",
+    "019": "Carver",
+    "021": "Cass",
+    "023": "Chippewa",
+    "025": "Chisago",
+    "027": "Clay",
+    "029": "Clearwater",
+    "031": "Cook",
+    "033": "Cottonwood",
+    "035": "Crow Wing",
+    "037": "Dakota",
+    "039": "Dodge",
+    "041": "Douglas",
+    "043": "Faribault",
+    "045": "Fillmore",
+    "047": "Freeborn",
+    "049": "Goodhue",
+    "051": "Grant",
+    "053": "Hennepin",
+    "055": "Houston",
+    "057": "Hubbard",
+    "059": "Isanti",
+    "061": "Itasca",
+    "063": "Jackson",
+    "065": "Kanabec",
+    "067": "Kandiyohi",
+    "069": "Kittson",
+    "071": "Koochiching",
+    "073": "Lac qui Parle",
+    "075": "Lake",
+    "077": "Lake of the Woods",
+    "079": "Le Sueur",
+    "081": "Lincoln",
+    "083": "Lyon",
+    "085": "McLeod",
+    "087": "Mahnomen",
+    "089": "Marshall",
+    "091": "Martin",
+    "093": "Meeker",
+    "095": "Mille Lacs",
+    "097": "Morrison",
+    "099": "Mower",
+    "101": "Murray",
+    "103": "Nicollet",
+    "105": "Nobles",
+    "107": "Norman",
+    "109": "Olmsted",
+    "111": "Otter Tail",
+    "113": "Pennington",
+    "115": "Pine",
+    "117": "Pipestone",
+    "119": "Polk",
+    "121": "Pope",
+    "123": "Ramsey",
+    "125": "Red Lake",
+    "127": "Redwood",
+    "129": "Renville",
+    "131": "Rice",
+    "133": "Rock",
+    "135": "Roseau",
+    "137": "St. Louis",
+    "139": "Scott",
+    "141": "Sherburne",
+    "143": "Sibley",
+    "145": "Stearns",
+    "147": "Steele",
+    "149": "Stevens",
+    "151": "Swift",
+    "153": "Todd",
+    "155": "Traverse",
+    "157": "Wabasha",
+    "159": "Wadena",
+    "161": "Waseca",
+    "163": "Washington",
+    "165": "Watonwan",
+    "167": "Wilkin",
+    "169": "Winona",
+    "171": "Wright",
+    "173": "Yellow Medicine"
+  }
+}

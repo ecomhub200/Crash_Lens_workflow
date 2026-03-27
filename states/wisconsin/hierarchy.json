@@ -1,0 +1,763 @@
+{
+  "state": {
+    "fips": "55",
+    "name": "Wisconsin",
+    "abbreviation": "WI",
+    "dot": "WisDOT",
+    "dotFullName": "Wisconsin Department of Transportation",
+    "center": [
+      -89.616508,
+      44.268543
+    ],
+    "zoom": 7,
+    "placesCount": 607
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "wi_1": {
+      "name": "Southwest Region",
+      "shortName": "Southwest Region",
+      "center": [
+        -90.5,
+        43.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "023",
+        "043",
+        "049",
+        "057",
+        "063",
+        "081",
+        "103",
+        "111",
+        "123"
+      ],
+      "countyNames": {
+        "023": "Crawford",
+        "043": "Grant",
+        "049": "Iowa",
+        "057": "Juneau",
+        "063": "La Crosse",
+        "081": "Monroe",
+        "103": "Richland",
+        "111": "Sauk",
+        "123": "Vernon"
+      },
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -91.3
+        ],
+        "ne": [
+          44.1,
+          -89.7
+        ]
+      },
+      "hq": "La Crosse"
+    },
+    "wi_2": {
+      "name": "Southeast Region",
+      "shortName": "Southeast Region",
+      "center": [
+        -88.1,
+        42.9
+      ],
+      "zoom": 9,
+      "counties": [
+        "059",
+        "079",
+        "089",
+        "101",
+        "127",
+        "131",
+        "133"
+      ],
+      "countyNames": {
+        "059": "Kenosha",
+        "079": "Milwaukee",
+        "089": "Ozaukee",
+        "101": "Racine",
+        "127": "Walworth",
+        "131": "Washington",
+        "133": "Waukesha"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -88.7
+        ],
+        "ne": [
+          43.4,
+          -87.5
+        ]
+      },
+      "hq": "Waukesha"
+    },
+    "wi_3": {
+      "name": "Northeast Region",
+      "shortName": "Northeast Region",
+      "center": [
+        -88.0,
+        44.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "015",
+        "029",
+        "037",
+        "041",
+        "061",
+        "067",
+        "071",
+        "075",
+        "078",
+        "083",
+        "087",
+        "115",
+        "117",
+        "135",
+        "139"
+      ],
+      "countyNames": {
+        "009": "Brown",
+        "015": "Calumet",
+        "029": "Door",
+        "037": "Florence",
+        "041": "Forest",
+        "061": "Kewaunee",
+        "067": "Langlade",
+        "071": "Manitowoc",
+        "075": "Marinette",
+        "078": "Menominee",
+        "083": "Oconto",
+        "087": "Outagamie",
+        "115": "Shawano",
+        "117": "Sheboygan",
+        "135": "Waupaca",
+        "139": "Winnebago"
+      },
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -88.8
+        ],
+        "ne": [
+          45.6,
+          -87.0
+        ]
+      },
+      "hq": "Green Bay"
+    },
+    "wi_4": {
+      "name": "North Central Region",
+      "shortName": "North Central Region",
+      "center": [
+        -89.6,
+        44.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "019",
+        "047",
+        "069",
+        "073",
+        "077",
+        "085",
+        "097",
+        "099",
+        "119",
+        "125",
+        "137",
+        "141"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "019": "Clark",
+        "047": "Green Lake",
+        "069": "Lincoln",
+        "073": "Marathon",
+        "077": "Marquette",
+        "085": "Oneida",
+        "097": "Portage",
+        "099": "Price",
+        "119": "Taylor",
+        "125": "Vilas",
+        "137": "Waushara",
+        "141": "Wood"
+      },
+      "mapBounds": {
+        "sw": [
+          43.9,
+          -90.5
+        ],
+        "ne": [
+          45.8,
+          -88.7
+        ]
+      },
+      "hq": "Wisconsin Rapids"
+    },
+    "wi_5": {
+      "name": "Northwest Region",
+      "shortName": "Northwest Region",
+      "center": [
+        -91.3,
+        45.4
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "005",
+        "007",
+        "011",
+        "013",
+        "017",
+        "031",
+        "033",
+        "035",
+        "051",
+        "053",
+        "091",
+        "093",
+        "095",
+        "107",
+        "113",
+        "109",
+        "121",
+        "129"
+      ],
+      "countyNames": {
+        "003": "Ashland",
+        "005": "Barron",
+        "007": "Bayfield",
+        "011": "Buffalo",
+        "013": "Burnett",
+        "017": "Chippewa",
+        "031": "Douglas",
+        "033": "Dunn",
+        "035": "Eau Claire",
+        "051": "Iron",
+        "053": "Jackson",
+        "091": "Pepin",
+        "093": "Pierce",
+        "095": "Polk",
+        "107": "Rusk",
+        "113": "Sawyer",
+        "109": "St. Croix",
+        "121": "Trempealeau",
+        "129": "Washburn"
+      },
+      "mapBounds": {
+        "sw": [
+          44.2,
+          -92.9
+        ],
+        "ne": [
+          47.1,
+          -89.7
+        ]
+      },
+      "hq": "Superior"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "sewrpcswrpcm": {
+      "name": "SEWRPC (Southeastern Wisconsin RPC / Milwaukee)",
+      "shortName": "Southeastern Wisconsin RPC / Milwaukee",
+      "type": "mpo",
+      "center": [
+        -87.9065,
+        43.0389
+      ],
+      "zoom": 10,
+      "counties": [
+        "079",
+        "133",
+        "089",
+        "131",
+        "101",
+        "059",
+        "127"
+      ],
+      "countyNames": {
+        "079": "Milwaukee",
+        "133": "Waukesha",
+        "089": "Ozaukee",
+        "131": "Washington",
+        "101": "Racine",
+        "059": "Kenosha",
+        "127": "Walworth"
+      },
+      "btsAcronym": "SWRM",
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -88.15
+        ],
+        "ne": [
+          43.25,
+          -87.65
+        ]
+      }
+    },
+    "matpb": {
+      "name": "Madison Area TPB",
+      "shortName": "Madison Area TPB",
+      "type": "mpo",
+      "center": [
+        -89.4012,
+        43.0731
+      ],
+      "zoom": 10,
+      "counties": [
+        "025"
+      ],
+      "countyNames": {
+        "025": "Dane"
+      },
+      "btsAcronym": "MAT",
+      "mapBounds": {
+        "sw": [
+          42.85,
+          -89.65
+        ],
+        "ne": [
+          43.3,
+          -89.15
+        ]
+      }
+    },
+    "bcpcgb": {
+      "name": "Brown County Planning Commission (Green Bay)",
+      "shortName": "Green Bay",
+      "type": "mpo",
+      "center": [
+        -88.0198,
+        44.5192
+      ],
+      "zoom": 10,
+      "counties": [
+        "009"
+      ],
+      "countyNames": {
+        "009": "Brown"
+      },
+      "btsAcronym": "BCPCB",
+      "mapBounds": {
+        "sw": [
+          44.25,
+          -88.3
+        ],
+        "ne": [
+          44.75,
+          -87.75
+        ]
+      }
+    },
+    "ecwrpcao": {
+      "name": "East Central Wisconsin RPC (Appleton-Oshkosh)",
+      "shortName": "Appleton-Oshkosh",
+      "type": "mpo",
+      "center": [
+        -88.5415,
+        44.0207
+      ],
+      "zoom": 10,
+      "counties": [
+        "087",
+        "015",
+        "139"
+      ],
+      "countyNames": {
+        "087": "Outagamie",
+        "015": "Calumet",
+        "139": "Winnebago"
+      },
+      "btsAcronym": "ECWR",
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -88.8
+        ],
+        "ne": [
+          44.25,
+          -88.3
+        ]
+      }
+    },
+    "cecmpo": {
+      "name": "Chippewa-Eau Claire MPO",
+      "shortName": "Chippewa-Eau Claire",
+      "type": "mpo",
+      "center": [
+        -88.4382,
+        43.7844
+      ],
+      "zoom": 10,
+      "counties": [
+        "035",
+        "017"
+      ],
+      "countyNames": {
+        "035": "Eau Claire",
+        "017": "Chippewa"
+      },
+      "btsAcronym": "CCM",
+      "mapBounds": {
+        "sw": [
+          43.55,
+          -88.7
+        ],
+        "ne": [
+          44.0,
+          -88.15
+        ]
+      }
+    },
+    "lcapc": {
+      "name": "La Crosse Area Planning Committee",
+      "shortName": "La Crosse Area Planning Committee",
+      "type": "mpo",
+      "center": [
+        -89.6302,
+        44.9441
+      ],
+      "zoom": 10,
+      "counties": [
+        "063"
+      ],
+      "countyNames": {
+        "063": "La Crosse"
+      },
+      "btsAcronym": "LCAPC",
+      "mapBounds": {
+        "sw": [
+          44.7,
+          -89.9
+        ],
+        "ne": [
+          45.15,
+          -89.35
+        ]
+      }
+    },
+    "jampo": {
+      "name": "Janesville Area MPO",
+      "shortName": "Janesville Area",
+      "type": "mpo",
+      "center": [
+        -91.4985,
+        44.8113
+      ],
+      "zoom": 10,
+      "counties": [
+        "105"
+      ],
+      "countyNames": {
+        "105": "Rock"
+      },
+      "btsAcronym": "JAM",
+      "mapBounds": {
+        "sw": [
+          44.55,
+          -91.75
+        ],
+        "ne": [
+          45.05,
+          -91.25
+        ]
+      }
+    },
+    "flampo": {
+      "name": "Fond du Lac Area MPO",
+      "shortName": "Fond du Lac Area",
+      "type": "mpo",
+      "center": [
+        -91.2396,
+        43.8014
+      ],
+      "zoom": 10,
+      "counties": [
+        "039"
+      ],
+      "countyNames": {
+        "039": "Fond du Lac"
+      },
+      "btsAcronym": "FDLAM",
+      "mapBounds": {
+        "sw": [
+          43.55,
+          -91.5
+        ],
+        "ne": [
+          44.05,
+          -91.0
+        ]
+      }
+    },
+    "dsmic": {
+      "name": "Duluth-Superior Metropolitan Interstate Council",
+      "shortName": "Duluth-Superior",
+      "type": "mpo",
+      "center": [
+        -87.7829,
+        42.7261
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "Douglas"
+      },
+      "btsAcronym": "DMIC",
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -88.05
+        ],
+        "ne": [
+          42.95,
+          -87.5
+        ]
+      }
+    },
+    "wampo": {
+      "name": "Wausau Area MPO",
+      "shortName": "Wausau Area",
+      "type": "mpo",
+      "center": [
+        -88.4154,
+        44.2619
+      ],
+      "zoom": 10,
+      "counties": [
+        "073"
+      ],
+      "countyNames": {
+        "073": "Marathon"
+      },
+      "btsAcronym": "WAM",
+      "mapBounds": {
+        "sw": [
+          44.05,
+          -88.65
+        ],
+        "ne": [
+          44.45,
+          -88.15
+        ]
+      }
+    },
+    "sampo": {
+      "name": "Sheboygan Area MPO",
+      "shortName": "Sheboygan Area",
+      "type": "mpo",
+      "center": [
+        -89.0188,
+        42.6306
+      ],
+      "zoom": 10,
+      "counties": [
+        "117"
+      ],
+      "countyNames": {
+        "117": "Sheboygan"
+      },
+      "btsAcronym": "SAM",
+      "mapBounds": {
+        "sw": [
+          42.4,
+          -89.28
+        ],
+        "ne": [
+          42.85,
+          -88.75
+        ]
+      }
+    },
+    "southeastern_wisconsin_regional_planning_commission_mpo": {
+      "name": "Southeastern Wisconsin Regional Planning Commission",
+      "shortName": "Southeastern Wisconsin Regional Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "55196100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.166678,
+        42.917036
+      ],
+      "zoom": 10
+    },
+    "wausau_metropolitan_planning_organization_mpo": {
+      "name": "Wausau Metropolitan Planning Organization",
+      "shortName": "Wausau",
+      "type": "mpo",
+      "btsMpoId": "55198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -89.651543,
+        44.952048
+      ],
+      "zoom": 10
+    },
+    "sheboygan_mpo": {
+      "name": "Sheboygan MPO",
+      "shortName": "Sheboygan",
+      "type": "mpo",
+      "btsMpoId": "55198202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.77643,
+        43.754891
+      ],
+      "zoom": 10
+    },
+    "madison_area_transportation_planning_board_mpo": {
+      "name": "Madison Area Transportation Planning Board",
+      "shortName": "Madison Transportation Planning Board",
+      "type": "mpo",
+      "btsMpoId": "55197100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -89.395496,
+        43.104541
+      ],
+      "zoom": 10
+    },
+    "state_line_area_transportation_study_mpo": {
+      "name": "State Line Area Transportation Study",
+      "shortName": "State Line Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "55197499",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -89.029891,
+        42.49272
+      ],
+      "zoom": 10
+    },
+    "appletonfox_cities_mpo": {
+      "name": "Appleton/Fox Cities MPO",
+      "shortName": "Appleton/Fox Cities",
+      "type": "mpo",
+      "btsMpoId": "55197301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.429176,
+        44.176433
+      ],
+      "zoom": 10
+    },
+    "oshkosh_mpo": {
+      "name": "Oshkosh MPO",
+      "shortName": "Oshkosh",
+      "type": "mpo",
+      "btsMpoId": "55197302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.532651,
+        44.01233
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Ashland",
+    "005": "Barron",
+    "007": "Bayfield",
+    "009": "Brown",
+    "011": "Buffalo",
+    "013": "Burnett",
+    "015": "Calumet",
+    "017": "Chippewa",
+    "019": "Clark",
+    "021": "Columbia",
+    "023": "Crawford",
+    "025": "Dane",
+    "027": "Dodge",
+    "029": "Door",
+    "031": "Douglas",
+    "033": "Dunn",
+    "035": "Eau Claire",
+    "037": "Florence",
+    "039": "Fond du Lac",
+    "041": "Forest",
+    "043": "Grant",
+    "045": "Green",
+    "047": "Green Lake",
+    "049": "Iowa",
+    "051": "Iron",
+    "053": "Jackson",
+    "055": "Jefferson",
+    "057": "Juneau",
+    "059": "Kenosha",
+    "061": "Kewaunee",
+    "063": "La Crosse",
+    "065": "Lafayette",
+    "067": "Langlade",
+    "069": "Lincoln",
+    "071": "Manitowoc",
+    "073": "Marathon",
+    "075": "Marinette",
+    "077": "Marquette",
+    "078": "Menominee",
+    "079": "Milwaukee",
+    "081": "Monroe",
+    "083": "Oconto",
+    "085": "Oneida",
+    "087": "Outagamie",
+    "089": "Ozaukee",
+    "091": "Pepin",
+    "093": "Pierce",
+    "095": "Polk",
+    "097": "Portage",
+    "099": "Price",
+    "101": "Racine",
+    "103": "Richland",
+    "105": "Rock",
+    "107": "Rusk",
+    "109": "St. Croix",
+    "111": "Sauk",
+    "113": "Sawyer",
+    "115": "Shawano",
+    "117": "Sheboygan",
+    "119": "Taylor",
+    "121": "Trempealeau",
+    "123": "Vernon",
+    "125": "Vilas",
+    "127": "Walworth",
+    "129": "Washburn",
+    "131": "Washington",
+    "133": "Waukesha",
+    "135": "Waupaca",
+    "137": "Waushara",
+    "139": "Winnebago",
+    "141": "Wood"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "state": {
+    "name": "Oregon",
+    "abbreviation": "OR",
+    "fips": "41",
+    "dotName": "ODOT",
+    "dotFullName": "Oregon Department of Transportation",
+    "dataPortalUrl": "https://oregon.gov/odot",
+    "coordinateBounds": {
+      "latMin": 41.99,
+      "latMax": 46.29,
+      "lonMin": -124.57,
+      "lonMax": -116.46
+    },
+    "dataDir": "OregonDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Oregon OTSDE Crash MapServer fields to CRASH LENS field codes",
+    "_note": "Column names from ODOT OTSDE_Crash MapServer/0 (2018-2023). Max Record Count: 10,000. Renderer uses KABCO unique values.",
+    "ID": "CRASH_ID",
+    "DATE": "CRASH_DT",
+    "TIME": "CRASH_HR_LONG_DESC",
+    "LAT": "LAT_DD",
+    "LON": "LONGTD_DD",
+    "SEVERITY": "KABCO",
+    "SEVERITY_CODE": "CRASH_SVRTY_CD",
+    "SEVERITY_DESC": "CRASH_SVRTY_LONG_DESC",
+    "JURISDICTION": "CNTY_NM",
+    "ROUTE": "RTE_NM",
+    "HIGHWAY_NUMBER": "HWY_NO",
+    "MILEPOINT": "MP_NO",
+    "COLLISION": "COLLIS_TYP_LONG_DESC",
+    "COLLISION_CODE": "COLLIS_TYP_CD",
+    "WEATHER": "WTHR_COND_LONG_DESC",
+    "LIGHT": "LGT_COND_LONG_DESC",
+    "LIGHT_CODE": "LGT_COND_CD",
+    "SURFACE_CONDITION": "RD_SURF_MED_DESC",
+    "SURFACE_CONDITION_CODE": "RD_SURF_COND_CD",
+    "JUNCTION": "TRAF_CNTL_DEVICE_LONG_DESC",
+    "JUNCTION_CODE": "TRAF_CNTL_DEVICE_CD",
+    "HITRUN": "CRASH_HIT_RUN_FLG",
+    "ALCOHOL": "ALCHL_INVLV_FLG",
+    "DRUG": "DRUG_INVLV_FLG",
+    "SPEED": "CRASH_SPEED_INVLV_FLG"
+  },
+  "derivedFields": {
+    "_description": "Fields computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_kabco",
+      "source": "KABCO",
+      "_note": "Oregon provides KABCO directly: K=Fatal, A=Injury A, B=Injury B, C=Injury C, O=PDO. Also CRASH_SVRTY_CD (single char) and CRASH_SVRTY_LONG_DESC (full text)."
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "CRASH_DT"
+    },
+    "NODE": {
+      "method": "route_milepoint",
+      "sources": [
+        "RTE_NM",
+        "MP_NO"
+      ],
+      "_note": "Oregon uses route name + milepoint instead of intersection. Format: 'ROUTE @ MP xxx.xx'"
+    }
+  },
+  "roadSystems": {
+    "_description": "Oregon road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Oregon collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "ODOT TransGIS / OTSDE Crash Data",
+    "url": "https://gis.odot.state.or.us/transgis/",
+    "apiUrl": "https://gis.odot.state.or.us/arcgis1006/rest/services/agol/OTSDE_Crash/MapServer/0",
+    "fileFormat": "GeoJSON/CSV (ArcGIS MapServer)",
+    "dataDictionary": "CDS Code Manual: https://www.oregon.gov/ODOT/Data/documents/CDS_Code_Manual.pdf, OTSDE User Guide: https://www.oregon.gov/ODOT/Data/Documents/OTSDE_UserGuide.pdf",
+    "_dataRange": "2018-2023, updated periodically as new years are finalized",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 10000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

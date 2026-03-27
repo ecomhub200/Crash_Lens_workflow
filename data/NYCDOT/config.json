@@ -1,0 +1,175 @@
+{
+  "state": {
+    "name": "New York City",
+    "abbreviation": "NYC",
+    "fips": "36",
+    "dotName": "NYC DOT",
+    "dotFullName": "New York City Department of Transportation",
+    "dataPortalUrl": "https://data.cityofnewyork.us",
+    "coordinateBounds": {
+      "latMin": 40.49,
+      "latMax": 40.92,
+      "lonMin": -74.26,
+      "lonMax": -73.7
+    },
+    "dataDir": "NYCDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps NYC Motor Vehicle Collisions (h9gi-nx95) fields to CRASH LENS field codes",
+    "_note": "Column names from NYC Open Data Motor Vehicle Collisions - Crashes dataset",
+    "ID": "collision_id",
+    "DATE": "crash_date",
+    "TIME": "crash_time",
+    "LAT": "latitude",
+    "LON": "longitude",
+    "SEVERITY": "_DERIVED",
+    "JURISDICTION": "borough",
+    "ROUTE": "on_street_name",
+    "CROSS_STREET": "cross_street_name",
+    "OFF_STREET": "off_street_name",
+    "COLLISION": "contributing_factor_vehicle_1",
+    "WEATHER": "_NOT_IN_CRASHES_TABLE",
+    "LIGHT": "_NOT_IN_CRASHES_TABLE",
+    "SURFACE_CONDITION": "_NOT_IN_CRASHES_TABLE",
+    "JUNCTION": "_NOT_IN_CRASHES_TABLE",
+    "HITRUN": "_NOT_IN_CRASHES_TABLE",
+    "ZIP_CODE": "zip_code",
+    "VEHICLE_TYPE_1": "vehicle_type_code1",
+    "VEHICLE_TYPE_2": "vehicle_type_code2",
+    "CONTRIBUTING_FACTOR_1": "contributing_factor_vehicle_1",
+    "CONTRIBUTING_FACTOR_2": "contributing_factor_vehicle_2"
+  },
+  "derivedFields": {
+    "_description": "Fields computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "derived_from_counts",
+      "_note": "NYC Crashes table has injury/fatality counts, not KABCO directly",
+      "rule": "If number_of_persons_killed > 0 \u2192 K; Elif number_of_persons_injured > 0 \u2192 B (conservative); Else \u2192 O",
+      "sources": [
+        "number_of_persons_killed",
+        "number_of_persons_injured"
+      ]
+    },
+    "PED": {
+      "method": "flag_from_count",
+      "sources": [
+        "number_of_pedestrians_killed",
+        "number_of_pedestrians_injured"
+      ],
+      "rule": "True if sum > 0"
+    },
+    "BIKE": {
+      "method": "flag_from_count",
+      "sources": [
+        "number_of_cyclist_killed",
+        "number_of_cyclist_injured"
+      ],
+      "rule": "True if sum > 0"
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "crash_date"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "on_street_name",
+        "cross_street_name"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "New York City road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps New York City collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "NYC DOT Open Data Portal",
+    "url": "https://data.cityofnewyork.us",
+    "apiUrl": "https://data.cityofnewyork.us/resource/h9gi-nx95.json",
+    "fileFormat": "JSON/CSV (Socrata SODA API)",
+    "dataDictionary": "See data.cityofnewyork.us dataset metadata",
+    "resourceId": "h9gi-nx95",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 50000,
+      "paramLimit": "$limit",
+      "paramOffset": "$offset"
+    }
+  }
+}

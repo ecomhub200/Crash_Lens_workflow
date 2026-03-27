@@ -1,0 +1,684 @@
+{
+  "state": {
+    "fips": "20",
+    "name": "Kansas",
+    "abbreviation": "KS",
+    "dot": "KDOT",
+    "dotFullName": "Kansas Department of Transportation",
+    "center": [
+      -96.726486,
+      38.5266
+    ],
+    "zoom": 7,
+    "placesCount": 624
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ks_1": {
+      "name": "District 1 (Northeast)",
+      "shortName": "District 1",
+      "center": [
+        -95.6,
+        39.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "013",
+        "027",
+        "029",
+        "041",
+        "043",
+        "045",
+        "061",
+        "085",
+        "087",
+        "091",
+        "103",
+        "111",
+        "117",
+        "121",
+        "127",
+        "131",
+        "139",
+        "149",
+        "157",
+        "161",
+        "177",
+        "197",
+        "201",
+        "209"
+      ],
+      "countyNames": {
+        "005": "Atchison",
+        "013": "Brown",
+        "027": "Clay",
+        "029": "Cloud",
+        "041": "Dickinson",
+        "043": "Doniphan",
+        "045": "Douglas",
+        "061": "Geary",
+        "085": "Jackson",
+        "087": "Jefferson",
+        "091": "Johnson",
+        "103": "Leavenworth",
+        "111": "Lyon",
+        "117": "Marshall",
+        "121": "Miami",
+        "127": "Morris",
+        "131": "Nemaha",
+        "139": "Osage",
+        "149": "Pottawatomie",
+        "157": "Republic",
+        "161": "Riley",
+        "177": "Shawnee",
+        "197": "Wabaunsee",
+        "201": "Washington",
+        "209": "Wyandotte"
+      },
+      "mapBounds": {
+        "sw": [
+          38.5,
+          -96.6
+        ],
+        "ne": [
+          40.0,
+          -94.6
+        ]
+      },
+      "hq": "Topeka"
+    },
+    "ks_2": {
+      "name": "District 2 (Southeast)",
+      "shortName": "District 2",
+      "center": [
+        -96.3,
+        37.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "011",
+        "015",
+        "017",
+        "019",
+        "021",
+        "031",
+        "035",
+        "037",
+        "049",
+        "059",
+        "073",
+        "079",
+        "099",
+        "107",
+        "115",
+        "113",
+        "125",
+        "133",
+        "191",
+        "205",
+        "207"
+      ],
+      "countyNames": {
+        "001": "Allen",
+        "003": "Anderson",
+        "011": "Bourbon",
+        "015": "Butler",
+        "017": "Chase",
+        "019": "Chautauqua",
+        "021": "Cherokee",
+        "031": "Coffey",
+        "035": "Cowley",
+        "037": "Crawford",
+        "049": "Elk",
+        "059": "Franklin",
+        "073": "Greenwood",
+        "079": "Harvey",
+        "099": "Labette",
+        "107": "Linn",
+        "115": "Marion",
+        "113": "McPherson",
+        "125": "Montgomery",
+        "133": "Neosho",
+        "191": "Sumner",
+        "205": "Wilson",
+        "207": "Woodson"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -97.3
+        ],
+        "ne": [
+          38.4,
+          -95.3
+        ]
+      },
+      "hq": "Chanute"
+    },
+    "ks_3": {
+      "name": "District 3 (Northwest)",
+      "shortName": "District 3",
+      "center": [
+        -99.8,
+        39.6
+      ],
+      "zoom": 7,
+      "counties": [
+        "023",
+        "039",
+        "051",
+        "053",
+        "063",
+        "065",
+        "089",
+        "105",
+        "109",
+        "123",
+        "137",
+        "141",
+        "143",
+        "147",
+        "153",
+        "163",
+        "167",
+        "169",
+        "179",
+        "181",
+        "183",
+        "193",
+        "195",
+        "199"
+      ],
+      "countyNames": {
+        "023": "Cheyenne",
+        "039": "Decatur",
+        "051": "Ellis",
+        "053": "Ellsworth",
+        "063": "Gove",
+        "065": "Graham",
+        "089": "Jewell",
+        "105": "Lincoln",
+        "109": "Logan",
+        "123": "Mitchell",
+        "137": "Norton",
+        "141": "Osborne",
+        "143": "Ottawa",
+        "147": "Phillips",
+        "153": "Rawlins",
+        "163": "Rooks",
+        "167": "Russell",
+        "169": "Saline",
+        "179": "Sheridan",
+        "181": "Sherman",
+        "183": "Smith",
+        "193": "Thomas",
+        "195": "Trego",
+        "199": "Wallace"
+      },
+      "mapBounds": {
+        "sw": [
+          38.7,
+          -101.5
+        ],
+        "ne": [
+          40.0,
+          -98.1
+        ]
+      },
+      "hq": "Norton"
+    },
+    "ks_4": {
+      "name": "District 4 (Southeast)",
+      "shortName": "District 4",
+      "center": [
+        -97.34,
+        37.69
+      ],
+      "zoom": 9,
+      "counties": [
+        "173"
+      ],
+      "countyNames": {
+        "173": "Sedgwick"
+      },
+      "mapBounds": {
+        "sw": [
+          37.4,
+          -97.6
+        ],
+        "ne": [
+          38.0,
+          -97.0
+        ]
+      },
+      "hq": "Chanute"
+    },
+    "ks_5": {
+      "name": "District 5 (South Central/Southwest)",
+      "shortName": "District 5",
+      "center": [
+        -99.0,
+        38.0
+      ],
+      "zoom": 7,
+      "counties": [
+        "007",
+        "009",
+        "025",
+        "033",
+        "047",
+        "055",
+        "057",
+        "067",
+        "069",
+        "071",
+        "075",
+        "077",
+        "081",
+        "083",
+        "093",
+        "095",
+        "097",
+        "101",
+        "119",
+        "129",
+        "135",
+        "145",
+        "151",
+        "155",
+        "159",
+        "165",
+        "171",
+        "175",
+        "185",
+        "187",
+        "189",
+        "203"
+      ],
+      "countyNames": {
+        "007": "Barber",
+        "009": "Barton",
+        "025": "Clark",
+        "033": "Comanche",
+        "047": "Edwards",
+        "055": "Finney",
+        "057": "Ford",
+        "067": "Grant",
+        "069": "Gray",
+        "071": "Greeley",
+        "075": "Hamilton",
+        "077": "Harper",
+        "081": "Haskell",
+        "083": "Hodgeman",
+        "093": "Kearny",
+        "095": "Kingman",
+        "097": "Kiowa",
+        "101": "Lane",
+        "119": "Meade",
+        "129": "Morton",
+        "135": "Ness",
+        "145": "Pawnee",
+        "151": "Pratt",
+        "155": "Reno",
+        "159": "Rice",
+        "165": "Rush",
+        "171": "Scott",
+        "175": "Seward",
+        "185": "Stafford",
+        "187": "Stanton",
+        "189": "Stevens",
+        "203": "Wichita"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -101.0
+        ],
+        "ne": [
+          39.0,
+          -97.0
+        ]
+      },
+      "hq": "Hutchinson"
+    },
+    "ks_6": {
+      "name": "District 6 (Garden City)",
+      "shortName": "District 6",
+      "center": [
+        -100.87,
+        37.98
+      ],
+      "zoom": 7,
+      "counties": [
+        "055",
+        "067",
+        "069",
+        "071",
+        "075",
+        "081",
+        "093",
+        "101",
+        "119",
+        "129",
+        "171",
+        "175",
+        "187",
+        "189",
+        "203"
+      ],
+      "countyNames": {
+        "055": "Finney",
+        "067": "Grant",
+        "069": "Gray",
+        "071": "Greeley",
+        "075": "Hamilton",
+        "081": "Haskell",
+        "093": "Kearny",
+        "101": "Lane",
+        "119": "Meade",
+        "129": "Morton",
+        "171": "Scott",
+        "175": "Seward",
+        "187": "Stanton",
+        "189": "Stevens",
+        "203": "Wichita"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -102.05
+        ],
+        "ne": [
+          38.5,
+          -100.0
+        ]
+      },
+      "hq": "Garden City"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "marcmarckc": {
+      "name": "MARC (Mid-America Regional Council / KC metro)",
+      "shortName": "Mid-America Regional Council / KC metro",
+      "type": "mpo",
+      "center": [
+        -97.3301,
+        37.6872
+      ],
+      "zoom": 10,
+      "counties": [
+        "091",
+        "103",
+        "209",
+        "121"
+      ],
+      "countyNames": {
+        "091": "Johnson",
+        "103": "Leavenworth",
+        "209": "Wyandotte",
+        "121": "Miami"
+      },
+      "btsAcronym": "MRCKM",
+      "mapBounds": {
+        "sw": [
+          37.4,
+          -97.6
+        ],
+        "ne": [
+          37.95,
+          -97.0
+        ]
+      }
+    },
+    "wampowampo": {
+      "name": "WAMPO (Wichita Area MPO)",
+      "shortName": "Wichita Area MPO",
+      "type": "mpo",
+      "center": [
+        -95.6752,
+        39.0473
+      ],
+      "zoom": 10,
+      "counties": [
+        "173",
+        "015",
+        "079",
+        "191"
+      ],
+      "countyNames": {
+        "173": "Sedgwick",
+        "015": "Butler",
+        "079": "Harvey",
+        "191": "Sumner"
+      },
+      "btsAcronym": "WAM",
+      "mapBounds": {
+        "sw": [
+          38.8,
+          -95.95
+        ],
+        "ne": [
+          39.3,
+          -95.4
+        ]
+      }
+    },
+    "mtpomtpo": {
+      "name": "MTPO (Metropolitan Topeka Planning Organization)",
+      "shortName": "Metropolitan Topeka Planning Organization",
+      "type": "mpo",
+      "center": [
+        -94.7077,
+        38.9717
+      ],
+      "zoom": 9,
+      "counties": [
+        "177"
+      ],
+      "countyNames": {
+        "177": "Shawnee"
+      },
+      "btsAcronym": "MTPO",
+      "mapBounds": {
+        "sw": [
+          38.5,
+          -95.3
+        ],
+        "ne": [
+          39.4,
+          -94.2
+        ]
+      }
+    },
+    "ldcmpo": {
+      "name": "Lawrence-Douglas County MPO",
+      "shortName": "Lawrence-Douglas County",
+      "type": "mpo",
+      "center": [
+        -99.3268,
+        38.8814
+      ],
+      "zoom": 11,
+      "counties": [
+        "045"
+      ],
+      "countyNames": {
+        "045": "Douglas"
+      },
+      "btsAcronym": "LCM",
+      "mapBounds": {
+        "sw": [
+          38.7,
+          -99.55
+        ],
+        "ne": [
+          39.1,
+          -99.1
+        ]
+      }
+    },
+    "fhmpom": {
+      "name": "Flint Hills MPO (Manhattan)",
+      "shortName": "Manhattan",
+      "type": "mpo",
+      "center": [
+        -100.0171,
+        37.7528
+      ],
+      "zoom": 11,
+      "counties": [
+        "161",
+        "149",
+        "061"
+      ],
+      "countyNames": {
+        "161": "Riley",
+        "149": "Pottawatomie",
+        "061": "Geary"
+      },
+      "btsAcronym": "FHM",
+      "mapBounds": {
+        "sw": [
+          37.55,
+          -100.25
+        ],
+        "ne": [
+          37.95,
+          -99.8
+        ]
+      }
+    },
+    "flint_hills_metropolitan_planning_organization_mpo": {
+      "name": "Flint Hills Metropolitan Planning Organization",
+      "shortName": "Flint Hills",
+      "type": "mpo",
+      "btsMpoId": "20201300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -96.655959,
+        39.144883
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Allen",
+    "003": "Anderson",
+    "005": "Atchison",
+    "007": "Barber",
+    "009": "Barton",
+    "011": "Bourbon",
+    "013": "Brown",
+    "015": "Butler",
+    "017": "Chase",
+    "019": "Chautauqua",
+    "021": "Cherokee",
+    "023": "Cheyenne",
+    "025": "Clark",
+    "027": "Clay",
+    "029": "Cloud",
+    "031": "Coffey",
+    "033": "Comanche",
+    "035": "Cowley",
+    "037": "Crawford",
+    "039": "Decatur",
+    "041": "Dickinson",
+    "043": "Doniphan",
+    "045": "Douglas",
+    "047": "Edwards",
+    "049": "Elk",
+    "051": "Ellis",
+    "053": "Ellsworth",
+    "055": "Finney",
+    "057": "Ford",
+    "059": "Franklin",
+    "061": "Geary",
+    "063": "Gove",
+    "065": "Graham",
+    "067": "Grant",
+    "069": "Gray",
+    "071": "Greeley",
+    "073": "Greenwood",
+    "075": "Hamilton",
+    "077": "Harper",
+    "079": "Harvey",
+    "081": "Haskell",
+    "083": "Hodgeman",
+    "085": "Jackson",
+    "087": "Jefferson",
+    "089": "Jewell",
+    "091": "Johnson",
+    "093": "Kearny",
+    "095": "Kingman",
+    "097": "Kiowa",
+    "099": "Labette",
+    "101": "Lane",
+    "103": "Leavenworth",
+    "105": "Lincoln",
+    "107": "Linn",
+    "109": "Logan",
+    "111": "Lyon",
+    "113": "McPherson",
+    "115": "Marion",
+    "117": "Marshall",
+    "119": "Meade",
+    "121": "Miami",
+    "123": "Mitchell",
+    "125": "Montgomery",
+    "127": "Morris",
+    "129": "Morton",
+    "131": "Nemaha",
+    "133": "Neosho",
+    "135": "Ness",
+    "137": "Norton",
+    "139": "Osage",
+    "141": "Osborne",
+    "143": "Ottawa",
+    "145": "Pawnee",
+    "147": "Phillips",
+    "149": "Pottawatomie",
+    "151": "Pratt",
+    "153": "Rawlins",
+    "155": "Reno",
+    "157": "Republic",
+    "159": "Rice",
+    "161": "Riley",
+    "163": "Rooks",
+    "165": "Rush",
+    "167": "Russell",
+    "169": "Saline",
+    "171": "Scott",
+    "173": "Sedgwick",
+    "175": "Seward",
+    "177": "Shawnee",
+    "179": "Sheridan",
+    "181": "Sherman",
+    "183": "Smith",
+    "185": "Stafford",
+    "187": "Stanton",
+    "189": "Stevens",
+    "191": "Sumner",
+    "193": "Thomas",
+    "195": "Trego",
+    "197": "Wabaunsee",
+    "199": "Wallace",
+    "201": "Washington",
+    "203": "Wichita",
+    "205": "Wilson",
+    "207": "Woodson",
+    "209": "Wyandotte"
+  }
+}

@@ -1,0 +1,293 @@
+# ============================================================================
+# Migrate Forecast Files to R2
+# ============================================================================
+# Uploads existing forecast JSON files from the git repo to R2 storage.
+# After upload, the forecast files can be removed from git (they'll be
+# served from R2 via the manifest).
+#
+# Standard R2 path: {state}/{jurisdiction}/forecasts_{road_type}.json
+#
+# This is a one-time migration workflow. Future forecasts are uploaded
+# automatically by process-cdot-data.yml and download-data.yml (Stage 5).
+# ============================================================================
+
+name: Migrate Forecasts to R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to migrate'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - colorado_douglas
+          - virginia_henrico
+          - custom
+      custom_state:
+        description: 'State prefix (for custom scope)'
+        required: false
+        default: ''
+        type: string
+      custom_jurisdiction:
+        description: 'Jurisdiction (for custom scope)'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Dry run (show what would be uploaded)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  migrate:
+    name: Upload Forecasts to R2
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Configure AWS CLI for R2
+        run: |
+          aws configure set aws_access_key_id "${{ secrets.CF_R2_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.CF_R2_SECRET_ACCESS_KEY }}"
+          aws configure set default.region auto
+
+      - name: Discover and upload forecast files
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          ROAD_TYPES=("county_roads" "city_roads" "no_interstate" "all_roads")
+          UPLOADED=0
+          FAILED=0
+
+          upload_forecast() {
+            local LOCAL_PATH="$1"
+            local R2_KEY="$2"
+
+            if [ ! -f "$LOCAL_PATH" ]; then
+              echo "  [SKIP] Not found: $LOCAL_PATH"
+              return
+            fi
+
+            SIZE=$(ls -lh "$LOCAL_PATH" | awk '{print $5}')
+            echo "  $LOCAL_PATH ($SIZE) -> $R2_KEY"
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "    [DRY-RUN] Would upload (gzip-compressed)"
+              return
+            fi
+
+            # Gzip the JSON before uploading for storage savings
+            GZ_FILE="${LOCAL_PATH}.gz"
+            gzip -c "$LOCAL_PATH" > "$GZ_FILE"
+            GZ_SIZE=$(ls -lh "$GZ_FILE" | awk '{print $5}')
+            echo "    Compressed: $SIZE -> $GZ_SIZE"
+
+            aws s3 cp "$GZ_FILE" "s3://${R2_BUCKET}/${R2_KEY}" \
+              --endpoint-url "$ENDPOINT" \
+              --content-type "application/json" \
+              --content-encoding "gzip" && {
+                echo "    Uploaded successfully (gzip)"
+                UPLOADED=$((UPLOADED + 1))
+              } || {
+                echo "    [ERROR] Upload failed"
+                FAILED=$((FAILED + 1))
+              }
+            rm -f "$GZ_FILE"
+          }
+
+          upload_jurisdiction() {
+            local STATE="$1"
+            local JURISDICTION="$2"
+            local LOCAL_DIR="$3"
+
+            echo ""
+            echo "================================================"
+            echo "Migrating: ${STATE}/${JURISDICTION}"
+            echo "Source dir: ${LOCAL_DIR}"
+            echo "================================================"
+
+            for rt in "${ROAD_TYPES[@]}"; do
+              # Try multiple local path patterns
+              LOCAL_FILE=""
+              for candidate in \
+                "${LOCAL_DIR}/forecasts_${rt}.json" \
+                "${LOCAL_DIR}/${JURISDICTION}/forecasts_${rt}.json" \
+                "data/${STATE}/${JURISDICTION}/forecasts_${rt}.json"; do
+                if [ -f "$candidate" ]; then
+                  LOCAL_FILE="$candidate"
+                  break
+                fi
+              done
+
+              if [ -n "$LOCAL_FILE" ]; then
+                upload_forecast "$LOCAL_FILE" "${STATE}/${JURISDICTION}/forecasts_${rt}.json"
+              else
+                echo "  [SKIP] No forecasts_${rt}.json found for ${STATE}/${JURISDICTION}"
+              fi
+            done
+          }
+
+          # ── Determine scope ──
+          SCOPE="${{ inputs.scope }}"
+
+          if [ "$SCOPE" = "all" ] || [ "$SCOPE" = "colorado_douglas" ]; then
+            upload_jurisdiction "colorado" "douglas" "data/CDOT"
+          fi
+
+          if [ "$SCOPE" = "all" ] || [ "$SCOPE" = "virginia_henrico" ]; then
+            # Virginia/Henrico forecasts exist in multiple locations
+            upload_jurisdiction "virginia" "henrico" "data"
+
+            # Also check the structured path
+            for rt in "${ROAD_TYPES[@]}"; do
+              STRUCTURED="data/virginia/henrico/forecasts_${rt}.json"
+              if [ -f "$STRUCTURED" ]; then
+                echo "  [NOTE] Also found at structured path: $STRUCTURED"
+              fi
+            done
+          fi
+
+          if [ "$SCOPE" = "custom" ]; then
+            STATE="${{ inputs.custom_state }}"
+            JURISDICTION="${{ inputs.custom_jurisdiction }}"
+            if [ -z "$STATE" ] || [ -z "$JURISDICTION" ]; then
+              echo "::error::custom_state and custom_jurisdiction are required for custom scope"
+              exit 1
+            fi
+
+            # Try common data directory patterns
+            DATA_DIR="data"
+            case "$STATE" in
+              colorado) DATA_DIR="data/CDOT" ;;
+              *) DATA_DIR="data" ;;
+            esac
+
+            upload_jurisdiction "$STATE" "$JURISDICTION" "$DATA_DIR"
+          fi
+
+          echo ""
+          echo "================================================"
+          echo "Migration complete: $UPLOADED uploaded, $FAILED failed"
+          echo "================================================"
+
+      - name: Verify R2 uploads
+        if: inputs.dry_run == false
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: |
+          ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          echo "Colorado/Douglas forecasts in R2:"
+          aws s3 ls "s3://${R2_BUCKET}/colorado/douglas/" --endpoint-url "$ENDPOINT" | grep forecast || echo "  (none)"
+
+          echo ""
+          echo "Virginia/Henrico forecasts in R2:"
+          aws s3 ls "s3://${R2_BUCKET}/virginia/henrico/" --endpoint-url "$ENDPOINT" | grep forecast || echo "  (none)"
+
+      - name: Update R2 manifest
+        if: inputs.dry_run == false
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, hashlib
+          from datetime import datetime, timezone
+
+          manifest_path = "data/r2-manifest.json"
+          with open(manifest_path) as f:
+              manifest = json.load(f)
+
+          now = datetime.now(timezone.utc).isoformat()
+
+          # Define all forecast files to register
+          forecast_entries = {
+              # Colorado/Douglas
+              "colorado/douglas/forecasts_county_roads.json": "data/CDOT/forecasts_county_roads.json",
+              "colorado/douglas/forecasts_no_interstate.json": "data/CDOT/forecasts_no_interstate.json",
+              "colorado/douglas/forecasts_all_roads.json": "data/CDOT/forecasts_all_roads.json",
+              # Virginia/Henrico (lowercase key for consistency)
+              "virginia/henrico/forecasts_county_roads.json": "data/forecasts_county_roads.json",
+              "virginia/henrico/forecasts_no_interstate.json": "data/forecasts_no_interstate.json",
+              "virginia/henrico/forecasts_all_roads.json": "data/forecasts_all_roads.json",
+          }
+
+          updated = False
+          for r2_key, local_path in forecast_entries.items():
+              if os.path.exists(local_path):
+                  size = os.path.getsize(local_path)
+                  with open(local_path, "rb") as f:
+                      md5 = hashlib.md5(f.read()).hexdigest()
+
+                  # Update files section
+                  manifest["files"][r2_key] = {
+                      "size": size,
+                      "md5": md5,
+                      "uploaded": now
+                  }
+
+                  # Update localPathMapping
+                  manifest["localPathMapping"][local_path] = r2_key
+
+                  print(f"  Registered: {r2_key} ({size:,} bytes)")
+                  updated = True
+
+          if updated:
+              manifest["updated"] = now
+              # Fix legacy Virginia keys (Henrico -> henrico)
+              legacy_keys = [k for k in manifest["files"] if "Henrico" in k]
+              for lk in legacy_keys:
+                  new_key = lk.replace("Henrico", "henrico").replace("henrico_", "")
+                  if new_key not in manifest["files"]:
+                      manifest["files"][new_key] = manifest["files"][lk]
+                  del manifest["files"][lk]
+                  print(f"  Renamed legacy key: {lk} -> {new_key}")
+
+              # Fix legacy localPathMapping entries
+              legacy_mappings = {k: v for k, v in manifest["localPathMapping"].items()
+                                 if "Henrico" in v}
+              for lk, lv in legacy_mappings.items():
+                  new_val = lv.replace("Henrico", "henrico").replace("henrico_", "")
+                  manifest["localPathMapping"][lk] = new_val
+                  print(f"  Fixed mapping: {lk} -> {new_val}")
+
+              with open(manifest_path, "w") as f:
+                  json.dump(manifest, f, indent=2)
+                  f.write("\n")
+              print(f"\n  Manifest updated: {manifest_path}")
+
+          PYEOF
+
+      - name: Commit manifest update
+        if: inputs.dry_run == false
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/r2-manifest.json
+          git diff --cached --quiet || git commit -m "chore: update R2 manifest with forecast file entries
+
+          Registered forecast JSONs for CO/Douglas and VA/Henrico in
+          R2 manifest files section with size, md5, and upload timestamp.
+          Fixed legacy Henrico mixed-case R2 keys to lowercase convention."
+          git push

@@ -1,0 +1,117 @@
+name: Send Email Notifications
+
+on:
+  schedule:
+    # Weekly digest: Every Monday at 9:00 AM ET (14:00 UTC)
+    - cron: '0 14 * * 1'
+    # Grant deadline alerts: Daily at 8:00 AM ET (13:00 UTC)
+    - cron: '0 13 * * *'
+    # Monthly reports: First day of month at 7:00 AM ET (12:00 UTC)
+    - cron: '0 12 1 * *'
+
+  workflow_dispatch:
+    inputs:
+      notification_type:
+        description: 'Type of notification to send'
+        required: true
+        type: choice
+        options:
+          - reports
+          - grants
+          - digest
+          - test
+      test_email:
+        description: 'Email address for test (only for test type)'
+        required: false
+
+jobs:
+  send-notifications:
+    runs-on: ubuntu-24.04
+
+    # Brevo credentials - set EITHER API key OR SMTP login+password
+    env:
+      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+      BREVO_SMTP_LOGIN: ${{ secrets.BREVO_SMTP_LOGIN }}
+      BREVO_SMTP_PASSWORD: ${{ secrets.BREVO_SMTP_PASSWORD }}
+      NOTIFICATION_FROM_EMAIL: ${{ secrets.NOTIFICATION_FROM_EMAIL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Determine notification type
+        id: determine-type
+        run: |
+          set -e
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ github.event.inputs.notification_type }}" >> $GITHUB_OUTPUT
+            echo "test_email=${{ github.event.inputs.test_email }}" >> $GITHUB_OUTPUT
+            echo "Manually triggered: ${{ github.event.inputs.notification_type }}"
+          else
+            SCHEDULE="${{ github.event.schedule }}"
+            echo "Triggered by schedule: $SCHEDULE"
+            case "$SCHEDULE" in
+              "0 12 1 * *")
+                echo "type=reports" >> $GITHUB_OUTPUT
+                echo "Detected: Monthly reports (1st of month)"
+                ;;
+              "0 14 * * 1")
+                echo "type=digest" >> $GITHUB_OUTPUT
+                echo "Detected: Weekly digest (Monday)"
+                ;;
+              "0 13 * * *")
+                echo "type=grants" >> $GITHUB_OUTPUT
+                echo "Detected: Daily grant alerts"
+                ;;
+              *)
+                echo "type=grants" >> $GITHUB_OUTPUT
+                echo "Unknown schedule, defaulting to grants"
+                ;;
+            esac
+          fi
+
+      - name: Send scheduled reports
+        if: steps.determine-type.outputs.type == 'reports'
+        run: |
+          set -e
+          echo "Sending scheduled reports..."
+          python send_notifications.py --type reports
+
+      - name: Send grant alerts
+        if: steps.determine-type.outputs.type == 'grants'
+        run: |
+          set -e
+          echo "Sending grant deadline alerts..."
+          python send_notifications.py --type grants
+
+      - name: Send weekly digest
+        if: steps.determine-type.outputs.type == 'digest'
+        run: |
+          set -e
+          echo "Sending weekly digest..."
+          python send_notifications.py --type digest
+
+      - name: Send test email
+        if: steps.determine-type.outputs.type == 'test'
+        run: |
+          set -e
+          if [ -z "${{ steps.determine-type.outputs.test_email }}" ]; then
+            echo "Error: test_email is required for test notifications"
+            exit 1
+          fi
+          echo "Sending test email to ${{ steps.determine-type.outputs.test_email }}..."
+          python send_notifications.py --type test --email "${{ steps.determine-type.outputs.test_email }}"
+
+      - name: Log completion
+        if: always()
+        run: |
+          echo "========================================"
+          echo "Notification job completed at $(date -u)"
+          echo "Type: ${{ steps.determine-type.outputs.type }}"
+          echo "Status: ${{ job.status }}"
+          echo "========================================"

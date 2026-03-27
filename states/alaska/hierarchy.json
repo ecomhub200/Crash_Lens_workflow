@@ -1,0 +1,260 @@
+{
+  "state": {
+    "fips": "02",
+    "name": "Alaska",
+    "abbreviation": "AK",
+    "dot": "AKDOT&PF",
+    "dotFullName": "Alaska Department of Transportation and Public Facilities",
+    "center": [
+      -154.493062,
+      63.588753
+    ],
+    "zoom": 4,
+    "placesCount": 149
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ak_1": {
+      "name": "Northern Region",
+      "shortName": "Northern Region",
+      "center": [
+        -147.72,
+        64.84
+      ],
+      "zoom": 5,
+      "counties": [
+        "090",
+        "068",
+        "290",
+        "240",
+        "180",
+        "185",
+        "188"
+      ],
+      "countyNames": {
+        "090": "Fairbanks North Star Borough",
+        "068": "Denali Borough",
+        "290": "Yukon-Koyukuk Census Area",
+        "240": "Southeast Fairbanks Census Area",
+        "180": "Nome Census Area",
+        "185": "North Slope Borough",
+        "188": "Northwest Arctic Borough"
+      },
+      "mapBounds": {
+        "sw": [
+          60.0,
+          -168.0
+        ],
+        "ne": [
+          71.0,
+          -141.0
+        ]
+      },
+      "hq": "Fairbanks"
+    },
+    "ak_2": {
+      "name": "Central Region",
+      "shortName": "Central Region",
+      "center": [
+        -149.9,
+        61.22
+      ],
+      "zoom": 5,
+      "counties": [
+        "020",
+        "170",
+        "122",
+        "261",
+        "050",
+        "070",
+        "060",
+        "164",
+        "013",
+        "016",
+        "150",
+        "270"
+      ],
+      "countyNames": {
+        "020": "Anchorage Municipality",
+        "170": "Matanuska-Susitna Borough",
+        "122": "Kenai Peninsula Borough",
+        "261": "Valdez-Cordova Census Area",
+        "050": "Bethel Census Area",
+        "070": "Dillingham Census Area",
+        "060": "Bristol Bay Borough",
+        "164": "Lake and Peninsula Borough",
+        "013": "Aleutians East Borough",
+        "016": "Aleutians West Census Area",
+        "150": "Kodiak Island Borough",
+        "270": "Wade Hampton Census Area"
+      },
+      "mapBounds": {
+        "sw": [
+          52.0,
+          -170.0
+        ],
+        "ne": [
+          64.0,
+          -141.0
+        ]
+      },
+      "hq": "Anchorage"
+    },
+    "ak_3": {
+      "name": "Southcoast Region",
+      "shortName": "Southcoast Region",
+      "center": [
+        -134.42,
+        58.3
+      ],
+      "zoom": 6,
+      "counties": [
+        "110",
+        "100",
+        "230",
+        "282",
+        "220",
+        "130",
+        "198",
+        "275",
+        "195",
+        "105"
+      ],
+      "countyNames": {
+        "110": "Juneau City and Borough",
+        "100": "Haines Borough",
+        "230": "Skagway Municipality",
+        "282": "Yakutat City and Borough",
+        "220": "Sitka City and Borough",
+        "130": "Ketchikan Gateway Borough",
+        "198": "Prince of Wales-Hyder Census Area",
+        "275": "Wrangell City and Borough",
+        "195": "Petersburg Borough",
+        "105": "Hoonah-Angoon Census Area"
+      },
+      "mapBounds": {
+        "sw": [
+          54.5,
+          -137.0
+        ],
+        "ne": [
+          60.5,
+          -130.0
+        ]
+      },
+      "hq": "Juneau"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "amatsa": {
+      "name": "AMATS (Anchorage)",
+      "shortName": "Anchorage",
+      "type": "mpo",
+      "center": [
+        -149.9003,
+        61.2181
+      ],
+      "zoom": 9,
+      "counties": [
+        "020"
+      ],
+      "countyNames": {
+        "020": "Anchorage Municipality"
+      },
+      "btsAcronym": "AMATS",
+      "mapBounds": {
+        "sw": [
+          60.8,
+          -150.5
+        ],
+        "ne": [
+          61.6,
+          -149.3
+        ]
+      }
+    },
+    "fastpf": {
+      "name": "FAST Planning (Fairbanks)",
+      "shortName": "Fairbanks",
+      "type": "mpo",
+      "center": [
+        -147.7164,
+        64.8378
+      ],
+      "zoom": 9,
+      "counties": [
+        "090"
+      ],
+      "countyNames": {
+        "090": "Fairbanks North Star Borough"
+      },
+      "btsAcronym": "FMATS",
+      "mapBounds": {
+        "sw": [
+          64.5,
+          -148.3
+        ],
+        "ne": [
+          65.1,
+          -147.1
+        ]
+      }
+    },
+    "matsu_valley_planning_for_transportation_mpo": {
+      "name": "MatSu Valley Planning for Transportation",
+      "shortName": "MatSu Valley Planning for Transportation",
+      "type": "mpo",
+      "btsMpoId": "02202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -149.373668,
+        61.584062
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "013": "Aleutians East Borough",
+    "016": "Aleutians West Census Area",
+    "020": "Anchorage Municipality",
+    "050": "Bethel Census Area",
+    "060": "Bristol Bay Borough",
+    "063": "Chugach",
+    "066": "Copper River",
+    "068": "Denali Borough",
+    "070": "Dillingham Census Area",
+    "090": "Fairbanks North Star Borough",
+    "100": "Haines Borough",
+    "105": "Hoonah-Angoon Census Area",
+    "110": "Juneau City and Borough",
+    "122": "Kenai Peninsula Borough",
+    "130": "Ketchikan Gateway Borough",
+    "150": "Kodiak Island Borough",
+    "158": "Kusilvak",
+    "164": "Lake and Peninsula Borough",
+    "170": "Matanuska-Susitna Borough",
+    "180": "Nome Census Area",
+    "185": "North Slope Borough",
+    "188": "Northwest Arctic Borough",
+    "195": "Petersburg Borough",
+    "198": "Prince of Wales-Hyder Census Area",
+    "220": "Sitka City and Borough",
+    "230": "Skagway Municipality",
+    "240": "Southeast Fairbanks Census Area",
+    "261": "Valdez-Cordova Census Area",
+    "270": "Wade Hampton Census Area",
+    "275": "Wrangell City and Borough",
+    "282": "Yakutat City and Borough",
+    "290": "Yukon-Koyukuk Census Area"
+  }
+}

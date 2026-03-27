@@ -1,0 +1,24 @@
+{
+  "_description": "ITD crash data registry. 44 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Idaho Transportation Department",
+    "base_url": "https://data-iplan.opendata.arcgis.com",
+    "api_url": "https://data-iplan.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 44 Idaho counties. FIPS codes are 5-digit (state 16 + 3-digit county).",
+    "_placeholder": "Populate with all 44 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data-iplan.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

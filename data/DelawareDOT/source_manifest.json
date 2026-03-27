@@ -1,0 +1,41 @@
+{
+  "_description": "DelDOT crash data registry. 3 jurisdictions available.",
+  "_updated": "2026-03-12",
+  "source": {
+    "name": "Delaware Department of Safety and Homeland Security",
+    "base_url": "https://data.delaware.gov",
+    "api_url": "https://data.delaware.gov/resource/827n-m6xc.json",
+    "file_format": "JSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 3 Delaware counties. FIPS codes are 5-digit (state 10 + 3-digit county). CSV export uses 'COUNTY NAME', JSON API uses 'county_desc'.",
+    "kent": {
+      "fips": "10001",
+      "county_name": "Kent",
+      "soql_filter": "county_desc='Kent'",
+      "csv_filter_column": "COUNTY NAME"
+    },
+    "new_castle": {
+      "fips": "10003",
+      "county_name": "New Castle",
+      "soql_filter": "county_desc='New Castle'",
+      "csv_filter_column": "COUNTY NAME"
+    },
+    "sussex": {
+      "fips": "10005",
+      "county_name": "Sussex",
+      "soql_filter": "county_desc='Sussex'",
+      "csv_filter_column": "COUNTY NAME"
+    }
+  },
+  "api": {
+    "endpoint": "https://data.delaware.gov/resource/827n-m6xc.json",
+    "resource_id": "827n-m6xc",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "max_per_request": 50000
+    }
+  }
+}

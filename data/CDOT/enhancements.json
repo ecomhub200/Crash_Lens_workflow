@@ -1,0 +1,66 @@
+{
+  "_description": "Defines which Deep Dive panels are available for Colorado CDOT crash data based on state-specific columns",
+  "stateEnhancements": {
+    "driverDemographics": {
+      "enabled": true,
+      "columns": ["_co_tu1_age", "_co_tu1_sex", "_co_tu2_age", "_co_tu2_sex"],
+      "label": "Driver Demographics",
+      "description": "Age and gender analysis of drivers involved in crashes"
+    },
+    "speedIntelligence": {
+      "enabled": true,
+      "columns": ["_co_tu1_speed_limit", "_co_tu1_estimated_speed", "_co_tu1_stated_speed"],
+      "label": "Speed Intelligence",
+      "description": "Posted speed limit vs estimated/stated speed analysis"
+    },
+    "driverBehavior": {
+      "enabled": true,
+      "columns": ["_co_tu1_driver_action", "_co_tu1_human_factor", "_co_tu2_driver_action", "_co_tu2_human_factor"],
+      "label": "Driver Behavior & Human Factors",
+      "description": "Contributing driver actions and human factors analysis"
+    },
+    "vehicleFleet": {
+      "enabled": true,
+      "columns": ["_co_tu1_vehicle_type", "_co_tu2_vehicle_type"],
+      "label": "Vehicle Fleet Analysis",
+      "description": "Vehicle type distribution and severity correlation"
+    },
+    "nonMotorist": {
+      "enabled": true,
+      "columns": ["_co_nm1_type", "_co_nm1_age", "_co_nm1_sex", "_co_nm1_action", "_co_nm1_movement", "_co_nm1_location", "_co_nm1_facility", "_co_nm1_contributing_factor"],
+      "label": "Non-Motorist Deep Dive",
+      "description": "Detailed pedestrian and cyclist crash analysis"
+    },
+    "crashSequence": {
+      "enabled": true,
+      "columns": ["_co_mhe", "_co_second_he", "_co_third_he", "_co_secondary_crash"],
+      "label": "Crash Sequence & Chain of Events",
+      "description": "Multi-event crash chain analysis and secondary crash detection"
+    },
+    "locationDetail": {
+      "enabled": true,
+      "columns": ["_co_city", "_co_location1", "_co_location2", "_co_lane_position"],
+      "label": "Location & Community Detail",
+      "description": "Community-level crash grouping and lane position analysis"
+    },
+    "animalDetail": {
+      "enabled": true,
+      "columns": ["_co_wild_animal"],
+      "label": "Animal Crash Specifics",
+      "description": "Wildlife type and seasonal pattern analysis"
+    },
+    "agencyMetadata": {
+      "enabled": true,
+      "columns": ["_co_system_code", "_co_agency_id"],
+      "label": "Agency & Jurisdiction Metadata",
+      "description": "Reporting agency and road system classification"
+    }
+  },
+  "standardUnused": {
+    "_description": "Standard columns now utilized in Dashboard and Ped/Bike tabs",
+    "vehicleCount": { "column": "Vehicle Count", "enriches": "Dashboard" },
+    "personsInjured": { "column": "Persons Injured", "enriches": "Dashboard" },
+    "pedestriansKilled": { "column": "Pedestrians Killed", "enriches": "Ped/Bike" },
+    "pedestriansInjured": { "column": "Pedestrians Injured", "enriches": "Ped/Bike" }
+  }
+}

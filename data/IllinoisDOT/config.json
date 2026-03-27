@@ -1,0 +1,162 @@
+{
+  "state": {
+    "name": "Illinois",
+    "abbreviation": "IL",
+    "fips": "17",
+    "dotName": "IDOT",
+    "dotFullName": "Illinois Department of Transportation",
+    "dataPortalUrl": "https://gis-idot.opendata.arcgis.com",
+    "coordinateBounds": {
+      "latMin": 36.97,
+      "latMax": 42.51,
+      "lonMin": -91.51,
+      "lonMax": -87.5
+    },
+    "dataDir": "IllinoisDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Illinois IDOT crash data fields to CRASH LENS field codes",
+    "_note": "Yearly ArcGIS layers from 2014-2024 (e.g., 'Crashes - 2024'). FeatureServer URLs are dynamically assigned per dataset page. Download CSV to inspect exact field names. Data dictionary: IL SR 1050 Traffic Crash Report. Crash types: Type A (PDO), Type B (injury/tow).",
+    "ID": "OBJECTID",
+    "DATE": "CrashDate",
+    "TIME": "_EMBEDDED_IN_CRASHDATE",
+    "LAT": "Latitude",
+    "LON": "Longitude",
+    "SEVERITY": "Severity",
+    "JURISDICTION": "County",
+    "COUNTY_NUMBER": "County_No",
+    "CITY": "City",
+    "ROUTE": "Road_Name",
+    "CROSS_STREET": "Street_Name_2",
+    "COLLISION": "First_Crash_Type",
+    "WEATHER": "Weather_Condition_1",
+    "WEATHER_2": "Weather_Condition_2",
+    "LIGHT": "Light_Condition",
+    "SURFACE_CONDITION": "Road_Surface_Condition",
+    "JUNCTION": "Intersection_Type",
+    "HITRUN": "Hit_And_Run",
+    "FUNCTIONAL_CLASS": "Functional_Class",
+    "SPEED_LIMIT": "Speed_Limit",
+    "TRAFFICWAY_TYPE": "Trafficway_Type",
+    "TRAFFIC_CONTROL": "Traffic_Control_Device",
+    "ROAD_DEFECT": "Road_Defect",
+    "ALIGNMENT": "Alignment",
+    "NUM_LANES": "Number_of_Lanes",
+    "FATAL_COUNT": "Number_Of_Fatalities",
+    "INJURY_COUNT": "Number_Of_Injuries"
+  },
+  "derivedFields": {
+    "_description": "Fields computed from raw data during Stage 1 (CONVERT)",
+    "_field_name_note": "Field names may vary slightly between years (e.g., Weather_Condition_1 vs WEATHER_CONDITION). Verify by downloading sample from latest year. City of Chicago uses uppercase underscore convention.",
+    "SEVERITY": {
+      "method": "direct_text",
+      "source": "Severity",
+      "_note": "Illinois provides Severity as text. Map to KABCO based on SR 1050 data dictionary values."
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "CrashDate"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "Road_Name",
+        "Street_Name_2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Illinois road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Illinois collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "IDOT GIS Portal",
+    "url": "https://gis-idot.opendata.arcgis.com",
+    "apiUrl": "https://gis-idot.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "_apiNote": "Yearly layers: 'Crashes - 2024', 'Crashes - 2023', etc. (2014-2024). FeatureServer URL varies per year/dataset. CSV/KML/GeoJSON/Shapefile downloads available.",
+    "fileFormat": "CSV, KML, GeoJSON, Shapefile (ArcGIS)",
+    "dataDictionary": "IL Dictionary of Data Elements - Traffic Crash Report (SR 1050): https://idot.illinois.gov/content/dam/soi/en/web/idot/documents/transportation-system/reports/safety/itrcc/il-data-dictionary-march-2011.pdf",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

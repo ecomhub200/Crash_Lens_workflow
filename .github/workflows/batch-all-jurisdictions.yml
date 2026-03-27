@@ -1,0 +1,961 @@
+# ==============================================================================
+# Batch All Jurisdictions — Registry-Driven Statewide Download + R2 Upload + Pipeline
+# ==============================================================================
+# Downloads statewide crash data for any US state using download-registry.json,
+# uploads to R2 (Cloudflare), then delegates all processing to batch-pipeline.yml.
+#
+# ZERO hardcoded state logic — all download behavior is driven by the registry.
+# This is the statewide counterpart to download-state-crash-data.yml which
+# supports all 4 scope levels (statewide/region/mpo/jurisdiction).
+#
+# Flow: Resolve Registry → Download → Merge → Standardize → Upload to R2 → Trigger batch-pipeline
+#
+# WHY R2 instead of git commit?
+#   Statewide CSVs (700MB+) exceed GitHub's 100MB file size limit.
+#   R2 has no file size limit and avoids bloating the git repo.
+#
+# OPTIMIZATIONS (v2):
+#   1. Registry-driven — no hardcoded state logic; add states to download-registry.json
+#   2. Scope support — statewide, region, or MPO (not just statewide)
+#   3. Incremental updates — compare R2 checksums to skip re-processing unchanged data
+#   4. Progress manifest — records per-jurisdiction timestamps for monitoring
+#
+# For single-jurisdiction updates, use download-state-crash-data.yml instead.
+# For reprocessing without re-downloading, trigger batch-pipeline.yml directly.
+# ==============================================================================
+
+name: "Batch All Jurisdictions"
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'State to process (must exist in download-registry.json)'
+        required: true
+        type: choice
+        options:
+          - virginia
+          - colorado
+          - maryland
+          - alaska
+          - arkansas
+          - connecticut
+          - delaware
+          - florida
+          - georgia
+          - hawaii
+          - idaho
+          - illinois
+          - iowa
+          - louisiana
+          - massachusetts
+          - mississippi
+          - montana
+          - nevada
+          - new_york
+          - nyc
+          - ohio
+          - oklahoma
+          - oregon
+          - pennsylvania
+          - south_carolina
+          - texas
+          - utah
+          - vermont
+          - washington
+          - west_virginia
+          - wisconsin
+
+      scope:
+        description: 'Processing scope (statewide = all counties, region/mpo = subset)'
+        required: true
+        type: choice
+        default: 'statewide'
+        options:
+          - statewide
+          - region
+          - mpo
+
+      selection:
+        description: 'Region or MPO ID (required for region/mpo scope, blank for statewide). Run resolve_scope.py --state STATE --list to see IDs.'
+        required: false
+        default: ''
+        type: string
+
+      force_download:
+        description: 'Force re-download (skip cache)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_pipeline:
+        description: 'Skip batch pipeline (download + R2 upload only)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_forecasts:
+        description: 'Skip forecast generation in batch pipeline'
+        required: false
+        type: boolean
+        default: false
+
+      incremental:
+        description: 'Incremental mode — skip batch pipeline if R2 data unchanged (checksum match)'
+        required: false
+        type: boolean
+        default: false
+
+      dry_run:
+        description: 'Dry run (no uploads, no pipeline trigger)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  NOTIFICATION_EMAIL: ecomhub200@gmail.com
+
+jobs:
+  # ============================================================
+  # JOB 1: Registry-driven download of statewide data
+  # ============================================================
+  download:
+    name: "Download (${{ github.event.inputs.state }} / ${{ github.event.inputs.scope }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    outputs:
+      state: ${{ github.event.inputs.state }}
+      scope: ${{ steps.resolve.outputs.scope }}
+      selection: ${{ steps.resolve.outputs.selection }}
+      display_name: ${{ steps.registry.outputs.display_name }}
+      r2_prefix: ${{ steps.registry.outputs.r2_prefix }}
+      jurisdiction_count: ${{ steps.resolve.outputs.jurisdiction_count }}
+      csv_path: ${{ steps.finalize.outputs.csv_path }}
+      total_records: ${{ steps.finalize.outputs.total_records }}
+      r2_data_key: ${{ steps.r2_upload.outputs.r2_data_key }}
+      data_changed: ${{ steps.r2_upload.outputs.data_changed }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # ── Step 1: Resolve ALL config from download-registry.json ──
+      - name: Resolve from download registry
+        id: registry
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          FORCE="${{ github.event.inputs.force_download }}"
+          REGISTRY="states/download-registry.json"
+
+          if [ ! -f "$REGISTRY" ]; then
+            echo "::error::Registry file not found: $REGISTRY"
+            exit 1
+          fi
+
+          python3 -c "
+          import json, sys
+
+          with open('$REGISTRY') as f:
+              reg = json.load(f)
+
+          state = '$STATE'
+          if state not in reg:
+              print(f'::error::State {state} not found in registry. Add it to states/download-registry.json first.', file=sys.stderr)
+              sys.exit(1)
+
+          e = reg[state]
+          dot_dir = e.get('dotDir', '')
+          script = e.get('script', '')
+
+          # Build the full download command from registry fields
+          script_args = e.get('scriptArgs', f'--data-dir {dot_dir}')
+          default_j = e.get('defaultJurisdiction', 'statewide')
+          script_args = script_args.replace('{defaultJurisdiction}', default_j)
+
+          # Statewide flags (always download full state — road type split is downstream)
+          statewide_flags = e.get('statewideFlagArgs', '--gzip')
+
+          # Force flag
+          force_flag = ''
+          if '$FORCE' == 'true':
+              force_flag = e.get('forceFlag', '--force')
+
+          # Build full command
+          full_cmd = f'python {script} {script_args} {statewide_flags}'
+          if force_flag:
+              full_cmd += f' {force_flag}'
+
+          # Output patterns (replace {dotDir} and {state} placeholders)
+          csv_pattern = e.get('statewideOutputPattern', f'{dot_dir}/{state}_statewide_all_roads.csv')
+          csv_pattern = csv_pattern.replace('{dotDir}', dot_dir).replace('{state}', state)
+          gz_pattern = e.get('statewideOutputGzPattern', f'{csv_pattern}.gz')
+          gz_pattern = gz_pattern.replace('{dotDir}', dot_dir).replace('{state}', state)
+
+          outputs = {
+              'display_name': e.get('displayName', state.replace('_', ' ').title()),
+              'dot_dir': dot_dir,
+              'script': script,
+              'r2_prefix': e.get('r2Prefix', state),
+              'tier': str(e.get('tier', 3)),
+              'requires_playwright': str(e.get('requiresPlaywright', False)).lower(),
+              'default_jurisdiction': default_j,
+              'default_region': e.get('defaultRegion', ''),
+              'default_mpo': e.get('defaultMpo', ''),
+              'download_cmd': full_cmd.strip(),
+              'csv_pattern': csv_pattern,
+              'gz_pattern': gz_pattern,
+              'needs_standardization': str(e.get('needsStandardization', True)).lower(),
+              'needs_merge': str(e.get('needsMerge', True)).lower(),
+          }
+
+          for k, v in outputs.items():
+              print(f'{k}={v}')
+          " >> $GITHUB_OUTPUT
+
+          echo "Registry resolved for $STATE"
+
+      # ── Step 2: Resolve scope from hierarchy.json ──
+      - name: Resolve scope
+        id: resolve
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          SCOPE="${{ github.event.inputs.scope }}"
+          SELECTION="${{ github.event.inputs.selection }}"
+
+          DEFAULT_R="${{ steps.registry.outputs.default_region }}"
+          DEFAULT_M="${{ steps.registry.outputs.default_mpo }}"
+
+          # Validate scope + selection
+          if [ "$SCOPE" = "statewide" ]; then
+            SELECTION=""
+          elif [ -z "$SELECTION" ]; then
+            if [ "$SCOPE" = "region" ] && [ -n "$DEFAULT_R" ]; then
+              SELECTION="$DEFAULT_R"
+              echo "No selection — defaulting to registry defaultRegion: $DEFAULT_R"
+            elif [ "$SCOPE" = "mpo" ] && [ -n "$DEFAULT_M" ]; then
+              SELECTION="$DEFAULT_M"
+              echo "No selection — defaulting to registry defaultMpo: $DEFAULT_M"
+            else
+              echo "::error::Selection required for scope=$SCOPE. Run: python scripts/resolve_scope.py --state $STATE --list"
+              exit 1
+            fi
+          fi
+
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+
+          # Resolve jurisdictions via hierarchy.json
+          HIERARCHY="states/$STATE/hierarchy.json"
+          if [ ! -f "$HIERARCHY" ]; then
+            echo "::error::No hierarchy.json for $STATE at $HIERARCHY"
+            exit 1
+          fi
+
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state "$STATE" --scope "$SCOPE" --selection "$SELECTION" --json)
+
+          JCOUNT=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['jurisdiction_count'])")
+          echo "jurisdiction_count=$JCOUNT" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "=========================================="
+          echo "Scope: $SCOPE ${SELECTION:+($SELECTION)}"
+          echo "Jurisdictions: $JCOUNT"
+          echo "=========================================="
+
+      # ── Step 3: Install dependencies (registry-driven) ──
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas requests openpyxl
+          fi
+          pip install awscli
+          # pyarrow + scipy + duckdb MUST be installed regardless of requirements.txt
+          # pyarrow: needed by pandas to read parquet cache files (HPMS, OSM, federal)
+          # scipy: needed by crash_enricher KDTree for spatial matching (fallback)
+          # duckdb: primary spatial grid engine (O(1) lookups, 95% less memory)
+          pip install pyarrow scipy duckdb
+
+          # Install Playwright only if registry says so
+          if [ "${{ steps.registry.outputs.requires_playwright }}" = "true" ]; then
+            pip install playwright
+            playwright install chromium
+          fi
+
+      # ── Step 4: Download statewide data (fully registry-driven) ──
+      - name: "Download statewide data"
+        id: download
+        timeout-minutes: 60
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          DOT_DIR="${{ steps.registry.outputs.dot_dir }}"
+          DOWNLOAD_CMD="${{ steps.registry.outputs.download_cmd }}"
+          CSV_PATTERN="${{ steps.registry.outputs.csv_pattern }}"
+          GZ_PATTERN="${{ steps.registry.outputs.gz_pattern }}"
+
+          echo "=========================================="
+          echo "Downloading statewide data for $STATE"
+          echo "  Command: $DOWNLOAD_CMD"
+          echo "  Expected: $CSV_PATTERN"
+          echo "  Started: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "=========================================="
+
+          # Ensure data directory exists
+          mkdir -p "$DOT_DIR"
+
+          # Run registry-derived download command
+          eval $DOWNLOAD_CMD 2>&1 || {
+            echo "::warning::Download script returned non-zero, checking for output..."
+          }
+
+          # Locate the statewide CSV using registry patterns
+          STATEWIDE=""
+
+          # 1. Check exact pattern from registry
+          if [ -f "$CSV_PATTERN" ]; then
+            STATEWIDE="$CSV_PATTERN"
+          # 2. Check gzip pattern and decompress
+          elif [ -f "$GZ_PATTERN" ]; then
+            gunzip -k "$GZ_PATTERN"
+            STATEWIDE="${GZ_PATTERN%.gz}"
+          # 3. Fallback: search for any statewide CSV in data dir
+          else
+            for f in "$DOT_DIR"/${STATE}_statewide*.csv "$DOT_DIR"/*statewide*.csv; do
+              if [ -f "$f" ]; then
+                STATEWIDE="$f"
+                break
+              fi
+            done
+            # 4. Fallback: decompress any gzip
+            if [ -z "$STATEWIDE" ]; then
+              GZ=$(find "$DOT_DIR" -maxdepth 1 \( -name "*statewide*.csv.gz" -o -name "*.csv.gz" \) -type f 2>/dev/null | head -1)
+              if [ -n "$GZ" ]; then
+                gunzip -k "$GZ"
+                STATEWIDE="${GZ%.gz}"
+              fi
+            fi
+            # NOTE: "Last resort: any CSV" fallback was REMOVED — it would pick up
+            # unrelated files like grants.csv or henrico_all_roads.csv and upload them
+            # to R2 as the "statewide" dataset, causing all 133 jurisdiction splits to fail.
+          fi
+
+          if [ -z "$STATEWIDE" ] || [ ! -f "$STATEWIDE" ]; then
+            echo "::error::Statewide CSV not found for $STATE after download"
+            echo "::error::Expected at: $CSV_PATTERN"
+            exit 1
+          fi
+
+          TOTAL=$(wc -l < "$STATEWIDE" | tr -d ' ')
+          SIZE=$(ls -lh "$STATEWIDE" | awk '{print $5}')
+          echo "Found statewide CSV: $STATEWIDE ($((TOTAL - 1)) records, $SIZE)"
+
+          # Validate minimum record count — statewide data should have tens of thousands
+          # of records. If it's tiny, the download returned wrong/partial data.
+          MIN_RECORDS=1000
+          if [ "$((TOTAL - 1))" -lt "$MIN_RECORDS" ]; then
+            echo "::error::Statewide CSV has only $((TOTAL - 1)) records (minimum: $MIN_RECORDS)"
+            echo "::error::This likely means the download returned partial or wrong data."
+            echo "::error::Check if the Virginia Roads CSV URLs are working."
+            exit 1
+          fi
+          echo "statewide_path=$STATEWIDE" >> $GITHUB_OUTPUT
+          echo "data_dir=$DOT_DIR" >> $GITHUB_OUTPUT
+
+      # ── Step 5: Merge source files (registry-driven) ──
+      - name: "Merge source files (if needed)"
+        id: merge
+        run: |
+          NEEDS_MERGE="${{ steps.registry.outputs.needs_merge }}"
+          STATEWIDE="${{ steps.download.outputs.statewide_path }}"
+          DATA_DIR="${{ steps.download.outputs.data_dir }}"
+          STATE="${{ github.event.inputs.state }}"
+
+          if [ "$NEEDS_MERGE" != "true" ]; then
+            echo "Registry says needsMerge=false — skipping merge"
+            echo "statewide_path=$STATEWIDE" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          RAW_COUNT=$(find "$DATA_DIR" -maxdepth 1 -name "*.csv" ! -name "*statewide*" ! -name "*standardized*" -type f 2>/dev/null | wc -l)
+          if [ "$RAW_COUNT" -gt 1 ]; then
+            echo "Found $RAW_COUNT raw CSV files — merging..."
+            python scripts/process_crash_data.py \
+              -i "$DATA_DIR"/*.csv \
+              -s "$STATE" -j "statewide" \
+              -o "$DATA_DIR" \
+              --merge --convert-only
+            STATEWIDE="$DATA_DIR/statewide_standardized.csv"
+            echo "Merged: $STATEWIDE"
+          else
+            echo "Single statewide file — no merge needed"
+          fi
+
+          echo "statewide_path=${STATEWIDE}" >> $GITHUB_OUTPUT
+
+      # ── Step 6: Convert to standardized format (registry-driven) ──
+      - name: "Convert to standardized format"
+        id: convert
+        run: |
+          NEEDS_STD="${{ steps.registry.outputs.needs_standardization }}"
+          STATE="${{ github.event.inputs.state }}"
+          STATEWIDE="${{ steps.merge.outputs.statewide_path || steps.download.outputs.statewide_path }}"
+          DATA_DIR="${{ steps.download.outputs.data_dir }}"
+
+          if [ "$NEEDS_STD" != "true" ]; then
+            echo "Registry says needsStandardization=false — already standard format"
+            echo "csv_path=$STATEWIDE" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          CONVERTED="$DATA_DIR/${STATE}_statewide_standardized.csv"
+          python scripts/process_crash_data.py \
+            -i "$STATEWIDE" \
+            -s "$STATE" -j "statewide" \
+            -o "$DATA_DIR" \
+            --convert-only --force 2>&1 || {
+            echo "::warning::Convert failed, using raw data"
+            CONVERTED="$STATEWIDE"
+          }
+
+          if [ -f "$DATA_DIR/statewide_standardized.csv" ]; then
+            CONVERTED="$DATA_DIR/statewide_standardized.csv"
+          fi
+
+          echo "Converted: $CONVERTED"
+          echo "csv_path=$CONVERTED" >> $GITHUB_OUTPUT
+
+      # ── Step 7: Finalize — verify output ──
+      - name: "Finalize download"
+        id: finalize
+        run: |
+          CSV_PATH="${{ steps.convert.outputs.csv_path || steps.merge.outputs.statewide_path || steps.download.outputs.statewide_path }}"
+
+          if [ -z "$CSV_PATH" ] || [ ! -f "$CSV_PATH" ]; then
+            echo "::error::No statewide CSV available after download stages"
+            exit 1
+          fi
+
+          TOTAL=$(wc -l < "$CSV_PATH" | tr -d ' ')
+          SIZE=$(ls -lh "$CSV_PATH" | awk '{print $5}')
+          echo "Final CSV: $CSV_PATH ($((TOTAL - 1)) records, $SIZE)"
+          echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+          echo "total_records=$((TOTAL - 1))" >> $GITHUB_OUTPUT
+
+          # Compute MD5 checksum for incremental mode
+          MD5=$(md5sum "$CSV_PATH" | awk '{print $1}')
+          echo "local_md5=$MD5" >> $GITHUB_OUTPUT
+          echo "Checksum: $MD5"
+
+      # ── Step 7.6: Restore enrichment caches from R2 ──
+      - name: "Restore enrichment caches from R2"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          BUCKET="crash-lens-data"
+          STATE_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+
+          # Derive state abbreviation from hierarchy.json
+          HIERARCHY="states/${{ github.event.inputs.state }}/hierarchy.json"
+          if [ ! -f "$HIERARCHY" ]; then
+            echo "⚠️ No hierarchy.json — skipping cache restore"
+            exit 0
+          fi
+
+          STATE_ABBR=$(python3 -c "
+          import json
+          with open('$HIERARCHY') as f:
+              h = json.load(f)
+          s = h.get('state', {})
+          print((s.get('abbreviation') or s.get('abbr') or '').lower())
+          ")
+
+          if [ -z "$STATE_ABBR" ]; then
+            echo "⚠️ Could not resolve abbreviation — skipping cache restore"
+            exit 0
+          fi
+
+          echo "Restoring enrichment caches for $STATE_ABBR from R2..."
+          mkdir -p cache
+          RESTORED=0
+          for FILE in ${STATE_ABBR}_roads.parquet.gz ${STATE_ABBR}_intersections.parquet.gz ${STATE_ABBR}_hpms.parquet.gz ${STATE_ABBR}_pois.parquet.gz ${STATE_ABBR}_schools.parquet.gz ${STATE_ABBR}_bridges.parquet.gz ${STATE_ABBR}_rail_crossings.parquet.gz ${STATE_ABBR}_transit.parquet.gz; do
+            if aws s3 cp "s3://$BUCKET/$STATE_PREFIX/cache/$FILE" "cache/$FILE" \
+                --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null; then
+              gunzip -f "cache/$FILE"
+              BASENAME="${FILE%.gz}"
+              SIZE=$(stat -c%s "cache/$BASENAME" 2>/dev/null || echo "0")
+              echo "  ✅ cache/$BASENAME ($((SIZE / 1048576)) MB)"
+              RESTORED=$((RESTORED + 1))
+            else
+              echo "  ⚠️ $FILE not found in R2"
+            fi
+          done
+
+          if [ "$RESTORED" -ge 1 ]; then
+            echo "✅ Restored $RESTORED cache files — enrichment tiers will use cached data"
+          else
+            echo "⚠️ No caches restored — Tier 2/3 enrichment will be limited"
+          fi
+
+      # ── Step 7.5: Normalize to CrashLens Standard ──
+      - name: "Normalize to CrashLens standard"
+        id: normalize
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          CSV_PATH="${{ steps.finalize.outputs.csv_path }}"
+
+          echo "=========================================="
+          echo "Normalize to CrashLens Standard"
+          echo "State: $STATE"
+          echo "=========================================="
+
+          # Derive state abbreviation from hierarchy.json
+          HIERARCHY="states/$STATE/hierarchy.json"
+          if [ ! -f "$HIERARCHY" ]; then
+            echo "INFO: No hierarchy.json for $STATE — skipping normalization"
+            echo "normalized=false" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          ABBR=$(python3 -c "
+          import json
+          with open('$HIERARCHY') as f:
+              h = json.load(f)
+          s = h.get('state', {})
+          print((s.get('abbreviation') or s.get('abbr') or '').lower())
+          ")
+
+          if [ -z "$ABBR" ]; then
+            echo "INFO: Could not resolve state abbreviation — skipping normalization"
+            echo "normalized=false" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          NORMALIZER="states/$STATE/${ABBR}_normalize.py"
+          if [ ! -f "$NORMALIZER" ]; then
+            echo "INFO: No state normalizer at $NORMALIZER — skipping"
+            echo "normalized=false" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          OUTPUT_CSV="${CSV_PATH%.csv}_normalized.csv"
+          REPORT_JSON="${CSV_PATH%.csv}_normalization_report.json"
+
+          echo "  Normalizer: $NORMALIZER"
+          echo "  Input:      $CSV_PATH"
+          echo "  Output:     $OUTPUT_CSV"
+
+          # Detect CLI convention: --input (existing normalizers) vs --csv (template-based)
+          INPUT_FLAG=$(python3 -c "
+          import re
+          with open('$NORMALIZER') as f:
+              text = f.read()
+          if \"'--input'\" in text or '\"--input\"' in text:
+              print('--input')
+          else:
+              print('--csv')
+          ")
+
+          python "$NORMALIZER" \
+            $INPUT_FLAG "$CSV_PATH" \
+            --output "$OUTPUT_CSV" \
+            --report "$REPORT_JSON" || {
+            echo "::warning::Normalization failed — uploading raw data"
+            echo "normalized=false" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          if [ -f "$OUTPUT_CSV" ]; then
+            NORM_COLS=$(head -1 "$OUTPUT_CSV" | tr ',' '\n' | wc -l)
+            NORM_ROWS=$(wc -l < "$OUTPUT_CSV" | tr -d ' ')
+            echo "  Normalized: $((NORM_ROWS - 1)) rows × $NORM_COLS columns"
+
+            # Replace original with normalized version
+            mv "$OUTPUT_CSV" "$CSV_PATH"
+            echo "  Replaced original CSV with normalized version"
+
+            # Recompute checksum after normalization
+            MD5=$(md5sum "$CSV_PATH" | awk '{print $1}')
+            echo "  New checksum: $MD5"
+
+            echo "normalized=true" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+          else
+            echo "normalized=false" >> $GITHUB_OUTPUT
+            echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -f "$REPORT_JSON" ]; then
+            QUALITY=$(python3 -c "import json; print(json.load(open('$REPORT_JSON')).get('quality_score', 'N/A'))")
+            echo "  Quality score: $QUALITY%"
+          fi
+
+      # ── Step 8: Upload statewide CSV to R2 (with incremental check) ──
+      - name: "Upload statewide CSV to R2"
+        id: r2_upload
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          R2_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+          CSV_PATH="${{ steps.finalize.outputs.csv_path }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          LOCAL_MD5="${{ steps.finalize.outputs.local_md5 }}"
+          INCREMENTAL="${{ github.event.inputs.incremental }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          R2_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
+
+          echo "=========================================="
+          echo "Uploading statewide CSV to R2"
+          echo "  Local:   $CSV_PATH"
+          echo "  R2:      s3://$R2_BUCKET/$R2_KEY"
+          echo "  Records: $TOTAL"
+          echo "=========================================="
+
+          if [ -z "$CSV_PATH" ] || [ ! -f "$CSV_PATH" ]; then
+            echo "::error::No CSV to upload"
+            exit 1
+          fi
+
+          # Gzip the CSV for storage savings (keep original for local use)
+          GZ_PATH="${CSV_PATH}.gz"
+          gzip -cn "$CSV_PATH" > "$GZ_PATH"
+          GZ_SIZE=$(stat -c%s "$GZ_PATH" 2>/dev/null || stat -f%z "$GZ_PATH")
+          ORIG_SIZE=$(stat -c%s "$CSV_PATH" 2>/dev/null || stat -f%z "$CSV_PATH")
+          GZ_MD5=$(md5sum "$GZ_PATH" | awk '{print $1}')
+          echo "  Gzip: ${ORIG_SIZE} -> ${GZ_SIZE} bytes (saved $((ORIG_SIZE - GZ_SIZE)) bytes)"
+
+          DATA_CHANGED="true"
+
+          # ── Incremental check: compare with existing R2 object ──
+          if [ "$INCREMENTAL" = "true" ]; then
+            echo "Incremental mode — checking R2 for existing data..."
+            R2_ETAG=$(aws s3api head-object \
+              --bucket "$R2_BUCKET" \
+              --key "$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --query 'ETag' --output text 2>/dev/null || echo "none")
+
+            # R2 ETag for single-part uploads is the MD5 in quotes
+            R2_MD5=$(echo "$R2_ETAG" | tr -d '"')
+
+            if [ "$R2_MD5" = "$GZ_MD5" ]; then
+              echo "Data unchanged (gzip MD5 match: $GZ_MD5) — skipping upload and pipeline"
+              DATA_CHANGED="false"
+              echo "r2_data_key=$R2_KEY" >> $GITHUB_OUTPUT
+              echo "data_changed=false" >> $GITHUB_OUTPUT
+              rm -f "$GZ_PATH"
+              exit 0
+            else
+              echo "Data changed (local_gz=$GZ_MD5, R2=$R2_MD5) — uploading"
+            fi
+          fi
+
+          # Upload gzipped with Content-Encoding: gzip (browsers auto-decompress)
+          for i in 1 2 3 4; do
+            if aws s3 cp "$GZ_PATH" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "text/csv" \
+              --content-encoding "gzip" \
+              --only-show-errors; then
+              echo "Upload succeeded (gzip-compressed)"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Upload failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+          rm -f "$GZ_PATH"
+
+          # Verify upload
+          SIZE=$(aws s3api head-object \
+            --bucket "$R2_BUCKET" \
+            --key "$R2_KEY" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'ContentLength' --output text 2>/dev/null || echo "0")
+
+          if [ "$SIZE" = "0" ]; then
+            echo "::error::R2 upload verification failed"
+            exit 1
+          fi
+
+          SIZE_MB=$((SIZE / 1048576))
+          echo "Verified: $R2_KEY (${SIZE_MB}MB on R2)"
+          echo "r2_data_key=$R2_KEY" >> $GITHUB_OUTPUT
+          echo "data_changed=$DATA_CHANGED" >> $GITHUB_OUTPUT
+
+      # ── Step 8b: Upload gzipped statewide CSV to R2 _state/ (matches download-virginia.yml) ──
+      - name: "Upload statewide gzip to R2 (_state/)"
+        id: r2_upload_gzip
+        if: github.event.inputs.dry_run != 'true' && steps.r2_upload.outputs.data_changed != 'false'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          R2_PREFIX="${{ steps.registry.outputs.r2_prefix }}"
+          CSV_PATH="${{ steps.finalize.outputs.csv_path }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          R2_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+
+          if [ -z "$CSV_PATH" ] || [ ! -f "$CSV_PATH" ]; then
+            echo "No CSV to gzip — skipping _state/ upload"
+            exit 0
+          fi
+
+          # Gzip the statewide CSV
+          GZ_PATH="${CSV_PATH}.gz"
+          if [ ! -f "$GZ_PATH" ]; then
+            gzip -k "$CSV_PATH"
+          fi
+
+          echo "Uploading gzipped statewide CSV to _state/"
+          echo "  Local: $GZ_PATH"
+          echo "  R2:    s3://$R2_BUCKET/$R2_KEY"
+
+          LOCAL_SIZE=$(stat -c%s "$GZ_PATH" 2>/dev/null || stat -f%z "$GZ_PATH" 2>/dev/null || echo "0")
+          LOCAL_MB=$((LOCAL_SIZE / 1048576))
+          echo "  Size: ${LOCAL_MB}MB (${LOCAL_SIZE} bytes)"
+
+          for i in 1 2 3 4; do
+            if aws s3 cp "$GZ_PATH" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "application/gzip" \
+              --only-show-errors; then
+              echo "Gzip upload succeeded"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Upload failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+
+          SIZE=$(aws s3api head-object \
+            --bucket "$R2_BUCKET" \
+            --key "$R2_KEY" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'ContentLength' --output text 2>/dev/null || echo "0")
+          SIZE_MB=$((SIZE / 1048576))
+          echo "Verified: $R2_KEY (${SIZE_MB}MB on R2, local was ${LOCAL_MB}MB)"
+
+      # ── Progress manifest: record download metadata ──
+      - name: "Update progress manifest"
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          SCOPE="${{ steps.resolve.outputs.scope }}"
+          SELECTION="${{ steps.resolve.outputs.selection }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          R2_KEY="${{ steps.r2_upload.outputs.r2_data_key }}"
+          DATA_CHANGED="${{ steps.r2_upload.outputs.data_changed }}"
+          JCOUNT="${{ steps.resolve.outputs.jurisdiction_count }}"
+
+          python3 -c "
+          import json, os
+          from datetime import datetime, timezone
+
+          manifest_path = 'data/batch-progress-manifest.json'
+
+          # Load existing or create new
+          if os.path.exists(manifest_path):
+              with open(manifest_path) as f:
+                  manifest = json.load(f)
+          else:
+              manifest = {'_comment': 'Batch processing progress tracker', 'states': {}}
+
+          state = '$STATE'
+          if state not in manifest['states']:
+              manifest['states'][state] = {'runs': [], 'last_updated': None}
+
+          manifest['states'][state]['last_updated'] = datetime.now(timezone.utc).isoformat()
+          manifest['states'][state]['runs'].append({
+              'timestamp': datetime.now(timezone.utc).isoformat(),
+              'scope': '$SCOPE',
+              'selection': '$SELECTION' or 'all',
+              'total_records': int('$TOTAL' or 0),
+              'jurisdiction_count': int('$JCOUNT' or 0),
+              'r2_key': '$R2_KEY',
+              'data_changed': '$DATA_CHANGED' == 'true',
+              'workflow_run': '${{ github.run_id }}'
+          })
+
+          # Keep only last 20 runs per state
+          manifest['states'][state]['runs'] = manifest['states'][state]['runs'][-20:]
+
+          os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+          with open(manifest_path, 'w') as f:
+              json.dump(manifest, f, indent=2)
+
+          print(f'Manifest updated: {manifest_path}')
+          "
+
+          # Commit manifest
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/batch-progress-manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "batch: update progress manifest for $STATE ($SCOPE)"
+            git push origin main || {
+              git fetch origin main
+              git rebase origin/main
+              git push origin main
+            }
+          fi
+
+      # ── Job summary ──
+      - name: Job summary
+        if: always()
+        run: |
+          STATE="${{ github.event.inputs.state }}"
+          DISPLAY="${{ steps.registry.outputs.display_name }}"
+          SCOPE="${{ steps.resolve.outputs.scope }}"
+          SELECTION="${{ steps.resolve.outputs.selection }}"
+          JCOUNT="${{ steps.resolve.outputs.jurisdiction_count }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          R2_KEY="${{ steps.r2_upload.outputs.r2_data_key }}"
+          DATA_CHANGED="${{ steps.r2_upload.outputs.data_changed }}"
+
+          SCOPE_LABEL="${SCOPE}"
+          if [ -n "$SELECTION" ]; then
+            SCOPE_LABEL="${SCOPE}: ${SELECTION}"
+          fi
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## ${DISPLAY} — Batch Download ($SCOPE_LABEL)
+
+          | Metric | Value |
+          |--------|-------|
+          | State | ${DISPLAY} (${STATE}) |
+          | Scope | ${SCOPE_LABEL} |
+          | Jurisdictions | ${JCOUNT:-N/A} |
+          | Records | ${TOTAL:-N/A} |
+          | R2 Key | ${R2_KEY:-'(dry run)'} |
+          | Data Changed | ${DATA_CHANGED:-N/A} |
+          | Incremental | ${{ github.event.inputs.incremental }} |
+          | Dry Run | ${{ github.event.inputs.dry_run }} |
+          | Completed | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+          EOF
+
+  # ============================================================
+  # JOB 2: Trigger batch pipeline (scope-aware, with incremental skip)
+  # ============================================================
+  trigger-pipeline:
+    name: "Trigger batch pipeline (${{ github.event.inputs.scope }})"
+    needs: download
+    if: >-
+      github.event.inputs.skip_pipeline != 'true' &&
+      github.event.inputs.dry_run != 'true' &&
+      needs.download.outputs.data_changed != 'false'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const state = '${{ needs.download.outputs.state }}';
+            const scope = '${{ needs.download.outputs.scope }}';
+            const selection = '${{ needs.download.outputs.selection }}';
+            const r2DataKey = '${{ needs.download.outputs.r2_data_key }}';
+            const skipForecasts = '${{ github.event.inputs.skip_forecasts }}';
+            const dryRun = '${{ github.event.inputs.dry_run }}';
+
+            console.log('Triggering batch-pipeline.yml');
+            console.log(`  State: ${state}, Scope: ${scope}, Selection: ${selection || '(all)'}`);
+            console.log(`  R2 key: ${r2DataKey}`);
+            console.log(`  Skip forecasts: ${skipForecasts}`);
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'batch-pipeline.yml',
+              ref: 'main',
+              inputs: {
+                state: state,
+                scope: scope,
+                selection: selection || '',
+                r2_data_key: r2DataKey,
+                skip_forecasts: skipForecasts || 'false',
+                dry_run: dryRun || 'false'
+              }
+            });
+
+            console.log('Pipeline dispatched successfully');
+
+      - name: Job summary
+        run: |
+          STATE="${{ needs.download.outputs.state }}"
+          SCOPE="${{ needs.download.outputs.scope }}"
+          SELECTION="${{ needs.download.outputs.selection }}"
+          JCOUNT="${{ needs.download.outputs.jurisdiction_count }}"
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Pipeline Triggered
+
+          | Metric | Value |
+          |--------|-------|
+          | State | $STATE |
+          | Scope | $SCOPE ${SELECTION:+($SELECTION)} |
+          | Jurisdictions | ${JCOUNT:-N/A} |
+          | Skip Forecasts | ${{ github.event.inputs.skip_forecasts }} |
+          | Data Changed | ${{ needs.download.outputs.data_changed }} |
+
+          **Pipeline:** R2 Download → Init Cache → Split Jurisdiction → Split Road Type → Aggregate → Upload → Forecasts → Manifest
+          EOF
+
+  # ============================================================
+  # JOB 3: Notify if skipped due to incremental (no data change)
+  # ============================================================
+  notify-skipped:
+    name: "Notify — data unchanged"
+    needs: download
+    if: >-
+      github.event.inputs.skip_pipeline != 'true' &&
+      github.event.inputs.dry_run != 'true' &&
+      needs.download.outputs.data_changed == 'false'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Summary
+        run: |
+          STATE="${{ needs.download.outputs.state }}"
+          TOTAL="${{ needs.download.outputs.total_records }}"
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Pipeline Skipped — Data Unchanged
+
+          The statewide CSV for **${STATE}** has not changed since the last upload (checksum match).
+          Batch pipeline was skipped to save compute time.
+
+          | Metric | Value |
+          |--------|-------|
+          | State | $STATE |
+          | Records | ${TOTAL} |
+          | Action | Skipped (incremental mode) |
+
+          To force reprocessing, run again with **Incremental = false**.
+          EOF

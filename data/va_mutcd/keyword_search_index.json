@@ -1,0 +1,193 @@
+{
+  "title": "Virginia MUTCD - Keyword Search Index",
+  "version": "11.0",
+  "effective_date": "January 2026",
+  "description": "Maps common traffic engineering queries to relevant Virginia MUTCD sections",
+  
+  "crash_pattern_mapping": {
+    "angle_crashes": {
+      "description": "Angle/turning crashes at intersections",
+      "relevant_sections": ["4C", "4D", "4F", "2B", "3B"],
+      "keywords": ["left turn", "protected phase", "signal timing", "clearance interval", "turn lane", "channelization"],
+      "specific_references": [
+        {"section": "4C.01", "topic": "Signal warrant studies"},
+        {"section": "4D.05", "topic": "Signal head placement"},
+        {"section": "4F.05", "topic": "Left-turn signal phases"},
+        {"section": "3B.20", "topic": "Turn lane markings"}
+      ]
+    },
+    "rear_end_crashes": {
+      "description": "Rear-end collisions",
+      "relevant_sections": ["4D", "4F", "2C", "3B"],
+      "keywords": ["clearance interval", "yellow time", "signal visibility", "advance warning", "queue detection"],
+      "specific_references": [
+        {"section": "4D.06", "topic": "Signal visibility requirements"},
+        {"section": "4F.06", "topic": "Yellow change and red clearance intervals"},
+        {"section": "2C.36", "topic": "Signal Ahead warning sign"}
+      ]
+    },
+    "pedestrian_crashes": {
+      "description": "Pedestrian-involved crashes",
+      "relevant_sections": ["4I", "4J", "4K", "4L", "3C", "7A", "7B", "7C"],
+      "keywords": ["crosswalk", "pedestrian signal", "walk interval", "APS", "RRFB", "PHB", "HAWK", "LPI"],
+      "specific_references": [
+        {"section": "4I.01", "topic": "Pedestrian signal heads"},
+        {"section": "4J.01", "topic": "Pedestrian Hybrid Beacon (PHB/HAWK)"},
+        {"section": "4K.01", "topic": "Accessible Pedestrian Signals (APS)"},
+        {"section": "4L.01", "topic": "Rectangular Rapid Flashing Beacons (RRFB)"},
+        {"section": "3C.01", "topic": "Crosswalk markings"}
+      ]
+    },
+    "bicycle_crashes": {
+      "description": "Bicycle-involved crashes",
+      "relevant_sections": ["9A", "9B", "9C", "9D", "9E", "9F", "4H"],
+      "keywords": ["bike lane", "bicycle signal", "bike box", "green pavement", "shared lane"],
+      "specific_references": [
+        {"section": "9E.01", "topic": "Bicycle lane markings"},
+        {"section": "9F.01", "topic": "Bicycle signals"},
+        {"section": "4H.01", "topic": "Bicycle signal faces"},
+        {"section": "3H.01", "topic": "Colored pavement for bike facilities"}
+      ]
+    },
+    "nighttime_crashes": {
+      "description": "Crashes occurring at night",
+      "relevant_sections": ["2A", "3A", "3G", "4D"],
+      "keywords": ["retroreflectivity", "illumination", "visibility", "delineator", "reflective"],
+      "specific_references": [
+        {"section": "2A.07", "topic": "Sign retroreflectivity"},
+        {"section": "3A.03", "topic": "Marking retroreflectivity"},
+        {"section": "3G.01", "topic": "Delineators"},
+        {"section": "4D.06", "topic": "Signal visibility"}
+      ]
+    },
+    "curve_crashes": {
+      "description": "Crashes on horizontal curves",
+      "relevant_sections": ["2C", "3B", "3G"],
+      "keywords": ["curve warning", "chevron", "advisory speed", "delineator", "curve ahead"],
+      "specific_references": [
+        {"section": "2C.06", "topic": "Curve warning signs"},
+        {"section": "2C.07", "topic": "Advisory speed plaques"},
+        {"section": "2C.08", "topic": "Chevron alignment signs"},
+        {"section": "3G.01", "topic": "Delineators on curves"}
+      ]
+    },
+    "speed_related_crashes": {
+      "description": "Speed-related crashes",
+      "relevant_sections": ["2B", "2C", "3K"],
+      "keywords": ["speed limit", "speed zone", "speed feedback", "rumble strips"],
+      "specific_references": [
+        {"section": "2B.13", "topic": "Speed limit signs"},
+        {"section": "2B.14", "topic": "Speed limit sign placement"},
+        {"section": "3K.01", "topic": "Rumble strip markings"}
+      ]
+    },
+    "work_zone_crashes": {
+      "description": "Work zone crashes - See VWAPM",
+      "relevant_sections": [],
+      "keywords": ["temporary traffic control", "TTC", "work zone", "flagger", "channelizing"],
+      "note": "Virginia MUTCD defers to Virginia Work Area Protection Manual (VWAPM) for all work zone guidance",
+      "reference": "Virginia Work Area Protection Manual (VWAPM)"
+    },
+    "school_zone_crashes": {
+      "description": "School zone crashes",
+      "relevant_sections": ["7A", "7B", "7C", "7D"],
+      "keywords": ["school zone", "school crossing", "crossing guard", "reduced speed school zone"],
+      "specific_references": [
+        {"section": "7A.01", "topic": "School area requirements"},
+        {"section": "7B.07", "topic": "School speed limit assembly"},
+        {"section": "7B.12", "topic": "School crossing signs"},
+        {"section": "7D.01", "topic": "Adult crossing guards"}
+      ]
+    },
+    "railroad_crashes": {
+      "description": "Railroad crossing crashes",
+      "relevant_sections": ["8A", "8B", "8C", "8D"],
+      "keywords": ["railroad", "grade crossing", "crossbuck", "gates", "preemption"],
+      "specific_references": [
+        {"section": "8A.01", "topic": "Railroad crossing requirements"},
+        {"section": "8B.04", "topic": "Crossbuck signs"},
+        {"section": "8D.01", "topic": "Flashing-light signals and gates"}
+      ]
+    },
+    "fixed_object_crashes": {
+      "description": "Fixed object crashes (off-road)",
+      "relevant_sections": ["2C", "3G", "3J"],
+      "keywords": ["object marker", "delineator", "end treatment", "barrier"],
+      "specific_references": [
+        {"section": "2C.63", "topic": "Object markers"},
+        {"section": "3G.01", "topic": "Delineators"},
+        {"section": "3J.01", "topic": "Island marking and delineation"}
+      ]
+    },
+    "head_on_crashes": {
+      "description": "Head-on crashes",
+      "relevant_sections": ["3B", "3G"],
+      "keywords": ["centerline", "no passing zone", "median", "divided highway"],
+      "specific_references": [
+        {"section": "3B.01", "topic": "Yellow centerline markings"},
+        {"section": "3B.02", "topic": "No-passing zone markings"},
+        {"section": "2C.39", "topic": "Divided Highway signs"}
+      ]
+    }
+  },
+  
+  "signal_warrants": {
+    "description": "Traffic signal warrant information (Chapter 4C)",
+    "warrants": [
+      {"number": 1, "name": "Eight-Hour Vehicular Volume", "section": "4C.02"},
+      {"number": 2, "name": "Four-Hour Vehicular Volume", "section": "4C.03"},
+      {"number": 3, "name": "Peak Hour", "section": "4C.04"},
+      {"number": 4, "name": "Pedestrian Volume", "section": "4C.05"},
+      {"number": 5, "name": "School Crossing", "section": "4C.06"},
+      {"number": 6, "name": "Coordinated Signal System", "section": "4C.07"},
+      {"number": 7, "name": "Crash Experience", "section": "4C.08"},
+      {"number": 8, "name": "Roadway Network", "section": "4C.09"},
+      {"number": 9, "name": "Grade Crossing", "section": "4C.10"}
+    ]
+  },
+  
+  "common_queries": {
+    "what are signal warrants": ["4C.01", "4C.02", "4C.03", "4C.04", "4C.05", "4C.06", "4C.07", "4C.08", "4C.09", "4C.10"],
+    "crash warrant": ["4C.08"],
+    "pedestrian signal": ["4I.01", "4I.02", "4I.03"],
+    "crosswalk requirements": ["3C.01", "3C.02", "3C.03"],
+    "stop sign": ["2B.04", "2B.05", "2B.06", "2B.07"],
+    "yield sign": ["2B.08", "2B.09"],
+    "speed limit": ["2B.13", "2B.14", "2B.15"],
+    "school zone": ["7A.01", "7B.07", "7B.12"],
+    "work zone": ["See VWAPM"],
+    "left turn phase": ["4F.05"],
+    "yellow time": ["4F.06"],
+    "RRFB": ["4L.01", "4L.02", "4L.03"],
+    "PHB HAWK": ["4J.01", "4J.02", "4J.03"],
+    "bike lane": ["9E.01", "9E.02", "9E.03"],
+    "roundabout": ["3D.01", "3D.02"],
+    "flashing beacon": ["4S.01", "4S.02"],
+    "APS accessible pedestrian": ["4K.01", "4K.02", "4K.03"]
+  },
+  
+  "virginia_specific_references": {
+    "work_zone": {
+      "document": "Virginia Work Area Protection Manual (VWAPM)",
+      "description": "All work zone and temporary traffic control requirements"
+    },
+    "road_design": {
+      "document": "VDOT Road Design Manual",
+      "description": "Virginia-specific design standards"
+    },
+    "traffic_engineering": {
+      "document": "VDOT Traffic Engineering Division Memoranda",
+      "description": "Policy and guidance memoranda"
+    }
+  },
+  
+  "terminology": {
+    "SHALL": "Mandatory requirement - must be followed",
+    "SHOULD": "Recommended practice - should be followed unless engineering judgment indicates otherwise",
+    "MAY": "Permissive - optional, left to engineering judgment",
+    "Standard": "Contains SHALL statements (mandatory)",
+    "Guidance": "Contains SHOULD statements (recommended)",
+    "Option": "Contains MAY statements (permissive)",
+    "Support": "Informational statements providing background"
+  }
+}

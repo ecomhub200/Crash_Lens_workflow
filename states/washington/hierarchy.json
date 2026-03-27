@@ -1,0 +1,664 @@
+{
+  "state": {
+    "fips": "53",
+    "name": "Washington",
+    "abbreviation": "WA",
+    "dot": "WSDOT",
+    "dotFullName": "Washington State Department of Transportation",
+    "center": [
+      -121.490494,
+      47.400902
+    ],
+    "zoom": 7,
+    "placesCount": 281
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "wa_1": {
+      "name": "Northwest Region",
+      "shortName": "Northwest Region",
+      "center": [
+        -122.3,
+        48.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "029",
+        "055",
+        "057",
+        "061",
+        "073"
+      ],
+      "countyNames": {
+        "029": "Island",
+        "055": "San Juan",
+        "057": "Skagit",
+        "061": "Snohomish",
+        "073": "Whatcom"
+      },
+      "mapBounds": {
+        "sw": [
+          47.8,
+          -123.0
+        ],
+        "ne": [
+          49.0,
+          -121.6
+        ]
+      },
+      "hq": "Mount Vernon"
+    },
+    "wa_2": {
+      "name": "North Central Region",
+      "shortName": "North Central Region",
+      "center": [
+        -120.5,
+        47.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "017",
+        "025",
+        "037",
+        "047"
+      ],
+      "countyNames": {
+        "007": "Chelan",
+        "017": "Douglas",
+        "025": "Grant",
+        "037": "Kittitas",
+        "047": "Okanogan"
+      },
+      "mapBounds": {
+        "sw": [
+          46.8,
+          -121.5
+        ],
+        "ne": [
+          48.5,
+          -119.5
+        ]
+      },
+      "hq": "Wenatchee"
+    },
+    "wa_3": {
+      "name": "Olympic Region",
+      "shortName": "Olympic Region",
+      "center": [
+        -123.0,
+        47.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "027",
+        "031",
+        "035",
+        "045",
+        "049",
+        "067"
+      ],
+      "countyNames": {
+        "009": "Clallam",
+        "027": "Grays Harbor",
+        "031": "Jefferson",
+        "035": "Kitsap",
+        "045": "Mason",
+        "049": "Pacific",
+        "067": "Thurston"
+      },
+      "mapBounds": {
+        "sw": [
+          46.4,
+          -124.5
+        ],
+        "ne": [
+          48.0,
+          -122.1
+        ]
+      },
+      "hq": "Tumwater"
+    },
+    "wa_4": {
+      "name": "Southwest Region",
+      "shortName": "Southwest Region",
+      "center": [
+        -122.5,
+        46.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "015",
+        "039",
+        "041",
+        "059",
+        "069"
+      ],
+      "countyNames": {
+        "011": "Clark",
+        "015": "Cowlitz",
+        "039": "Klickitat",
+        "041": "Lewis",
+        "059": "Skamania",
+        "069": "Wahkiakum"
+      },
+      "mapBounds": {
+        "sw": [
+          45.5,
+          -123.5
+        ],
+        "ne": [
+          46.5,
+          -121.5
+        ]
+      },
+      "hq": "Vancouver"
+    },
+    "wa_5": {
+      "name": "South Central Region",
+      "shortName": "South Central Region",
+      "center": [
+        -119.5,
+        46.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "005",
+        "021",
+        "071",
+        "077"
+      ],
+      "countyNames": {
+        "005": "Benton",
+        "021": "Franklin",
+        "071": "Walla Walla",
+        "077": "Yakima"
+      },
+      "mapBounds": {
+        "sw": [
+          45.8,
+          -120.5
+        ],
+        "ne": [
+          46.8,
+          -118.5
+        ]
+      },
+      "hq": "Union Gap"
+    },
+    "wa_6": {
+      "name": "Eastern Region",
+      "shortName": "Eastern Region",
+      "center": [
+        -117.5,
+        47.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "013",
+        "019",
+        "023",
+        "043",
+        "051",
+        "063",
+        "065",
+        "075"
+      ],
+      "countyNames": {
+        "001": "Adams",
+        "003": "Asotin",
+        "013": "Columbia",
+        "019": "Ferry",
+        "023": "Garfield",
+        "043": "Lincoln",
+        "051": "Pend Oreille",
+        "063": "Spokane",
+        "065": "Stevens",
+        "075": "Whitman"
+      },
+      "mapBounds": {
+        "sw": [
+          46.0,
+          -118.8
+        ],
+        "ne": [
+          49.0,
+          -116.5
+        ]
+      },
+      "hq": "Spokane"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "psrcpsrcs": {
+      "name": "PSRC (Puget Sound Regional Council / Seattle)",
+      "shortName": "Puget Sound Regional Council / Seattle",
+      "type": "mpo",
+      "center": [
+        -122.3321,
+        47.6062
+      ],
+      "zoom": 9,
+      "counties": [
+        "033",
+        "035",
+        "053",
+        "061"
+      ],
+      "countyNames": {
+        "033": "King",
+        "035": "Kitsap",
+        "053": "Pierce",
+        "061": "Snohomish"
+      },
+      "btsAcronym": "PSRCS",
+      "mapBounds": {
+        "sw": [
+          47.15,
+          -122.8
+        ],
+        "ne": [
+          48.1,
+          -121.8
+        ]
+      }
+    },
+    "rtcswwv": {
+      "name": "RTC (SW Washington / Vancouver)",
+      "shortName": "SW Washington / Vancouver",
+      "type": "mpo",
+      "center": [
+        -117.426,
+        47.6588
+      ],
+      "zoom": 10,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Clark"
+      },
+      "btsAcronym": "RWV",
+      "mapBounds": {
+        "sw": [
+          47.4,
+          -117.7
+        ],
+        "ne": [
+          47.9,
+          -117.15
+        ]
+      }
+    },
+    "srtcsrtc": {
+      "name": "SRTC (Spokane Regional Transportation Council)",
+      "shortName": "Spokane Regional Transportation Council",
+      "type": "mpo",
+      "center": [
+        -122.6615,
+        45.6387
+      ],
+      "zoom": 10,
+      "counties": [
+        "063"
+      ],
+      "countyNames": {
+        "063": "Spokane"
+      },
+      "btsAcronym": "SRTC",
+      "mapBounds": {
+        "sw": [
+          45.4,
+          -122.9
+        ],
+        "ne": [
+          45.85,
+          -122.4
+        ]
+      }
+    },
+    "trpctrpco": {
+      "name": "TRPC (Thurston Regional Planning Council / Olympia)",
+      "shortName": "Thurston Regional Planning Council / Olympia",
+      "type": "mpo",
+      "center": [
+        -119.2013,
+        46.2396
+      ],
+      "zoom": 10,
+      "counties": [
+        "067"
+      ],
+      "countyNames": {
+        "067": "Thurston"
+      },
+      "btsAcronym": "TRPCO",
+      "mapBounds": {
+        "sw": [
+          45.95,
+          -119.5
+        ],
+        "ne": [
+          46.5,
+          -118.9
+        ]
+      }
+    },
+    "yvmpo": {
+      "name": "Yakima Valley MPO",
+      "shortName": "Yakima Valley",
+      "type": "mpo",
+      "center": [
+        -122.9007,
+        47.0379
+      ],
+      "zoom": 10,
+      "counties": [
+        "077"
+      ],
+      "countyNames": {
+        "077": "Yakima"
+      },
+      "btsAcronym": "YVM",
+      "mapBounds": {
+        "sw": [
+          46.8,
+          -123.15
+        ],
+        "ne": [
+          47.25,
+          -122.65
+        ]
+      }
+    },
+    "bfcogtcmates": {
+      "name": "BFCOG (Tri-Cities MATES)",
+      "shortName": "Tri-Cities MATES",
+      "type": "mpo",
+      "center": [
+        -117.1817,
+        46.7324
+      ],
+      "zoom": 10,
+      "counties": [
+        "005",
+        "021"
+      ],
+      "countyNames": {
+        "005": "Benton",
+        "021": "Franklin"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          46.5,
+          -117.45
+        ],
+        "ne": [
+          46.95,
+          -116.9
+        ]
+      }
+    },
+    "wcogwcogb": {
+      "name": "WCOG (Whatcom COG / Bellingham)",
+      "shortName": "Whatcom COG / Bellingham",
+      "type": "mpo",
+      "center": [
+        -122.4787,
+        48.7519
+      ],
+      "zoom": 10,
+      "counties": [
+        "073"
+      ],
+      "countyNames": {
+        "073": "Whatcom"
+      },
+      "btsAcronym": "WCB",
+      "mapBounds": {
+        "sw": [
+          48.5,
+          -122.75
+        ],
+        "ne": [
+          49.0,
+          -122.2
+        ]
+      }
+    },
+    "scogscog": {
+      "name": "SCOG (Skagit COG)",
+      "shortName": "Skagit COG",
+      "type": "mpo",
+      "center": [
+        -122.4443,
+        47.2529
+      ],
+      "zoom": 10,
+      "counties": [
+        "057"
+      ],
+      "countyNames": {
+        "057": "Skagit"
+      },
+      "btsAcronym": "SC",
+      "mapBounds": {
+        "sw": [
+          47.05,
+          -122.7
+        ],
+        "ne": [
+          47.45,
+          -122.2
+        ]
+      }
+    },
+    "cwcoglk": {
+      "name": "Cowlitz-Wahkiakum COG (Longview-Kelso)",
+      "shortName": "Longview-Kelso",
+      "type": "mpo",
+      "center": [
+        -120.5059,
+        46.6021
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Cowlitz"
+      },
+      "btsAcronym": "CC",
+      "mapBounds": {
+        "sw": [
+          46.35,
+          -120.75
+        ],
+        "ne": [
+          46.85,
+          -120.25
+        ]
+      }
+    },
+    "cdtcw": {
+      "name": "Chelan-Douglas Transportation Council (Wenatchee)",
+      "shortName": "Wenatchee",
+      "type": "mpo",
+      "center": [
+        -122.2282,
+        48.2982
+      ],
+      "zoom": 10,
+      "counties": [
+        "007",
+        "017"
+      ],
+      "countyNames": {
+        "007": "Chelan",
+        "017": "Douglas"
+      },
+      "btsAcronym": "CTC",
+      "mapBounds": {
+        "sw": [
+          48.05,
+          -122.5
+        ],
+        "ne": [
+          48.55,
+          -121.95
+        ]
+      }
+    },
+    "wwvmpo": {
+      "name": "Walla Walla Valley MPO",
+      "shortName": "Walla Walla Valley",
+      "type": "mpo",
+      "center": [
+        -122.2021,
+        47.979
+      ],
+      "zoom": 10,
+      "counties": [
+        "071"
+      ],
+      "countyNames": {
+        "071": "Walla Walla"
+      },
+      "btsAcronym": "WWVM",
+      "mapBounds": {
+        "sw": [
+          47.75,
+          -122.45
+        ],
+        "ne": [
+          48.2,
+          -121.95
+        ]
+      }
+    },
+    "benton_franklin_council_of_governments_mpo": {
+      "name": "Benton-Franklin Council of Governments",
+      "shortName": "Benton-Franklin Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "53197100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -118.782898,
+        46.425019
+      ],
+      "zoom": 10
+    },
+    "cowlitz_wahkiakum_council_of_governments_mpo": {
+      "name": "Cowlitz-Wahkiakum Council of Governments",
+      "shortName": "Cowlitz-Wahkiakum Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "53198202",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -122.944284,
+        46.145451
+      ],
+      "zoom": 10
+    },
+    "southwest_washington_regional_transportation_council_mpo": {
+      "name": "Southwest Washington Regional Transportation Council",
+      "shortName": "Southwest Washington Regional Transportation Council",
+      "type": "mpo",
+      "btsMpoId": "53199200",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -122.490684,
+        45.882754
+      ],
+      "zoom": 10
+    },
+    "chelan_douglas_transportation_council_cdtc_mpo": {
+      "name": "Chelan-Douglas Transportation Council (CDTC)",
+      "shortName": "Chelan-Douglas Transportation Council (CDTC)",
+      "type": "mpo",
+      "btsMpoId": "53200302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -120.716461,
+        47.662961
+      ],
+      "zoom": 10
+    },
+    "skagit_mpo": {
+      "name": "Skagit MPO",
+      "shortName": "Skagit",
+      "type": "mpo",
+      "btsMpoId": "53200301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -121.514269,
+        48.461545
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adams",
+    "003": "Asotin",
+    "005": "Benton",
+    "007": "Chelan",
+    "009": "Clallam",
+    "011": "Clark",
+    "013": "Columbia",
+    "015": "Cowlitz",
+    "017": "Douglas",
+    "019": "Ferry",
+    "021": "Franklin",
+    "023": "Garfield",
+    "025": "Grant",
+    "027": "Grays Harbor",
+    "029": "Island",
+    "031": "Jefferson",
+    "033": "King",
+    "035": "Kitsap",
+    "037": "Kittitas",
+    "039": "Klickitat",
+    "041": "Lewis",
+    "043": "Lincoln",
+    "045": "Mason",
+    "047": "Okanogan",
+    "049": "Pacific",
+    "051": "Pend Oreille",
+    "053": "Pierce",
+    "055": "San Juan",
+    "057": "Skagit",
+    "059": "Skamania",
+    "061": "Snohomish",
+    "063": "Spokane",
+    "065": "Stevens",
+    "067": "Thurston",
+    "069": "Wahkiakum",
+    "071": "Walla Walla",
+    "073": "Whatcom",
+    "075": "Whitman",
+    "077": "Yakima"
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "state": {
+    "fips": "50",
+    "name": "Vermont",
+    "abbreviation": "VT",
+    "dot": "VTrans",
+    "dotFullName": "Vermont Agency of Transportation",
+    "center": [
+      -72.710686,
+      44.045876
+    ],
+    "zoom": 8,
+    "placesCount": 39
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "vt_1": {
+      "name": "District 1 (Bennington)",
+      "shortName": "District 1",
+      "center": [
+        -73.2,
+        42.9
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Bennington"
+      },
+      "mapBounds": {
+        "sw": [
+          42.73,
+          -73.4
+        ],
+        "ne": [
+          43.1,
+          -73.0
+        ]
+      },
+      "hq": "Bennington"
+    },
+    "vt_2": {
+      "name": "District 2 (Dummerston)",
+      "shortName": "District 2",
+      "center": [
+        -72.6,
+        42.95
+      ],
+      "zoom": 10,
+      "counties": [
+        "025"
+      ],
+      "countyNames": {
+        "025": "Windham"
+      },
+      "mapBounds": {
+        "sw": [
+          42.73,
+          -72.8
+        ],
+        "ne": [
+          43.2,
+          -72.4
+        ]
+      },
+      "hq": "Dummerston"
+    },
+    "vt_3": {
+      "name": "District 3 (Rutland)",
+      "shortName": "District 3",
+      "center": [
+        -73.0,
+        43.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "021"
+      ],
+      "countyNames": {
+        "021": "Rutland"
+      },
+      "mapBounds": {
+        "sw": [
+          43.3,
+          -73.4
+        ],
+        "ne": [
+          43.9,
+          -72.7
+        ]
+      },
+      "hq": "Rutland"
+    },
+    "vt_4": {
+      "name": "District 4 (White River Junction)",
+      "shortName": "District 4",
+      "center": [
+        -72.3,
+        43.65
+      ],
+      "zoom": 9,
+      "counties": [
+        "027"
+      ],
+      "countyNames": {
+        "027": "Windsor"
+      },
+      "mapBounds": {
+        "sw": [
+          43.3,
+          -72.6
+        ],
+        "ne": [
+          44.0,
+          -72.0
+        ]
+      },
+      "hq": "White River Junction"
+    },
+    "vt_5": {
+      "name": "District 5 (Colchester)",
+      "shortName": "District 5",
+      "center": [
+        -73.1,
+        44.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "007"
+      ],
+      "countyNames": {
+        "001": "Addison",
+        "007": "Chittenden"
+      },
+      "mapBounds": {
+        "sw": [
+          43.9,
+          -73.4
+        ],
+        "ne": [
+          44.6,
+          -72.6
+        ]
+      },
+      "hq": "Colchester"
+    },
+    "vt_7": {
+      "name": "District 7 (Berlin)",
+      "shortName": "District 7",
+      "center": [
+        -72.5,
+        44.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "017",
+        "023"
+      ],
+      "countyNames": {
+        "005": "Caledonia",
+        "017": "Orange",
+        "023": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          43.8,
+          -72.8
+        ],
+        "ne": [
+          44.6,
+          -72.1
+        ]
+      },
+      "hq": "Berlin"
+    },
+    "vt_8": {
+      "name": "District 8 (St. Johnsbury)",
+      "shortName": "District 8",
+      "center": [
+        -72.1,
+        44.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "009",
+        "015",
+        "019"
+      ],
+      "countyNames": {
+        "009": "Essex",
+        "015": "Lamoille",
+        "019": "Orleans"
+      },
+      "mapBounds": {
+        "sw": [
+          44.3,
+          -72.5
+        ],
+        "ne": [
+          45.0,
+          -71.5
+        ]
+      },
+      "hq": "St. Johnsbury"
+    },
+    "vt_9": {
+      "name": "District 9 (Derby)",
+      "shortName": "District 9",
+      "center": [
+        -73.0,
+        44.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "011",
+        "013"
+      ],
+      "countyNames": {
+        "011": "Franklin",
+        "013": "Grand Isle"
+      },
+      "mapBounds": {
+        "sw": [
+          44.6,
+          -73.3
+        ],
+        "ne": [
+          45.0,
+          -72.7
+        ]
+      },
+      "hq": "Derby"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "ccrpcccrpcb": {
+      "name": "Chittenden County RPC / CCRPC (Burlington)",
+      "shortName": "Burlington",
+      "type": "mpo",
+      "center": [
+        -73.2121,
+        44.4759
+      ],
+      "zoom": 10,
+      "counties": [
+        "007"
+      ],
+      "countyNames": {
+        "007": "Chittenden"
+      },
+      "btsAcronym": "CCRC",
+      "mapBounds": {
+        "sw": [
+          44.25,
+          -73.45
+        ],
+        "ne": [
+          44.7,
+          -72.95
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Addison",
+    "003": "Bennington",
+    "005": "Caledonia",
+    "007": "Chittenden",
+    "009": "Essex",
+    "011": "Franklin",
+    "013": "Grand Isle",
+    "015": "Lamoille",
+    "017": "Orange",
+    "019": "Orleans",
+    "021": "Rutland",
+    "023": "Washington",
+    "025": "Windham",
+    "027": "Windsor"
+  }
+}

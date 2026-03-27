@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "generatedAt": "2026-02-09T11:47:17.844635Z",
+    "jurisdiction": "henrico",
+    "validationVersion": "1.3.0",
+    "runType": "incremental"
+  },
+  "summary": "Validated 0 records. 0 clean (0.0%).",
+  "totalRecords": 48476,
+  "newRecords": 0,
+  "autoCorrections": 0,
+  "deduplicated": 0,
+  "flaggedRecords": 0,
+  "totalIssues": 0,
+  "errors": 0,
+  "cleanRecords": 0,
+  "cleanRate": 0.0,
+  "errorRate": 0.0,
+  "issuesByCategory": {},
+  "correctionsByField": {},
+  "flaggedRecordsList": []
+}

@@ -1,0 +1,24 @@
+{
+  "_description": "HDOT crash data registry. 4 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Hawaii Department of Transportation",
+    "base_url": "https://data.hawaii.gov",
+    "api_url": "https://data.hawaii.gov/resource/a393-uawk.json",
+    "file_format": "JSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 4 Hawaii counties. FIPS codes are 5-digit (state 15 + 3-digit county).",
+    "_placeholder": "Populate with all 4 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data.hawaii.gov/resource/a393-uawk.json",
+    "resource_id": "a393-uawk",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "max_per_request": 50000
+    }
+  }
+}

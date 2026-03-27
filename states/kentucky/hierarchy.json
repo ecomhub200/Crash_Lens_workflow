@@ -1,0 +1,932 @@
+{
+  "state": {
+    "fips": "21",
+    "name": "Kentucky",
+    "abbreviation": "KY",
+    "dot": "KYTC",
+    "dotFullName": "Kentucky Transportation Cabinet",
+    "center": [
+      -84.670067,
+      37.66814
+    ],
+    "zoom": 7,
+    "placesCount": 417
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ky_1": {
+      "name": "District 1 (Paducah)",
+      "shortName": "District 1",
+      "center": [
+        -88.4,
+        36.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "007",
+        "033",
+        "035",
+        "039",
+        "055",
+        "075",
+        "083",
+        "105",
+        "139",
+        "143",
+        "157",
+        "145",
+        "221"
+      ],
+      "countyNames": {
+        "007": "Ballard",
+        "033": "Caldwell",
+        "035": "Calloway",
+        "039": "Carlisle",
+        "055": "Crittenden",
+        "075": "Fulton",
+        "083": "Graves",
+        "105": "Hickman",
+        "139": "Livingston",
+        "143": "Lyon",
+        "157": "Marshall",
+        "145": "McCracken",
+        "221": "Trigg"
+      },
+      "mapBounds": {
+        "sw": [
+          36.4,
+          -89.2
+        ],
+        "ne": [
+          37.4,
+          -87.6
+        ]
+      },
+      "hq": "Paducah"
+    },
+    "ky_2": {
+      "name": "District 2 (Madisonville)",
+      "shortName": "District 2",
+      "center": [
+        -87.5,
+        37.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "047",
+        "059",
+        "091",
+        "101",
+        "107",
+        "149",
+        "177",
+        "183",
+        "219",
+        "225",
+        "233"
+      ],
+      "countyNames": {
+        "047": "Christian",
+        "059": "Daviess",
+        "091": "Hancock",
+        "101": "Henderson",
+        "107": "Hopkins",
+        "149": "McLean",
+        "177": "Muhlenberg",
+        "183": "Ohio",
+        "219": "Todd",
+        "225": "Union",
+        "233": "Webster"
+      },
+      "mapBounds": {
+        "sw": [
+          37.0,
+          -88.2
+        ],
+        "ne": [
+          38.0,
+          -86.8
+        ]
+      },
+      "hq": "Madisonville"
+    },
+    "ky_3": {
+      "name": "District 3 (Bowling Green)",
+      "shortName": "District 3",
+      "center": [
+        -86.4,
+        36.95
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "009",
+        "031",
+        "057",
+        "061",
+        "099",
+        "141",
+        "169",
+        "171",
+        "213",
+        "227"
+      ],
+      "countyNames": {
+        "003": "Allen",
+        "009": "Barren",
+        "031": "Butler",
+        "057": "Cumberland",
+        "061": "Edmonson",
+        "099": "Hart",
+        "141": "Logan",
+        "169": "Metcalfe",
+        "171": "Monroe",
+        "213": "Simpson",
+        "227": "Warren"
+      },
+      "mapBounds": {
+        "sw": [
+          36.5,
+          -87.1
+        ],
+        "ne": [
+          37.4,
+          -85.7
+        ]
+      },
+      "hq": "Bowling Green"
+    },
+    "ky_4": {
+      "name": "District 4 (Elizabethtown)",
+      "shortName": "District 4",
+      "center": [
+        -85.9,
+        37.7
+      ],
+      "zoom": 8,
+      "counties": [
+        "027",
+        "085",
+        "087",
+        "093",
+        "123",
+        "155",
+        "163",
+        "179",
+        "215",
+        "217",
+        "229"
+      ],
+      "countyNames": {
+        "027": "Breckinridge",
+        "085": "Grayson",
+        "087": "Green",
+        "093": "Hardin",
+        "123": "LaRue",
+        "155": "Marion",
+        "163": "Meade",
+        "179": "Nelson",
+        "215": "Spencer",
+        "217": "Taylor",
+        "229": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          37.2,
+          -86.6
+        ],
+        "ne": [
+          38.1,
+          -85.2
+        ]
+      },
+      "hq": "Elizabethtown"
+    },
+    "ky_5": {
+      "name": "District 5 (Louisville)",
+      "shortName": "District 5",
+      "center": [
+        -85.7,
+        38.25
+      ],
+      "zoom": 9,
+      "counties": [
+        "029",
+        "041",
+        "103",
+        "111",
+        "185",
+        "211",
+        "223"
+      ],
+      "countyNames": {
+        "029": "Bullitt",
+        "041": "Carroll",
+        "103": "Henry",
+        "111": "Jefferson",
+        "185": "Oldham",
+        "211": "Shelby",
+        "223": "Trimble"
+      },
+      "mapBounds": {
+        "sw": [
+          37.9,
+          -86.1
+        ],
+        "ne": [
+          38.7,
+          -85.3
+        ]
+      },
+      "hq": "Louisville"
+    },
+    "ky_6": {
+      "name": "District 6 (Covington)",
+      "shortName": "District 6",
+      "center": [
+        -84.6,
+        38.8
+      ],
+      "zoom": 9,
+      "counties": [
+        "015",
+        "037",
+        "077",
+        "081",
+        "117",
+        "187",
+        "191"
+      ],
+      "countyNames": {
+        "015": "Boone",
+        "037": "Campbell",
+        "077": "Gallatin",
+        "081": "Grant",
+        "117": "Kenton",
+        "187": "Owen",
+        "191": "Pendleton"
+      },
+      "mapBounds": {
+        "sw": [
+          38.4,
+          -85.0
+        ],
+        "ne": [
+          39.1,
+          -84.2
+        ]
+      },
+      "hq": "Covington"
+    },
+    "ky_7": {
+      "name": "District 7 (Lexington)",
+      "shortName": "District 7",
+      "center": [
+        -84.6,
+        38.1
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "017",
+        "049",
+        "067",
+        "073",
+        "097",
+        "113",
+        "167",
+        "181",
+        "201",
+        "209",
+        "239"
+      ],
+      "countyNames": {
+        "005": "Anderson",
+        "017": "Bourbon",
+        "049": "Clark",
+        "067": "Fayette",
+        "073": "Franklin",
+        "097": "Harrison",
+        "113": "Jessamine",
+        "167": "Mercer",
+        "181": "Nicholas",
+        "201": "Robertson",
+        "209": "Scott",
+        "239": "Woodford"
+      },
+      "mapBounds": {
+        "sw": [
+          37.7,
+          -85.3
+        ],
+        "ne": [
+          38.5,
+          -83.9
+        ]
+      },
+      "hq": "Lexington"
+    },
+    "ky_8": {
+      "name": "District 8 (Somerset)",
+      "shortName": "District 8",
+      "center": [
+        -84.8,
+        37.0
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "045",
+        "053",
+        "079",
+        "137",
+        "147",
+        "199",
+        "203",
+        "207",
+        "231"
+      ],
+      "countyNames": {
+        "001": "Adair",
+        "045": "Casey",
+        "053": "Clinton",
+        "079": "Garrard",
+        "137": "Lincoln",
+        "147": "McCreary",
+        "199": "Pulaski",
+        "203": "Rockcastle",
+        "207": "Russell",
+        "231": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          36.5,
+          -85.5
+        ],
+        "ne": [
+          37.5,
+          -84.1
+        ]
+      },
+      "hq": "Somerset"
+    },
+    "ky_9": {
+      "name": "District 9 (Flemingsburg)",
+      "shortName": "District 9",
+      "center": [
+        -83.6,
+        38.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "019",
+        "023",
+        "043",
+        "063",
+        "069",
+        "089",
+        "135",
+        "161",
+        "165",
+        "173",
+        "175",
+        "205"
+      ],
+      "countyNames": {
+        "011": "Bath",
+        "019": "Boyd",
+        "023": "Bracken",
+        "043": "Carter",
+        "063": "Elliott",
+        "069": "Fleming",
+        "089": "Greenup",
+        "135": "Lewis",
+        "161": "Mason",
+        "165": "Menifee",
+        "173": "Montgomery",
+        "175": "Morgan",
+        "205": "Rowan"
+      },
+      "mapBounds": {
+        "sw": [
+          37.8,
+          -84.3
+        ],
+        "ne": [
+          38.8,
+          -82.9
+        ]
+      },
+      "hq": "Flemingsburg"
+    },
+    "ky_10": {
+      "name": "District 10 (Jackson)",
+      "shortName": "District 10",
+      "center": [
+        -83.6,
+        37.6
+      ],
+      "zoom": 8,
+      "counties": [
+        "025",
+        "065",
+        "109",
+        "129",
+        "131",
+        "153",
+        "189",
+        "193",
+        "197",
+        "237"
+      ],
+      "countyNames": {
+        "025": "Breathitt",
+        "065": "Estill",
+        "109": "Jackson",
+        "129": "Lee",
+        "131": "Leslie",
+        "153": "Magoffin",
+        "189": "Owsley",
+        "193": "Perry",
+        "197": "Powell",
+        "237": "Wolfe"
+      },
+      "mapBounds": {
+        "sw": [
+          37.1,
+          -84.1
+        ],
+        "ne": [
+          38.1,
+          -83.1
+        ]
+      },
+      "hq": "Jackson"
+    },
+    "ky_11": {
+      "name": "District 11 (Manchester)",
+      "shortName": "District 11",
+      "center": [
+        -83.9,
+        37.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "013",
+        "051",
+        "095",
+        "121",
+        "125",
+        "235"
+      ],
+      "countyNames": {
+        "013": "Bell",
+        "051": "Clay",
+        "095": "Harlan",
+        "121": "Knox",
+        "125": "Laurel",
+        "235": "Whitley"
+      },
+      "mapBounds": {
+        "sw": [
+          36.6,
+          -84.4
+        ],
+        "ne": [
+          37.4,
+          -83.4
+        ]
+      },
+      "hq": "Manchester"
+    },
+    "ky_12": {
+      "name": "District 12 (Pikeville)",
+      "shortName": "District 12",
+      "center": [
+        -82.5,
+        37.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "071",
+        "115",
+        "119",
+        "127",
+        "133",
+        "159",
+        "195"
+      ],
+      "countyNames": {
+        "071": "Floyd",
+        "115": "Johnson",
+        "119": "Knott",
+        "127": "Lawrence",
+        "133": "Letcher",
+        "159": "Martin",
+        "195": "Pike"
+      },
+      "mapBounds": {
+        "sw": [
+          37.1,
+          -83.1
+        ],
+        "ne": [
+          37.9,
+          -81.9
+        ]
+      },
+      "hq": "Pikeville"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "kipdalm": {
+      "name": "KIPDA (Louisville Metro)",
+      "shortName": "Louisville Metro",
+      "type": "mpo",
+      "center": [
+        -85.7585,
+        38.2527
+      ],
+      "zoom": 9,
+      "counties": [
+        "111",
+        "029",
+        "185"
+      ],
+      "countyNames": {
+        "111": "Jefferson",
+        "029": "Bullitt",
+        "185": "Oldham"
+      },
+      "btsAcronym": "KM",
+      "mapBounds": {
+        "sw": [
+          37.9,
+          -86.1
+        ],
+        "ne": [
+          38.6,
+          -85.4
+        ]
+      }
+    },
+    "lampo": {
+      "name": "Lexington Area MPO",
+      "shortName": "Lexington Area",
+      "type": "mpo",
+      "center": [
+        -84.5037,
+        38.0406
+      ],
+      "zoom": 10,
+      "counties": [
+        "067",
+        "113",
+        "209"
+      ],
+      "countyNames": {
+        "067": "Fayette",
+        "113": "Jessamine",
+        "209": "Scott"
+      },
+      "btsAcronym": "LAM",
+      "mapBounds": {
+        "sw": [
+          37.8,
+          -84.8
+        ],
+        "ne": [
+          38.3,
+          -84.2
+        ]
+      }
+    },
+    "okiokinky": {
+      "name": "OKI (Ohio-Kentucky-Indiana / Northern KY)",
+      "shortName": "Ohio-Kentucky-Indiana / Northern KY",
+      "type": "mpo",
+      "center": [
+        -84.512,
+        39.073
+      ],
+      "zoom": 10,
+      "counties": [
+        "015",
+        "037",
+        "117"
+      ],
+      "countyNames": {
+        "015": "Boone",
+        "037": "Campbell",
+        "117": "Kenton"
+      },
+      "btsAcronym": "ONK",
+      "mapBounds": {
+        "sw": [
+          38.8,
+          -84.85
+        ],
+        "ne": [
+          39.3,
+          -84.2
+        ]
+      }
+    },
+    "bgwcmpo": {
+      "name": "Bowling Green-Warren County MPO",
+      "shortName": "Bowling Green-Warren County",
+      "type": "mpo",
+      "center": [
+        -88.6001,
+        37.0834
+      ],
+      "zoom": 10,
+      "counties": [
+        "227"
+      ],
+      "countyNames": {
+        "227": "Warren"
+      },
+      "btsAcronym": "BGCM",
+      "mapBounds": {
+        "sw": [
+          36.85,
+          -88.85
+        ],
+        "ne": [
+          37.3,
+          -88.35
+        ]
+      }
+    },
+    "fivcoadda": {
+      "name": "FIVCO ADD (Ashland area)",
+      "shortName": "Ashland area",
+      "type": "mpo",
+      "center": [
+        -87.1133,
+        37.7747
+      ],
+      "zoom": 10,
+      "counties": [
+        "019",
+        "089"
+      ],
+      "countyNames": {
+        "019": "Boyd",
+        "089": "Greenup"
+      },
+      "btsAcronym": "FAA",
+      "mapBounds": {
+        "sw": [
+          37.55,
+          -87.35
+        ],
+        "ne": [
+          38.0,
+          -86.85
+        ]
+      }
+    },
+    "odcmpo": {
+      "name": "Owensboro-Daviess County MPO",
+      "shortName": "Owensboro-Daviess County",
+      "type": "mpo",
+      "center": [
+        -86.4388,
+        37.0442
+      ],
+      "zoom": 10,
+      "counties": [
+        "059"
+      ],
+      "countyNames": {
+        "059": "Daviess"
+      },
+      "btsAcronym": "OCM",
+      "mapBounds": {
+        "sw": [
+          36.8,
+          -86.7
+        ],
+        "ne": [
+          37.3,
+          -86.15
+        ]
+      }
+    },
+    "empo": {
+      "name": "Elizabethtown MPO",
+      "shortName": "Elizabethtown",
+      "type": "mpo",
+      "center": [
+        -82.4457,
+        38.4185
+      ],
+      "zoom": 10,
+      "counties": [
+        "093"
+      ],
+      "countyNames": {
+        "093": "Hardin"
+      },
+      "btsAcronym": "EM",
+      "mapBounds": {
+        "sw": [
+          38.2,
+          -82.7
+        ],
+        "ne": [
+          38.6,
+          -82.2
+        ]
+      }
+    },
+    "hmpo": {
+      "name": "Henderson MPO",
+      "shortName": "Henderson",
+      "type": "mpo",
+      "center": [
+        -87.59,
+        37.8362
+      ],
+      "zoom": 11,
+      "counties": [
+        "101"
+      ],
+      "countyNames": {
+        "101": "Henderson"
+      },
+      "btsAcronym": "HM",
+      "mapBounds": {
+        "sw": [
+          37.65,
+          -87.8
+        ],
+        "ne": [
+          38.0,
+          -87.35
+        ]
+      }
+    },
+    "paducah_mccracken_mpo": {
+      "name": "Paducah-McCracken MPO",
+      "shortName": "Paducah-McCracken",
+      "type": "mpo",
+      "btsMpoId": "21202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -88.641105,
+        37.122471
+      ],
+      "zoom": 10
+    },
+    "louisvillejefferson_county_ky_in_mpo": {
+      "name": "Louisville/Jefferson County KY-IN MPO",
+      "shortName": "Louisville/Jefferson County KY-IN",
+      "type": "mpo",
+      "btsMpoId": "21197300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.687155,
+        38.172353
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Adair",
+    "003": "Allen",
+    "005": "Anderson",
+    "007": "Ballard",
+    "009": "Barren",
+    "011": "Bath",
+    "013": "Bell",
+    "015": "Boone",
+    "017": "Bourbon",
+    "019": "Boyd",
+    "021": "Boyle",
+    "023": "Bracken",
+    "025": "Breathitt",
+    "027": "Breckinridge",
+    "029": "Bullitt",
+    "031": "Butler",
+    "033": "Caldwell",
+    "035": "Calloway",
+    "037": "Campbell",
+    "039": "Carlisle",
+    "041": "Carroll",
+    "043": "Carter",
+    "045": "Casey",
+    "047": "Christian",
+    "049": "Clark",
+    "051": "Clay",
+    "053": "Clinton",
+    "055": "Crittenden",
+    "057": "Cumberland",
+    "059": "Daviess",
+    "061": "Edmonson",
+    "063": "Elliott",
+    "065": "Estill",
+    "067": "Fayette",
+    "069": "Fleming",
+    "071": "Floyd",
+    "073": "Franklin",
+    "075": "Fulton",
+    "077": "Gallatin",
+    "079": "Garrard",
+    "081": "Grant",
+    "083": "Graves",
+    "085": "Grayson",
+    "087": "Green",
+    "089": "Greenup",
+    "091": "Hancock",
+    "093": "Hardin",
+    "095": "Harlan",
+    "097": "Harrison",
+    "099": "Hart",
+    "101": "Henderson",
+    "103": "Henry",
+    "105": "Hickman",
+    "107": "Hopkins",
+    "109": "Jackson",
+    "111": "Jefferson",
+    "113": "Jessamine",
+    "115": "Johnson",
+    "117": "Kenton",
+    "119": "Knott",
+    "121": "Knox",
+    "123": "LaRue",
+    "125": "Laurel",
+    "127": "Lawrence",
+    "129": "Lee",
+    "131": "Leslie",
+    "133": "Letcher",
+    "135": "Lewis",
+    "137": "Lincoln",
+    "139": "Livingston",
+    "141": "Logan",
+    "143": "Lyon",
+    "145": "McCracken",
+    "147": "McCreary",
+    "149": "McLean",
+    "151": "Madison",
+    "153": "Magoffin",
+    "155": "Marion",
+    "157": "Marshall",
+    "159": "Martin",
+    "161": "Mason",
+    "163": "Meade",
+    "165": "Menifee",
+    "167": "Mercer",
+    "169": "Metcalfe",
+    "171": "Monroe",
+    "173": "Montgomery",
+    "175": "Morgan",
+    "177": "Muhlenberg",
+    "179": "Nelson",
+    "181": "Nicholas",
+    "183": "Ohio",
+    "185": "Oldham",
+    "187": "Owen",
+    "189": "Owsley",
+    "191": "Pendleton",
+    "193": "Perry",
+    "195": "Pike",
+    "197": "Powell",
+    "199": "Pulaski",
+    "201": "Robertson",
+    "203": "Rockcastle",
+    "205": "Rowan",
+    "207": "Russell",
+    "209": "Scott",
+    "211": "Shelby",
+    "213": "Simpson",
+    "215": "Spencer",
+    "217": "Taylor",
+    "219": "Todd",
+    "221": "Trigg",
+    "223": "Trimble",
+    "225": "Union",
+    "227": "Warren",
+    "229": "Washington",
+    "231": "Wayne",
+    "233": "Webster",
+    "235": "Whitley",
+    "237": "Wolfe",
+    "239": "Woodford"
+  }
+}

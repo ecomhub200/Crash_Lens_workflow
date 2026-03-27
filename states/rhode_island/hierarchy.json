@@ -1,0 +1,104 @@
+{
+  "state": {
+    "fips": "44",
+    "name": "Rhode Island",
+    "abbreviation": "RI",
+    "dot": "RIDOT",
+    "dotFullName": "Rhode Island Department of Transportation",
+    "center": [
+      -71.51178,
+      41.680893
+    ],
+    "zoom": 10,
+    "placesCount": 8
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "ri_1": {
+      "name": "Statewide (single district)",
+      "shortName": "Statewide",
+      "center": [
+        -71.51,
+        41.68
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "003",
+        "005",
+        "007",
+        "009"
+      ],
+      "countyNames": {
+        "001": "Bristol",
+        "003": "Kent",
+        "005": "Newport",
+        "007": "Providence",
+        "009": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          41.15,
+          -71.9
+        ],
+        "ne": [
+          42.02,
+          -71.12
+        ]
+      },
+      "hq": "Providence"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "spcrimpo": {
+      "name": "State Planning Council / Rhode Island MPO",
+      "shortName": "State Planning Council / Rhode Island",
+      "type": "mpo",
+      "center": [
+        -71.4128,
+        41.824
+      ],
+      "zoom": 10,
+      "counties": [
+        "001",
+        "003",
+        "005",
+        "007",
+        "009"
+      ],
+      "countyNames": {
+        "001": "Bristol",
+        "003": "Kent",
+        "005": "Newport",
+        "007": "Providence",
+        "009": "Washington"
+      },
+      "btsAcronym": "SPCRIM",
+      "mapBounds": {
+        "sw": [
+          41.4,
+          -71.8
+        ],
+        "ne": [
+          42.02,
+          -71.1
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Bristol",
+    "003": "Kent",
+    "005": "Newport",
+    "007": "Providence",
+    "009": "Washington"
+  }
+}

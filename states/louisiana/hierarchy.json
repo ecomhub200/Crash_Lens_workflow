@@ -1,0 +1,755 @@
+{
+  "state": {
+    "fips": "22",
+    "name": "Louisiana",
+    "abbreviation": "LA",
+    "dot": "LADOTD",
+    "dotFullName": "Louisiana Department of Transportation and Development",
+    "center": [
+      -91.867805,
+      31.169546
+    ],
+    "zoom": 7,
+    "placesCount": 301
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "la_02": {
+      "name": "District 02 (Ville Platte)",
+      "shortName": "District 02",
+      "center": [
+        -92.2,
+        30.3
+      ],
+      "zoom": 9,
+      "counties": [
+        "001",
+        "039",
+        "055",
+        "097",
+        "099",
+        "113"
+      ],
+      "countyNames": {
+        "001": "Acadia",
+        "039": "Evangeline",
+        "055": "Lafayette",
+        "097": "St. Landry",
+        "099": "St. Martin",
+        "113": "Vermilion"
+      },
+      "mapBounds": {
+        "sw": [
+          29.8,
+          -92.8
+        ],
+        "ne": [
+          30.8,
+          -91.6
+        ]
+      },
+      "hq": "Ville Platte"
+    },
+    "la_03": {
+      "name": "District 03 (New Iberia)",
+      "shortName": "District 03",
+      "center": [
+        -91.3,
+        29.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "007",
+        "045",
+        "057",
+        "101",
+        "109"
+      ],
+      "countyNames": {
+        "007": "Assumption",
+        "045": "Iberia",
+        "057": "Lafourche",
+        "101": "St. Mary",
+        "109": "Terrebonne"
+      },
+      "mapBounds": {
+        "sw": [
+          29.0,
+          -91.9
+        ],
+        "ne": [
+          30.0,
+          -90.6
+        ]
+      },
+      "hq": "New Iberia"
+    },
+    "la_04": {
+      "name": "District 04 (Shreveport)",
+      "shortName": "District 04",
+      "center": [
+        -93.5,
+        32.2
+      ],
+      "zoom": 8,
+      "counties": [
+        "013",
+        "015",
+        "017",
+        "027",
+        "031",
+        "061",
+        "069",
+        "081",
+        "085",
+        "119"
+      ],
+      "countyNames": {
+        "013": "Bienville",
+        "015": "Bossier",
+        "017": "Caddo",
+        "027": "Claiborne",
+        "031": "DeSoto",
+        "061": "Lincoln",
+        "069": "Natchitoches",
+        "081": "Red River",
+        "085": "Sabine",
+        "119": "Webster"
+      },
+      "mapBounds": {
+        "sw": [
+          31.4,
+          -94.1
+        ],
+        "ne": [
+          33.0,
+          -92.9
+        ]
+      },
+      "hq": "Shreveport"
+    },
+    "la_05": {
+      "name": "District 05 (Monroe)",
+      "shortName": "District 05",
+      "center": [
+        -91.8,
+        32.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "021",
+        "035",
+        "041",
+        "049",
+        "065",
+        "067",
+        "073",
+        "083",
+        "107",
+        "111",
+        "123"
+      ],
+      "countyNames": {
+        "021": "Caldwell",
+        "035": "East Carroll",
+        "041": "Franklin",
+        "049": "Jackson",
+        "065": "Madison",
+        "067": "Morehouse",
+        "073": "Ouachita",
+        "083": "Richland",
+        "107": "Tensas",
+        "111": "Union",
+        "123": "West Carroll"
+      },
+      "mapBounds": {
+        "sw": [
+          31.6,
+          -92.5
+        ],
+        "ne": [
+          33.0,
+          -91.1
+        ]
+      },
+      "hq": "Monroe"
+    },
+    "la_07": {
+      "name": "District 07 (Lake Charles)",
+      "shortName": "District 07",
+      "center": [
+        -93.1,
+        30.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "003",
+        "011",
+        "019",
+        "023",
+        "051",
+        "115"
+      ],
+      "countyNames": {
+        "003": "Allen",
+        "011": "Beauregard",
+        "019": "Calcasieu",
+        "023": "Cameron",
+        "051": "Jeff Davis",
+        "115": "Vernon"
+      },
+      "mapBounds": {
+        "sw": [
+          29.8,
+          -93.9
+        ],
+        "ne": [
+          31.1,
+          -92.3
+        ]
+      },
+      "hq": "Lake Charles"
+    },
+    "la_08": {
+      "name": "District 08 (Alexandria)",
+      "shortName": "District 08",
+      "center": [
+        -92.4,
+        31.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "025",
+        "029",
+        "043",
+        "059",
+        "079",
+        "115",
+        "127"
+      ],
+      "countyNames": {
+        "009": "Avoyelles",
+        "025": "Catahoula",
+        "029": "Concordia",
+        "043": "Grant",
+        "059": "LaSalle",
+        "079": "Rapides",
+        "115": "Vernon",
+        "127": "Winn"
+      },
+      "mapBounds": {
+        "sw": [
+          30.8,
+          -93.1
+        ],
+        "ne": [
+          31.8,
+          -91.7
+        ]
+      },
+      "hq": "Alexandria"
+    },
+    "la_58": {
+      "name": "District 58 (Statewide/Pontchartrain)",
+      "shortName": "District 58",
+      "center": [
+        -90.3,
+        30.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "063",
+        "091",
+        "103",
+        "105",
+        "117"
+      ],
+      "countyNames": {
+        "063": "Livingston",
+        "091": "St. Helena",
+        "103": "St. Tammany",
+        "105": "Tangipahoa",
+        "117": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          30.1,
+          -90.9
+        ],
+        "ne": [
+          31.0,
+          -89.7
+        ]
+      },
+      "hq": "Hammond"
+    },
+    "la_61": {
+      "name": "District 61 (New Orleans)",
+      "shortName": "District 61",
+      "center": [
+        -90.1,
+        29.95
+      ],
+      "zoom": 9,
+      "counties": [
+        "051",
+        "071",
+        "075",
+        "087",
+        "089",
+        "093",
+        "095"
+      ],
+      "countyNames": {
+        "051": "Jefferson",
+        "071": "Orleans",
+        "075": "Plaquemines",
+        "087": "St. Bernard",
+        "089": "St. Charles",
+        "093": "St. James",
+        "095": "St. John the Baptist"
+      },
+      "mapBounds": {
+        "sw": [
+          29.2,
+          -90.8
+        ],
+        "ne": [
+          30.3,
+          -89.4
+        ]
+      },
+      "hq": "New Orleans"
+    },
+    "la_62": {
+      "name": "District 62 (Baton Rouge)",
+      "shortName": "District 62",
+      "center": [
+        -91.15,
+        30.45
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "033",
+        "037",
+        "047",
+        "077",
+        "121",
+        "125"
+      ],
+      "countyNames": {
+        "005": "Ascension",
+        "033": "East Baton Rouge",
+        "037": "East Feliciana",
+        "047": "Iberville",
+        "077": "Pointe Coupee",
+        "121": "West Baton Rouge",
+        "125": "West Feliciana"
+      },
+      "mapBounds": {
+        "sw": [
+          30.0,
+          -91.6
+        ],
+        "ne": [
+          30.9,
+          -90.7
+        ]
+      },
+      "hq": "Baton Rouge"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "rpcno": {
+      "name": "Regional Planning Commission (New Orleans)",
+      "shortName": "New Orleans",
+      "type": "mpo",
+      "center": [
+        -90.0715,
+        29.9511
+      ],
+      "zoom": 9,
+      "counties": [
+        "051",
+        "071",
+        "075",
+        "087",
+        "089",
+        "093",
+        "095",
+        "103"
+      ],
+      "countyNames": {
+        "051": "Jefferson",
+        "071": "Orleans",
+        "075": "Plaquemines",
+        "087": "St. Bernard",
+        "089": "St. Charles",
+        "093": "St. James",
+        "095": "St. John the Baptist",
+        "103": "St. Tammany"
+      },
+      "btsAcronym": "RPCO",
+      "mapBounds": {
+        "sw": [
+          29.5,
+          -90.6
+        ],
+        "ne": [
+          30.3,
+          -89.5
+        ]
+      }
+    },
+    "crpcbr": {
+      "name": "Capital Regional Planning Commission (Baton Rouge)",
+      "shortName": "Baton Rouge",
+      "type": "mpo",
+      "center": [
+        -91.1871,
+        30.4515
+      ],
+      "zoom": 10,
+      "counties": [
+        "033",
+        "121",
+        "005",
+        "047",
+        "063"
+      ],
+      "countyNames": {
+        "033": "East Baton Rouge",
+        "121": "West Baton Rouge",
+        "005": "Ascension",
+        "047": "Iberville",
+        "063": "Livingston"
+      },
+      "btsAcronym": "CRPCR",
+      "mapBounds": {
+        "sw": [
+          30.2,
+          -91.5
+        ],
+        "ne": [
+          30.7,
+          -90.9
+        ]
+      }
+    },
+    "lampo": {
+      "name": "Lafayette Area MPO",
+      "shortName": "Lafayette Area",
+      "type": "mpo",
+      "center": [
+        -93.7502,
+        32.5252
+      ],
+      "zoom": 10,
+      "counties": [
+        "055",
+        "099",
+        "045"
+      ],
+      "countyNames": {
+        "055": "Lafayette",
+        "099": "St. Martin",
+        "045": "Iberia"
+      },
+      "btsAcronym": "LAM",
+      "mapBounds": {
+        "sw": [
+          32.25,
+          -94.05
+        ],
+        "ne": [
+          32.8,
+          -93.45
+        ]
+      }
+    },
+    "nwlcogs": {
+      "name": "NW Louisiana COG (Shreveport)",
+      "shortName": "Shreveport",
+      "type": "mpo",
+      "center": [
+        -93.2174,
+        30.2241
+      ],
+      "zoom": 10,
+      "counties": [
+        "017",
+        "015"
+      ],
+      "countyNames": {
+        "017": "Caddo",
+        "015": "Bossier"
+      },
+      "btsAcronym": "NLC",
+      "mapBounds": {
+        "sw": [
+          30.0,
+          -93.5
+        ],
+        "ne": [
+          30.45,
+          -92.95
+        ]
+      }
+    },
+    "ocogm": {
+      "name": "Ouachita COG (Monroe)",
+      "shortName": "Monroe",
+      "type": "mpo",
+      "center": [
+        -92.0198,
+        30.2241
+      ],
+      "zoom": 10,
+      "counties": [
+        "073"
+      ],
+      "countyNames": {
+        "073": "Ouachita"
+      },
+      "btsAcronym": "OC",
+      "mapBounds": {
+        "sw": [
+          29.95,
+          -92.3
+        ],
+        "ne": [
+          30.5,
+          -91.7
+        ]
+      }
+    },
+    "iclc": {
+      "name": "Imperial Calcasieu (Lake Charles)",
+      "shortName": "Lake Charles",
+      "type": "mpo",
+      "center": [
+        -90.7195,
+        29.5958
+      ],
+      "zoom": 10,
+      "counties": [
+        "019"
+      ],
+      "countyNames": {
+        "019": "Calcasieu"
+      },
+      "btsAcronym": "ICC",
+      "mapBounds": {
+        "sw": [
+          29.35,
+          -91.0
+        ],
+        "ne": [
+          29.85,
+          -90.45
+        ]
+      }
+    },
+    "apmpo": {
+      "name": "Alexandria-Pineville MPO",
+      "shortName": "Alexandria-Pineville",
+      "type": "mpo",
+      "center": [
+        -92.1193,
+        32.5093
+      ],
+      "zoom": 10,
+      "counties": [
+        "079"
+      ],
+      "countyNames": {
+        "079": "Rapides"
+      },
+      "btsAcronym": "AM",
+      "mapBounds": {
+        "sw": [
+          32.25,
+          -92.4
+        ],
+        "ne": [
+          32.75,
+          -91.85
+        ]
+      }
+    },
+    "htmpo": {
+      "name": "Houma-Thibodaux MPO",
+      "shortName": "Houma-Thibodaux",
+      "type": "mpo",
+      "center": [
+        -92.4451,
+        31.3113
+      ],
+      "zoom": 10,
+      "counties": [
+        "109",
+        "057"
+      ],
+      "countyNames": {
+        "109": "Terrebonne",
+        "057": "Lafourche"
+      },
+      "btsAcronym": "HM",
+      "mapBounds": {
+        "sw": [
+          31.05,
+          -92.7
+        ],
+        "ne": [
+          31.55,
+          -92.15
+        ]
+      }
+    },
+    "stmpo": {
+      "name": "South Tangipahoa MPO",
+      "shortName": "South Tangipahoa",
+      "type": "mpo",
+      "center": [
+        -90.4593,
+        30.453
+      ],
+      "zoom": 10,
+      "counties": [
+        "105"
+      ],
+      "countyNames": {
+        "105": "Tangipahoa"
+      },
+      "btsAcronym": "STM",
+      "mapBounds": {
+        "sw": [
+          30.25,
+          -90.7
+        ],
+        "ne": [
+          30.65,
+          -90.2
+        ]
+      }
+    },
+    "ouachata_council_of_governments_mpo": {
+      "name": "Ouachata Council of Governments",
+      "shortName": "Ouachata Council of Governments",
+      "type": "mpo",
+      "btsMpoId": "22197300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -92.114836,
+        32.52351
+      ],
+      "zoom": 10
+    },
+    "northwest_louisiana_cog_mpo": {
+      "name": "Northwest Louisiana COG",
+      "shortName": "Northwest Louisiana COG",
+      "type": "mpo",
+      "btsMpoId": "22196800",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -93.474373,
+        32.269403
+      ],
+      "zoom": 10
+    },
+    "imperial_calcasieu_regional_planning_development_commission_mpo": {
+      "name": "Imperial Calcasieu Regional Planning & Development Commission",
+      "shortName": "Imperial Calcasieu Regional Planning & Development Commission",
+      "type": "mpo",
+      "btsMpoId": "22198400",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -93.313388,
+        30.215777
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Acadia",
+    "003": "Allen",
+    "005": "Ascension",
+    "007": "Assumption",
+    "009": "Avoyelles",
+    "011": "Beauregard",
+    "013": "Bienville",
+    "015": "Bossier",
+    "017": "Caddo",
+    "019": "Calcasieu",
+    "021": "Caldwell",
+    "023": "Cameron",
+    "025": "Catahoula",
+    "027": "Claiborne",
+    "029": "Concordia",
+    "031": "DeSoto",
+    "033": "East Baton Rouge",
+    "035": "East Carroll",
+    "037": "East Feliciana",
+    "039": "Evangeline",
+    "041": "Franklin",
+    "043": "Grant",
+    "045": "Iberia",
+    "047": "Iberville",
+    "049": "Jackson",
+    "051": "Jefferson",
+    "053": "Jefferson Davis",
+    "055": "Lafayette",
+    "057": "Lafourche",
+    "059": "LaSalle",
+    "061": "Lincoln",
+    "063": "Livingston",
+    "065": "Madison",
+    "067": "Morehouse",
+    "069": "Natchitoches",
+    "071": "Orleans",
+    "073": "Ouachita",
+    "075": "Plaquemines",
+    "077": "Pointe Coupee",
+    "079": "Rapides",
+    "081": "Red River",
+    "083": "Richland",
+    "085": "Sabine",
+    "087": "St. Bernard",
+    "089": "St. Charles",
+    "091": "St. Helena",
+    "093": "St. James",
+    "095": "St. John the Baptist",
+    "097": "St. Landry",
+    "099": "St. Martin",
+    "101": "St. Mary",
+    "103": "St. Tammany",
+    "105": "Tangipahoa",
+    "107": "Tensas",
+    "109": "Terrebonne",
+    "111": "Union",
+    "113": "Vermilion",
+    "115": "Vernon",
+    "117": "Washington",
+    "119": "Webster",
+    "121": "West Baton Rouge",
+    "123": "West Carroll",
+    "125": "West Feliciana",
+    "127": "Winn"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "_description": "NYC DOT crash data registry. 5 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "New York City Department of Transportation",
+    "base_url": "https://data.cityofnewyork.us",
+    "api_url": "https://data.cityofnewyork.us/resource/h9gi-nx95.json",
+    "file_format": "JSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 5 New York City counties. FIPS codes are 5-digit (state 36 + 3-digit county).",
+    "_placeholder": "Populate with all 5 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://data.cityofnewyork.us/resource/h9gi-nx95.json",
+    "resource_id": "h9gi-nx95",
+    "pagination": {
+      "method": "offset",
+      "limit_param": "$limit",
+      "offset_param": "$offset",
+      "max_per_request": 50000
+    }
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "state": {
+    "fips": "32",
+    "name": "Nevada",
+    "abbreviation": "NV",
+    "dot": "NDOT",
+    "dotFullName": "Nevada Department of Transportation",
+    "center": [
+      -117.055374,
+      38.313515
+    ],
+    "zoom": 7,
+    "placesCount": 19
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "nv_1": {
+      "name": "District I (Las Vegas/Southern)",
+      "shortName": "District I",
+      "center": [
+        -115.5,
+        36.8
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "009",
+        "017",
+        "023"
+      ],
+      "countyNames": {
+        "003": "Clark",
+        "009": "Esmeralda",
+        "017": "Lincoln",
+        "023": "Nye"
+      },
+      "mapBounds": {
+        "sw": [
+          35.0,
+          -117.0
+        ],
+        "ne": [
+          38.5,
+          -114.0
+        ]
+      },
+      "hq": "Las Vegas"
+    },
+    "nv_2": {
+      "name": "District II (Elko/Eastern)",
+      "shortName": "District II",
+      "center": [
+        -116.0,
+        40.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "007",
+        "011",
+        "013",
+        "015",
+        "033"
+      ],
+      "countyNames": {
+        "007": "Elko",
+        "011": "Eureka",
+        "013": "Humboldt",
+        "015": "Lander",
+        "033": "White Pine"
+      },
+      "mapBounds": {
+        "sw": [
+          39.0,
+          -118.0
+        ],
+        "ne": [
+          42.0,
+          -114.0
+        ]
+      },
+      "hq": "Elko"
+    },
+    "nv_3": {
+      "name": "District III (Reno/Western)",
+      "shortName": "District III",
+      "center": [
+        -119.5,
+        39.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "510",
+        "001",
+        "005",
+        "019",
+        "021",
+        "027",
+        "029",
+        "031"
+      ],
+      "countyNames": {
+        "510": "Carson City",
+        "001": "Churchill",
+        "005": "Douglas",
+        "019": "Lyon",
+        "021": "Mineral",
+        "027": "Pershing",
+        "029": "Storey",
+        "031": "Washoe"
+      },
+      "mapBounds": {
+        "sw": [
+          38.5,
+          -120.0
+        ],
+        "ne": [
+          40.7,
+          -117.5
+        ]
+      },
+      "hq": "Reno"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "rtcsnlv": {
+      "name": "RTC of Southern Nevada (Las Vegas)",
+      "shortName": "Las Vegas",
+      "type": "mpo",
+      "center": [
+        -115.1398,
+        36.1699
+      ],
+      "zoom": 9,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Clark"
+      },
+      "btsAcronym": "RSNV",
+      "mapBounds": {
+        "sw": [
+          35.8,
+          -115.6
+        ],
+        "ne": [
+          36.5,
+          -114.7
+        ]
+      }
+    },
+    "rtcwcr": {
+      "name": "RTC of Washoe County (Reno)",
+      "shortName": "Reno",
+      "type": "mpo",
+      "center": [
+        -119.8138,
+        39.5296
+      ],
+      "zoom": 10,
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "Washoe"
+      },
+      "btsAcronym": "RWC",
+      "mapBounds": {
+        "sw": [
+          39.25,
+          -120.1
+        ],
+        "ne": [
+          39.8,
+          -119.5
+        ]
+      }
+    },
+    "campo": {
+      "name": "Carson Area MPO",
+      "shortName": "Carson Area",
+      "type": "mpo",
+      "center": [
+        -119.7674,
+        39.1638
+      ],
+      "zoom": 10,
+      "counties": [
+        "510"
+      ],
+      "countyNames": {
+        "510": "Carson City"
+      },
+      "btsAcronym": "CAM",
+      "mapBounds": {
+        "sw": [
+          38.95,
+          -120.0
+        ],
+        "ne": [
+          39.35,
+          -119.55
+        ]
+      }
+    },
+    "tmpo": {
+      "name": "Tahoe MPO",
+      "shortName": "Tahoe",
+      "type": "mpo",
+      "center": [
+        -120.0324,
+        39.0968
+      ],
+      "zoom": 10,
+      "counties": [
+        "005",
+        "031"
+      ],
+      "countyNames": {
+        "005": "Douglas",
+        "031": "Washoe"
+      },
+      "btsAcronym": "TM",
+      "mapBounds": {
+        "sw": [
+          38.85,
+          -120.3
+        ],
+        "ne": [
+          39.35,
+          -119.75
+        ]
+      }
+    },
+    "regional_transportation_commission_of_southern_nevada_mpo": {
+      "name": "Regional Transportation Commission of Southern Nevada",
+      "shortName": "Regional Transportation Commission of Southern Nevada",
+      "type": "mpo",
+      "btsMpoId": "32198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -114.721335,
+        35.884187
+      ],
+      "zoom": 10
+    },
+    "regional_transportation_commission_of_washoe_mpo": {
+      "name": "Regional Transportation Commission of Washoe County",
+      "shortName": "Regional Transportation Commission of Washoe County",
+      "type": "mpo",
+      "btsMpoId": "32197900",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -119.690622,
+        39.82425
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Churchill",
+    "003": "Clark",
+    "005": "Douglas",
+    "007": "Elko",
+    "009": "Esmeralda",
+    "011": "Eureka",
+    "013": "Humboldt",
+    "015": "Lander",
+    "017": "Lincoln",
+    "019": "Lyon",
+    "021": "Mineral",
+    "023": "Nye",
+    "027": "Pershing",
+    "029": "Storey",
+    "031": "Washoe",
+    "033": "White Pine",
+    "510": "Carson City"
+  }
+}

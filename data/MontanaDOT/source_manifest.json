@@ -1,0 +1,24 @@
+{
+  "_description": "MDT crash data registry. 56 jurisdictions available.",
+  "_updated": "2026-02-15",
+  "source": {
+    "name": "Montana Department of Transportation",
+    "base_url": "https://gis-mdt.opendata.arcgis.com",
+    "api_url": "https://gis-mdt.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "file_format": "GeoJSON/CSV"
+  },
+  "jurisdiction_filters": {
+    "_description": "All 56 Montana counties. FIPS codes are 5-digit (state 30 + 3-digit county).",
+    "_placeholder": "Populate with all 56 jurisdictions and FIPS codes"
+  },
+  "api": {
+    "endpoint": "https://gis-mdt.opendata.arcgis.com/datasets/crashes/FeatureServer/0",
+    "pagination": {
+      "method": "offset",
+      "offset_param": "resultOffset",
+      "count_param": "resultRecordCount",
+      "max_per_request": 2000
+    },
+    "query_format": "where=COUNTY_FIPS='{fips}'&outFields=*&f=json"
+  }
+}

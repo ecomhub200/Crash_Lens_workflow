@@ -1,0 +1,425 @@
+{
+  "title": "Virginia MUTCD for Streets and Highways - Structured Index",
+  "version": "11.0",
+  "effective_date": "January 2026",
+  "source": "Virginia Department of Transportation (VDOT)",
+  "description": "Virginia Supplement to the Manual on Uniform Traffic Control Devices",
+  "total_parts": 9,
+  "parts": [
+    {
+      "part_id": "part1",
+      "part_number": 1,
+      "title": "GENERAL",
+      "filename": "part1_general.json",
+      "chapters": [
+        {
+          "code": "1A",
+          "title": "GENERAL",
+          "sections": 6
+        },
+        {
+          "code": "1B",
+          "title": "LEGAL REQUIREMENTS FOR TRAFFIC CONTROL DEVICES",
+          "sections": 10
+        },
+        {
+          "code": "1C",
+          "title": "DEFINITIONS, ACRONYMS, AND",
+          "sections": 3
+        },
+        {
+          "code": "1D",
+          "title": "PROVISIONS APPLICABLE TO TRAFFIC CONTROL DEVICES IN GENERAL",
+          "sections": 11
+        }
+      ],
+      "page_range": "37-76"
+    },
+    {
+      "part_id": "part2",
+      "part_number": 2,
+      "title": "SIGNS",
+      "filename": "part2_signs.json",
+      "chapters": [
+        {
+          "code": "2A",
+          "title": "GENERAL",
+          "sections": 29
+        },
+        {
+          "code": "2B",
+          "title": "REGULATORY SIGNS, BARRICADES, AND GATES",
+          "sections": 90
+        },
+        {
+          "code": "2C",
+          "title": "WARNING SIGNS AND OBJECT MARKERS",
+          "sections": 92
+        },
+        {
+          "code": "2D",
+          "title": "Chapter 2D",
+          "sections": 77
+        },
+        {
+          "code": "2E",
+          "title": "Chapter 2E",
+          "sections": 78
+        },
+        {
+          "code": "2F",
+          "title": "TOLL ROAD SIGNS",
+          "sections": 27
+        },
+        {
+          "code": "2G",
+          "title": "PREFERENTIAL AND MANAGED LANE SIGNS",
+          "sections": 34
+        },
+        {
+          "code": "2H",
+          "title": "GENERAL INFORMATION SIGNS",
+          "sections": 17
+        },
+        {
+          "code": "2I",
+          "title": "Final - Pending",
+          "sections": 16
+        },
+        {
+          "code": "2J",
+          "title": "SPECIFIC SERVICE SIGNS",
+          "sections": 19
+        },
+        {
+          "code": "2K",
+          "title": "TOURIST-ORIENTED DIRECTIONAL SIGNS",
+          "sections": 9
+        },
+        {
+          "code": "2L",
+          "title": "CHANGEABLE MESSAGE SIGNS",
+          "sections": 10
+        },
+        {
+          "code": "2M",
+          "title": "RECREATIONAL AND CULTURAL INTEREST AREA SIGNS",
+          "sections": 10
+        },
+        {
+          "code": "2N",
+          "title": "EMERGENCY MANAGEMENT SIGNS",
+          "sections": 9
+        }
+      ],
+      "page_range": "1-539"
+    },
+    {
+      "part_id": "part3",
+      "part_number": 3,
+      "title": "MARKINGS",
+      "filename": "part3_markings.json",
+      "chapters": [
+        {
+          "code": "3A",
+          "title": "GENERAL",
+          "sections": 5
+        },
+        {
+          "code": "3B",
+          "title": "PAVEMENT AND CURB MARKINGS",
+          "sections": 46
+        },
+        {
+          "code": "3C",
+          "title": "CROSSWALK MARKINGS",
+          "sections": 12
+        },
+        {
+          "code": "3D",
+          "title": "CIRCULAR INTER",
+          "sections": 7
+        },
+        {
+          "code": "3E",
+          "title": "PREFERENTIAL LANE MARKINGS FOR MOTOR VEHICLES",
+          "sections": 4
+        },
+        {
+          "code": "3F",
+          "title": "MARKINGS FOR TOLL PLAZAS",
+          "sections": 3
+        },
+        {
+          "code": "3G",
+          "title": "DELINEATORS",
+          "sections": 4
+        },
+        {
+          "code": "3H",
+          "title": "COLORED PAVEMENT",
+          "sections": 8
+        },
+        {
+          "code": "3I",
+          "title": "CHANNELIZING DEVICES USED FOR EMPHASIS OF PAVEMENT",
+          "sections": 2
+        },
+        {
+          "code": "3J",
+          "title": "MARKING AND DELINEATION OF ISLANDS AND SIDEWALK",
+          "sections": 7
+        },
+        {
+          "code": "3K",
+          "title": "RUMBLE STRIP MARKINGS",
+          "sections": 2
+        }
+      ],
+      "page_range": "77-186"
+    },
+    {
+      "part_id": "part4",
+      "part_number": 4,
+      "title": "HIGHWAY TRAFFIC SIGNALS",
+      "filename": "part4_highway_traffic_signals.json",
+      "chapters": [
+        {
+          "code": "4A",
+          "title": "GENERAL",
+          "sections": 10
+        },
+        {
+          "code": "4B",
+          "title": "Chapter 4B",
+          "sections": 5
+        },
+        {
+          "code": "4C",
+          "title": "TRAFFIC CONTROL SIGNAL NEEDS STUDIES",
+          "sections": 10
+        },
+        {
+          "code": "4D",
+          "title": "DESIGN FEATURES OF TRAFFIC CONTROL SIGNALS",
+          "sections": 17
+        },
+        {
+          "code": "4E",
+          "title": "TRAFFIC CONTROL SIGNAL INDICATIONS",
+          "sections": 5
+        },
+        {
+          "code": "4F",
+          "title": "Chapter 4F",
+          "sections": 24
+        },
+        {
+          "code": "4G",
+          "title": "FLASHING OPERATION OF TRAFFIC CONTROL SIGNALS",
+          "sections": 4
+        },
+        {
+          "code": "4H",
+          "title": "BICYCLE SIGNALS",
+          "sections": 12
+        },
+        {
+          "code": "4I",
+          "title": "PEDESTRIAN CONTROL FEATURES",
+          "sections": 6
+        },
+        {
+          "code": "4J",
+          "title": "PEDESTRIAN HYBRID BEACONS",
+          "sections": 3
+        },
+        {
+          "code": "4K",
+          "title": "ACCESSIBLE PEDESTRIAN SIGNALS AND DETECTORS",
+          "sections": 6
+        },
+        {
+          "code": "4L",
+          "title": "RECTANGULAR RAPID FLASHING BEACONS",
+          "sections": 3
+        },
+        {
+          "code": "4M",
+          "title": "TRAFFIC CONTROL SIGNALS FOR EMERGENCY-VEHICLE ACCESS",
+          "sections": 3
+        },
+        {
+          "code": "4N",
+          "title": "HYBRID BEACONS FOR EMERGENCY-VEHICLE ACCESS",
+          "sections": 3
+        },
+        {
+          "code": "4O",
+          "title": "TRAFFIC CONTROL SIGNALS FOR ONE-LANE, TWO-WAY FACILITIES",
+          "sections": 3
+        },
+        {
+          "code": "4P",
+          "title": "TRAFFIC CONTROL SIGNALS FOR FREEWAY ENTRANCE RAMPS",
+          "sections": 3
+        },
+        {
+          "code": "4Q",
+          "title": "TRAFFIC CONTROL FOR MOVABLE BRIDGES",
+          "sections": 3
+        },
+        {
+          "code": "4R",
+          "title": "HIGHWAY TRAFFIC SIGNALS AT TOLL PLAZAS",
+          "sections": 3
+        },
+        {
+          "code": "4S",
+          "title": "FLASHING BEACONS",
+          "sections": 5
+        },
+        {
+          "code": "4T",
+          "title": "LANE-USE CONTROL SIGNALS",
+          "sections": 4
+        }
+      ],
+      "page_range": "187-306"
+    },
+    {
+      "part_id": "part5",
+      "part_number": 5,
+      "title": "TRAFFIC CONTROL DEVICE CONSIDERATIONS FOR AUTOMATED VEHICLES",
+      "filename": "part5_traffic_control_device_conside.json",
+      "chapters": [
+        {
+          "code": "5A",
+          "title": "GENERAL",
+          "sections": 4
+        },
+        {
+          "code": "5B",
+          "title": "PROVISIONS FOR TRAFFIC CONTROL DEVICES",
+          "sections": 6
+        }
+      ],
+      "page_range": "307-312"
+    },
+    {
+      "part_id": "part6",
+      "part_number": 6,
+      "title": "TEMPORARY TRAFFIC CONTROL",
+      "filename": "part6_temporary_traffic_control.json",
+      "chapters": [],
+      "page_range": "313-314"
+    },
+    {
+      "part_id": "part7",
+      "part_number": 7,
+      "title": "TRAFFIC CONTROL FOR SCHOOL AREAS",
+      "filename": "part7_traffic_control_for_school_are.json",
+      "chapters": [
+        {
+          "code": "7A",
+          "title": "GENERAL",
+          "sections": 2
+        },
+        {
+          "code": "7B",
+          "title": "SIGNS",
+          "sections": 7
+        },
+        {
+          "code": "7C",
+          "title": "MARKINGS",
+          "sections": 2
+        },
+        {
+          "code": "7D",
+          "title": "CROSSING SUPERVISION",
+          "sections": 2
+        }
+      ],
+      "page_range": "315-332"
+    },
+    {
+      "part_id": "part8",
+      "part_number": 8,
+      "title": "TRAFFIC CONTROL FOR RAILROAD AND LIGHT RAIL TRANSIT GRADE CROSSINGS",
+      "filename": "part8_traffic_control_for_railroad_a.json",
+      "chapters": [
+        {
+          "code": "8A",
+          "title": "GENERAL",
+          "sections": 13
+        },
+        {
+          "code": "8B",
+          "title": "SIGNS",
+          "sections": 27
+        },
+        {
+          "code": "8C",
+          "title": "MARKINGS",
+          "sections": 6
+        },
+        {
+          "code": "8D",
+          "title": "FLASHING-LIGHT SIGNALS, AUTOMATIC GATES,",
+          "sections": 21
+        },
+        {
+          "code": "8E",
+          "title": "PATHWAY AND SIDEWALK GRADE CROSSINGS",
+          "sections": 11
+        }
+      ],
+      "page_range": "333-392"
+    },
+    {
+      "part_id": "part9",
+      "part_number": 9,
+      "title": "TRAFFIC CONTROL FOR BICYCLE FACILITIES",
+      "filename": "part9_traffic_control_for_bicycle_fa.json",
+      "chapters": [
+        {
+          "code": "9A",
+          "title": "GENERAL",
+          "sections": 3
+        },
+        {
+          "code": "9B",
+          "title": "REGULATORY SIGNS",
+          "sections": 25
+        },
+        {
+          "code": "9C",
+          "title": "WARNING SIGNS AND OBJECT MARKERS",
+          "sections": 10
+        },
+        {
+          "code": "9D",
+          "title": "GUIDE AND SERVICE SIGNS",
+          "sections": 15
+        },
+        {
+          "code": "9E",
+          "title": "MARKINGS",
+          "sections": 19
+        },
+        {
+          "code": "9F",
+          "title": "SIGNALS",
+          "sections": 3
+        }
+      ],
+      "page_range": "393-460"
+    }
+  ],
+  "notes": [
+    "This is the Virginia-specific version of the MUTCD",
+    "Contains Virginia supplements and modifications to federal MUTCD",
+    "Standard = SHALL (mandatory), Guidance = SHOULD (recommended), Option = MAY (permissive)"
+  ]
+}

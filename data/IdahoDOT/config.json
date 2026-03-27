@@ -1,0 +1,175 @@
+{
+  "state": {
+    "name": "Idaho",
+    "abbreviation": "ID",
+    "fips": "16",
+    "dotName": "ITD",
+    "dotFullName": "Idaho Transportation Department",
+    "dataPortalUrl": "https://data-iplan.opendata.arcgis.com",
+    "coordinateBounds": {
+      "latMin": 41.99,
+      "latMax": 49.0,
+      "lonMin": -117.24,
+      "lonMax": -111.04
+    },
+    "dataDir": "IdahoDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Idaho ITD Crash Data (2005-present) fields to CRASH LENS field codes",
+    "_note": "Column names from IPLAN ArcGIS FeatureServer. CIRCA database (law enforcement investigated only). Serial_Number format: 2-digit year + 7 digits ('C' as 3rd char if electronic).",
+    "ID": "Serial_Number",
+    "DATE": "_DERIVED_FROM_YEAR_MONTH",
+    "TIME": "Accident_Hour_Time",
+    "TIME_ALT": "Accident_Time",
+    "LAT": "Latitude",
+    "LON": "Longitude",
+    "SEVERITY": "Severity",
+    "JURISDICTION": "County",
+    "CITY": "City",
+    "IN_CITY_LIMITS": "In_City_Limits",
+    "ROUTE": "Street1",
+    "CROSS_STREET": "Street2",
+    "REFERENCE_STREET": "Reference_Street",
+    "MILEPOINT": "Mile_Point",
+    "COLLISION": "_EVENTS_TABLE_JOIN",
+    "_COLLISION_NOTE": "Collision type is in the EVENTS table of the CIRCA database. Requires join by crash ID. Events table contains Manner_Collision and First_Harmful_Event fields.",
+    "WEATHER": "Weather_Condition_1",
+    "WEATHER_2": "Weather_Condition_2",
+    "LIGHT": "Light_Condition",
+    "SURFACE_CONDITION": "Road_Surface_Condition",
+    "ROAD_SURFACE_TYPE": "Road_Surface",
+    "JUNCTION": "IntersectionRelated",
+    "HITRUN": "_UNIT_TABLE_JOIN",
+    "_HITRUN_NOTE": "Hit-and-run indicator is in the UNIT table of the CIRCA database. Requires join by crash ID + unit number.",
+    "YEAR": "Accident_Year",
+    "MONTH": "Accident_Month",
+    "DAY_OF_WEEK": "Day_Of_Week",
+    "FATAL_COUNT": "Number_Of_Fatalities",
+    "INJURY_COUNT": "Number_Of_Injuries",
+    "PERSON_COUNT": "Number_Of_Persons",
+    "UNIT_COUNT": "Number_Of_Units",
+    "ROAD_TYPE": "Road_Type",
+    "FUNCTIONAL_CLASS": "Functional_Class",
+    "SPEED_LIMIT_1": "Speed_Limit_Street_1",
+    "SPEED_LIMIT_2": "Speed_Limit_Street_2",
+    "TRAFFIC_CONTROL": "Traffic_Control_Device",
+    "NUM_LANES": "Number_of_Lanes",
+    "SEGMENT_CODE": "Segment_Code",
+    "DIST_FROM_INTERSECTION": "Dist_From_Intersection",
+    "DIR_FROM_INTERSECTION": "Dir_From_Intersection"
+  },
+  "derivedFields": {
+    "_description": "Fields computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "text_to_kabco",
+      "source": "Severity",
+      "_note": "Idaho provides text severity: 'Fatal'\u2192K, 'Type A'\u2192A (Suspected Serious), 'Type B'\u2192B (Suspected Minor), 'Type C'\u2192C (Possible), 'PDO'\u2192O"
+    },
+    "YEAR": {
+      "method": "direct",
+      "source": "Accident_Year"
+    },
+    "NODE": {
+      "method": "concatenate",
+      "sources": [
+        "Street1",
+        "Street2"
+      ],
+      "separator": " & "
+    }
+  },
+  "roadSystems": {
+    "_description": "Idaho road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Idaho collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "ITD IPLAN / Idaho GIS Hub",
+    "url": "https://data-iplan.opendata.arcgis.com",
+    "apiUrl": "https://data-iplan.opendata.arcgis.com/datasets/0b2144204ade4595997c592c625ca2c2",
+    "_apiUrlAlt": "https://gis-idaho.hub.arcgis.com/datasets/IPLAN::crash-data-2005-present/about",
+    "fileFormat": "GeoJSON/CSV (ArcGIS)",
+    "dataDictionary": "ITD Data Dictionary on Numetric: https://support.numetric.com/en/articles/8715919-itd-data-dictionary",
+    "_dataRange": "2005-present, CIRCA database (law enforcement investigated crashes only)",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}

@@ -1,0 +1,856 @@
+{
+  "state": {
+    "fips": "26",
+    "name": "Michigan",
+    "abbreviation": "MI",
+    "dot": "MDOT",
+    "dotFullName": "Michigan Department of Transportation",
+    "center": [
+      -84.536095,
+      43.326618
+    ],
+    "zoom": 7,
+    "placesCount": 533
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "mi_1": {
+      "name": "Superior Region",
+      "shortName": "Superior Region",
+      "center": [
+        -87.4,
+        46.6
+      ],
+      "zoom": 7,
+      "counties": [
+        "003",
+        "013",
+        "033",
+        "041",
+        "043",
+        "053",
+        "061",
+        "071",
+        "083",
+        "095",
+        "097",
+        "103",
+        "109",
+        "131",
+        "153"
+      ],
+      "countyNames": {
+        "003": "Alger",
+        "013": "Baraga",
+        "033": "Chippewa",
+        "041": "Delta",
+        "043": "Dickinson",
+        "053": "Gogebic",
+        "061": "Houghton",
+        "071": "Iron",
+        "083": "Keweenaw",
+        "095": "Luce",
+        "097": "Mackinac",
+        "103": "Marquette",
+        "109": "Menominee",
+        "131": "Ontonagon",
+        "153": "Schoolcraft"
+      },
+      "mapBounds": {
+        "sw": [
+          45.8,
+          -90.4
+        ],
+        "ne": [
+          47.5,
+          -84.4
+        ]
+      },
+      "hq": "Marquette"
+    },
+    "mi_2": {
+      "name": "North Region",
+      "shortName": "North Region",
+      "center": [
+        -85.3,
+        44.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "009",
+        "019",
+        "029",
+        "035",
+        "039",
+        "047",
+        "051",
+        "055",
+        "073",
+        "079",
+        "085",
+        "089",
+        "101",
+        "105",
+        "107",
+        "113",
+        "117",
+        "123",
+        "127",
+        "133",
+        "137",
+        "141",
+        "143",
+        "165"
+      ],
+      "countyNames": {
+        "009": "Antrim",
+        "019": "Benzie",
+        "029": "Charlevoix",
+        "035": "Clare",
+        "039": "Crawford",
+        "047": "Emmet",
+        "051": "Gladwin",
+        "055": "Grand Traverse",
+        "073": "Isabella",
+        "079": "Kalkaska",
+        "085": "Lake",
+        "089": "Leelanau",
+        "101": "Manistee",
+        "105": "Mason",
+        "107": "Mecosta",
+        "113": "Missaukee",
+        "117": "Montcalm",
+        "123": "Newaygo",
+        "127": "Oceana",
+        "133": "Osceola",
+        "137": "Otsego",
+        "141": "Presque Isle",
+        "143": "Roscommon",
+        "165": "Wexford"
+      },
+      "mapBounds": {
+        "sw": [
+          43.5,
+          -86.5
+        ],
+        "ne": [
+          45.5,
+          -84.1
+        ]
+      },
+      "hq": "Cadillac"
+    },
+    "mi_3": {
+      "name": "Grand Region",
+      "shortName": "Grand Region",
+      "center": [
+        -85.6,
+        43.0
+      ],
+      "zoom": 9,
+      "counties": [
+        "005",
+        "015",
+        "067",
+        "081",
+        "121",
+        "139"
+      ],
+      "countyNames": {
+        "005": "Allegan",
+        "015": "Barry",
+        "067": "Ionia",
+        "081": "Kent",
+        "121": "Muskegon",
+        "139": "Ottawa"
+      },
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -86.3
+        ],
+        "ne": [
+          43.4,
+          -85.0
+        ]
+      },
+      "hq": "Grand Rapids"
+    },
+    "mi_4": {
+      "name": "Bay Region",
+      "shortName": "Bay Region",
+      "center": [
+        -83.9,
+        43.5
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "017",
+        "037",
+        "049",
+        "057",
+        "063",
+        "069",
+        "111",
+        "129",
+        "145",
+        "151",
+        "155",
+        "157"
+      ],
+      "countyNames": {
+        "011": "Arenac",
+        "017": "Bay",
+        "037": "Clinton",
+        "049": "Genesee",
+        "057": "Gratiot",
+        "063": "Huron",
+        "069": "Iosco",
+        "111": "Midland",
+        "129": "Ogemaw",
+        "145": "Saginaw",
+        "151": "Sanilac",
+        "155": "Shiawassee",
+        "157": "Tuscola"
+      },
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -84.7
+        ],
+        "ne": [
+          44.2,
+          -83.1
+        ]
+      },
+      "hq": "Saginaw"
+    },
+    "mi_5": {
+      "name": "Southwest Region",
+      "shortName": "Southwest Region",
+      "center": [
+        -85.3,
+        42.3
+      ],
+      "zoom": 8,
+      "counties": [
+        "021",
+        "023",
+        "025",
+        "027",
+        "045",
+        "059",
+        "065",
+        "075",
+        "077",
+        "091",
+        "149",
+        "159"
+      ],
+      "countyNames": {
+        "021": "Berrien",
+        "023": "Branch",
+        "025": "Calhoun",
+        "027": "Cass",
+        "045": "Eaton",
+        "059": "Hillsdale",
+        "065": "Ingham",
+        "075": "Jackson",
+        "077": "Kalamazoo",
+        "091": "Lenawee",
+        "149": "St. Joseph",
+        "159": "Van Buren"
+      },
+      "mapBounds": {
+        "sw": [
+          41.7,
+          -86.3
+        ],
+        "ne": [
+          42.8,
+          -84.3
+        ]
+      },
+      "hq": "Kalamazoo"
+    },
+    "mi_6": {
+      "name": "University Region",
+      "shortName": "University Region",
+      "center": [
+        -83.4,
+        42.6
+      ],
+      "zoom": 9,
+      "counties": [
+        "087",
+        "093",
+        "099",
+        "115",
+        "125",
+        "147",
+        "161",
+        "163"
+      ],
+      "countyNames": {
+        "087": "Lapeer",
+        "093": "Livingston",
+        "099": "Macomb",
+        "115": "Monroe",
+        "125": "Oakland",
+        "147": "St. Clair",
+        "161": "Washtenaw",
+        "163": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          41.7,
+          -84.0
+        ],
+        "ne": [
+          43.2,
+          -82.5
+        ]
+      },
+      "hq": "Brighton"
+    },
+    "mi_7": {
+      "name": "Metro Region",
+      "shortName": "Metro Region",
+      "center": [
+        -83.3,
+        42.4
+      ],
+      "zoom": 10,
+      "counties": [
+        "099",
+        "125",
+        "163"
+      ],
+      "countyNames": {
+        "099": "Macomb",
+        "125": "Oakland",
+        "163": "Wayne"
+      },
+      "mapBounds": {
+        "sw": [
+          42.1,
+          -83.6
+        ],
+        "ne": [
+          42.7,
+          -82.9
+        ]
+      },
+      "hq": "Southfield"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "semcogsmcog": {
+      "name": "SEMCOG (Southeast Michigan COG)",
+      "shortName": "Southeast Michigan COG",
+      "type": "mpo",
+      "center": [
+        -83.0458,
+        42.3314
+      ],
+      "zoom": 9,
+      "counties": [
+        "163",
+        "125",
+        "099",
+        "161",
+        "147",
+        "093",
+        "115"
+      ],
+      "countyNames": {
+        "163": "Wayne",
+        "125": "Oakland",
+        "099": "Macomb",
+        "161": "Washtenaw",
+        "147": "St. Clair",
+        "093": "Livingston",
+        "115": "Monroe"
+      },
+      "btsAcronym": "SMC",
+      "mapBounds": {
+        "sw": [
+          42.0,
+          -83.5
+        ],
+        "ne": [
+          42.7,
+          -82.6
+        ]
+      }
+    },
+    "gvmcgvmc": {
+      "name": "GVMC (Grand Valley Metropolitan Council)",
+      "shortName": "Grand Valley Metropolitan Council",
+      "type": "mpo",
+      "center": [
+        -85.6681,
+        42.9634
+      ],
+      "zoom": 10,
+      "counties": [
+        "081",
+        "139"
+      ],
+      "countyNames": {
+        "081": "Kent",
+        "139": "Ottawa"
+      },
+      "btsAcronym": "GVMC",
+      "mapBounds": {
+        "sw": [
+          42.7,
+          -85.95
+        ],
+        "ne": [
+          43.2,
+          -85.35
+        ]
+      }
+    },
+    "gcmpcf": {
+      "name": "Genesee County Metropolitan Planning Commission (Flint)",
+      "shortName": "Flint",
+      "type": "mpo",
+      "center": [
+        -84.5555,
+        42.7325
+      ],
+      "zoom": 10,
+      "counties": [
+        "049"
+      ],
+      "countyNames": {
+        "049": "Genesee"
+      },
+      "btsAcronym": "GCMPC",
+      "mapBounds": {
+        "sw": [
+          42.5,
+          -84.8
+        ],
+        "ne": [
+          42.95,
+          -84.3
+        ]
+      }
+    },
+    "kats": {
+      "name": "Kalamazoo Area Transportation Study",
+      "shortName": "Kalamazoo Area Transportation Study",
+      "type": "mpo",
+      "center": [
+        -83.6875,
+        43.0125
+      ],
+      "zoom": 10,
+      "counties": [
+        "077"
+      ],
+      "countyNames": {
+        "077": "Kalamazoo"
+      },
+      "btsAcronym": "KATS",
+      "mapBounds": {
+        "sw": [
+          42.8,
+          -83.95
+        ],
+        "ne": [
+          43.2,
+          -83.4
+        ]
+      }
+    },
+    "tcrpcl": {
+      "name": "Tri-County Regional Planning Commission (Lansing)",
+      "shortName": "Lansing",
+      "type": "mpo",
+      "center": [
+        -85.5872,
+        42.2917
+      ],
+      "zoom": 10,
+      "counties": [
+        "065",
+        "045",
+        "037"
+      ],
+      "countyNames": {
+        "065": "Ingham",
+        "045": "Eaton",
+        "037": "Clinton"
+      },
+      "btsAcronym": "TRPC",
+      "mapBounds": {
+        "sw": [
+          42.1,
+          -85.85
+        ],
+        "ne": [
+          42.5,
+          -85.3
+        ]
+      }
+    },
+    "sampo": {
+      "name": "Saginaw Area MPO",
+      "shortName": "Saginaw Area",
+      "type": "mpo",
+      "center": [
+        -83.9508,
+        43.4195
+      ],
+      "zoom": 10,
+      "counties": [
+        "145"
+      ],
+      "countyNames": {
+        "145": "Saginaw"
+      },
+      "btsAcronym": "SAM",
+      "mapBounds": {
+        "sw": [
+          43.2,
+          -84.2
+        ],
+        "ne": [
+          43.65,
+          -83.7
+        ]
+      }
+    },
+    "bcampo": {
+      "name": "Battle Creek Area MPO",
+      "shortName": "Battle Creek Area",
+      "type": "mpo",
+      "center": [
+        -85.1797,
+        42.3211
+      ],
+      "zoom": 10,
+      "counties": [
+        "025"
+      ],
+      "countyNames": {
+        "025": "Calhoun"
+      },
+      "btsAcronym": "BCAM",
+      "mapBounds": {
+        "sw": [
+          42.1,
+          -85.45
+        ],
+        "ne": [
+          42.55,
+          -84.9
+        ]
+      }
+    },
+    "nwmcogtc": {
+      "name": "NWMCOG (Traverse City)",
+      "shortName": "Traverse City",
+      "type": "mpo",
+      "center": [
+        -85.6206,
+        44.7631
+      ],
+      "zoom": 10,
+      "counties": [
+        "055"
+      ],
+      "countyNames": {
+        "055": "Grand Traverse"
+      },
+      "btsAcronym": "NC",
+      "mapBounds": {
+        "sw": [
+          44.55,
+          -85.9
+        ],
+        "ne": [
+          44.95,
+          -85.35
+        ]
+      }
+    },
+    "smpcbh": {
+      "name": "Southwest Michigan Planning Commission (Benton Harbor)",
+      "shortName": "Benton Harbor",
+      "type": "mpo",
+      "center": [
+        -86.4791,
+        42.1052
+      ],
+      "zoom": 10,
+      "counties": [
+        "021"
+      ],
+      "countyNames": {
+        "021": "Berrien"
+      },
+      "btsAcronym": "SMPCH",
+      "mapBounds": {
+        "sw": [
+          41.9,
+          -86.75
+        ],
+        "ne": [
+          42.3,
+          -86.2
+        ]
+      }
+    },
+    "jampo": {
+      "name": "Jackson Area MPO",
+      "shortName": "Jackson Area",
+      "type": "mpo",
+      "center": [
+        -86.109,
+        42.7752
+      ],
+      "zoom": 10,
+      "counties": [
+        "075"
+      ],
+      "countyNames": {
+        "075": "Jackson"
+      },
+      "btsAcronym": "JAM",
+      "mapBounds": {
+        "sw": [
+          42.55,
+          -86.35
+        ],
+        "ne": [
+          43.0,
+          -85.85
+        ]
+      }
+    },
+    "mampo": {
+      "name": "Muskegon Area MPO",
+      "shortName": "Muskegon Area",
+      "type": "mpo",
+      "center": [
+        -84.4015,
+        42.2448
+      ],
+      "zoom": 10,
+      "counties": [
+        "121"
+      ],
+      "countyNames": {
+        "121": "Muskegon"
+      },
+      "btsAcronym": "MAM",
+      "mapBounds": {
+        "sw": [
+          42.05,
+          -84.65
+        ],
+        "ne": [
+          42.45,
+          -84.15
+        ]
+      }
+    },
+    "macatawa_area_coordinating_council_mpo": {
+      "name": "Macatawa Area Coordinating Council",
+      "shortName": "Macatawa Coordinating Council",
+      "type": "mpo",
+      "btsMpoId": "26199100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -86.136311,
+        42.809617
+      ],
+      "zoom": 10
+    },
+    "west_michigan_shoreline_regional_development_commission_mpo": {
+      "name": "West Michigan Shoreline Regional Development Commission",
+      "shortName": "West Michigan Shoreline Regional Development Commission",
+      "type": "mpo",
+      "btsMpoId": "26197302",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -86.280615,
+        43.274052
+      ],
+      "zoom": 10
+    },
+    "region_2_planning_commission_mpo": {
+      "name": "Region 2 Planning Commission",
+      "shortName": "Region 2 Planning Commission",
+      "type": "mpo",
+      "btsMpoId": "26196800",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.426214,
+        42.224004
+      ],
+      "zoom": 10
+    },
+    "saginaw_metropolitan_area_transportation_study_mpo": {
+      "name": "Saginaw Metropolitan Area Transportation Study",
+      "shortName": "Saginaw Metropolitan Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "26196500",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -83.986985,
+        43.327589
+      ],
+      "zoom": 10
+    },
+    "midland_area_transportation_study_mpo": {
+      "name": "Midland Area Transportation Study",
+      "shortName": "Midland Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "26201300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.355757,
+        43.657239
+      ],
+      "zoom": 10
+    },
+    "bay_city_area_transportation_study_mpo": {
+      "name": "Bay City Area Transportation Study",
+      "shortName": "Bay City Transportation Study",
+      "type": "mpo",
+      "btsMpoId": "26197404",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -83.830168,
+        43.634439
+      ],
+      "zoom": 10
+    },
+    "traverse_transportation_coordinating_initiative_mpo": {
+      "name": "Traverse Transportation Coordinating Initiative",
+      "shortName": "Traverse Transportation Coordinating Initiative",
+      "type": "mpo",
+      "btsMpoId": "26202300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.567679,
+        44.834748
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Alcona",
+    "003": "Alger",
+    "005": "Allegan",
+    "007": "Alpena",
+    "009": "Antrim",
+    "011": "Arenac",
+    "013": "Baraga",
+    "015": "Barry",
+    "017": "Bay",
+    "019": "Benzie",
+    "021": "Berrien",
+    "023": "Branch",
+    "025": "Calhoun",
+    "027": "Cass",
+    "029": "Charlevoix",
+    "031": "Cheboygan",
+    "033": "Chippewa",
+    "035": "Clare",
+    "037": "Clinton",
+    "039": "Crawford",
+    "041": "Delta",
+    "043": "Dickinson",
+    "045": "Eaton",
+    "047": "Emmet",
+    "049": "Genesee",
+    "051": "Gladwin",
+    "053": "Gogebic",
+    "055": "Grand Traverse",
+    "057": "Gratiot",
+    "059": "Hillsdale",
+    "061": "Houghton",
+    "063": "Huron",
+    "065": "Ingham",
+    "067": "Ionia",
+    "069": "Iosco",
+    "071": "Iron",
+    "073": "Isabella",
+    "075": "Jackson",
+    "077": "Kalamazoo",
+    "079": "Kalkaska",
+    "081": "Kent",
+    "083": "Keweenaw",
+    "085": "Lake",
+    "087": "Lapeer",
+    "089": "Leelanau",
+    "091": "Lenawee",
+    "093": "Livingston",
+    "095": "Luce",
+    "097": "Mackinac",
+    "099": "Macomb",
+    "101": "Manistee",
+    "103": "Marquette",
+    "105": "Mason",
+    "107": "Mecosta",
+    "109": "Menominee",
+    "111": "Midland",
+    "113": "Missaukee",
+    "115": "Monroe",
+    "117": "Montcalm",
+    "119": "Montmorency",
+    "121": "Muskegon",
+    "123": "Newaygo",
+    "125": "Oakland",
+    "127": "Oceana",
+    "129": "Ogemaw",
+    "131": "Ontonagon",
+    "133": "Osceola",
+    "135": "Oscoda",
+    "137": "Otsego",
+    "139": "Ottawa",
+    "141": "Presque Isle",
+    "143": "Roscommon",
+    "145": "Saginaw",
+    "147": "St. Clair",
+    "149": "St. Joseph",
+    "151": "Sanilac",
+    "153": "Schoolcraft",
+    "155": "Shiawassee",
+    "157": "Tuscola",
+    "159": "Van Buren",
+    "161": "Washtenaw",
+    "163": "Wayne",
+    "165": "Wexford"
+  }
+}

@@ -1,0 +1,1332 @@
+{
+  "state": {
+    "fips": "12",
+    "name": "Florida",
+    "abbreviation": "FL",
+    "dot": "FDOT",
+    "dotFullName": "Florida Department of Transportation",
+    "center": [
+      -81.686783,
+      27.766279
+    ],
+    "zoom": 7,
+    "placesCount": 411
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "fl_1": {
+      "name": "District 1 (Bartow)",
+      "shortName": "District 1",
+      "center": [
+        -81.7,
+        27.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "015",
+        "021",
+        "027",
+        "043",
+        "049",
+        "051",
+        "055",
+        "071",
+        "081",
+        "093",
+        "105",
+        "115"
+      ],
+      "countyNames": {
+        "015": "Charlotte",
+        "021": "Collier",
+        "027": "DeSoto",
+        "043": "Glades",
+        "049": "Hardee",
+        "051": "Hendry",
+        "055": "Highlands",
+        "071": "Lee",
+        "081": "Manatee",
+        "093": "Okeechobee",
+        "105": "Polk",
+        "115": "Sarasota"
+      },
+      "mapBounds": {
+        "sw": [
+          25.8,
+          -82.8
+        ],
+        "ne": [
+          28.0,
+          -80.6
+        ]
+      },
+      "hq": "Bartow"
+    },
+    "fl_2": {
+      "name": "District 2 (Lake City)",
+      "shortName": "District 2",
+      "center": [
+        -82.1,
+        30.1
+      ],
+      "zoom": 8,
+      "counties": [
+        "001",
+        "003",
+        "007",
+        "019",
+        "023",
+        "029",
+        "031",
+        "041",
+        "047",
+        "067",
+        "075",
+        "079",
+        "089",
+        "107",
+        "109",
+        "121",
+        "123",
+        "125"
+      ],
+      "countyNames": {
+        "001": "Alachua",
+        "003": "Baker",
+        "007": "Bradford",
+        "019": "Clay",
+        "023": "Columbia",
+        "029": "Dixie",
+        "031": "Duval",
+        "041": "Gilchrist",
+        "047": "Hamilton",
+        "067": "Lafayette",
+        "075": "Levy",
+        "079": "Madison",
+        "089": "Nassau",
+        "107": "Putnam",
+        "109": "St. Johns",
+        "121": "Suwannee",
+        "123": "Taylor",
+        "125": "Union"
+      },
+      "mapBounds": {
+        "sw": [
+          29.2,
+          -83.0
+        ],
+        "ne": [
+          31.0,
+          -81.2
+        ]
+      },
+      "hq": "Lake City"
+    },
+    "fl_3": {
+      "name": "District 3 (Chipley)",
+      "shortName": "District 3",
+      "center": [
+        -85.2,
+        30.5
+      ],
+      "zoom": 7,
+      "counties": [
+        "005",
+        "013",
+        "033",
+        "037",
+        "039",
+        "045",
+        "059",
+        "063",
+        "065",
+        "073",
+        "077",
+        "091",
+        "113",
+        "129",
+        "131",
+        "133"
+      ],
+      "countyNames": {
+        "005": "Bay",
+        "013": "Calhoun",
+        "033": "Escambia",
+        "037": "Franklin",
+        "039": "Gadsden",
+        "045": "Gulf",
+        "059": "Holmes",
+        "063": "Jackson",
+        "065": "Jefferson",
+        "073": "Leon",
+        "077": "Liberty",
+        "091": "Okaloosa",
+        "113": "Santa Rosa",
+        "129": "Wakulla",
+        "131": "Walton",
+        "133": "Washington"
+      },
+      "mapBounds": {
+        "sw": [
+          29.6,
+          -87.6
+        ],
+        "ne": [
+          31.0,
+          -82.8
+        ]
+      },
+      "hq": "Chipley"
+    },
+    "fl_4": {
+      "name": "District 4 (Ft. Lauderdale)",
+      "shortName": "District 4",
+      "center": [
+        -80.3,
+        26.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "011",
+        "061",
+        "085",
+        "099",
+        "111"
+      ],
+      "countyNames": {
+        "011": "Broward",
+        "061": "Indian River",
+        "085": "Martin",
+        "099": "Palm Beach",
+        "111": "St. Lucie"
+      },
+      "mapBounds": {
+        "sw": [
+          26.0,
+          -80.8
+        ],
+        "ne": [
+          27.6,
+          -80.0
+        ]
+      },
+      "hq": "Fort Lauderdale"
+    },
+    "fl_5": {
+      "name": "District 5 (DeLand)",
+      "shortName": "District 5",
+      "center": [
+        -81.3,
+        28.8
+      ],
+      "zoom": 8,
+      "counties": [
+        "009",
+        "035",
+        "069",
+        "083",
+        "095",
+        "097",
+        "117",
+        "119",
+        "127"
+      ],
+      "countyNames": {
+        "009": "Brevard",
+        "035": "Flagler",
+        "069": "Lake",
+        "083": "Marion",
+        "095": "Orange",
+        "097": "Osceola",
+        "117": "Seminole",
+        "119": "Sumter",
+        "127": "Volusia"
+      },
+      "mapBounds": {
+        "sw": [
+          27.8,
+          -82.0
+        ],
+        "ne": [
+          29.7,
+          -80.6
+        ]
+      },
+      "hq": "DeLand"
+    },
+    "fl_6": {
+      "name": "District 6 (Miami)",
+      "shortName": "District 6",
+      "center": [
+        -80.6,
+        25.68
+      ],
+      "zoom": 9,
+      "counties": [
+        "086",
+        "087"
+      ],
+      "countyNames": {
+        "086": "Miami-Dade",
+        "087": "Monroe"
+      },
+      "mapBounds": {
+        "sw": [
+          24.5,
+          -81.8
+        ],
+        "ne": [
+          25.9,
+          -80.1
+        ]
+      },
+      "hq": "Miami"
+    },
+    "fl_7": {
+      "name": "District 7 (Tampa)",
+      "shortName": "District 7",
+      "center": [
+        -82.5,
+        28.2
+      ],
+      "zoom": 9,
+      "counties": [
+        "017",
+        "053",
+        "057",
+        "101",
+        "103"
+      ],
+      "countyNames": {
+        "017": "Citrus",
+        "053": "Hernando",
+        "057": "Hillsborough",
+        "101": "Pasco",
+        "103": "Pinellas"
+      },
+      "mapBounds": {
+        "sw": [
+          27.6,
+          -82.9
+        ],
+        "ne": [
+          28.95,
+          -82.1
+        ]
+      },
+      "hq": "Tampa"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "mdtpo": {
+      "name": "Miami-Dade TPO",
+      "shortName": "Miami-Dade TPO",
+      "type": "mpo",
+      "center": [
+        -81.6557,
+        30.3322
+      ],
+      "zoom": 10,
+      "counties": [
+        "086"
+      ],
+      "countyNames": {
+        "086": "Miami-Dade"
+      },
+      "btsAcronym": "MT",
+      "mapBounds": {
+        "sw": [
+          30.0,
+          -82.0
+        ],
+        "ne": [
+          30.6,
+          -81.3
+        ]
+      }
+    },
+    "bmpo": {
+      "name": "Broward MPO",
+      "shortName": "Broward",
+      "type": "mpo",
+      "center": [
+        -80.1918,
+        25.7617
+      ],
+      "zoom": 9,
+      "counties": [
+        "011"
+      ],
+      "countyNames": {
+        "011": "Broward"
+      },
+      "btsAcronym": "BM",
+      "mapBounds": {
+        "sw": [
+          25.4,
+          -80.6
+        ],
+        "ne": [
+          26.1,
+          -80.0
+        ]
+      }
+    },
+    "pbtpa": {
+      "name": "Palm Beach TPA",
+      "shortName": "Palm Beach TPA",
+      "type": "mpo",
+      "center": [
+        -82.4572,
+        27.9506
+      ],
+      "zoom": 9,
+      "counties": [
+        "099"
+      ],
+      "countyNames": {
+        "099": "Palm Beach"
+      },
+      "btsAcronym": "PBT",
+      "mapBounds": {
+        "sw": [
+          27.5,
+          -82.9
+        ],
+        "ne": [
+          28.4,
+          -82.0
+        ]
+      }
+    },
+    "metroplano": {
+      "name": "METROPLAN Orlando",
+      "shortName": "METROPLAN Orlando",
+      "type": "mpo",
+      "center": [
+        -81.3792,
+        28.5383
+      ],
+      "zoom": 9,
+      "counties": [
+        "095",
+        "097",
+        "117"
+      ],
+      "countyNames": {
+        "095": "Orange",
+        "097": "Osceola",
+        "117": "Seminole"
+      },
+      "btsAcronym": "MO",
+      "mapBounds": {
+        "sw": [
+          28.2,
+          -81.8
+        ],
+        "ne": [
+          28.85,
+          -80.95
+        ]
+      }
+    },
+    "hmpo": {
+      "name": "Hillsborough MPO",
+      "shortName": "Hillsborough",
+      "type": "mpo",
+      "center": [
+        -80.1373,
+        26.1224
+      ],
+      "zoom": 10,
+      "counties": [
+        "057"
+      ],
+      "countyNames": {
+        "057": "Hillsborough"
+      },
+      "btsAcronym": "HM",
+      "mapBounds": {
+        "sw": [
+          25.9,
+          -80.4
+        ],
+        "ne": [
+          26.35,
+          -80.0
+        ]
+      }
+    },
+    "fp": {
+      "name": "Forward Pinellas",
+      "shortName": "Forward Pinellas",
+      "type": "mpo",
+      "center": [
+        -80.0534,
+        26.7153
+      ],
+      "zoom": 10,
+      "counties": [
+        "103"
+      ],
+      "countyNames": {
+        "103": "Pinellas"
+      },
+      "btsAcronym": "FP",
+      "mapBounds": {
+        "sw": [
+          26.4,
+          -80.4
+        ],
+        "ne": [
+          27.0,
+          -79.8
+        ]
+      }
+    },
+    "nftpoj": {
+      "name": "North Florida TPO (Jacksonville)",
+      "shortName": "Jacksonville",
+      "type": "mpo",
+      "center": [
+        -82.6403,
+        27.7676
+      ],
+      "zoom": 10,
+      "counties": [
+        "031",
+        "019",
+        "089",
+        "109"
+      ],
+      "countyNames": {
+        "031": "Duval",
+        "019": "Clay",
+        "089": "Nassau",
+        "109": "St. Johns"
+      },
+      "btsAcronym": "NFT",
+      "mapBounds": {
+        "sw": [
+          27.5,
+          -82.9
+        ],
+        "ne": [
+          28.05,
+          -82.3
+        ]
+      }
+    },
+    "lcmpo": {
+      "name": "Lee County MPO",
+      "shortName": "Lee County",
+      "type": "mpo",
+      "center": [
+        -84.2807,
+        30.4383
+      ],
+      "zoom": 10,
+      "counties": [
+        "071"
+      ],
+      "countyNames": {
+        "071": "Lee"
+      },
+      "btsAcronym": "LCM",
+      "mapBounds": {
+        "sw": [
+          30.15,
+          -84.6
+        ],
+        "ne": [
+          30.7,
+          -83.95
+        ]
+      }
+    },
+    "smmpo": {
+      "name": "Sarasota-Manatee MPO",
+      "shortName": "Sarasota-Manatee",
+      "type": "mpo",
+      "center": [
+        -87.2169,
+        30.4213
+      ],
+      "zoom": 10,
+      "counties": [
+        "115",
+        "081"
+      ],
+      "countyNames": {
+        "115": "Sarasota",
+        "081": "Manatee"
+      },
+      "btsAcronym": "SM",
+      "mapBounds": {
+        "sw": [
+          30.2,
+          -87.55
+        ],
+        "ne": [
+          30.65,
+          -86.9
+        ]
+      }
+    },
+    "ptpo": {
+      "name": "Polk TPO",
+      "shortName": "Polk TPO",
+      "type": "mpo",
+      "center": [
+        -82.3248,
+        29.6516
+      ],
+      "zoom": 10,
+      "counties": [
+        "105"
+      ],
+      "countyNames": {
+        "105": "Polk"
+      },
+      "btsAcronym": "PT",
+      "mapBounds": {
+        "sw": [
+          29.4,
+          -82.6
+        ],
+        "ne": [
+          29.9,
+          -82.05
+        ]
+      }
+    },
+    "sctpo": {
+      "name": "Space Coast TPO",
+      "shortName": "Space Coast TPO",
+      "type": "mpo",
+      "center": [
+        -81.0228,
+        29.2108
+      ],
+      "zoom": 10,
+      "counties": [
+        "009"
+      ],
+      "countyNames": {
+        "009": "Brevard"
+      },
+      "btsAcronym": "SCT",
+      "mapBounds": {
+        "sw": [
+          28.95,
+          -81.3
+        ],
+        "ne": [
+          29.5,
+          -80.75
+        ]
+      }
+    },
+    "rstpod": {
+      "name": "River to Sea TPO (Daytona)",
+      "shortName": "Daytona",
+      "type": "mpo",
+      "center": [
+        -80.6081,
+        28.0836
+      ],
+      "zoom": 10,
+      "counties": [
+        "127",
+        "035"
+      ],
+      "countyNames": {
+        "127": "Volusia",
+        "035": "Flagler"
+      },
+      "btsAcronym": "RST",
+      "mapBounds": {
+        "sw": [
+          27.8,
+          -80.9
+        ],
+        "ne": [
+          28.6,
+          -80.3
+        ]
+      }
+    },
+    "pcmpo": {
+      "name": "Pasco County MPO",
+      "shortName": "Pasco County",
+      "type": "mpo",
+      "center": [
+        -81.7729,
+        26.4615
+      ],
+      "zoom": 10,
+      "counties": [
+        "101"
+      ],
+      "countyNames": {
+        "101": "Pasco"
+      },
+      "btsAcronym": "PCM",
+      "mapBounds": {
+        "sw": [
+          26.2,
+          -82.1
+        ],
+        "ne": [
+          26.7,
+          -81.45
+        ]
+      }
+    },
+    "lsmpo": {
+      "name": "Lake-Sumter MPO",
+      "shortName": "Lake-Sumter",
+      "type": "mpo",
+      "center": [
+        -82.5307,
+        27.3364
+      ],
+      "zoom": 10,
+      "counties": [
+        "069",
+        "119"
+      ],
+      "countyNames": {
+        "069": "Lake",
+        "119": "Sumter"
+      },
+      "btsAcronym": "LM",
+      "mapBounds": {
+        "sw": [
+          27.05,
+          -82.8
+        ],
+        "ne": [
+          27.6,
+          -82.25
+        ]
+      }
+    },
+    "omtpo": {
+      "name": "Ocala-Marion TPO",
+      "shortName": "Ocala-Marion TPO",
+      "type": "mpo",
+      "center": [
+        -81.7648,
+        26.242
+      ],
+      "zoom": 10,
+      "counties": [
+        "083"
+      ],
+      "countyNames": {
+        "083": "Marion"
+      },
+      "btsAcronym": "OT",
+      "mapBounds": {
+        "sw": [
+          26.05,
+          -81.9
+        ],
+        "ne": [
+          26.45,
+          -81.55
+        ]
+      }
+    },
+    "cmpo": {
+      "name": "Collier MPO",
+      "shortName": "Collier",
+      "type": "mpo",
+      "center": [
+        -81.9179,
+        28.9419
+      ],
+      "zoom": 10,
+      "counties": [
+        "021"
+      ],
+      "countyNames": {
+        "021": "Collier"
+      },
+      "btsAcronym": "CM",
+      "mapBounds": {
+        "sw": [
+          28.7,
+          -82.2
+        ],
+        "ne": [
+          29.15,
+          -81.6
+        ]
+      }
+    },
+    "ccpgmpo": {
+      "name": "Charlotte County-Punta Gorda MPO",
+      "shortName": "Charlotte County-Punta Gorda",
+      "type": "mpo",
+      "center": [
+        -82.7,
+        28.234
+      ],
+      "zoom": 10,
+      "counties": [
+        "015"
+      ],
+      "countyNames": {
+        "015": "Charlotte"
+      },
+      "btsAcronym": "CCGM",
+      "mapBounds": {
+        "sw": [
+          28.0,
+          -82.95
+        ],
+        "ne": [
+          28.5,
+          -82.45
+        ]
+      }
+    },
+    "hcmpo": {
+      "name": "Hernando/Citrus MPO",
+      "shortName": "Hernando/Citrus",
+      "type": "mpo",
+      "center": [
+        -81.7,
+        28.8
+      ],
+      "zoom": 10,
+      "counties": [
+        "053",
+        "017"
+      ],
+      "countyNames": {
+        "053": "Hernando",
+        "017": "Citrus"
+      },
+      "btsAcronym": "HM",
+      "mapBounds": {
+        "sw": [
+          28.55,
+          -82.0
+        ],
+        "ne": [
+          29.05,
+          -81.4
+        ]
+      }
+    },
+    "crtpat": {
+      "name": "Capital Region TPA (Tallahassee)",
+      "shortName": "Tallahassee",
+      "type": "mpo",
+      "center": [
+        -85.8055,
+        30.1766
+      ],
+      "zoom": 10,
+      "counties": [
+        "073",
+        "039",
+        "129",
+        "065"
+      ],
+      "countyNames": {
+        "073": "Leon",
+        "039": "Gadsden",
+        "129": "Wakulla",
+        "065": "Jefferson"
+      },
+      "btsAcronym": "CRT",
+      "mapBounds": {
+        "sw": [
+          29.95,
+          -86.05
+        ],
+        "ne": [
+          30.4,
+          -85.55
+        ]
+      }
+    },
+    "fatpop": {
+      "name": "Florida-Alabama TPO (Pensacola)",
+      "shortName": "Pensacola",
+      "type": "mpo",
+      "center": [
+        -81.3143,
+        29.8868
+      ],
+      "zoom": 10,
+      "counties": [
+        "033",
+        "113"
+      ],
+      "countyNames": {
+        "033": "Escambia",
+        "113": "Santa Rosa"
+      },
+      "btsAcronym": "FT",
+      "mapBounds": {
+        "sw": [
+          29.65,
+          -81.55
+        ],
+        "ne": [
+          30.1,
+          -81.05
+        ]
+      }
+    },
+    "owtpo": {
+      "name": "Okaloosa-Walton TPO",
+      "shortName": "Okaloosa-Walton TPO",
+      "type": "mpo",
+      "center": [
+        -80.9281,
+        29.0218
+      ],
+      "zoom": 10,
+      "counties": [
+        "091",
+        "131"
+      ],
+      "countyNames": {
+        "091": "Okaloosa",
+        "131": "Walton"
+      },
+      "btsAcronym": "OT",
+      "mapBounds": {
+        "sw": [
+          28.8,
+          -81.2
+        ],
+        "ne": [
+          29.25,
+          -80.65
+        ]
+      }
+    },
+    "bctpo": {
+      "name": "Bay County TPO",
+      "shortName": "Bay County TPO",
+      "type": "mpo",
+      "center": [
+        -81.95,
+        28.0601
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Bay"
+      },
+      "btsAcronym": "BCT",
+      "mapBounds": {
+        "sw": [
+          27.8,
+          -82.25
+        ],
+        "ne": [
+          28.3,
+          -81.65
+        ]
+      }
+    },
+    "gmtpo": {
+      "name": "Gainesville MTPO",
+      "shortName": "Gainesville MTPO",
+      "type": "mpo",
+      "center": [
+        -86.5268,
+        30.3501
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Alachua"
+      },
+      "btsAcronym": "GM",
+      "mapBounds": {
+        "sw": [
+          30.1,
+          -86.8
+        ],
+        "ne": [
+          30.6,
+          -86.25
+        ]
+      }
+    },
+    "mcmpo": {
+      "name": "Martin County MPO",
+      "shortName": "Martin County",
+      "type": "mpo",
+      "center": [
+        -80.3256,
+        27.4467
+      ],
+      "zoom": 10,
+      "counties": [
+        "085"
+      ],
+      "countyNames": {
+        "085": "Martin"
+      },
+      "btsAcronym": "MCM",
+      "mapBounds": {
+        "sw": [
+          27.15,
+          -80.6
+        ],
+        "ne": [
+          27.7,
+          -80.05
+        ]
+      }
+    },
+    "sltpo": {
+      "name": "St. Lucie TPO",
+      "shortName": "St. Lucie TPO",
+      "type": "mpo",
+      "center": [
+        -80.2498,
+        27.1951
+      ],
+      "zoom": 10,
+      "counties": [
+        "111"
+      ],
+      "countyNames": {
+        "111": "St. Lucie"
+      },
+      "btsAcronym": "SLT",
+      "mapBounds": {
+        "sw": [
+          26.95,
+          -80.5
+        ],
+        "ne": [
+          27.45,
+          -80.0
+        ]
+      }
+    },
+    "ircmpo": {
+      "name": "Indian River County MPO",
+      "shortName": "Indian River County",
+      "type": "mpo",
+      "center": [
+        -80.5636,
+        27.0964
+      ],
+      "zoom": 10,
+      "counties": [
+        "061"
+      ],
+      "countyNames": {
+        "061": "Indian River"
+      },
+      "btsAcronym": "IRCM",
+      "mapBounds": {
+        "sw": [
+          26.85,
+          -80.8
+        ],
+        "ne": [
+          27.35,
+          -80.3
+        ]
+      }
+    },
+    "hrtpo": {
+      "name": "Heartland Regional TPO",
+      "shortName": "Heartland Regional TPO",
+      "type": "mpo",
+      "center": [
+        -82.32,
+        28.822
+      ],
+      "zoom": 10,
+      "counties": [
+        "055",
+        "093",
+        "027",
+        "043",
+        "051"
+      ],
+      "countyNames": {
+        "055": "Highlands",
+        "093": "Okeechobee",
+        "027": "DeSoto",
+        "043": "Glades",
+        "051": "Hendry"
+      },
+      "btsAcronym": "HRT",
+      "mapBounds": {
+        "sw": [
+          28.6,
+          -82.6
+        ],
+        "ne": [
+          29.05,
+          -82.05
+        ]
+      }
+    },
+    "bay_county_transportation_planning_organization_mpo": {
+      "name": "Bay County Transportation Planning Organization",
+      "shortName": "Bay County Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12198002",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -85.603112,
+        30.309765
+      ],
+      "zoom": 10
+    },
+    "capital_region_transportation_planning_agency_mpo": {
+      "name": "Capital Region Transportation Planning Agency",
+      "shortName": "Capital Region Transportation Planning Agency",
+      "type": "mpo",
+      "btsMpoId": "12197706",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -84.285121,
+        30.251124
+      ],
+      "zoom": 10
+    },
+    "florida_alabama_transportation_planning_organization_mpo": {
+      "name": "Florida-Alabama Transportation Planning Organization",
+      "shortName": "Florida-Alabama Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12197000",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -87.159661,
+        30.615745
+      ],
+      "zoom": 10
+    },
+    "okaloosa_walton_transportation_planning_organization_mpo": {
+      "name": "Okaloosa-Walton Transportation Planning Organization",
+      "shortName": "Okaloosa-Walton Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12198001",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -86.465306,
+        30.678445
+      ],
+      "zoom": 10
+    },
+    "st_lucie_transportation_planning_organization_mpo": {
+      "name": "St. Lucie Transportation Planning Organization",
+      "shortName": "St. Lucie Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12198203",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.326431,
+        27.462807
+      ],
+      "zoom": 10
+    },
+    "north_florida_transportation_planning_organization_mpo": {
+      "name": "North Florida Transportation Planning Organization",
+      "shortName": "North Florida Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12197802",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -81.672508,
+        30.343357
+      ],
+      "zoom": 10
+    },
+    "ocalamarion_mpo": {
+      "name": "Ocala/Marion TPO",
+      "shortName": "Ocala/Marion TPO",
+      "type": "mpo",
+      "btsMpoId": "12198100",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -82.271097,
+        29.110292
+      ],
+      "zoom": 10
+    },
+    "martin_mpo": {
+      "name": "Martin MPO",
+      "shortName": "Martin",
+      "type": "mpo",
+      "btsMpoId": "12199301",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.225784,
+        27.131503
+      ],
+      "zoom": 10
+    },
+    "polk_county_transportation_planning_organization_mpo": {
+      "name": "Polk County Transportation Planning Organization",
+      "shortName": "Polk County Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12197805",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -81.503662,
+        27.997103
+      ],
+      "zoom": 10
+    },
+    "sarasotamanatee_mpo": {
+      "name": "Sarasota/Manatee MPO",
+      "shortName": "Sarasota/Manatee",
+      "type": "mpo",
+      "btsMpoId": "12197804",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -82.480492,
+        27.348185
+      ],
+      "zoom": 10
+    },
+    "space_coast_transportation_planning_organization_mpo": {
+      "name": "Space Coast Transportation Planning Organization",
+      "shortName": "Space Coast Transportation Planning Organization",
+      "type": "mpo",
+      "btsMpoId": "12198300",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -80.756231,
+        28.404762
+      ],
+      "zoom": 10
+    },
+    "volusia_flagler_mpo": {
+      "name": "Volusia-Flagler TPO",
+      "shortName": "Volusia-Flagler TPO",
+      "type": "mpo",
+      "btsMpoId": "12197705",
+      "source": "BTS/USDOT NTAD",
+      "counties": [],
+      "countyNames": {},
+      "center": [
+        -81.181019,
+        29.189241
+      ],
+      "zoom": 10
+    }
+  },
+  "allCounties": {
+    "001": "Alachua",
+    "003": "Baker",
+    "005": "Bay",
+    "007": "Bradford",
+    "009": "Brevard",
+    "011": "Broward",
+    "013": "Calhoun",
+    "015": "Charlotte",
+    "017": "Citrus",
+    "019": "Clay",
+    "021": "Collier",
+    "023": "Columbia",
+    "027": "DeSoto",
+    "029": "Dixie",
+    "031": "Duval",
+    "033": "Escambia",
+    "035": "Flagler",
+    "037": "Franklin",
+    "039": "Gadsden",
+    "041": "Gilchrist",
+    "043": "Glades",
+    "045": "Gulf",
+    "047": "Hamilton",
+    "049": "Hardee",
+    "051": "Hendry",
+    "053": "Hernando",
+    "055": "Highlands",
+    "057": "Hillsborough",
+    "059": "Holmes",
+    "061": "Indian River",
+    "063": "Jackson",
+    "065": "Jefferson",
+    "067": "Lafayette",
+    "069": "Lake",
+    "071": "Lee",
+    "073": "Leon",
+    "075": "Levy",
+    "077": "Liberty",
+    "079": "Madison",
+    "081": "Manatee",
+    "083": "Marion",
+    "085": "Martin",
+    "086": "Miami-Dade",
+    "087": "Monroe",
+    "089": "Nassau",
+    "091": "Okaloosa",
+    "093": "Okeechobee",
+    "095": "Orange",
+    "097": "Osceola",
+    "099": "Palm Beach",
+    "101": "Pasco",
+    "103": "Pinellas",
+    "105": "Polk",
+    "107": "Putnam",
+    "109": "St. Johns",
+    "111": "St. Lucie",
+    "113": "Santa Rosa",
+    "115": "Sarasota",
+    "117": "Seminole",
+    "119": "Sumter",
+    "121": "Suwannee",
+    "123": "Taylor",
+    "125": "Union",
+    "127": "Volusia",
+    "129": "Wakulla",
+    "131": "Walton",
+    "133": "Washington"
+  }
+}

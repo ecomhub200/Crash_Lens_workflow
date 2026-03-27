@@ -1,0 +1,182 @@
+# ============================================================================
+# Rename R2 Keys (one-time)
+# ============================================================================
+# Renames all objects under virginia/Henrico/ (capital H) to virginia/henrico/
+# (lowercase) to match the project-wide lowercase convention.
+#
+# This dynamically discovers ALL objects under the old prefix so it catches
+# CSVs, forecast JSONs, folder markers, and any other files.
+#
+# Safe to re-run — if no objects exist under the old prefix, it's a no-op.
+# ============================================================================
+
+name: Rename R2 Keys (one-time)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (show what would be renamed without doing it)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  rename:
+    name: Rename Henrico R2 keys to lowercase
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Configure AWS CLI for R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: |
+          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+          aws configure set default.region auto
+
+      - name: Discover and rename Henrico R2 keys to lowercase
+        env:
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          echo "=========================================="
+          echo "  Rename virginia/Henrico/ -> virginia/henrico/"
+          echo "  Dry run: $DRY_RUN"
+          echo "=========================================="
+
+          OLD_PREFIX="virginia/Henrico/"
+          NEW_PREFIX="virginia/henrico/"
+
+          # Discover all objects under the old prefix
+          echo ""
+          echo "Listing all objects under s3://${R2_BUCKET}/${OLD_PREFIX}..."
+          OBJECTS=$(aws s3api list-objects-v2 \
+            --bucket "$R2_BUCKET" \
+            --prefix "$OLD_PREFIX" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'Contents[].Key' \
+            --output text 2>/dev/null || echo "")
+
+          if [ -z "$OBJECTS" ] || [ "$OBJECTS" = "None" ]; then
+            echo ""
+            echo "No objects found under ${OLD_PREFIX} — nothing to rename."
+            echo "The rename may have already been completed."
+            exit 0
+          fi
+
+          # Count and list objects
+          TOTAL=0
+          COPIED=0
+          FAILED=0
+
+          echo ""
+          echo "Objects found:"
+          for old_key in $OBJECTS; do
+            echo "  - $old_key"
+            TOTAL=$((TOTAL + 1))
+          done
+          echo ""
+          echo "Total objects to rename: $TOTAL"
+          echo ""
+
+          # Rename each object (copy to new key, then delete old)
+          for old_key in $OBJECTS; do
+            # Replace old prefix with new prefix
+            new_key="${NEW_PREFIX}${old_key#${OLD_PREFIX}}"
+
+            # Also fix legacy naming: remove redundant "henrico_" prefix from filenames
+            # e.g., virginia/henrico/henrico_county_roads.csv -> virginia/henrico/county_roads.csv
+            filename="${new_key##*/}"
+            if echo "$filename" | grep -q "^henrico_"; then
+              fixed_filename="${filename#henrico_}"
+              new_key="${new_key%/*}/${fixed_filename}"
+            fi
+
+            echo "  $old_key"
+            echo "    -> $new_key"
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "    [DRY RUN] Would copy and delete"
+              echo ""
+              COPIED=$((COPIED + 1))
+              continue
+            fi
+
+            # Copy to new key
+            if aws s3 cp \
+              "s3://$R2_BUCKET/$old_key" \
+              "s3://$R2_BUCKET/$new_key" \
+              --endpoint-url "$R2_ENDPOINT" 2>/dev/null; then
+              echo "    Copied OK"
+            else
+              echo "    [ERROR] Copy failed — skipping"
+              FAILED=$((FAILED + 1))
+              echo ""
+              continue
+            fi
+
+            # Verify new key exists
+            if aws s3api head-object \
+              --bucket "$R2_BUCKET" \
+              --key "$new_key" \
+              --endpoint-url "$R2_ENDPOINT" >/dev/null 2>&1; then
+              echo "    Verified new key exists"
+            else
+              echo "    [ERROR] Verify failed — skipping delete of old key"
+              FAILED=$((FAILED + 1))
+              echo ""
+              continue
+            fi
+
+            # Delete old key
+            if aws s3 rm "s3://$R2_BUCKET/$old_key" --endpoint-url "$R2_ENDPOINT" 2>/dev/null; then
+              echo "    Deleted old key"
+              COPIED=$((COPIED + 1))
+            else
+              echo "    [WARN] Delete failed (non-critical)"
+              COPIED=$((COPIED + 1))
+            fi
+            echo ""
+          done
+
+          echo "=========================================="
+          echo "  Results: $COPIED renamed, $FAILED failed, $TOTAL total"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "  This was a DRY RUN. Re-run with dry_run=false to apply."
+          fi
+          echo "=========================================="
+
+      - name: Verify cleanup
+        if: inputs.dry_run == false
+        env:
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+        run: |
+          echo ""
+          echo "Verifying old prefix is empty..."
+          REMAINING=$(aws s3api list-objects-v2 \
+            --bucket "$R2_BUCKET" \
+            --prefix "virginia/Henrico/" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'KeyCount' \
+            --output text 2>/dev/null || echo "0")
+
+          if [ "$REMAINING" = "0" ] || [ "$REMAINING" = "None" ]; then
+            echo "  OK: No objects remain under virginia/Henrico/"
+          else
+            echo "  WARNING: $REMAINING objects still exist under virginia/Henrico/"
+          fi
+
+          echo ""
+          echo "Current virginia/henrico/ contents:"
+          aws s3 ls "s3://$R2_BUCKET/virginia/henrico/" --endpoint-url "$R2_ENDPOINT" || echo "  (empty)"

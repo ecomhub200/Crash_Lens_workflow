@@ -1,0 +1,183 @@
+{
+  "state": {
+    "name": "Iowa",
+    "abbreviation": "IA",
+    "fips": "19",
+    "dotName": "Iowa DOT",
+    "dotFullName": "Iowa Department of Transportation",
+    "dataPortalUrl": "https://data.iowadot.gov",
+    "coordinateBounds": {
+      "latMin": 40.38,
+      "latMax": 43.5,
+      "lonMin": -96.64,
+      "lonMax": -90.14
+    },
+    "dataDir": "IowaDOT"
+  },
+  "columnMapping": {
+    "_description": "Maps Iowa DOT crash data fields (ArcGIS Feature Server) to CRASH LENS field codes",
+    "_note": "Column names confirmed from Iowa DOT Traffic_Safety/Crash_Data FeatureServer/0 metadata. Max Record Count: 2,000. Display Field: CITY_NAME. Geometry: esriGeometryPoint. Prior 10 years of crash data (SOR). XCOORD/YCOORD are UTM NAD83 Zone 15, NOT lat/lon \u2014 use outSR=4326 for WGS84.",
+    "ID": "CASENUMBER",
+    "CRASH_KEY": "CRASH_KEY",
+    "LE_CASE_NUM": "LECASENUM",
+    "DATE": "CRASH_DATE",
+    "DATETIME": "CRASH_DATETIME",
+    "DATETIME_UTC": "CRASH_DATETIME_UTC",
+    "TIME": "_DERIVED_FROM_CRASH_DATETIME",
+    "LAT": "_DERIVED_FROM_GEOMETRY",
+    "LON": "_DERIVED_FROM_GEOMETRY",
+    "_COORD_NOTE": "XCOORD/YCOORD are UTM Zone 15 (EPSG:26915), not lat/lon. Use outSR=4326 parameter or extract from GeoJSON geometry for WGS84 coordinates.",
+    "XCOORD_UTM": "XCOORD",
+    "YCOORD_UTM": "YCOORD",
+    "SEVERITY": "CSEV",
+    "JURISDICTION": "COUNTY_NAME",
+    "COUNTY_NUMBER": "COUNTY_NUMBER",
+    "CITY": "CITY_NAME",
+    "CITY_NUMBER": "CITY_NUMBER",
+    "DISTRICT": "DISTRICT",
+    "ROUTE": "LITERAL",
+    "ROUTE_SYSTEM": "SYSTEMSTR",
+    "DIRECTION": "CARDINAL",
+    "COLLISION": "CRCOMNNR",
+    "FIRST_HARMFUL_EVENT": "FRSTHARM",
+    "FIRST_HARMFUL_LOC": "LOCFSTHRM",
+    "WEATHER": "WEATHER",
+    "LIGHT": "LIGHT",
+    "SURFACE_CONDITION": "CSRFCND",
+    "JUNCTION": "RDTYP",
+    "HITRUN": "_NOT_IN_CRASH_LAYER",
+    "MAJOR_CAUSE": "MAJCSE",
+    "DRUG_ALCOHOL": "DRUGALC",
+    "ENV_CONTRIBUTING": "ECNTCRC",
+    "PAVED": "PAVED",
+    "WORKZONE": "WZRELATED",
+    "FATALITIES": "FATALITIES",
+    "INJURIES": "INJURIES",
+    "VEHICLES": "VEHICLES",
+    "TOTAL_OCCUPANTS": "TOCCUPANTS",
+    "ROUTE_ID": "ROUTEID",
+    "MILEPOINT": "FROM_MEASURE",
+    "YEAR": "CRASH_YEAR",
+    "MONTH": "CRASH_MONTH",
+    "DAY_OF_WEEK": "CRASH_DAY"
+  },
+  "derivedFields": {
+    "_description": "Fields that must be computed from raw data during Stage 1 (CONVERT)",
+    "SEVERITY": {
+      "method": "direct_coded",
+      "source": "CSEV",
+      "_note": "Iowa CSEV is coded: 1=Fatal(K), 2=Major Injury(A), 3=Minor Injury(B), 4=Possible Injury(C), 5=PDO(O)",
+      "mapping": {
+        "1": "K",
+        "2": "A",
+        "3": "B",
+        "4": "C",
+        "5": "O"
+      }
+    },
+    "YEAR": {
+      "method": "extract_year",
+      "source": "CRASH_DATE"
+    },
+    "NODE": {
+      "method": "route_milepoint",
+      "sources": [
+        "LITERAL",
+        "FROM_MEASURE"
+      ],
+      "_note": "Iowa uses LITERAL (route description) + FROM_MEASURE (milepoint). SYSTEMSTR provides route system code."
+    }
+  },
+  "roadSystems": {
+    "_description": "Iowa road classification for road-type filtering",
+    "values": {
+      "Interstate": {
+        "classification": "state_maintained",
+        "label": "Interstate"
+      },
+      "US Route": {
+        "classification": "state_maintained",
+        "label": "US Route"
+      },
+      "State Route": {
+        "classification": "state_maintained",
+        "label": "State Route"
+      },
+      "County Road": {
+        "classification": "local",
+        "label": "County Road"
+      },
+      "Local Road": {
+        "classification": "local",
+        "label": "Local Road"
+      }
+    },
+    "filterProfiles": {
+      "countyOnly": {
+        "include": [
+          "County Road"
+        ],
+        "label": "County Roads Only"
+      },
+      "countyPlusState": {
+        "include": [
+          "County Road",
+          "Local Road",
+          "State Route",
+          "US Route"
+        ],
+        "label": "County + State Routes"
+      },
+      "allRoads": {
+        "include": [
+          "Interstate",
+          "US Route",
+          "State Route",
+          "County Road",
+          "Local Road"
+        ],
+        "label": "All Roads"
+      },
+      "cityOnly": {
+        "include": [
+          "Local Road"
+        ],
+        "label": "City Roads Only"
+      }
+    }
+  },
+  "crashTypeMapping": {
+    "_description": "Maps Iowa collision type values to CRASH LENS standard",
+    "_note": "Update with actual state values from data dictionary"
+  },
+  "epdoWeights": {
+    "K": 883,
+    "A": 94,
+    "B": 21,
+    "C": 11,
+    "O": 1,
+    "_source": "FHWA-SA-25-021 (Oct 2025) crash costs in 2024 dollars"
+  },
+  "validValues": {
+    "severity": {
+      "K": "Fatal",
+      "A": "Suspected Serious Injury",
+      "B": "Suspected Minor Injury",
+      "C": "Possible Injury",
+      "O": "Property Damage Only"
+    }
+  },
+  "dataSource": {
+    "name": "Iowa DOT GIS Portal",
+    "url": "https://data.iowadot.gov",
+    "apiUrl": "https://gis.iowadot.gov/agshost/rest/services/Traffic_Safety/Crash_Data/FeatureServer/0",
+    "fileFormat": "GeoJSON/CSV (ArcGIS)",
+    "dataDictionary": "See data.iowadot.gov dataset metadata",
+    "pagination": {
+      "method": "offset",
+      "maxPerRequest": 2000,
+      "paramOffset": "resultOffset",
+      "paramCount": "resultRecordCount"
+    }
+  }
+}
