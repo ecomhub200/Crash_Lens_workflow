@@ -1,17 +1,21 @@
 # ============================================================================
-# Download US Geographic & Administrative Data
+# Download US Geographic & Administrative Data + Sync to R2
 # ============================================================================
-# Fetches comprehensive geographic data from federal APIs to update:
-#   - states/us_counties_db.js (offline county database)
-#   - states/fips_database.js (state FIPS + metadata)
-#   - docs/CDOT/us_states_dot_districts_mpos.json (DOT districts + MPOs)
-#   - states/{state}/hierarchy.json (per-state geographic hierarchy)
+# Full pipeline that fetches geographic data from federal APIs, processes it,
+# enhances hierarchy.json files, and uploads everything to R2.
+#
+# Pipeline:
+#   1. Download raw data from Census TIGERweb + BTS/USDOT → data/geographic/
+#   2. Mirror canonical files to states/geography/ (done by download script)
+#   3. Process data into grouped formats → data/geographic/processed/
+#   4. Enhance codebase files (us_counties_db.js, hierarchy.json, etc.)
+#   5. Upload geography JSON files to R2 → states/geography/{file}
+#   6. Upload per-state hierarchy.json to R2 → {state}/_state/hierarchy.json
+#   7. Commit updated files to a data branch
 #
 # Data sources:
 #   1. Census TIGERweb API — States, counties, incorporated places, subdivisions
 #   2. BTS/USDOT NTAD — Metropolitan Planning Organization boundaries
-#
-# Output: Raw JSON files in data/geographic/ for post-processing by Claude Code
 #
 # Safe to re-run — overwrites previous downloads with fresh data.
 # ============================================================================
@@ -41,6 +45,16 @@ on:
         type: string
       skip_subdivisions:
         description: 'Skip county subdivisions (saves ~15 min on full download)'
+        required: false
+        default: true
+        type: boolean
+      run_enhance:
+        description: 'Run process + enhance pipeline after download'
+        required: false
+        default: true
+        type: boolean
+      upload_to_r2:
+        description: 'Upload geography + hierarchy files to R2'
         required: false
         default: true
         type: boolean
@@ -78,8 +92,11 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Create output directory
-        run: mkdir -p data/geographic
+      - name: Create output directories
+        run: |
+          mkdir -p data/geographic
+          mkdir -p data/geographic/processed
+          mkdir -p states/geography
 
       # Quick connectivity check — confirm APIs are reachable before long run
       - name: Test API connectivity
@@ -127,6 +144,7 @@ jobs:
               print(f'  Full response: {json.dumps(data)[:500]}')
           "
 
+      # ── Step 1: Download geographic data ──
       - name: Download geographic data
         run: |
           ARGS=""
@@ -170,10 +188,13 @@ jobs:
             python scripts/download_geographic_data.py $ARGS
           fi
 
-      - name: Show output summary
+      - name: Show download summary
         run: |
-          echo "=== Downloaded Files ==="
-          ls -lh data/geographic/ 2>/dev/null || echo "No files downloaded"
+          echo "=== Downloaded Files (data/geographic/) ==="
+          ls -lh data/geographic/*.json 2>/dev/null || echo "No files in data/geographic/"
+          echo ""
+          echo "=== Mirrored Files (states/geography/) ==="
+          ls -lh states/geography/*.json 2>/dev/null || echo "No files in states/geography/"
           echo ""
           echo "=== Record Counts ==="
           for f in data/geographic/*.json; do
@@ -184,15 +205,177 @@ jobs:
             fi
           done
 
+      # ── Step 2: Process geographic data into grouped formats ──
+      - name: Process geographic data
+        if: ${{ inputs.run_enhance != 'false' && (inputs.scope == 'all' || inputs.scope == 'counties-and-mpos') }}
+        run: |
+          echo "=== Processing geographic data ==="
+          STATE_FIPS="${{ inputs.state_fips }}"
+          ARGS=""
+          if [ -n "$STATE_FIPS" ]; then
+            ARGS="--state $STATE_FIPS"
+          fi
+          python scripts/process_geographic_data.py $ARGS
+
+          echo ""
+          echo "=== Processed Files ==="
+          ls -lh data/geographic/processed/*.json 2>/dev/null || echo "No processed files"
+
+      # ── Step 3: Enhance codebase files (hierarchy.json, us_counties_db.js, etc.) ──
+      - name: Enhance geographic data
+        if: ${{ inputs.run_enhance != 'false' && (inputs.scope == 'all' || inputs.scope == 'counties-and-mpos') }}
+        run: |
+          echo "=== Enhancing codebase geographic data ==="
+          python scripts/enhance_geographic_data.py
+
+          echo ""
+          echo "=== Checking modified hierarchy.json files ==="
+          MODIFIED=$(git diff --name-only -- 'states/*/hierarchy.json' | wc -l)
+          echo "  $MODIFIED hierarchy.json files modified"
+          git diff --stat -- 'states/*/hierarchy.json' | tail -5
+
+      # ── Step 4: Upload geography files + hierarchy.json to R2 ──
+      - name: Configure AWS CLI for R2
+        if: ${{ inputs.upload_to_r2 != 'false' }}
+        run: |
+          aws configure set aws_access_key_id "${{ secrets.CF_R2_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.CF_R2_SECRET_ACCESS_KEY }}"
+          aws configure set default.region auto
+
+      - name: Upload geography files to R2
+        if: ${{ inputs.upload_to_r2 != 'false' }}
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          R2_BUCKET: crash-lens-data
+        run: |
+          ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          BUCKET="${R2_BUCKET}"
+          UPLOADED=0
+          FAILED=0
+
+          echo "=== Uploading geography files to R2: states/geography/ ==="
+          for f in states/geography/us_*.json; do
+            if [ ! -f "$f" ]; then
+              continue
+            fi
+
+            FILENAME=$(basename "$f")
+            R2_KEY="states/geography/${FILENAME}"
+            SIZE=$(du -h "$f" | cut -f1)
+
+            # Gzip for transfer
+            gzip -c -6 "$f" > "${f}.gz"
+            GZ_SIZE=$(du -h "${f}.gz" | cut -f1)
+
+            echo -n "  Uploading ${FILENAME} (${SIZE} → ${GZ_SIZE} gzip)..."
+
+            RETRY=0
+            SUCCESS=false
+            while [ $RETRY -lt 3 ]; do
+              if aws s3 cp "${f}.gz" "s3://${BUCKET}/${R2_KEY}" \
+                --endpoint-url "$ENDPOINT" \
+                --content-type "application/json" \
+                --content-encoding "gzip" \
+                --only-show-errors 2>/dev/null; then
+                SUCCESS=true
+                break
+              fi
+              RETRY=$((RETRY + 1))
+              echo -n " retry ${RETRY}..."
+              sleep $((2 ** RETRY))
+            done
+
+            rm -f "${f}.gz"
+
+            if [ "$SUCCESS" = "true" ]; then
+              echo " ✓"
+              UPLOADED=$((UPLOADED + 1))
+            else
+              echo " ✗ FAILED"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo ""
+          echo "  Geography upload: ${UPLOADED} uploaded, ${FAILED} failed"
+
+          if [ $FAILED -gt 0 ]; then
+            echo "::warning::${FAILED} geography file(s) failed to upload to R2"
+          fi
+
+      - name: Upload hierarchy.json files to R2
+        if: ${{ inputs.upload_to_r2 != 'false' }}
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          R2_BUCKET: crash-lens-data
+        run: |
+          ENDPOINT="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          BUCKET="${R2_BUCKET}"
+          UPLOADED=0
+          FAILED=0
+          SKIPPED=0
+
+          echo "=== Uploading per-state hierarchy.json to R2 ==="
+
+          # Map state directory names to R2 prefixes (they match by convention)
+          for STATE_DIR in states/*/hierarchy.json; do
+            if [ ! -f "$STATE_DIR" ]; then
+              continue
+            fi
+
+            # Extract state name from path: states/virginia/hierarchy.json → virginia
+            STATE_NAME=$(echo "$STATE_DIR" | sed 's|states/||;s|/hierarchy.json||')
+
+            # Skip non-state directories (geography, etc.)
+            if [ "$STATE_NAME" = "geography" ]; then
+              continue
+            fi
+
+            R2_KEY="${STATE_NAME}/_state/hierarchy.json"
+            SIZE=$(du -h "$STATE_DIR" | cut -f1)
+
+            RETRY=0
+            SUCCESS=false
+            while [ $RETRY -lt 3 ]; do
+              if aws s3 cp "$STATE_DIR" "s3://${BUCKET}/${R2_KEY}" \
+                --endpoint-url "$ENDPOINT" \
+                --content-type "application/json" \
+                --only-show-errors 2>/dev/null; then
+                SUCCESS=true
+                break
+              fi
+              RETRY=$((RETRY + 1))
+              sleep $((2 ** RETRY))
+            done
+
+            if [ "$SUCCESS" = "true" ]; then
+              echo "  [OK] ${STATE_NAME} → ${R2_KEY} (${SIZE})"
+              UPLOADED=$((UPLOADED + 1))
+            else
+              echo "  [FAIL] ${STATE_NAME} → ${R2_KEY}"
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo ""
+          echo "  Hierarchy upload: ${UPLOADED} uploaded, ${FAILED} failed"
+
+          if [ $FAILED -gt 0 ]; then
+            echo "::warning::${FAILED} hierarchy.json file(s) failed to upload to R2"
+          fi
+
+      # ── Step 5: Upload artifact + commit ──
       - name: Upload as artifact
         if: ${{ inputs.upload_artifact != 'false' }}
         uses: actions/upload-artifact@v4
         with:
           name: geographic-data-${{ github.run_number }}
-          path: data/geographic/
+          path: |
+            data/geographic/
+            data/geographic/processed/
           retention-days: 30
 
-      - name: Commit to branch (optional)
+      - name: Commit to branch
         if: ${{ inputs.state_fips == '' && inputs.scope == 'all' }}
         run: |
           git config user.name "github-actions[bot]"
@@ -202,8 +385,29 @@ jobs:
           BRANCH="data/geographic-refresh-$(date +%Y%m%d)"
           git checkout -b "$BRANCH"
 
+          # Stage downloaded and enhanced files
           git add data/geographic/
-          git commit -m "data: refresh nationwide geographic data from Census + BTS
+          git add states/geography/
+          git add states/*/hierarchy.json
+          git add states/us_counties_db.js || true
+          git add states/fips_database.js || true
+          git add docs/CDOT/us_states_dot_districts_mpos.json || true
+
+          # Check if there are changes to commit
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "data: refresh geographic data from Census + BTS and sync to R2
+
+          Pipeline steps completed:
+          1. Downloaded raw data from Census TIGERweb + BTS/USDOT NTAD
+          2. Mirrored canonical files to states/geography/
+          3. Processed into grouped formats (data/geographic/processed/)
+          4. Enhanced hierarchy.json files with missing counties/MPOs
+          5. Uploaded geography files to R2 (states/geography/)
+          6. Uploaded hierarchy.json to R2 ({state}/_state/hierarchy.json)
 
           Downloaded:
           $(ls -1 data/geographic/*.json 2>/dev/null | while read f; do
