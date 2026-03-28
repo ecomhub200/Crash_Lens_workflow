@@ -1,0 +1,259 @@
+# ==============================================================================
+# Mapillary Traffic Inventory — County-by-County Statewide Download
+# ==============================================================================
+# Downloads ALL traffic signs, signals, street lights from Mapillary API v4
+# using county-by-county adaptive tiling for better progress tracking,
+# restartability, and per-county R2 storage.
+#
+# Flow:
+#   1. Download us_counties.json from R2 (_national/)
+#   2. For each county: download features → save to {state}/{county}/traffic-inventory.csv
+#   3. Consolidate all counties → {state}/cache/{abbr}_mapillary.parquet.gz
+#
+# PREREQUISITE: Add MAPILLARY_TOKEN secret (Settings > Secrets > Actions)
+#   Get token at: https://www.mapillary.com/dashboard/developers
+#
+# SCALE:
+#   Delaware (3 counties):     ~55K features,     ~5 min
+#   Virginia (133 counties):  ~500K features,    ~90 min
+#   Texas (254 counties):      ~2M features,    ~6 hours
+# ==============================================================================
+
+name: "Mapillary: Download Traffic Inventory"
+
+on:
+  workflow_dispatch:
+    inputs:
+      state:
+        description: 'State abbreviation to download'
+        required: true
+        type: choice
+        options:
+          - de
+          - va
+          - co
+          - md
+          - ct
+          - fl
+          - ga
+          - il
+          - ma
+          - ny
+          - nc
+          - oh
+          - pa
+          - sc
+          - tx
+          - wa
+
+      tile_size:
+        description: 'Initial tile size (subdivides to 0.009 on dense tiles automatically)'
+        required: false
+        type: choice
+        default: '0.02'
+        options:
+          - '0.01'
+          - '0.02'
+          - '0.03'
+          - '0.05'
+
+      resume:
+        description: 'Resume — skip counties already uploaded to R2'
+        required: false
+        type: boolean
+        default: true
+
+      force:
+        description: 'Force re-download even if statewide cache exists in R2'
+        required: false
+        type: boolean
+        default: false
+
+      county:
+        description: 'Single county name (optional — e.g. "Fairfax County")'
+        required: false
+        type: string
+        default: ''
+
+  schedule:
+    - cron: '0 4 1 1,4,7,10 *'
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    name: "Mapillary (${{ github.event.inputs.state || 'de' }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas pyarrow requests boto3
+
+      - name: Check existing R2 cache
+        id: check
+        if: github.event.inputs.force != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          STATE="${{ github.event.inputs.state || 'de' }}"
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          # Map abbreviation → full state name for R2 prefix
+          declare -A PREFIXES=(
+            [de]=delaware [va]=virginia [co]=colorado [md]=maryland
+            [ct]=connecticut [fl]=florida [ga]=georgia [il]=illinois
+            [ma]=massachusetts [ny]=new_york [nc]=north_carolina [oh]=ohio
+            [pa]=pennsylvania [sc]=south_carolina [tx]=texas [wa]=washington
+          )
+          PREFIX="${PREFIXES[$STATE]:-$STATE}"
+
+          if aws s3 ls "s3://crash-lens-data/${PREFIX}/cache/${STATE}_mapillary.parquet.gz" \
+              --endpoint-url "$R2" 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Statewide cache exists — use force=true to re-download"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No statewide cache — will download"
+          fi
+
+      - name: Download us_counties.json from R2
+        if: steps.check.outputs.exists != 'true' || github.event.inputs.force == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          aws s3 cp "s3://crash-lens-data/_national/us_counties.json" us_counties.json \
+            --endpoint-url "$R2" --only-show-errors
+          echo "Downloaded us_counties.json ($(stat -c%s us_counties.json) bytes)"
+
+      - name: Download Mapillary inventory (county-by-county)
+        id: download
+        if: steps.check.outputs.exists != 'true' || github.event.inputs.force == 'true'
+        env:
+          MAPILLARY_TOKEN: ${{ secrets.MAPILLARY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+        run: |
+          STATE="${{ github.event.inputs.state || 'de' }}"
+          TILE="${{ github.event.inputs.tile_size || '0.02' }}"
+          RESUME="${{ github.event.inputs.resume || 'true' }}"
+          COUNTY="${{ github.event.inputs.county || '' }}"
+
+          if [ -z "$MAPILLARY_TOKEN" ]; then
+            echo "::error::MAPILLARY_TOKEN secret not set"
+            echo "Setup:"
+            echo "  1. Go to https://www.mapillary.com/dashboard/developers"
+            echo "  2. Copy your client token (MLY|...)"
+            echo "  3. Repo > Settings > Secrets > Actions > New"
+            echo "     Name: MAPILLARY_TOKEN"
+            exit 1
+          fi
+
+          mkdir -p cache
+
+          ARGS="--state $STATE --tile-size $TILE --cache-dir cache"
+
+          if [ "$RESUME" = "true" ]; then
+            ARGS="$ARGS --resume"
+          fi
+
+          if [ -n "$COUNTY" ]; then
+            ARGS="$ARGS --county \"$COUNTY\""
+          fi
+
+          echo "Running: python mapillary_county_download.py $ARGS"
+          eval python mapillary_county_download.py $ARGS
+
+          if [ ! -f "cache/${STATE}_mapillary.parquet.gz" ]; then
+            echo "::error::Download failed — no statewide output file"
+            exit 1
+          fi
+
+          ROWS=$(python3 -c "
+          import pandas as pd, gzip, io
+          with gzip.open('cache/${STATE}_mapillary.parquet.gz','rb') as f:
+              df = pd.read_parquet(io.BytesIO(f.read()))
+          print(len(df))
+          ")
+          echo "features=$ROWS" >> $GITHUB_OUTPUT
+          echo "Downloaded $ROWS features"
+
+      - name: Verify statewide upload
+        if: steps.download.outcome == 'success'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          STATE="${{ github.event.inputs.state || 'de' }}"
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          # Map abbreviation to R2 prefix (full state name)
+          PREFIX=$(python3 -c "
+          from mapillary_county_download import STATES
+          print(STATES['${STATE}'][2])
+          ")
+          echo "R2 prefix: $PREFIX"
+
+          # Check statewide file
+          if aws s3 ls "s3://crash-lens-data/${PREFIX}/cache/${STATE}_mapillary.parquet.gz" \
+              --endpoint-url "$R2" 2>/dev/null; then
+            echo "✅ Statewide cache uploaded"
+          else
+            echo "::warning::Statewide cache not found in R2"
+          fi
+
+          # Count per-county traffic-inventory.csv files
+          COUNTY_COUNT=$(aws s3 ls "s3://crash-lens-data/${PREFIX}/" \
+            --endpoint-url "$R2" --recursive 2>/dev/null \
+            | grep "traffic-inventory.csv" | wc -l)
+          echo "✅ $COUNTY_COUNT county traffic-inventory.csv files in R2"
+
+          # Also upload statewide CSV for human inspection
+          if [ -f "cache/${STATE}_mapillary.csv" ]; then
+            gzip -cn "cache/${STATE}_mapillary.csv" > "cache/${STATE}_mapillary.csv.gz"
+            aws s3 cp "cache/${STATE}_mapillary.csv.gz" \
+              "s3://crash-lens-data/${PREFIX}/cache/${STATE}_mapillary.csv.gz" \
+              --endpoint-url "$R2" --only-show-errors
+            echo "✅ CSV backup uploaded"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          STATE="${{ github.event.inputs.state || 'de' }}"
+          FEATURES="${{ steps.download.outputs.features || 'skipped (cache exists)' }}"
+          RESUME="${{ github.event.inputs.resume || 'true' }}"
+          COUNTY="${{ github.event.inputs.county || 'all' }}"
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Mapillary Traffic Inventory: ${STATE}
+
+          | Detail | Value |
+          |--------|-------|
+          | State | ${STATE} |
+          | Features | ${FEATURES} |
+          | Method | County-by-county |
+          | Tile Size | ${{ github.event.inputs.tile_size || '0.02' }} (adaptive to 0.009 on dense) |
+          | Resume | ${RESUME} |
+          | County Filter | ${COUNTY} |
+          | R2 Statewide | ${STATE}/cache/${STATE}_mapillary.parquet.gz |
+          | R2 Per-County | ${STATE}/{county}/traffic-inventory.csv |
+          EOF
