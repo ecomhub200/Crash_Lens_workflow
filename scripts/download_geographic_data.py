@@ -26,6 +26,7 @@ Requires: requests (pip install requests)
 import json
 import time
 import argparse
+import shutil
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -74,6 +75,16 @@ MAX_RETRIES = 4
 PAGE_SIZE = 2000  # ArcGIS max varies; 2000 is safe for TIGERweb
 
 OUTPUT_DIR = Path(__file__).parent.parent / "data" / "geographic"
+GEOGRAPHY_DIR = Path(__file__).parent.parent / "states" / "geography"
+
+# Canonical filenames that should be mirrored to states/geography/
+_CANONICAL_GEO_FILES = {
+    "us_states.json",
+    "us_counties.json",
+    "us_places.json",
+    "us_mpos.json",
+    "us_county_subdivisions.json",
+}
 
 
 def arcgis_query_all(url, where="1=1", out_fields="*", return_geometry=True,
@@ -687,7 +698,12 @@ _LSAD_PLACE_TYPE = {
 # ─── Main ────────────────────────────────────────────────────────────────────
 
 def save_json(data, filename, metadata=None):
-    """Save data to JSON file with metadata header."""
+    """Save data to JSON file with metadata header.
+
+    Also mirrors canonical nationwide files (us_counties.json, us_mpos.json, etc.)
+    to states/geography/ so that enhance_geographic_data.py and the front-end
+    R2 upload pipeline can consume them.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     filepath = OUTPUT_DIR / filename
 
@@ -708,6 +724,13 @@ def save_json(data, filename, metadata=None):
 
     size_mb = filepath.stat().st_size / (1024 * 1024)
     print(f"  💾 Saved {filepath} ({size_mb:.1f} MB, {len(data)} records)")
+
+    # Mirror canonical nationwide files to states/geography/
+    if filename in _CANONICAL_GEO_FILES:
+        GEOGRAPHY_DIR.mkdir(parents=True, exist_ok=True)
+        geo_dest = GEOGRAPHY_DIR / filename
+        shutil.copy2(filepath, geo_dest)
+        print(f"  📋 Mirrored to {geo_dest}")
 
 
 def main():
