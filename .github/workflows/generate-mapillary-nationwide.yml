@@ -1,0 +1,413 @@
+# ==============================================================================
+# Mapillary Traffic Inventory — Nationwide County-by-County Download
+# ==============================================================================
+# Downloads ALL traffic signs, signals, street lights from Mapillary API v4
+# for all 50 states + DC using county-by-county adaptive tiling.
+#
+# STRATEGY:
+#   - Matrix of states, max-parallel: 3 (3 states downloading at once)
+#   - Each state: 3 parallel county workers (--parallel 3)
+#   - Total: 9 concurrent Mapillary API connections (safe under rate limits)
+#   - Each state job: 6h timeout (GitHub max)
+#   - --resume: skips counties already in R2 → re-run if a state times out
+#   - Preflight job: checks R2, skips states that already have statewide cache
+#
+# WALL CLOCK:
+#   Small states (DE, RI, DC):     ~3 min each
+#   Medium states (VA, MD, CO):    ~25 min each
+#   Large states (TX, CA, NY):     ~2-4 hrs each
+#   Total nationwide (3 parallel): ~3-4 days
+#
+# RE-RUNNABLE: If the workflow fails or times out, re-run it.
+#   - Preflight skips states with statewide cache in R2
+#   - --resume skips counties already uploaded within a state
+#   - Net effect: picks up exactly where it left off
+#
+# PREREQUISITE: Add MAPILLARY_TOKEN secret (Settings > Secrets > Actions)
+# ==============================================================================
+
+name: "Mapillary: Nationwide Download"
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Which states to download'
+        required: true
+        default: 'nationwide'
+        type: choice
+        options:
+          - nationwide
+          - small_states
+          - medium_states
+          - large_states
+          - single_state
+
+      state:
+        description: 'State abbreviation (only for scope=single_state)'
+        required: false
+        default: ''
+        type: string
+
+      parallel:
+        description: 'Parallel county workers per state (1-4)'
+        required: false
+        type: choice
+        default: '3'
+        options:
+          - '1'
+          - '2'
+          - '3'
+          - '4'
+
+      max_states:
+        description: 'Max parallel state jobs'
+        required: false
+        type: choice
+        default: '3'
+        options:
+          - '1'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+
+      tile_size:
+        description: 'Initial tile size (adaptive to 0.009 on dense)'
+        required: false
+        type: choice
+        default: '0.02'
+        options:
+          - '0.01'
+          - '0.02'
+          - '0.03'
+
+      force:
+        description: 'Force re-download even if statewide cache exists'
+        required: false
+        type: boolean
+        default: false
+
+  schedule:
+    # Quarterly: 1st of Jan, Apr, Jul, Oct at 4am UTC
+    - cron: '0 4 1 1,4,7,10 *'
+
+permissions:
+  contents: read
+
+env:
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  #  PREFLIGHT: Check R2 for completed states, build matrix
+  # ════════════════════════════════════════════════════════════════
+  preflight:
+    name: "Preflight — Build state matrix"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      total: ${{ steps.matrix.outputs.total }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build state matrix
+        id: matrix
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          SCOPE="${{ github.event.inputs.scope || 'nationwide' }}"
+          FORCE="${{ github.event.inputs.force || 'false' }}"
+          SINGLE="${{ github.event.inputs.state || '' }}"
+
+          # ── Define state groups ──
+          SMALL="dc ri de ct nj nh vt ma md hi me wv"
+          MEDIUM="sc nc ky ar ms al la ia ok ks ne nd sd wy nm id nv ut az co va ga wi mn mo"
+          LARGE="oh pa il mi fl ny wa or tn tx ca ak in"
+
+          if [ "$SCOPE" = "single_state" ] && [ -n "$SINGLE" ]; then
+            ALL_STATES="$SINGLE"
+          elif [ "$SCOPE" = "small_states" ]; then
+            ALL_STATES="$SMALL"
+          elif [ "$SCOPE" = "medium_states" ]; then
+            ALL_STATES="$MEDIUM"
+          elif [ "$SCOPE" = "large_states" ]; then
+            ALL_STATES="$LARGE"
+          else
+            ALL_STATES="$SMALL $MEDIUM $LARGE"
+          fi
+
+          # ── State → R2 prefix mapping ──
+          declare -A PREFIXES=(
+            [al]=alabama [ak]=alaska [az]=arizona [ar]=arkansas [ca]=california
+            [co]=colorado [ct]=connecticut [de]=delaware [dc]=district_of_columbia
+            [fl]=florida [ga]=georgia [hi]=hawaii [id]=idaho [il]=illinois
+            [in]=indiana [ia]=iowa [ks]=kansas [ky]=kentucky [la]=louisiana
+            [me]=maine [md]=maryland [ma]=massachusetts [mi]=michigan [mn]=minnesota
+            [ms]=mississippi [mo]=missouri [mt]=montana [ne]=nebraska [nv]=nevada
+            [nh]=new_hampshire [nj]=new_jersey [nm]=new_mexico [ny]=new_york
+            [nc]=north_carolina [nd]=north_dakota [oh]=ohio [ok]=oklahoma [or]=oregon
+            [pa]=pennsylvania [ri]=rhode_island [sc]=south_carolina [sd]=south_dakota
+            [tn]=tennessee [tx]=texas [ut]=utah [vt]=vermont [va]=virginia
+            [wa]=washington [wv]=west_virginia [wi]=wisconsin [wy]=wyoming
+          )
+
+          # ── Check R2 for completed states ──
+          NEEDED=""
+          SKIPPED=""
+          for STATE in $ALL_STATES; do
+            PREFIX="${PREFIXES[$STATE]:-$STATE}"
+            if [ "$FORCE" = "true" ]; then
+              NEEDED="$NEEDED $STATE"
+            elif aws s3 ls "s3://${R2_BUCKET}/${PREFIX}/cache/${STATE}_mapillary.parquet.gz" \
+                --endpoint-url "$R2" 2>/dev/null | grep -q parquet; then
+              SKIPPED="$SKIPPED $STATE"
+            else
+              NEEDED="$NEEDED $STATE"
+            fi
+          done
+
+          NEEDED=$(echo $NEEDED | xargs)  # trim whitespace
+          SKIPPED=$(echo $SKIPPED | xargs)
+          TOTAL=$(echo $NEEDED | wc -w)
+
+          echo "Scope: $SCOPE"
+          echo "States needed: $NEEDED"
+          echo "States skipped (cache exists): $SKIPPED"
+          echo "Total to process: $TOTAL"
+
+          if [ -z "$NEEDED" ]; then
+            echo "All states already have statewide cache in R2!"
+            echo 'matrix={"state":[]}' >> $GITHUB_OUTPUT
+            echo "total=0" >> $GITHUB_OUTPUT
+          else
+            # Build JSON array for matrix
+            JSON="["
+            FIRST=true
+            for STATE in $NEEDED; do
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                JSON="$JSON,"
+              fi
+              JSON="$JSON\"$STATE\""
+            done
+            JSON="$JSON]"
+            echo "matrix={\"state\":$JSON}" >> $GITHUB_OUTPUT
+            echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Preflight summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Mapillary Nationwide — Preflight
+
+          | Detail | Value |
+          |--------|-------|
+          | Scope | ${{ github.event.inputs.scope || 'nationwide' }} |
+          | States to process | ${{ steps.matrix.outputs.total }} |
+          | Parallel states | ${{ github.event.inputs.max_states || '3' }} |
+          | Workers per state | ${{ github.event.inputs.parallel || '3' }} |
+          | Force | ${{ github.event.inputs.force || 'false' }} |
+          EOF
+
+  # ════════════════════════════════════════════════════════════════
+  #  DOWNLOAD: One job per state, max-parallel from input
+  # ════════════════════════════════════════════════════════════════
+  download:
+    name: "${{ matrix.state }}"
+    needs: preflight
+    if: needs.preflight.outputs.total != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      matrix: ${{ fromJson(needs.preflight.outputs.matrix) }}
+      max-parallel: ${{ fromJson(github.event.inputs.max_states || '3') }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas pyarrow requests boto3
+
+      - name: Download us_counties.json
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          aws s3 cp "s3://${R2_BUCKET}/_national/us_counties.json" us_counties.json \
+            --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --only-show-errors
+
+      - name: Download Mapillary (${{ matrix.state }})
+        id: download
+        env:
+          MAPILLARY_TOKEN: ${{ secrets.MAPILLARY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+        run: |
+          STATE="${{ matrix.state }}"
+          PARALLEL="${{ github.event.inputs.parallel || '3' }}"
+          TILE="${{ github.event.inputs.tile_size || '0.02' }}"
+
+          if [ -z "$MAPILLARY_TOKEN" ]; then
+            echo "::error::MAPILLARY_TOKEN secret not set"
+            exit 1
+          fi
+
+          mkdir -p cache
+
+          echo "Starting: $STATE (${PARALLEL} workers, ${TILE}° tiles, resume=on)"
+          echo "start_time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+
+          python mapillary_county_download.py \
+            --state "$STATE" \
+            --parallel "$PARALLEL" \
+            --tile-size "$TILE" \
+            --cache-dir cache \
+            --resume
+
+          # Count features
+          if [ -f "cache/${STATE}_mapillary.parquet.gz" ]; then
+            ROWS=$(python3 -c "
+          import pandas as pd, gzip, io
+          with gzip.open('cache/${STATE}_mapillary.parquet.gz','rb') as f:
+              df = pd.read_parquet(io.BytesIO(f.read()))
+          print(len(df))
+          ")
+            echo "features=$ROWS" >> $GITHUB_OUTPUT
+            echo "status=completed" >> $GITHUB_OUTPUT
+          else
+            echo "features=0" >> $GITHUB_OUTPUT
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload statewide CSV backup
+        if: steps.download.outputs.status == 'completed'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          STATE="${{ matrix.state }}"
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          # Get R2 prefix
+          PREFIX=$(python3 -c "
+          from mapillary_county_download import STATES
+          print(STATES['${STATE}'][2])
+          ")
+
+          if [ -f "cache/${STATE}_mapillary.csv" ]; then
+            gzip -cn "cache/${STATE}_mapillary.csv" > "cache/${STATE}_mapillary.csv.gz"
+            aws s3 cp "cache/${STATE}_mapillary.csv.gz" \
+              "s3://${R2_BUCKET}/${PREFIX}/cache/${STATE}_mapillary.csv.gz" \
+              --endpoint-url "$R2" --only-show-errors
+          fi
+
+      - name: Job summary
+        if: always()
+        run: |
+          STATE="${{ matrix.state }}"
+          FEATURES="${{ steps.download.outputs.features || '0' }}"
+          STATUS="${{ steps.download.outputs.status || 'unknown' }}"
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Mapillary: ${STATE}
+
+          | Detail | Value |
+          |--------|-------|
+          | State | ${STATE} |
+          | Status | ${STATUS} |
+          | Features | ${FEATURES} |
+          | Workers | ${{ github.event.inputs.parallel || '3' }} |
+          | Started | ${{ steps.download.outputs.start_time || 'N/A' }} |
+          EOF
+
+  # ════════════════════════════════════════════════════════════════
+  #  SUMMARY: After all states complete
+  # ════════════════════════════════════════════════════════════════
+  summary:
+    name: "Nationwide Summary"
+    needs: [preflight, download]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check R2 coverage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          declare -A PREFIXES=(
+            [al]=alabama [ak]=alaska [az]=arizona [ar]=arkansas [ca]=california
+            [co]=colorado [ct]=connecticut [de]=delaware [dc]=district_of_columbia
+            [fl]=florida [ga]=georgia [hi]=hawaii [id]=idaho [il]=illinois
+            [in]=indiana [ia]=iowa [ks]=kansas [ky]=kentucky [la]=louisiana
+            [me]=maine [md]=maryland [ma]=massachusetts [mi]=michigan [mn]=minnesota
+            [ms]=mississippi [mo]=missouri [mt]=montana [ne]=nebraska [nv]=nevada
+            [nh]=new_hampshire [nj]=new_jersey [nm]=new_mexico [ny]=new_york
+            [nc]=north_carolina [nd]=north_dakota [oh]=ohio [ok]=oklahoma [or]=oregon
+            [pa]=pennsylvania [ri]=rhode_island [sc]=south_carolina [sd]=south_dakota
+            [tn]=tennessee [tx]=texas [ut]=utah [vt]=vermont [va]=virginia
+            [wa]=washington [wv]=west_virginia [wi]=wisconsin [wy]=wyoming
+          )
+
+          ALL="dc ri de ct nj nh vt ma md hi me wv sc nc ky ar ms al la ia ok ks ne nd sd wy nm id nv ut az co va oh pa il mi ga wi mn mo fl ny wa or tn tx ca ak in"
+
+          DONE=0
+          MISSING=""
+          for STATE in $ALL; do
+            PREFIX="${PREFIXES[$STATE]:-$STATE}"
+            if aws s3 ls "s3://${R2_BUCKET}/${PREFIX}/cache/${STATE}_mapillary.parquet.gz" \
+                --endpoint-url "$R2" 2>/dev/null | grep -q parquet; then
+              DONE=$((DONE + 1))
+            else
+              MISSING="$MISSING $STATE"
+            fi
+          done
+
+          TOTAL=$(echo $ALL | wc -w)
+          MISSING=$(echo $MISSING | xargs)
+          MISSING_COUNT=$(echo $MISSING | wc -w)
+
+          echo "Coverage: $DONE / $TOTAL states"
+          if [ -n "$MISSING" ]; then
+            echo "Missing: $MISSING"
+          fi
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Mapillary Nationwide — Final Summary
+
+          | Detail | Value |
+          |--------|-------|
+          | Coverage | ${DONE} / ${TOTAL} states |
+          | Missing | ${MISSING_COUNT} states |
+          | Missing list | ${MISSING:-none} |
+          | Scope | ${{ github.event.inputs.scope || 'nationwide' }} |
+
+          **Re-run this workflow to pick up missing states.**
+          The preflight job will skip completed states automatically.
+          EOF
