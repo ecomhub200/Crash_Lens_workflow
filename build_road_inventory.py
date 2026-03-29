@@ -932,12 +932,17 @@ def main():
             # HPMS urban_code empty — fallback to AADT-based classification
             # FHWA threshold: roads with AADT >= 5,000 in areas with AADT density → Urban
             aadt = pd.to_numeric(roads.get("hpms_aadt", 0), errors="coerce").fillna(0)
-            fc = roads.get("Functional Class", roads.get("resolved_functional_class", ""))
+            if 'Functional Class' in roads.columns:
+                fc = roads['Functional Class'].astype(str)
+            elif 'resolved_functional_class' in roads.columns:
+                fc = roads['resolved_functional_class'].astype(str)
+            else:
+                fc = pd.Series([''] * len(roads), index=roads.index)
 
             # Heuristic: Interstate/Freeway/Principal Arterial with AADT > 5K → Urban context
             # Collectors/Locals with AADT > 2K → Urban context
             # Everything else → Rural
-            is_major = fc.astype(str).str.startswith(("1-", "2-", "3-"))
+            is_major = fc.str.startswith(("1-", "2-", "3-"))
             is_urban = np.where(
                 is_major & (aadt >= 5000), True,
                 np.where(aadt >= 2000, True, False))
