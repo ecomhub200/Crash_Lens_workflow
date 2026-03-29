@@ -192,6 +192,7 @@ def _clean(val):
 def graph_to_dataframes(G):
     """Convert osmnx graph to road_df + int_df DataFrames."""
     import osmnx as ox
+    ox.settings.useful_tags_way += ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
 
     nodes_gdf, edges_gdf = ox.graph_to_gdfs(G, nodes=True, edges=True)
 
@@ -292,6 +293,7 @@ POI_TAGS = [
 def _download_one_road_county(county, state_name, index, total):
     """Download road graph for one county with exponential backoff."""
     import osmnx as ox
+    ox.settings.useful_tags_way += ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
     county_name = county["NAMELSAD"]
     place = f"{county_name}, {state_name}, United States"
 
@@ -326,6 +328,7 @@ def _download_one_road_county(county, state_name, index, total):
 def _download_one_poi_county(county, state_name, index, total):
     """Download POIs for one county with exponential backoff per category."""
     import osmnx as ox
+    ox.settings.useful_tags_way += ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
     county_name = county["NAMELSAD"]
     place = f"{county_name}, {state_name}, United States"
     pois = []
