@@ -1166,11 +1166,11 @@ def main():
     # ── Split.py compatibility validation (#6) ──
     print(f"\n  Split.py compatibility check:")
     split_checks = {
-        "dot_roads": (roads.get("Ownership", "") == "1. State Hwy Agency").sum(),
-        "county_roads": (roads.get("Ownership", "") == "2. County Hwy Agency").sum(),
-        "city_roads": (roads.get("Ownership", "") == "3. City or Town Hwy Agency").sum(),
-        "primary_roads": roads.get("Functional Class", pd.Series(dtype=str)).astype(str).str.startswith(("1-", "2-")).sum(),
-        "no_interstate": (~roads.get("Functional Class", pd.Series(dtype=str)).astype(str).str.startswith(("1-", "2-"))).sum(),
+        'dot_roads': (roads['Ownership'] == '1. State Hwy Agency').sum() if 'Ownership' in roads.columns else 0,
+        'county_roads': (roads['Ownership'] == '2. County Hwy Agency').sum() if 'Ownership' in roads.columns else 0,
+        'city_roads': (roads['Ownership'] == '3. City or Town Hwy Agency').sum() if 'Ownership' in roads.columns else 0,
+        'primary_roads': roads['Functional Class'].astype(str).str.startswith(('1-', '2-')).sum() if 'Functional Class' in roads.columns else 0,
+        'no_interstate': (~roads['Functional Class'].astype(str).str.startswith(('1-', '2-'))).sum() if 'Functional Class' in roads.columns else 0,
     }
     all_ok = True
     for name, count in split_checks.items():
