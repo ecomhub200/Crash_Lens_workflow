@@ -143,6 +143,7 @@ def convert_to_enricher_format(G):
     Has_Street_Lighting, Has_Sidewalk, Has_Bike_Lane
     """
     import osmnx as ox
+    ox.settings.useful_tags_way += ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
 
     nodes_gdf, edges_gdf = ox.graph_to_gdfs(G, nodes=True, edges=True)
 
