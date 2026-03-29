@@ -21,7 +21,7 @@ RESOLVED COLUMNS:
   resolved_has_signal         Mapillary > POI > HPMS
   resolved_has_lighting       Mapillary(count>0) > OSM(lit=yes)
   resolved_on_bridge          OSM(bridge tag) > Federal(500ft)
-  resolved_school_zone        Mapillary(S1-1 sign) > POI(school 1500ft) > Federal(school 1500ft)
+  resolved_school_zone        Mapillary(S1-1 sign) > POI(school 2000ft) > Federal(school 2000ft)
 
 SANITY CHECKS:
   Speed: 5-85 mph
@@ -228,8 +228,8 @@ def resolve_school_zone(df):
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
 
-    if "Near_School_1500ft" in df.columns:
-        mask = df["Near_School_1500ft"].values == "Yes"
+    if "Near_School_2000ft" in df.columns:
+        mask = df["Near_School_2000ft"].values == "Yes"
         values[mask] = "Yes"
         sources[mask] = "Federal"
 
@@ -491,8 +491,8 @@ def compute_confidence_scores(df):
 
     # ── SCHOOL ZONE confidence ──
     school_sources = np.zeros(n, dtype=int)
-    if "Near_School_1500ft" in df.columns:
-        school_sources += (df["Near_School_1500ft"] == "Yes").astype(int)
+    if "Near_School_2000ft" in df.columns:
+        school_sources += (df["Near_School_2000ft"] == "Yes").astype(int)
     if "map_school_zone" in df.columns:
         school_sources += (df["map_school_zone"] == "Yes").astype(int)
     if "Near_PoiCollege_1500ft" in df.columns:
@@ -653,17 +653,17 @@ def compute_risk_indicators(df):
     scores = np.zeros(n, dtype=int)
     
     near_school = np.zeros(n, dtype=bool)
-    if "Near_School_1500ft" in df.columns:
-        near_school = (df["Near_School_1500ft"].values == "Yes")
+    if "Near_School_2000ft" in df.columns:
+        near_school = (df["Near_School_2000ft"].values == "Yes")
     
     if near_school.sum() > 0:
-        # Distance factor: 0-500ft=40pts, 500-1000ft=25pts, 1000-1500ft=15pts
+        # Distance factor: 0-500ft=40pts, 500-1000ft=25pts, 1000-2000ft=15pts
         dist_pts = np.zeros(n, dtype=int)
         if "nearest_school_dist_ft" in df.columns:
             dist = pd.to_numeric(df["nearest_school_dist_ft"], errors="coerce").fillna(9999).values
             dist_pts = np.where(dist <= 500, 40,
                        np.where(dist <= 1000, 25,
-                       np.where(dist <= 1500, 15, 0)))
+                       np.where(dist <= 2000, 15, 0)))
 
         # Enrollment factor: >1000=30pts, 500-1000=20pts, <500=10pts
         enr_pts = np.zeros(n, dtype=int)
@@ -680,8 +680,8 @@ def compute_risk_indicators(df):
 
         # Multi-school bonus: +10 per additional school
         multi_pts = np.zeros(n, dtype=int)
-        if "school_count_1500ft" in df.columns:
-            cnt = pd.to_numeric(df["school_count_1500ft"], errors="coerce").fillna(0).values
+        if "school_count_2000ft" in df.columns:
+            cnt = pd.to_numeric(df["school_count_2000ft"], errors="coerce").fillna(0).values
             multi_pts = np.minimum((cnt - 1).clip(0) * 10, 30).astype(int)
 
         scores = np.minimum(dist_pts + enr_pts + sign_pts + multi_pts, 100)
