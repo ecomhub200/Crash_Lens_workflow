@@ -612,37 +612,43 @@ def populate_frontend_columns(df, state_abbr=""):
     if "resolved_functional_class" in df.columns:
         df["Functional Class"] = df["resolved_functional_class"]
         df["SYSTEM"] = df["resolved_system"]
-        print(f"      Functional Class:  {(df["Functional Class"] != "").sum():>7,}/{n:,}")
+        _fc_count = (df["Functional Class"] != "").sum()
+        print(f"      Functional Class:  {_fc_count:>7,}/{n:,}")
         populated += 2
 
     # ── Ownership ──
     if "resolved_ownership" in df.columns:
         df["Ownership"] = df["resolved_ownership"]
-        print(f"      Ownership:         {(df["Ownership"] != "").sum():>7,}/{n:,}")
+        _own_count = (df["Ownership"] != "").sum()
+        print(f"      Ownership:         {_own_count:>7,}/{n:,}")
         populated += 1
 
     # ── Facility Type ──
     if "resolved_facility_type" in df.columns:
         df["Facility Type"] = df["resolved_facility_type"]
-        print(f"      Facility Type:     {(df["Facility Type"] != "").sum():>7,}/{n:,}")
+        _ft_count = (df["Facility Type"] != "").sum()
+        print(f"      Facility Type:     {_ft_count:>7,}/{n:,}")
         populated += 1
 
     # ── Roadway Surface Type ──
     if "resolved_surface_type_vdot" in df.columns:
         df["Roadway Surface Type"] = df["resolved_surface_type_vdot"]
-        print(f"      Surface Type:      {(df["Roadway Surface Type"] != "").sum():>7,}/{n:,}")
+        _st_count = (df["Roadway Surface Type"] != "").sum()
+        print(f"      Surface Type:      {_st_count:>7,}/{n:,}")
         populated += 1
 
     # ── Traffic Control Type ──
     if "resolved_traffic_control" in df.columns:
         df["Traffic Control Type"] = df["resolved_traffic_control"]
-        print(f"      Traffic Control:   {(df["Traffic Control Type"] != "1. No Traffic Control").sum():>7,}/{n:,}")
+        _tc_count = (df["Traffic Control Type"] != "1. No Traffic Control").sum()
+        print(f"      Traffic Control:   {_tc_count:>7,}/{n:,}")
         populated += 1
 
     # ── Intersection Type ──
     if "resolved_intersection_type" in df.columns:
         df["Intersection Type"] = df["resolved_intersection_type"]
-        print(f"      Intersection Type: {(df["Intersection Type"] != "1. Not at Intersection").sum():>7,}/{n:,}")
+        _it_count = (df["Intersection Type"] != "1. Not at Intersection").sum()
+        print(f"      Intersection Type: {_it_count:>7,}/{n:,}")
         populated += 1
 
     # ── Area Type ──
