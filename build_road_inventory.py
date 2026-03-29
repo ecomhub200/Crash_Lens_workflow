@@ -23,8 +23,8 @@ INPUT FILES (from {state}/cache/):
     OR traffic-inventory.parquet.gz  <- Mapillary (alternate name)
 
 PROXIMITY THRESHOLDS (all in feet):
-    Schools: 1500ft, Transit: 500ft, Bridges: 500ft, Rail: 500ft
-    POI bars: 1500ft, hospitals: 2000ft, parking/fuel: 500ft
+    Schools: 2000ft, Transit: 500ft, Bridges: 500ft, Rail: 500ft
+    POI bars: 2000ft, hospitals: 2000ft, parking/fuel: 500ft
 
 MAPILLARY (feet): Speed: 500ft, Signals: 500ft, General: 100ft
 
@@ -320,7 +320,7 @@ def enrich_rail_crossings(roads, df):
 
 
 def enrich_schools(roads, df):
-    enrich_nearest_asset(roads, df, "school", 1500,
+    enrich_nearest_asset(roads, df, "school", 2000,
         attr_cols=[
             ("school_name",   "name"),
             ("school_level",  "level"),
@@ -354,7 +354,7 @@ def enrich_poi_categories(roads, pois):
 
     print("    POI categories...")
     poi_configs = [
-        ("bar",        1500),
+        ("bar",        2000),
         ("hospital",   2000),
         ("clinic",     1500),
         ("parking",     500),
