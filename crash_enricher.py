@@ -886,14 +886,19 @@ class CrashEnricher:
         df = self.enrich_tier1(df)
 
         if not skip_tier2:
-            df = self.enrich_tier3_hpms(df)   # HPMS first (authoritative)
-            gc.collect()                       # Free HPMS arrays before OSM
+            ri_path = Path(self.cache_dir) / f'{self.state_abbr.lower()}_road_inventory.parquet.gz'
+            if ri_path.exists():
+                from road_inventory_enricher import enrich_from_road_inventory
+                df = enrich_from_road_inventory(df, self.state_abbr, self.cache_dir)
+            else:
+                df = self.enrich_tier3_hpms(df)   # HPMS first (authoritative)
+                gc.collect()                       # Free HPMS arrays before OSM
 
-            df = self.enrich_tier2(df)         # OSM second (fills gaps)
-            gc.collect()                       # Free OSM arrays before POI
+                df = self.enrich_tier2(df)         # OSM second (fills gaps)
+                gc.collect()                       # Free OSM arrays before POI
 
-            df = self.enrich_tier2b_pois(df)   # POI proximity
-            gc.collect()                       # Free POI arrays before Federal
+                df = self.enrich_tier2b_pois(df)   # POI proximity
+                gc.collect()                       # Free POI arrays before Federal
 
             df = self.enrich_tier2c_federal(df)  # Federal safety data
             gc.collect()                       # Free Federal arrays
