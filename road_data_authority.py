@@ -37,104 +37,133 @@ import pandas as pd
 
 
 def resolve_speed_limit(df):
-    """HPMS > Mapillary > OSM. Returns (value_array, source_array). Vectorized."""
+    """HPMS > Mapillary > OSM. Returns (value_array, source_array)."""
     n = len(df)
-    values = np.zeros(n, dtype=int)
+    values = np.full(n, 0, dtype=int)
     sources = np.full(n, "", dtype=object)
 
-    # Tier 3: OSM (lowest priority)
+    # Tier 3: OSM (lowest priority — set first, gets overwritten)
     if "maxspeed" in df.columns:
-        osm_raw = df["maxspeed"].astype(str).str.replace("mph", "", regex=False).str.strip()
-        osm_spd = pd.to_numeric(osm_raw, errors="coerce").fillna(0).astype(int).values
-        valid = (osm_spd >= 5) & (osm_spd <= 85)
-        values[valid] = osm_spd[valid]
-        sources[valid] = "OSM"
+        for i, v in enumerate(df["maxspeed"].values):
+            s = str(v).replace("mph", "").strip()
+            try:
+                spd = int(s)
+                if 5 <= spd <= 85:
+                    values[i] = spd
+                    sources[i] = "OSM"
+            except (ValueError, TypeError):
+                pass
 
     # Tier 2: Mapillary (overwrites OSM)
     if "map_speed_limit_value" in df.columns:
-        map_spd = pd.to_numeric(df["map_speed_limit_value"], errors="coerce").fillna(0).astype(int).values
-        valid = (map_spd >= 5) & (map_spd <= 85)
-        values[valid] = map_spd[valid]
-        sources[valid] = "Mapillary"
+        for i, v in enumerate(df["map_speed_limit_value"].values):
+            s = str(v).strip()
+            try:
+                spd = int(s)
+                if 5 <= spd <= 85:
+                    values[i] = spd
+                    sources[i] = "Mapillary"
+            except (ValueError, TypeError):
+                pass
 
-    # Tier 1: HPMS (highest — always wins)
+    # Tier 1: HPMS (highest authority — always wins)
     if "hpms_speed_limit" in df.columns:
-        hpms_spd = pd.to_numeric(df["hpms_speed_limit"], errors="coerce").fillna(0).astype(int).values
-        valid = (hpms_spd >= 5) & (hpms_spd <= 85)
-        values[valid] = hpms_spd[valid]
-        sources[valid] = "HPMS"
+        for i, v in enumerate(df["hpms_speed_limit"].values):
+            try:
+                spd = int(v)
+                if 5 <= spd <= 85:
+                    values[i] = spd
+                    sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
 
     return values, sources
 
 
 def resolve_lanes(df):
-    """HPMS > OSM. Vectorized."""
+    """HPMS > OSM."""
     n = len(df)
     values = np.zeros(n, dtype=int)
     sources = np.full(n, "", dtype=object)
 
     if "lanes" in df.columns:
-        # Take first value if semicolon-separated
-        osm_raw = df["lanes"].astype(str).str.split(";").str[0].str.strip()
-        osm_ln = pd.to_numeric(osm_raw, errors="coerce").fillna(0).astype(int).values
-        valid = (osm_ln >= 1) & (osm_ln <= 12)
-        values[valid] = osm_ln[valid]
-        sources[valid] = "OSM"
+        for i, v in enumerate(df["lanes"].values):
+            s = str(v).strip().split(";")[0]  # Take first if multi-value
+            try:
+                ln = int(s)
+                if 1 <= ln <= 12:
+                    values[i] = ln
+                    sources[i] = "OSM"
+            except (ValueError, TypeError):
+                pass
 
     if "hpms_through_lanes" in df.columns:
-        hpms_ln = pd.to_numeric(df["hpms_through_lanes"], errors="coerce").fillna(0).astype(int).values
-        valid = (hpms_ln >= 1) & (hpms_ln <= 12)
-        values[valid] = hpms_ln[valid]
-        sources[valid] = "HPMS"
+        for i, v in enumerate(df["hpms_through_lanes"].values):
+            try:
+                ln = int(v)
+                if 1 <= ln <= 12:
+                    values[i] = ln
+                    sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
 
     return values, sources
 
 
 def resolve_surface(df):
-    """HPMS > OSM. Standardizes to: Paved/Unpaved/Unknown. Vectorized."""
+    """HPMS > OSM. Standardizes to: Paved/Unpaved/Unknown."""
     n = len(df)
     values = np.full(n, "", dtype=object)
     sources = np.full(n, "", dtype=object)
 
+    # OSM surface → standardized
     osm_paved = {"asphalt", "concrete", "paved", "concrete:plates", "concrete:lanes",
                  "paving_stones", "sett", "metal"}
     osm_unpaved = {"unpaved", "gravel", "dirt", "sand", "grass", "ground",
                    "mud", "compacted", "fine_gravel", "earth"}
 
     if "surface" in df.columns:
-        surf = df["surface"].astype(str).str.strip().str.lower().values
-        is_paved = np.isin(surf, list(osm_paved))
-        is_unpaved = np.isin(surf, list(osm_unpaved))
-        values[is_paved] = "Paved"
-        sources[is_paved] = "OSM"
-        values[is_unpaved] = "Unpaved"
-        sources[is_unpaved] = "OSM"
+        for i, v in enumerate(df["surface"].values):
+            s = str(v).strip().lower()
+            if s in osm_paved:
+                values[i] = "Paved"
+                sources[i] = "OSM"
+            elif s in osm_unpaved:
+                values[i] = "Unpaved"
+                sources[i] = "OSM"
 
-    # HPMS surface_type: 1-5=Paved variants, 7-9=Unpaved
+    # HPMS surface_type: 1=Concrete, 2=Asphalt, 3=Brick, 4=Gravel, 5=Dirt
     if "hpms_surface_type" in df.columns:
-        st = pd.to_numeric(df["hpms_surface_type"], errors="coerce").fillna(0).astype(int).values
-        hpms_paved = np.isin(st, [1, 2, 3, 4, 5, 6])
-        hpms_unpaved = np.isin(st, [7, 8, 9, 11])
-        values[hpms_paved] = "Paved"
-        sources[hpms_paved] = "HPMS"
-        values[hpms_unpaved] = "Unpaved"
-        sources[hpms_unpaved] = "HPMS"
+        for i, v in enumerate(df["hpms_surface_type"].values):
+            try:
+                st = int(v)
+                if st in (1, 2, 3):
+                    values[i] = "Paved"
+                    sources[i] = "HPMS"
+                elif st in (4, 5):
+                    values[i] = "Unpaved"
+                    sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
 
     return values, sources
 
 
 def resolve_signals(df):
-    """Mapillary > POI > HPMS. Returns Yes/No. Vectorized."""
+    """Mapillary > POI > HPMS. Returns Yes/No."""
     n = len(df)
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
 
     # Tier 3: HPMS signal_type
     if "hpms_signal_type" in df.columns:
-        hpms_sig = pd.to_numeric(df["hpms_signal_type"], errors="coerce").fillna(0).values
-        mask = hpms_sig > 0
-        values[mask] = "Yes"
-        sources[mask] = "HPMS"
+        for i, v in enumerate(df["hpms_signal_type"].values):
+            try:
+                if int(v) > 0:
+                    values[i] = "Yes"
+                    sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
 
     # Tier 2: POI signal
     if "Near_PoiSignal_100ft" in df.columns:
@@ -152,16 +181,16 @@ def resolve_signals(df):
 
 
 def resolve_lighting(df):
-    """Mapillary(count>0) > OSM(lit=yes). Vectorized."""
+    """Mapillary(count>0) > OSM(lit=yes)."""
     n = len(df)
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
 
     if "lit" in df.columns:
-        lit = df["lit"].astype(str).str.strip().str.lower().values
-        mask = (lit == "yes")
-        values[mask] = "Yes"
-        sources[mask] = "OSM"
+        for i, v in enumerate(df["lit"].values):
+            if str(v).strip().lower() == "yes":
+                values[i] = "Yes"
+                sources[i] = "OSM"
 
     if "map_street_light_count" in df.columns:
         mask = df["map_street_light_count"].values > 0
@@ -172,7 +201,7 @@ def resolve_lighting(df):
 
 
 def resolve_bridge(df):
-    """OSM(bridge tag on segment) > Federal(within 500ft). Vectorized."""
+    """OSM(bridge tag on segment) > Federal(within 500ft)."""
     n = len(df)
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
@@ -184,10 +213,11 @@ def resolve_bridge(df):
 
     # OSM bridge tag is directly ON the segment — higher authority
     if "bridge" in df.columns:
-        br = df["bridge"].astype(str).str.strip().str.lower().values
-        mask = ~np.isin(br, ["", "no", "nan", "none"])
-        values[mask] = "Yes"
-        sources[mask] = "OSM"
+        for i, v in enumerate(df["bridge"].values):
+            s = str(v).strip().lower()
+            if s and s not in ("", "no", "nan"):
+                values[i] = "Yes"
+                sources[i] = "OSM"
 
     return values, sources
 
@@ -213,632 +243,6 @@ def resolve_school_zone(df):
         sources[mask] = "Mapillary"
 
     return values, sources
-
-
-# ═══════════════════════════════════════════════════════════════
-#  HPMS → VDOT FRONTEND VALUE MAPPINGS
-# ═══════════════════════════════════════════════════════════════
-
-# HPMS f_system → VDOT Functional Class
-HPMS_FC_MAP = {
-    1: "1-Interstate",
-    2: "2-Freeway/Expressway",
-    3: "3-Principal Arterial",
-    4: "4-Minor Arterial",
-    5: "5-Major Collector",
-    6: "6-Minor Collector",
-    7: "7-Local",
-}
-
-# HPMS f_system → VDOT SYSTEM (same as FC_TO_SYSTEM in crash_enricher)
-FC_TO_SYSTEM = {
-    "1-Interstate": "DOT Interstate",
-    "2-Freeway/Expressway": "DOT Primary",
-    "3-Principal Arterial": "DOT Primary",
-    "4-Minor Arterial": "DOT Secondary",
-    "5-Major Collector": "DOT Secondary",
-    "6-Minor Collector": "Non-DOT primary",
-    "7-Local": "Non-DOT secondary",
-}
-
-# OSM highway → VDOT Functional Class
-OSM_FC_MAP = {
-    "motorway": "1-Interstate",
-    "motorway_link": "1-Interstate",
-    "trunk": "2-Freeway/Expressway",
-    "trunk_link": "2-Freeway/Expressway",
-    "primary": "3-Principal Arterial",
-    "primary_link": "3-Principal Arterial",
-    "secondary": "4-Minor Arterial",
-    "secondary_link": "4-Minor Arterial",
-    "tertiary": "5-Major Collector",
-    "tertiary_link": "5-Major Collector",
-    "unclassified": "6-Minor Collector",
-    "residential": "7-Local",
-    "living_street": "7-Local",
-    "service": "7-Local",
-}
-
-# HPMS ownership code → VDOT Ownership value
-HPMS_OWN_MAP = {
-    1:  "1. State Hwy Agency",
-    2:  "2. County Hwy Agency",
-    3:  "3. City or Town Hwy Agency",
-    4:  "3. City or Town Hwy Agency",   # HPMS 4 = City or Municipal Highway Agency
-    5:  "1. State Hwy Agency",          # State Park, Forest, or Reservation Agency
-    11: "1. State Hwy Agency",          # State Park/Forest Agency
-    12: "3. City or Town Hwy Agency",   # Local Park/Forest Agency
-    21: "4. Federal Roads",          # Other Federal
-    25: "4. Federal Roads",          # Forest Service
-    26: "4. Federal Roads",          # National Park Service
-    27: "4. Federal Roads",          # Bureau of Indian Affairs
-    31: "1. State Hwy Agency",      # State Toll Authority
-    32: "5. Toll Roads Maintained by Others",  # Local Toll Authority
-    40: "5. Toll Roads Maintained by Others",  # Other Toll
-    50: "4. Federal Roads",          # Indian Tribe Nation
-    60: "6. Private/Unknown Roads",  # Other Agencies
-    62: "4. Federal Roads",          # Bureau of Reclamation
-    63: "4. Federal Roads",          # Corps of Engineers
-    64: "4. Federal Roads",          # Military
-    66: "4. Federal Roads",          # FHWA
-    70: "6. Private/Unknown Roads",  # Railroad
-    80: "6. Private/Unknown Roads",  # Other
-}
-
-# OSM highway → VDOT Ownership (heuristic fallback)
-OSM_OWN_MAP = {
-    "motorway": "1. State Hwy Agency",
-    "motorway_link": "1. State Hwy Agency",
-    "trunk": "1. State Hwy Agency",
-    "trunk_link": "1. State Hwy Agency",
-    "primary": "1. State Hwy Agency",
-    "primary_link": "1. State Hwy Agency",
-    "secondary": "2. County Hwy Agency",
-    "secondary_link": "2. County Hwy Agency",
-    "tertiary": "2. County Hwy Agency",
-    "tertiary_link": "2. County Hwy Agency",
-    "residential": "3. City or Town Hwy Agency",
-    "living_street": "3. City or Town Hwy Agency",
-    "service": "6. Private/Unknown Roads",
-    "unclassified": "3. City or Town Hwy Agency",
-}
-
-# HPMS facility_type → VDOT Facility Type
-# CRITICAL: HPMS codes are NOT the same numbering as VDOT!
-# HPMS: 1=One-Way, 2=Two-Way, 4=Divided, 6=One-Way Couplet
-# VDOT: 1=One-Way Undivided, 2=One-Way Divided, 3=Two-Way Undivided, 4=Two-Way Divided
-HPMS_FACILITY_MAP = {
-    1: "1-One-Way Undivided",       # HPMS 1 = One-Way Roadway
-    2: "3-Two-Way Undivided",       # HPMS 2 = Two-Way Roadway (NOT "2-One-Way Divided")
-    4: "4-Two-Way Divided",         # HPMS 4 = Divided Highway
-    6: "1-One-Way Undivided",       # HPMS 6 = One-Way Couplet
-}
-
-# HPMS surface_type → VDOT Roadway Surface Type
-# CRITICAL: Codes changed between 2018 and 2023 schemas.
-# This mapping handles BOTH — keys that exist in both map correctly.
-# 2023 schema (75K+ segments = 2023): 1=PCC, 2=AC, 3=CRCP, 4=AC/PCC,
-#   5=AC Composite, 6=Other Composite, 7=Gravel, 8=Brick, 9=Dirt, 10=Other, 11=PCC+AC Overlay
-# 2018 schema (19K segments = 2018): 1=Concrete, 2=Bituminous, 3=Brick, 4=Gravel, 5=Dirt
-HPMS_SURFACE_MAP = {
-    1:  "1. Concrete",                          # PCC (both schemas)
-    2:  "2. Blacktop, Asphalt, Bituminous",     # AC / Bituminous (both)
-    3:  "1. Concrete",                          # 2023: CRCP; 2018: Brick → safer to map as Concrete
-    4:  "2. Blacktop, Asphalt, Bituminous",     # 2023: AC over PCC; 2018: Gravel → ambiguous
-    5:  "2. Blacktop, Asphalt, Bituminous",     # 2023: AC Composite; 2018: Dirt → ambiguous
-    6:  "6. Other",                             # 2023: Other Composite (NOT Brick)
-    7:  "4. Slag, Gravel, Stone",               # 2023: Gravel; 2018: Dirt → use 2023 since DE=2023
-    8:  "3. Brick or Block",                    # 2023: Brick (code 8, not 6)
-    9:  "5. Dirt",                              # 2023: Unpaved/Dirt
-    10: "6. Other",                             # 2023: Other/Unknown
-    11: "1. Concrete",                          # 2023: PCC with Asphalt Overlay
-}
-
-
-def resolve_functional_class(df):
-    """HPMS > OSM. Returns (fc_values, system_values, fc_sources)."""
-    n = len(df)
-    fc_values = np.full(n, "", dtype=object)
-    sys_values = np.full(n, "", dtype=object)
-    fc_sources = np.full(n, "", dtype=object)
-
-    # Tier 2: OSM (lowest — set first)
-    if "highway" in df.columns:
-        hw = df["highway"].astype(str).str.strip().str.lower().values
-        for i, h in enumerate(hw):
-            # Handle semicolons (e.g. "primary;trunk")
-            first = h.split(";")[0].strip()
-            fc = OSM_FC_MAP.get(first, "")
-            if fc:
-                fc_values[i] = fc
-                sys_values[i] = FC_TO_SYSTEM.get(fc, "")
-                fc_sources[i] = "OSM"
-
-    # Tier 1: HPMS (highest — always overwrites)
-    if "hpms_f_system" in df.columns:
-        fs = pd.to_numeric(df["hpms_f_system"], errors="coerce").fillna(0).astype(int).values
-        for i, code in enumerate(fs):
-            fc = HPMS_FC_MAP.get(code, "")
-            if fc:
-                fc_values[i] = fc
-                sys_values[i] = FC_TO_SYSTEM.get(fc, "")
-                fc_sources[i] = "HPMS"
-
-    return fc_values, sys_values, fc_sources
-
-
-def resolve_ownership(df):
-    """HPMS > OSM. Returns (ownership_values, ownership_sources)."""
-    n = len(df)
-    values = np.full(n, "", dtype=object)
-    sources = np.full(n, "", dtype=object)
-
-    # Tier 2: OSM (heuristic from highway tag)
-    if "highway" in df.columns:
-        hw = df["highway"].astype(str).str.strip().str.lower().values
-        for i, h in enumerate(hw):
-            first = h.split(";")[0].strip()
-            own = OSM_OWN_MAP.get(first, "")
-            if own:
-                values[i] = own
-                sources[i] = "OSM"
-
-    # Tier 1: HPMS (authoritative — always overwrites)
-    if "hpms_ownership" in df.columns:
-        oc = pd.to_numeric(df["hpms_ownership"], errors="coerce").fillna(0).astype(int).values
-        for i, code in enumerate(oc):
-            own = HPMS_OWN_MAP.get(code, "")
-            if own:
-                values[i] = own
-                sources[i] = "HPMS"
-
-    return values, sources
-
-
-def resolve_intersection_type(df):
-    """Derive Intersection Type from intersection_degree with correct approach count."""
-    n = len(df)
-    values = np.full(n, "1. Not at Intersection", dtype=object)
-
-    if "is_intersection" not in df.columns or "intersection_degree" not in df.columns:
-        return values
-
-    is_int = df["is_intersection"].values == "Yes"
-    degree = pd.to_numeric(df["intersection_degree"], errors="coerce").fillna(0).astype(int).values
-
-    # OSM graph degree counts ALL edges (both directions of 2-way roads).
-    # A typical 3-way T-intersection has degree 6 (3 roads × 2 directions).
-    # A 4-way intersection has degree 8 (4 roads × 2 directions).
-    # For one-way roads, degree = actual edges. Mixed is complex.
-    # Best heuristic: approaches ≈ ceil(degree / 2), capped at 5
-    approaches = np.ceil(degree / 2).astype(int)
-    approaches = np.clip(approaches, 0, 6)
-
-    values = np.where(~is_int, "1. Not at Intersection",
-             np.where(approaches <= 2, "2. Two Approaches",
-             np.where(approaches == 3, "3. Three Approaches",
-             np.where(approaches == 4, "4. Four Approaches",
-             "5. Five-Point, or More"))))
-
-    return values
-
-
-def resolve_facility_type(df):
-    """HPMS > OSM oneway tag. Returns (values, sources)."""
-    n = len(df)
-    values = np.full(n, "", dtype=object)
-    sources = np.full(n, "", dtype=object)
-
-    # Tier 2: OSM (from oneway + divider tags)
-    if "oneway" in df.columns:
-        ow = df["oneway"].astype(str).str.strip().str.lower().values
-        div = df.get("divider", pd.Series([""] * n)).astype(str).str.strip().str.lower().values
-        for i in range(n):
-            if ow[i] in ("yes", "true", "1", "-1"):
-                values[i] = "1-One-Way Undivided"
-                sources[i] = "OSM"
-            elif div[i] in ("yes", "median", "barrier"):
-                values[i] = "4-Two-Way Divided"
-                sources[i] = "OSM"
-            elif ow[i] in ("no", "false", "0", ""):
-                values[i] = "3-Two-Way Undivided"
-                sources[i] = "OSM"
-
-    # Tier 1: HPMS (authoritative)
-    if "hpms_facility_type" in df.columns:
-        ft = pd.to_numeric(df["hpms_facility_type"], errors="coerce").fillna(0).astype(int).values
-        for i, code in enumerate(ft):
-            fac = HPMS_FACILITY_MAP.get(code, "")
-            if fac:
-                values[i] = fac
-                sources[i] = "HPMS"
-
-    return values, sources
-
-
-def resolve_surface_type_vdot(df):
-    """HPMS > OSM. Returns VDOT-standard surface type values using correct HPMS mapping."""
-    n = len(df)
-    values = np.full(n, "", dtype=object)
-    sources = np.full(n, "", dtype=object)
-
-    # OSM surface → VDOT
-    osm_to_vdot = {
-        "asphalt": "2. Blacktop, Asphalt, Bituminous",
-        "concrete": "1. Concrete",
-        "paved": "2. Blacktop, Asphalt, Bituminous",
-        "concrete:plates": "1. Concrete",
-        "concrete:lanes": "1. Concrete",
-        "paving_stones": "3. Brick or Block",
-        "sett": "3. Brick or Block",
-        "brick": "3. Brick or Block",
-        "gravel": "4. Slag, Gravel, Stone",
-        "fine_gravel": "4. Slag, Gravel, Stone",
-        "compacted": "4. Slag, Gravel, Stone",
-        "dirt": "5. Dirt",
-        "earth": "5. Dirt",
-        "ground": "5. Dirt",
-        "mud": "5. Dirt",
-        "sand": "5. Dirt",
-        "grass": "5. Dirt",
-        "unpaved": "4. Slag, Gravel, Stone",
-        "metal": "6. Other",
-    }
-
-    if "surface" in df.columns:
-        surf = df["surface"].astype(str).str.strip().str.lower().values
-        for i, s in enumerate(surf):
-            v = osm_to_vdot.get(s, "")
-            if v:
-                values[i] = v
-                sources[i] = "OSM"
-
-    # HPMS surface_type → VDOT (using correct mapping, NOT 1:1 numbering)
-    if "hpms_surface_type" in df.columns:
-        st = pd.to_numeric(df["hpms_surface_type"], errors="coerce").fillna(0).astype(int).values
-        for i, code in enumerate(st):
-            v = HPMS_SURFACE_MAP.get(code, "")
-            if v:
-                values[i] = v
-                sources[i] = "HPMS"
-
-    return values, sources
-
-
-def resolve_traffic_control(df):
-    """Derive Traffic Control Type from resolved signals, stop signs, yield signs."""
-    n = len(df)
-    values = np.full(n, "", dtype=object)
-
-    # Yield signs from Mapillary
-    if "map_yield_sign" in df.columns:
-        mask = df["map_yield_sign"].values == "Yes"
-        values[mask] = "8. Yield Sign"
-
-    # Stop signs
-    has_stop = np.zeros(n, dtype=bool)
-    if "map_stop_sign" in df.columns:
-        has_stop |= (df["map_stop_sign"].values == "Yes")
-    if "Near_PoiStopSign_100ft" in df.columns:
-        has_stop |= (df["Near_PoiStopSign_100ft"].values == "Yes")
-    values[has_stop] = "4. Stop Sign"
-
-    # Traffic signals (highest priority — overwrites stop)
-    has_signal = np.zeros(n, dtype=bool)
-    if "resolved_has_signal" in df.columns:
-        has_signal = (df["resolved_has_signal"].values == "Yes")
-    elif "map_signal_present" in df.columns:
-        has_signal = (df["map_signal_present"].values == "Yes")
-    values[has_signal] = "3. Traffic Signal"
-
-    # Rail crossing signals
-    if "Near_RailXing_500ft" in df.columns:
-        rail = (df["Near_RailXing_500ft"].values == "Yes")
-        # Only set if not already signal/stop
-        empty_rail = rail & (values == "")
-        values[empty_rail] = "10. Railroad Crossing With Markings and Signs"
-
-    # Fill remaining empty with "1. No Traffic Control"
-    values[values == ""] = "1. No Traffic Control"
-
-    return values
-
-
-# ═══════════════════════════════════════════════════════════════
-#  FRONTEND COLUMN POPULATOR
-# ═══════════════════════════════════════════════════════════════
-
-def populate_frontend_columns(df, state_abbr=""):
-    """
-    Map all resolved/enriched values to exact VDOT frontend column names.
-    Applies statutory speed defaults, IRI pavement condition, VMT readiness.
-    Drops duplicate resolved_ columns (keeps _source cols for provenance).
-    """
-    print("    Populating frontend-standard columns...")
-    n = len(df)
-    populated = 0
-
-    # ── Speed limit with statutory defaults (#1) ──
-    if "resolved_speed_limit" in df.columns:
-        speed = df["resolved_speed_limit"].values.copy()
-        source = df["resolved_speed_source"].values.copy()
-        fc = df.get("resolved_functional_class",
-                     df.get("Functional Class", pd.Series([""] * n))).astype(str).values
-
-        # Load statutory defaults from registry
-        get_statutory = None
-        try:
-            from states_registry import get_statutory_speed
-            get_statutory = get_statutory_speed
-        except ImportError:
-            pass
-        if not get_statutory:
-            try:
-                from pathlib import Path
-                import importlib.util
-                for p in [Path(__file__).parent / "states_registry.py", Path("states_registry.py")]:
-                    if p.exists():
-                        spec = importlib.util.spec_from_file_location("sr", p)
-                        sr = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(sr)
-                        get_statutory = sr.get_statutory_speed
-                        break
-            except Exception:
-                pass
-
-        if get_statutory:
-            no_speed = speed == 0
-            imputed = 0
-            for i in range(n):
-                if no_speed[i] and fc[i]:
-                    default = get_statutory(fc[i], state_abbr)
-                    if default > 0:
-                        speed[i] = default
-                        source[i] = "Statutory"
-                        imputed += 1
-            df["resolved_speed_limit"] = speed
-            df["resolved_speed_source"] = source
-            measured = ((source != "Statutory") & (source != "")).sum()
-            print(f"      Speed limit:       measured={measured:,}, "
-                  f"statutory={imputed:,}, total={(speed > 0).sum():,}/{n:,} "
-                  f"({(speed > 0).sum()/n*100:.0f}%)")
-        else:
-            print(f"      Speed limit:       {(speed > 0).sum():>7,}/{n:,} (no defaults — states_registry.py not found)")
-
-        df["Max Speed Diff"] = df["resolved_speed_limit"]
-        populated += 1
-
-    # ── Functional Class + SYSTEM ──
-    if "resolved_functional_class" in df.columns:
-        df["Functional Class"] = df["resolved_functional_class"]
-        df["SYSTEM"] = df["resolved_system"]
-        _fc = (df["Functional Class"] != "").sum()
-        print(f"      Functional Class:  {_fc:>7,}/{n:,}")
-        populated += 2
-
-    # ── Ownership ──
-    if "resolved_ownership" in df.columns:
-        df["Ownership"] = df["resolved_ownership"]
-        _own = (df["Ownership"] != "").sum()
-        print(f"      Ownership:         {_own:>7,}/{n:,}")
-        populated += 1
-
-    # ── Facility Type ──
-    if "resolved_facility_type" in df.columns:
-        df["Facility Type"] = df["resolved_facility_type"]
-        _ft = (df["Facility Type"] != "").sum()
-        print(f"      Facility Type:     {_ft:>7,}/{n:,}")
-        populated += 1
-
-    # ── Roadway Surface Type ──
-    if "resolved_surface_type_vdot" in df.columns:
-        df["Roadway Surface Type"] = df["resolved_surface_type_vdot"]
-        _surf = (df["Roadway Surface Type"] != "").sum()
-        print(f"      Surface Type:      {_surf:>7,}/{n:,}")
-        populated += 1
-
-    # ── Traffic Control Type ──
-    if "resolved_traffic_control" in df.columns:
-        df["Traffic Control Type"] = df["resolved_traffic_control"]
-        _tc = (df["Traffic Control Type"] != "1. No Traffic Control").sum()
-        print(f"      Traffic Control:   {_tc:>7,}/{n:,}")
-        populated += 1
-
-    # ── Intersection Type ──
-    if "resolved_intersection_type" in df.columns:
-        df["Intersection Type"] = df["resolved_intersection_type"]
-        _it = (df["Intersection Type"] != "1. Not at Intersection").sum()
-        print(f"      Intersection Type: {_it:>7,}/{n:,}")
-        populated += 1
-
-    # ── Area Type ──
-    if "geo_area_type" in df.columns:
-        df["Area Type"] = df["geo_area_type"]
-        populated += 1
-
-    # ── Lanes with FC defaults ──
-    if "resolved_lanes" in df.columns:
-        df["Through_Lanes"] = df["resolved_lanes"]
-    if "Through_Lanes" not in df.columns:
-        df["Through_Lanes"] = 0
-    tl = pd.to_numeric(df["Through_Lanes"], errors="coerce").fillna(0).astype(int)
-    fc_col = df.get("Functional Class", pd.Series([""] * n)).astype(str)
-    no_lanes = tl == 0
-    lane_defaults = {"1-Interstate": 4, "2-Freeway/Expressway": 4,
-                     "3-Principal Arterial": 2, "4-Minor Arterial": 2,
-                     "5-Major Collector": 2, "6-Minor Collector": 2, "7-Local": 2}
-    lanes_imputed = 0
-    for fc_val, default in lane_defaults.items():
-        mask = no_lanes & (fc_col == fc_val)
-        tl[mask] = default
-        lanes_imputed += mask.sum()
-    df["Through_Lanes"] = tl
-    measured_lanes = (tl > 0).sum() - lanes_imputed
-    print(f'      Through_Lanes:     measured={measured_lanes:,}, default={lanes_imputed:,}, '
-          f'total={(tl>0).sum():,}/{n:,}')
-    populated += 1
-
-    # ── AADT with estimation for local roads ──
-    if "hpms_aadt" in df.columns:
-        df["AADT"] = pd.to_numeric(df["hpms_aadt"], errors="coerce").fillna(0).astype(int)
-    if "AADT" not in df.columns:
-        df["AADT"] = 0
-    aadt_arr = pd.to_numeric(df["AADT"], errors="coerce").fillna(0).astype(int)
-    no_aadt = aadt_arr == 0
-    area = df.get("Area Type", pd.Series(["Rural"] * n)).astype(str)
-    is_urban = area.str.contains("Urban", case=False, na=False)
-    # FHWA-based estimation defaults by FC + area type
-    aadt_defaults = {
-        ("1-Interstate", True): 60000, ("1-Interstate", False): 25000,
-        ("2-Freeway/Expressway", True): 40000, ("2-Freeway/Expressway", False): 15000,
-        ("3-Principal Arterial", True): 15000, ("3-Principal Arterial", False): 5000,
-        ("4-Minor Arterial", True): 8000, ("4-Minor Arterial", False): 3000,
-        ("5-Major Collector", True): 5000, ("5-Major Collector", False): 2000,
-        ("6-Minor Collector", True): 2000, ("6-Minor Collector", False): 800,
-        ("7-Local", True): 1500, ("7-Local", False): 400,
-    }
-    if "AADT_source" not in df.columns:
-        df["AADT_source"] = ""
-    df.loc[aadt_arr > 0, "AADT_source"] = "HPMS"
-    aadt_estimated = 0
-    for (fc_val, urban), default in aadt_defaults.items():
-        mask = no_aadt & (fc_col == fc_val) & (is_urban == urban)
-        aadt_arr[mask] = default
-        aadt_estimated += mask.sum()
-    df["AADT"] = aadt_arr
-    df.loc[(df["AADT_source"] == "") & (aadt_arr > 0), "AADT_source"] = "Estimated"
-    print(f'      AADT:              measured={(aadt_arr>0).sum()-aadt_estimated:,}, '
-          f'estimated={aadt_estimated:,}, total={(aadt_arr>0).sum():,}/{n:,}')
-    populated += 1
-
-    # ── Geography ──
-    for src, dst in [("geo_dot_region","DOT District"),("geo_planning_district","Planning District"),
-                     ("geo_mpo_name","MPO Name"),("geo_county_name","Physical Juris Name"),
-                     ("geo_juris_code","Juris Code")]:
-        if src in df.columns:
-            df[dst] = df[src]
-            populated += 1
-
-    # ── Route name (5-tier waterfall: 12% → 100%) ──
-    # Tier 1: HPMS route_name (official: "SR 13", "CR 1", "US 95")
-    rte = pd.Series([""] * n, index=df.index)
-    if "hpms_route_name" in df.columns:
-        hpms_rte = df["hpms_route_name"].astype(str).str.strip()
-        mask = ~hpms_rte.isin(["", "0", "nan", "None"])
-        rte[mask] = hpms_rte[mask]
-
-    # Tier 2: OSM ref tag (route number: "US 13", "DE 1")
-    if "ref" in df.columns:
-        osm_ref = df["ref"].astype(str).str.strip()
-        empty = rte.isin(["", "0", "nan"])
-        has_ref = ~osm_ref.isin(["", "0", "nan", "None", "False"])
-        rte[empty & has_ref] = osm_ref[empty & has_ref]
-
-    # Tier 3: OSM name tag (street name: "Dupont Boulevard", "Main Street")
-    if "name" in df.columns:
-        osm_name = df["name"].astype(str).str.strip()
-        empty = rte.isin(["", "0", "nan"])
-        has_name = ~osm_name.isin(["", "0", "nan", "None", "False"])
-        rte[empty & has_name] = osm_name[empty & has_name]
-
-    # Tier 4: HPMS orphans — generate label from FC + county
-    if "road_source" in df.columns:
-        empty = rte.isin(["", "0", "nan"])
-        is_orphan = df["road_source"].astype(str) == "HPMS"
-        fc_label = df.get("Functional Class", pd.Series([""] * n)).astype(str)
-        fc_short = fc_label.str.split("-").str[-1].str.split("(").str[0].str.strip()
-        county = df.get("Physical Juris Name", pd.Series([""] * n)).astype(str).str.strip()
-        gen = fc_short + " (" + county + ")"
-        fill_mask = empty & is_orphan & (fc_short != "") & (county != "")
-        rte[fill_mask] = gen[fill_mask]
-
-    # Tier 5: Remaining unnamed → "Local Road"
-    empty = rte.isin(["", "0", "nan"])
-    rte[empty] = "Local Road"
-
-    df["RTE Name"] = rte
-    t1 = (~df["hpms_route_name"].astype(str).str.strip().isin(["","0","nan","None"])).sum() if "hpms_route_name" in df.columns else 0
-    _count = (~rte.isin(["", "Local Road"])).sum()
-    print(f'      RTE Name:          {_count:>7,}/{n:,} named ({t1:,} official routes)')
-    populated += 1
-
-    # ── School Zone ──
-    if "resolved_school_zone" in df.columns:
-        df["School Zone"] = np.where(df["resolved_school_zone"] == "Yes", "1. Yes", "3. No")
-        populated += 1
-
-    # ── Roadway Alignment from curvature (0% → 100%) ──
-    if "curve_class" in df.columns:
-        cc = pd.to_numeric(df["curve_class"], errors="coerce").fillna(1).astype(int)
-        # Without HPMS grade data, we can only distinguish straight vs curve (level assumed)
-        alignment = np.where(cc <= 1, "1. Straight - Level",
-                   np.where(cc <= 3, "2. Curve - Level",
-                   "4. Grade - Curve"))  # Sharp/Extreme curves often on grades
-        if "Roadway Alignment" not in df.columns:
-            df["Roadway Alignment"] = ""
-        # Only fill empty cells (state crash data may have alignment)
-        empty = df["Roadway Alignment"].astype(str).str.strip().isin(["", "nan", "None"])
-        df.loc[empty, "Roadway Alignment"] = alignment[empty.values]
-        _count = (df["Roadway Alignment"].astype(str).str.strip() != "").sum()
-        print(f'      Roadway Alignment: {_count:>7,}/{n:,}')
-        populated += 1
-
-    # ── Roadway Description from Facility Type (0% → 100%) ──
-    if "Facility Type" in df.columns:
-        ft = df["Facility Type"].astype(str)
-        desc_map = {
-            "1-One-Way Undivided":  "4. One-Way, Not Divided",
-            "2-One-Way Divided":    "4. One-Way, Not Divided",
-            "3-Two-Way Undivided":  "1. Two-Way, Not Divided",
-            "4-Two-Way Divided":    "2. Two-Way, Divided, Unprotected Median",
-            "5-Reversible Exclusively": "5. Unknown",
-        }
-        if "Roadway Description" not in df.columns:
-            df["Roadway Description"] = ""
-        empty = df["Roadway Description"].astype(str).str.strip().isin(["", "nan", "None"])
-        derived = ft.map(desc_map).fillna("")
-        df.loc[empty & (derived != ""), "Roadway Description"] = derived[empty & (derived != "")]
-        _count = (df["Roadway Description"].astype(str).str.strip() != "").sum()
-        print(f'      Roadway Desc:      {_count:>7,}/{n:,}')
-        populated += 1
-
-    # ── IRI Pavement Condition (#7 — new frontend column) ──
-    if "hpms_iri" in df.columns:
-        iri = pd.to_numeric(df["hpms_iri"], errors="coerce").fillna(0).values
-        df["Roadway Condition"] = np.where(
-            iri <= 0, "",
-            np.where(iri <= 95, "Good",
-            np.where(iri <= 170, "Fair",
-            np.where(iri <= 220, "Mediocre", "Poor"))))
-        has_cond = (df["Roadway Condition"] != "").sum()
-        good = ((iri > 0) & (iri <= 95)).sum()
-        poor = (iri > 220).sum()
-        print(f"      Roadway Condition: {has_cond:>7,}/{n:,} (Good={good:,}, Poor={poor:,})")
-        populated += 1
-
-    # ── Crash Rate Readiness (#8) ──
-    if "AADT" in df.columns:
-        aadt_val = pd.to_numeric(df["AADT"], errors="coerce").fillna(0)
-        length_mi = pd.to_numeric(df.get("hpms_length_mi",
-                     df.get("length_mi", pd.Series([0]*n))), errors="coerce").fillna(0)
-        # Use OSM length_m as fallback (convert to miles)
-        if (length_mi == 0).all() and "length_m" in df.columns:
-            length_mi = pd.to_numeric(df["length_m"], errors="coerce").fillna(0) / 1609.34
-        df["VMT_Annual"] = (aadt_val * 365 * length_mi).round(0).astype(int)
-        vmt_ready = (df["VMT_Annual"] > 0).sum()
-        print(f"      VMT_Annual:        {vmt_ready:>7,}/{n:,} crash-rate-ready")
-        populated += 1
-
-    # ── Drop duplicate resolved_ columns (#5 — keep _source for provenance) ──
-    dupes = ["resolved_functional_class","resolved_system","resolved_ownership",
-             "resolved_facility_type","resolved_surface_type_vdot",
-             "resolved_traffic_control","resolved_intersection_type"]
-    dropped = sum(1 for c in dupes if c in df.columns)
-    df.drop(columns=[c for c in dupes if c in df.columns], inplace=True)
-    if dropped:
-        print(f"      Dropped {dropped} duplicate resolved_ cols (kept _source)")
-
-    print(f"    Frontend columns populated: {populated}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -904,15 +308,15 @@ def run_sanity_checks(df, state_abbr):
 
     # County FIPS populated
     if "geo_county_fips" in df.columns:
-        has_county = (df["geo_county_fips"].astype(str).str.strip() != "").sum()
+        has_county = (df["geo_county_fips"].str.strip() != "").sum()
         checks["county_fips_populated"] = (has_county, n, has_county/n*100)
 
-    # No duplicate rows (exclude HPMS orphans with negative IDs)
-    if "u_node" in df.columns:
-        real_segs = df[df["u_node"] >= 0] if (df["u_node"] < 0).any() else df
-        dupes = real_segs.duplicated(subset=["u_node", "v_node"]).sum()
-        checks["no_duplicate_segments"] = (len(real_segs) - dupes, len(real_segs),
-                                           (len(real_segs)-dupes)/max(len(real_segs),1)*100)
+    # No duplicate rows
+    dupes = 0
+    dup_cols = ["osm_u_node", "osm_v_node"] if "osm_u_node" in df.columns else ["u_node", "v_node"]
+    if all(c in df.columns for c in dup_cols):
+        dupes = df.duplicated(subset=dup_cols).sum()
+    checks["no_duplicate_segments"] = (n - dupes, n, (n-dupes)/n*100)
 
     # HPMS match within 100m
     if "hpms_match_dist_ft" in df.columns:
@@ -921,40 +325,6 @@ def run_sanity_checks(df, state_abbr):
             within_100m = (df.loc[matched, "hpms_match_dist_ft"] <= 328).sum()  # 100m in ft
             checks["hpms_within_100m"] = (within_100m, matched.sum(), within_100m/max(matched.sum(),1)*100)
 
-    # ── Frontend column validation ──
-    # Valid VDOT Functional Class values
-    VALID_FC = {"1-Interstate", "2-Freeway/Expressway", "3-Principal Arterial",
-                "4-Minor Arterial", "5-Major Collector", "6-Minor Collector", "7-Local", ""}
-    if "Functional Class" in df.columns:
-        fc_vals = set(df["Functional Class"].astype(str).unique())
-        invalid_fc = fc_vals - VALID_FC
-        valid_fc = (df["Functional Class"].astype(str).isin(VALID_FC)).sum()
-        checks["fc_valid_values"] = (valid_fc, n, valid_fc/n*100)
-        if invalid_fc - {"nan", "None"}:
-            print(f"      ⚠️ Invalid FC values: {invalid_fc - {'nan', 'None'}}")
-
-    # Valid Ownership values
-    VALID_OWN = {"1. State Hwy Agency", "2. County Hwy Agency", "3. City or Town Hwy Agency",
-                 "4. Federal Roads", "5. Toll Roads Maintained by Others",
-                 "6. Private/Unknown Roads", ""}
-    if "Ownership" in df.columns:
-        own_vals = set(df["Ownership"].astype(str).unique())
-        invalid_own = own_vals - VALID_OWN
-        valid_own = (df["Ownership"].astype(str).isin(VALID_OWN)).sum()
-        checks["ownership_valid_values"] = (valid_own, n, valid_own/n*100)
-        if invalid_own - {"nan", "None"}:
-            print(f"      ⚠️ Invalid Ownership values: {invalid_own - {'nan', 'None'}}")
-
-    # Functional Class populated (should be near 100%)
-    if "Functional Class" in df.columns:
-        fc_filled = (df["Functional Class"].astype(str).str.strip().isin(VALID_FC - {""})).sum()
-        checks["fc_populated"] = (fc_filled, n, fc_filled/n*100)
-
-    # Ownership populated
-    if "Ownership" in df.columns:
-        own_filled = (df["Ownership"].astype(str).str.strip().isin(VALID_OWN - {""})).sum()
-        checks["ownership_populated"] = (own_filled, n, own_filled/n*100)
-
     return checks
 
 
@@ -962,34 +332,9 @@ def run_sanity_checks(df, state_abbr):
 #  MAIN ENTRY POINT
 # ═══════════════════════════════════════════════════════════════
 
-def apply_authority_layer(df, state_abbr=""):
+def apply_authority_layer(df):
     """Add all resolved columns to the road database DataFrame."""
     print("    Data authority resolution...")
-
-    # ── Functional Class + SYSTEM ──
-    fc_vals, sys_vals, fc_srcs = resolve_functional_class(df)
-    df["resolved_functional_class"] = fc_vals
-    df["resolved_system"] = sys_vals
-    df["resolved_fc_source"] = fc_srcs
-    filled = (fc_vals != "").sum()
-    print(f"      Func Class:   {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(fc_srcs=='HPMS').sum():,} OSM:{(fc_srcs=='OSM').sum():,}")
-
-    # ── Ownership ──
-    own_vals, own_srcs = resolve_ownership(df)
-    df["resolved_ownership"] = own_vals
-    df["resolved_ownership_source"] = own_srcs
-    filled = (own_vals != "").sum()
-    print(f"      Ownership:    {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(own_srcs=='HPMS').sum():,} OSM:{(own_srcs=='OSM').sum():,}")
-
-    # ── Facility Type ──
-    fac_vals, fac_srcs = resolve_facility_type(df)
-    df["resolved_facility_type"] = fac_vals
-    df["resolved_facility_source"] = fac_srcs
-    filled = (fac_vals != "").sum()
-    print(f"      Facility:     {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(fac_srcs=='HPMS').sum():,} OSM:{(fac_srcs=='OSM').sum():,}")
 
     vals, srcs = resolve_speed_limit(df)
     df["resolved_speed_limit"] = vals
@@ -1039,29 +384,6 @@ def apply_authority_layer(df, state_abbr=""):
     yes = (vals == "Yes").sum()
     print(f"      School zone:  {yes:>7,} Yes"
           f" — Map:{(srcs=='Mapillary').sum():,} Fed:{(srcs=='Federal').sum():,}")
-
-    # ── Surface Type (VDOT standard) ──
-    surf_vals, surf_srcs = resolve_surface_type_vdot(df)
-    df["resolved_surface_type_vdot"] = surf_vals
-    df["resolved_surface_vdot_source"] = surf_srcs
-    filled = (surf_vals != "").sum()
-    print(f"      Surface(VDOT):{filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(surf_srcs=='HPMS').sum():,} OSM:{(surf_srcs=='OSM').sum():,}")
-
-    # ── Intersection Type ──
-    int_vals = resolve_intersection_type(df)
-    df["resolved_intersection_type"] = int_vals
-    at_int = (int_vals != "1. Not at Intersection").sum()
-    print(f"      Intersection: {at_int:>7,} at intersection ({at_int/len(df)*100:.1f}%)")
-
-    # ── Traffic Control Type ──
-    tc_vals = resolve_traffic_control(df)
-    df["resolved_traffic_control"] = tc_vals
-    has_ctrl = (tc_vals != "1. No Traffic Control").sum()
-    print(f"      Traffic Ctrl: {has_ctrl:>7,} controlled ({has_ctrl/len(df)*100:.1f}%)")
-
-    # ── Populate frontend columns (must be last) ──
-    populate_frontend_columns(df, state_abbr=state_abbr)
 
 
 def print_sanity_report(checks):
@@ -1281,39 +603,31 @@ def compute_risk_indicators(df):
     # ── 1. SPEED TRANSITION ZONES ──
     speed_cols = [c for c in df.columns if c.startswith("map_speed_") and c.endswith("_count")]
     if speed_cols:
-        # Extract speed values from column names once
-        col_speeds = []
-        valid_speed_cols = []
-        for col in speed_cols:
-            spd_str = col.replace("map_speed_", "").replace("_count", "")
-            try:
-                col_speeds.append(int(spd_str))
-                valid_speed_cols.append(col)
-            except ValueError:
-                pass
+        speed_matrix = df[speed_cols].values
+        distinct_speeds = (speed_matrix > 0).sum(axis=1)
+        is_transition = distinct_speeds >= 2
+        df["risk_speed_transition"] = np.where(is_transition, "Yes", "No")
 
-        if valid_speed_cols:
-            speed_matrix = df[valid_speed_cols].values > 0  # boolean: is this speed present?
-            speed_vals = np.array(col_speeds)  # speed value per column
-            distinct_speeds = speed_matrix.sum(axis=1)
-            is_transition = distinct_speeds >= 2
-            df["risk_speed_transition"] = np.where(is_transition, "Yes", "No")
-
-            # Vectorized: max speed - min speed where present
-            # Set non-present to NaN, then take max/min per row
-            speed_present = np.where(speed_matrix, speed_vals[np.newaxis, :], np.nan)
-            with np.errstate(invalid="ignore"):
-                max_spd = np.nanmax(speed_present, axis=1)
-                min_spd = np.nanmin(speed_present, axis=1)
-                diffs = np.where(is_transition, np.nan_to_num(max_spd - min_spd, nan=0).astype(int), 0)
-            df["risk_speed_transition_diff"] = diffs
-
-            tz = is_transition.sum()
-            med_diff = np.median(diffs[diffs > 0]) if (diffs > 0).sum() > 0 else 0
-            print(f"      Speed transition: {tz:,} zones, median Δ={med_diff:.0f} mph")
-        else:
-            df["risk_speed_transition"] = "No"
-            df["risk_speed_transition_diff"] = 0
+        # Calculate speed differential (max speed - min speed at this location)
+        diffs = np.zeros(n, dtype=int)
+        for i in range(n):
+            if distinct_speeds[i] >= 2:
+                present = []
+                for col in speed_cols:
+                    if df[col].iloc[i] > 0:
+                        # Extract speed from column name: map_speed_35_count → 35
+                        spd_str = col.replace("map_speed_", "").replace("_count", "")
+                        try:
+                            present.append(int(spd_str))
+                        except ValueError:
+                            pass
+                if len(present) >= 2:
+                    diffs[i] = max(present) - min(present)
+        df["risk_speed_transition_diff"] = diffs
+        
+        tz = is_transition.sum()
+        med_diff = np.median(diffs[diffs > 0]) if (diffs > 0).sum() > 0 else 0
+        print(f"      Speed transition: {tz:,} zones, median Δ={med_diff:.0f} mph")
     else:
         df["risk_speed_transition"] = "No"
         df["risk_speed_transition_diff"] = 0
@@ -1404,14 +718,11 @@ def compute_risk_indicators(df):
                       np.where((yr >= 1960) & (yr < 1990), 10,
                       np.where(yr >= 1990, 5, 15))))
 
-        # Width penalty: narrow bridges (< 8m / 26ft) = +10
+        # Width penalty: narrow bridges (< 8m) = +10
         width_pts = np.zeros(n, dtype=int)
         if "nearest_bridge_width_m" in df.columns:
             w = pd.to_numeric(df["nearest_bridge_width_m"], errors="coerce").fillna(0).values
             width_pts = np.where((w > 0) & (w < 8), 10, 0)
-        elif "nearest_bridge_width_ft" in df.columns:
-            w = pd.to_numeric(df["nearest_bridge_width_ft"], errors="coerce").fillna(0).values
-            width_pts = np.where((w > 0) & (w < 26), 10, 0)
 
         bridge_risk = np.minimum(cond_pts + age_pts + width_pts, 100)
         bridge_risk = np.where(near_bridge, bridge_risk, 0)
@@ -1686,409 +997,266 @@ def compute_curve_analysis(df):
 
 
 # ═══════════════════════════════════════════════════════════════
-#  TRAFFIC ENGINEERING METRICS (from Mapillary + multi-source)
+#  FRONTEND COLUMN MERGE — VDOT Architecture Mapping
 # ═══════════════════════════════════════════════════════════════
 
-def derive_intersection_and_road_names(df):
+# FC code → VDOT frontend Functional Class string
+FC_LABELS = {
+    1: "1-Interstate", 2: "2-Freeway/Expressway",
+    3: "3-Principal Arterial", 4: "4-Minor Arterial",
+    5: "5-Major Collector", 6: "6-Minor Collector", 7: "7-Local",
+}
+
+# OSM highway → approximate FC
+OSM_TO_FC = {
+    "motorway": 1, "trunk": 2, "primary": 3, "secondary": 4,
+    "tertiary": 5, "unclassified": 6, "residential": 7,
+    "motorway_link": 2, "trunk_link": 3, "primary_link": 3,
+    "secondary_link": 4, "tertiary_link": 5,
+}
+
+# FC → SYSTEM
+FC_TO_SYSTEM = {
+    1: "DOT Interstate", 2: "DOT Primary", 3: "DOT Primary",
+    4: "DOT Secondary", 5: "DOT Secondary",
+    6: "Non-DOT primary", 7: "Non-DOT secondary",
+}
+
+# FC → Ownership
+FC_TO_OWNERSHIP = {
+    1: "1. State Hwy Agency", 2: "1. State Hwy Agency",
+    3: "1. State Hwy Agency", 4: "1. State Hwy Agency",
+    5: "2. County Hwy Agency", 6: "2. County Hwy Agency",
+    7: "3. City or Town Hwy Agency",
+}
+
+# HPMS ownership code → VDOT string (comprehensive — all FHWA codes)
+OWNERSHIP_LABELS = {
+    1: "1. State Hwy Agency",
+    2: "2. County Hwy Agency",
+    3: "3. City or Town Hwy Agency",
+    4: "3. City or Town Hwy Agency",    # HPMS: City/Municipal
+    5: "4. Other State Agency",          # HPMS: State Park/Forest/Reservation
+    11: "1. State Hwy Agency",           # State Toll Authority
+    12: "2. County Hwy Agency",          # Local Toll Authority
+    21: "4. Other State Agency",          # Other State Agency
+    25: "4. Other State Agency",          # Other Local Agency
+    26: "4. Other State Agency",          # Private
+    27: "4. Other State Agency",          # Railroad
+    31: "1. State Hwy Agency",           # State Toll Authority
+    32: "2. County Hwy Agency",          # Local Toll Authority
+    40: "4. Other State Agency",          # Other Public Instrumentality
+    50: "4. Other State Agency",          # Indian Tribe
+    60: "4. Other State Agency",          # Other Federal
+    62: "4. Other State Agency",          # Bureau of Indian Affairs
+    64: "4. Other State Agency",          # Bureau of Land Management
+    66: "4. Other State Agency",          # Bureau of Reclamation
+    68: "4. Other State Agency",          # Corps of Engineers
+    70: "4. Other State Agency",          # Federal Aviation Administration
+    72: "1. State Hwy Agency",           # Federal Highway Administration
+    74: "4. Other State Agency",          # FERC
+    76: "4. Other State Agency",          # National Park Service
+    80: "4. Other State Agency",          # Other
+}
+
+# HPMS facility_type → VDOT string (comprehensive)
+# HPMS: 1=One-Way, 2=Two-Way, 4=Two-Way Divided, 6=Non-Inventory Direction
+FACILITY_LABELS = {
+    1: "1-One-Way Undivided",
+    2: "3-Two-Way Undivided",           # HPMS code 2 = Two-Way (NOT One-Way Divided)
+    3: "3-Two-Way Undivided",           # alternate
+    4: "4-Two-Way Divided",
+    5: "5-Reversible Exclusively",
+    6: "4-Two-Way Divided",             # HPMS: Non-Inventory Direction (divided hwy opposite)
+}
+
+# HPMS surface_type → VDOT string (comprehensive — all FHWA codes)
+SURFACE_LABELS = {
+    1: "1. Concrete",                     # Portland Cement Concrete (Rigid)
+    2: "2. Blacktop, Asphalt, Bituminous",# Asphalt Concrete (Flexible)
+    3: "3. Brick or Block",               # Semi-Rigid / Composite
+    4: "4. Slag, Gravel, Stone",          # Gravel/Stone
+    5: "5. Dirt",                          # Dirt/Earth
+    6: "6. Other",                         # Other
+    7: "3. Brick or Block",               # Brick/Block (alternate code)
+    8: "5. Dirt",                          # Unpaved
+    9: "6. Other",                         # Other (alternate)
+    10: "2. Blacktop, Asphalt, Bituminous",# Asphalt (alternate)
+    11: "1. Concrete",                     # Composite (Rigid + Flexible)
+}
+
+
+def merge_frontend_columns(df):
     """
-    Derive Intersection Name and RTE Name for every road segment using
-    cross-street analysis at OSM nodes.
-
-    Intersection Name = the cross streets meeting at the segment's intersection
-    endpoint. Example: "US 13 & DE 9" for a segment on US 13 at its
-    intersection with DE 9.
-
-    Uses a route-number dedup to prevent "SR 13 & US 13" (same road,
-    different agency naming). Priority: I > US > DE/SR > CR > street name.
-
-    Produces:
-      intersection_name    "US 13 & DE 9" or "" if not at intersection
+    Create VDOT-architecture-named columns from merged multi-source data.
+    HPMS always takes priority, then Mapillary, then OSM.
+    
+    FIXES APPLIED:
+      1. Area Type: MPO membership → Urban/Rural (not HPMS urban_code)
+      2. RTE Name: Filters out numeric-only junk values
+      3. Traffic Control Type: Adds Yield Sign from Mapillary R1-2
+      4. x/y renamed to road_lon/road_lat (avoid crash coordinate conflict)
+      5. length_m → length_ft (all units in feet)
+      6. u_node/v_node → osm_u_node/osm_v_node (clarify meaning)
     """
-    import re
-    print("    Intersection & road names...")
-
+    print("    Frontend column merge (VDOT architecture)...")
     n = len(df)
-    is_osm = (df.get("road_source", "") == "OSM")
-    osm_mask = is_osm.values if hasattr(is_osm, "values") else np.array([False] * n)
 
-    if osm_mask.sum() == 0:
-        df["intersection_name"] = ""
-        return
-
-    # ── Build per-segment best label (single canonical name) ──
-    hpms_rte = df["hpms_route_name"].astype(str).str.strip() if "hpms_route_name" in df.columns else pd.Series([""] * n)
-    osm_ref = df["ref"].astype(str).str.strip() if "ref" in df.columns else pd.Series([""] * n)
-    osm_name = df["name"].astype(str).str.strip() if "name" in df.columns else pd.Series([""] * n)
-
-    empties = {"", "0", "nan", "None", "False"}
-
-    seg_label = pd.Series([""] * n, index=df.index)
-
-    mask_h = ~hpms_rte.isin(empties) & osm_mask
-    seg_label[mask_h] = hpms_rte[mask_h]
-
-    mask_r = seg_label.isin(empties) & ~osm_ref.isin(empties) & osm_mask
-    seg_label[mask_r] = osm_ref[mask_r]
-
-    mask_n = seg_label.isin(empties) & ~osm_name.isin(empties) & osm_mask
-    seg_label[mask_n] = osm_name[mask_n]
-
-    # ── Build node → road names mapping ──
-    u_nodes = df["u_node"].values
-    v_nodes = df["v_node"].values
-    labels = seg_label.values
-
-    node_roads = {}
-    for i in range(n):
-        if not osm_mask[i]:
-            continue
-        lbl = str(labels[i])
-        if lbl in empties:
-            continue
-        for part in lbl.split(";"):
-            part = part.strip()
-            if not part:
-                continue
-            for node in [u_nodes[i], v_nodes[i]]:
-                nstr = str(node)
-                if nstr in ("0", "nan", ""):
-                    continue
-                node_roads.setdefault(nstr, set()).add(part)
-
-    # ── Deduplicate route aliases at each node ──
-    prefix_priority = {"I": 0, "US": 1, "DE": 2, "SR": 3, "CR": 4}
-    route_re = re.compile(r"^(US|SR|CR|DE|I)\s*-?\s*(\d+)", re.IGNORECASE)
-
-    def _dedupe(names):
-        by_number = {}
-        no_number = []
-        for name in names:
-            m = route_re.match(name)
-            if m:
-                prefix = m.group(1).upper()
-                num = m.group(2)
-                pri = prefix_priority.get(prefix, 5)
-                if num not in by_number or pri < by_number[num][0]:
-                    by_number[num] = (pri, name)
-            else:
-                no_number.append(name)
-        return set([v[1] for v in by_number.values()] + no_number)
-
-    for node in node_roads:
-        if len(node_roads[node]) > 1:
-            node_roads[node] = _dedupe(node_roads[node])
-
-    # ── Generate intersection name for each segment ──
-    int_names = np.empty(n, dtype=object)
-    int_names[:] = ""
-
-    is_int = (df.get("is_intersection", "") == "Yes").values
-
-    for i in range(n):
-        if not osm_mask[i] or not is_int[i]:
-            continue
-
-        u_key = str(u_nodes[i])
-        v_key = str(v_nodes[i])
-        u_set = node_roads.get(u_key, set())
-        v_set = node_roads.get(v_key, set())
-
-        # Pick the endpoint with more distinct road names
-        best = u_set if len(u_set) >= len(v_set) else v_set
-        if len(best) < 2:
-            continue
-
-        int_names[i] = " & ".join(sorted(best)[:3])
-
-    df["intersection_name"] = int_names
-
-    filled = (int_names != "").sum()
-    total_int = is_int.sum()
-    unique = len(set(int_names[int_names != ""]))
-    print(f"      Intersection names: {filled:,}/{total_int:,} intersections "
-          f"({filled/max(total_int,1)*100:.0f}%), {unique:,} unique")
-
-
-def compute_traffic_engineering_metrics(df):
-    """
-    Derive traffic-engineering-relevant safety metrics from Mapillary,
-    HPMS, OSM, and federal data. These are analytical columns for engineers.
-
-    PEDESTRIAN SAFETY (5 columns):
-      te_ped_signal_present       Yes/No — dedicated pedestrian signal head
-      te_ped_unlit_crosswalk      Yes/No — crosswalk without street lighting
-      te_ped_high_speed_xwalk     Yes/No — crosswalk on ≥40mph road
-      te_ped_unprotected_xwalk    Yes/No — crosswalk without signal or stop sign
-      te_ped_risk_score           0-100 composite pedestrian risk
-
-    INTERSECTION CONTROL (4 columns):
-      te_int_control_type         Signal/Stop/Yield/RR Crossing/None
-      te_int_control_conflict     Yes/No — conflicting signs (stop+signal)
-      te_int_stop_has_marking     Yes/No — stop sign has stop line pavement marking
-      te_int_sources_agree        0-4 count of agreeing sources
-
-    SPEED MANAGEMENT (4 columns):
-      te_speed_transition         Yes/No — 2+ speed limits within 500ft
-      te_speed_max_diff           Max speed differential (mph)
-      te_speed_posted_vs_design   Posted speed minus HPMS design speed
-      te_speed_mismatch           Yes/No — posted > design speed (overposted)
-
-    LIGHTING (3 columns):
-      te_lighting_density         None/Sparse/Adequate/Dense (lights per segment)
-      te_lighting_gap             Yes/No — nearby segments lit but this one dark
-      te_lit_intersection         Yes/No — intersection with lighting
-
-    RAILROAD CROSSING (2 columns):
-      te_rail_warning_coverage    Full/Partial/None — Mapillary sign + federal data
-      te_rail_gates_present       Yes/No — from federal warning_level
-
-    WRONG-WAY RISK (2 columns):
-      te_wrong_way_signs          Count of DNE + one-way signs within 100ft
-      te_wrong_way_on_divided     Yes/No — DNE sign on divided highway (ramp protection)
-    """
-    print("    Traffic engineering metrics...")
-    n = len(df)
-    cols_added = 0
-
-    # ══════════════════════════════════════════════════════════
-    #  PEDESTRIAN SAFETY
-    # ══════════════════════════════════════════════════════════
-
-    # Dedicated ped signal
-    has_ped_sig = np.zeros(n, dtype=bool)
-    if "map_signal_count_500ft" in df.columns and "map_signal_heads" in df.columns:
-        heads = df["map_signal_heads"].astype(str).values
-        # Signal head "2" = pedestrian front signal
-        has_ped_sig = np.isin(heads, ["2", "5"])
-    df["te_ped_signal_present"] = np.where(has_ped_sig, "Yes", "No")
-
-    # Crosswalk detection (from Mapillary markings + OSM POI)
-    has_xwalk = np.zeros(n, dtype=bool)
-    if "map_crosswalk_count" in df.columns:
-        has_xwalk |= (pd.to_numeric(df["map_crosswalk_count"], errors="coerce").fillna(0) > 0).values
-    if "Near_PoiCrossing_100ft" in df.columns:
-        has_xwalk |= (df["Near_PoiCrossing_100ft"].values == "Yes")
-
-    # Lighting detection
-    has_light = np.zeros(n, dtype=bool)
-    if "map_street_light_count" in df.columns:
-        has_light |= (pd.to_numeric(df["map_street_light_count"], errors="coerce").fillna(0) > 0).values
-    if "lit" in df.columns:
-        has_light |= (df["lit"].astype(str).str.lower().values == "yes")
-
-    # Signal/stop detection
-    has_signal = np.zeros(n, dtype=bool)
-    if "resolved_has_signal" in df.columns:
-        has_signal = (df["resolved_has_signal"].values == "Yes")
-    has_stop = np.zeros(n, dtype=bool)
-    if "map_stop_sign" in df.columns:
-        has_stop = (df["map_stop_sign"].values == "Yes")
-
-    # Speed
-    speed = pd.to_numeric(df.get("resolved_speed_limit", 0), errors="coerce").fillna(0).values
-
-    # Unlit crosswalk
-    df["te_ped_unlit_crosswalk"] = np.where(has_xwalk & ~has_light, "Yes", "No")
-    # High speed crosswalk (≥40mph — FHWA considers 40+ high-speed for ped safety)
-    df["te_ped_high_speed_xwalk"] = np.where(has_xwalk & (speed >= 40), "Yes", "No")
-    # Unprotected crosswalk (no signal, no stop sign)
-    df["te_ped_unprotected_xwalk"] = np.where(has_xwalk & ~has_signal & ~has_stop, "Yes", "No")
-
-    # Composite ped risk (0-100)
-    ped_risk = np.zeros(n, dtype=int)
-    ped_risk += np.where(has_xwalk, 20, 0)                    # Base: crosswalk present
-    ped_risk += np.where(has_xwalk & ~has_light, 25, 0)       # Unlit
-    ped_risk += np.where(has_xwalk & (speed >= 40), 25, 0)    # High speed
-    ped_risk += np.where(has_xwalk & ~has_signal & ~has_stop, 15, 0)  # Unprotected
-    ped_risk += np.where(has_xwalk & ~has_ped_sig & has_signal, 10, 0)  # Signal but no ped phase
-    ped_risk += np.where(has_xwalk & (speed >= 50), 5, 0)     # Extra for very high speed
-    df["te_ped_risk_score"] = np.minimum(ped_risk, 100)
-
-    unlit = (df["te_ped_unlit_crosswalk"] == "Yes").sum()
-    hi_spd = (df["te_ped_high_speed_xwalk"] == "Yes").sum()
-    unp = (df["te_ped_unprotected_xwalk"] == "Yes").sum()
-    hi_risk = (ped_risk >= 60).sum()
-    print(f"      Ped safety: {has_xwalk.sum():,} crosswalks, {unlit:,} unlit, "
-          f"{hi_spd:,} high-speed, {unp:,} unprotected, {hi_risk:,} high-risk")
-    cols_added += 5
-
-    # ══════════════════════════════════════════════════════════
-    #  INTERSECTION CONTROL
-    # ══════════════════════════════════════════════════════════
-
-    has_yield = np.zeros(n, dtype=bool)
-    if "map_yield_sign" in df.columns:
-        has_yield = (df["map_yield_sign"].values == "Yes")
-
-    has_rail_near = np.zeros(n, dtype=bool)
-    if "Near_RailXing_500ft" in df.columns:
-        has_rail_near = (df["Near_RailXing_500ft"].values == "Yes")
-
-    # Resolved control type (priority: signal > stop > yield > RR > none)
-    ctrl = np.full(n, "None", dtype=object)
-    ctrl[has_rail_near] = "RR Crossing"
-    ctrl[has_yield] = "Yield"
-    ctrl[has_stop] = "Stop"
-    ctrl[has_signal] = "Signal"
-    df["te_int_control_type"] = ctrl
-
-    # Control conflict — stop sign AND signal at same location
-    df["te_int_control_conflict"] = np.where(has_stop & has_signal, "Yes", "No")
-
-    # Stop sign with stop line marking (properly marked intersection)
-    has_stop_line = np.zeros(n, dtype=bool)
-    if "map_stop_line_count" in df.columns:
-        has_stop_line = (pd.to_numeric(df["map_stop_line_count"], errors="coerce").fillna(0) > 0).values
-    df["te_int_stop_has_marking"] = np.where(has_stop & has_stop_line, "Yes",
-                                    np.where(has_stop & ~has_stop_line, "No", ""))
-
-    # Source agreement count
-    sources = np.zeros(n, dtype=int)
-    if "xval_signal_sources" in df.columns:
-        sources = np.maximum(sources, pd.to_numeric(df["xval_signal_sources"], errors="coerce").fillna(0).astype(int).values)
-    if "xval_stop_sign_sources" in df.columns:
-        sources = np.maximum(sources, pd.to_numeric(df["xval_stop_sign_sources"], errors="coerce").fillna(0).astype(int).values)
-    df["te_int_sources_agree"] = sources
-
-    conflict = (df["te_int_control_conflict"] == "Yes").sum()
-    unmarked = (df["te_int_stop_has_marking"] == "No").sum()
-    print(f"      Intersection: {has_signal.sum():,} signal, {has_stop.sum():,} stop, "
-          f"{has_yield.sum():,} yield, {conflict:,} conflicts, {unmarked:,} unmarked stops")
-    cols_added += 4
-
-    # ══════════════════════════════════════════════════════════
-    #  SPEED MANAGEMENT
-    # ══════════════════════════════════════════════════════════
-
-    # Speed transition (already partially computed in risk indicators)
-    speed_cols = [c for c in df.columns if c.startswith("map_speed_") and c.endswith("_count")
-                  and c != "map_speed_sign_count_500ft"]
-    if speed_cols:
-        col_speeds = []
-        valid_cols = []
-        for col in speed_cols:
-            spd_str = col.replace("map_speed_", "").replace("_count", "")
-            try:
-                col_speeds.append(int(spd_str))
-                valid_cols.append(col)
-            except ValueError:
-                pass
-
-        if valid_cols:
-            speed_matrix = df[valid_cols].values > 0
-            speed_vals = np.array(col_speeds)
-            distinct = speed_matrix.sum(axis=1)
-            is_transition = distinct >= 2
-
-            speed_present = np.where(speed_matrix, speed_vals[np.newaxis, :], np.nan)
-            with np.errstate(invalid="ignore"):
-                max_spd = np.nanmax(speed_present, axis=1)
-                min_spd = np.nanmin(speed_present, axis=1)
-                raw_diff = np.nan_to_num(max_spd - min_spd, nan=0).astype(int)
-            max_diff = np.where(is_transition, raw_diff, 0)
-
-            df["te_speed_transition"] = np.where(is_transition, "Yes", "No")
-            df["te_speed_max_diff"] = max_diff
-        else:
-            df["te_speed_transition"] = "No"
-            df["te_speed_max_diff"] = 0
-    else:
-        df["te_speed_transition"] = "No"
-        df["te_speed_max_diff"] = 0
-
-    # Posted vs design speed (overposted = dangerous)
-    design = pd.to_numeric(df.get("hpms_design_speed", 0), errors="coerce").fillna(0).values
-    posted = speed.copy()
-    diff_pd = np.where((posted > 0) & (design > 0), posted - design, 0).astype(int)
-    df["te_speed_posted_vs_design"] = diff_pd
-    overposted = ((posted > 0) & (design > 0) & (posted > design))
-    df["te_speed_mismatch"] = np.where(overposted, "Yes", "No")
-
-    trans = (df["te_speed_transition"] == "Yes").sum()
-    mismatch = overposted.sum()
-    print(f"      Speed mgmt: {trans:,} transitions, {mismatch:,} overposted (posted>design)")
-    cols_added += 4
-
-    # ══════════════════════════════════════════════════════════
-    #  LIGHTING ASSESSMENT
-    # ══════════════════════════════════════════════════════════
-
-    light_count = pd.to_numeric(df.get("map_street_light_count", 0), errors="coerce").fillna(0).values
-    density = np.full(n, "None", dtype=object)
-    density[light_count >= 1] = "Sparse"
-    density[light_count >= 3] = "Adequate"
-    density[light_count >= 6] = "Dense"
-    df["te_lighting_density"] = density
-
-    # Lighting gap: intersection that SHOULD be lit but isn't
-    # (nearby segments have lights, this one doesn't)
-    is_int = np.zeros(n, dtype=bool)
-    if "is_intersection" in df.columns:
-        is_int = (df["is_intersection"].values == "Yes")
-    df["te_lighting_gap"] = "No"  # Would need spatial neighbor analysis for true gap detection
-    # Simple heuristic: intersection with signal but no lighting = gap
-    sig_no_light = is_int & has_signal & ~has_light
-    df.loc[sig_no_light, "te_lighting_gap"] = "Yes"
-
-    # Lit intersection
-    df["te_lit_intersection"] = np.where(is_int & has_light, "Yes", "No")
-
-    lit_int = (df["te_lit_intersection"] == "Yes").sum()
-    dark_sig = sig_no_light.sum()
-    print(f"      Lighting: {(light_count > 0).sum():,} lit segments, "
-          f"{lit_int:,} lit intersections, {dark_sig:,} signalized but unlit")
-    cols_added += 3
-
-    # ══════════════════════════════════════════════════════════
-    #  RAILROAD CROSSING SAFETY
-    # ══════════════════════════════════════════════════════════
-
-    has_rr_sign = np.zeros(n, dtype=bool)
-    if "map_rr_crossing_warning" in df.columns:
-        has_rr_sign = (df["map_rr_crossing_warning"].values == "Yes")
-
-    # Warning coverage: both Mapillary sign + federal = Full, one = Partial
-    coverage = np.full(n, "None", dtype=object)
-    coverage[has_rail_near | has_rr_sign] = "Partial"
-    coverage[has_rail_near & has_rr_sign] = "Full"
-    df["te_rail_warning_coverage"] = coverage
-
-    # Gates (from federal warning_level)
-    has_gates = np.zeros(n, dtype=bool)
-    if "nearest_rail_xing_warning_level" in df.columns:
-        wl = df["nearest_rail_xing_warning_level"].astype(str).str.lower().values
-        has_gates = np.isin(wl, ["gates", "gate", "flashing lights and gates"])
-    df["te_rail_gates_present"] = np.where(has_rail_near & has_gates, "Yes",
-                                  np.where(has_rail_near & ~has_gates, "No", ""))
-
-    partial = (coverage == "Partial").sum()
-    full = (coverage == "Full").sum()
-    gates = (df["te_rail_gates_present"] == "Yes").sum()
-    print(f"      Railroad: {full:,} full coverage, {partial:,} partial, {gates:,} with gates")
-    cols_added += 2
-
-    # ══════════════════════════════════════════════════════════
-    #  WRONG-WAY RISK
-    # ══════════════════════════════════════════════════════════
-
-    dne_count = np.zeros(n, dtype=int)
-    if "map_do_not_enter" in df.columns:
-        dne_count += (df["map_do_not_enter"].values == "Yes").astype(int)
-    if "map_one_way" in df.columns:
-        dne_count += (df["map_one_way"].values == "Yes").astype(int)
-    df["te_wrong_way_signs"] = dne_count
-
-    # DNE on divided highway (ramp protection)
-    is_divided = np.zeros(n, dtype=bool)
+    # ── Functional Class (HPMS > OSM) ──
+    fc_codes = np.zeros(n, dtype=int)
+    fc_source = np.full(n, "", dtype=object)
+    
+    if "highway" in df.columns:
+        for i, hw in enumerate(df["highway"].values):
+            fc = OSM_TO_FC.get(str(hw).strip(), 0)
+            if fc > 0:
+                fc_codes[i] = fc
+                fc_source[i] = "OSM"
+    
+    if "hpms_f_system" in df.columns:
+        hpms_fc = pd.to_numeric(df["hpms_f_system"], errors="coerce").fillna(0).astype(int).values
+        mask = hpms_fc > 0
+        fc_codes[mask] = hpms_fc[mask]
+        fc_source[mask] = "HPMS"
+    
+    df["Functional Class"] = [FC_LABELS.get(fc, "") for fc in fc_codes]
+    fc_filled = (fc_codes > 0).sum()
+    print(f"      Functional Class:   {fc_filled:>7,} — HPMS:{(fc_source=='HPMS').sum():,} OSM:{(fc_source=='OSM').sum():,}")
+
+    # ── SYSTEM (derived from FC) ──
+    df["SYSTEM"] = [FC_TO_SYSTEM.get(fc, "") for fc in fc_codes]
+
+    # ── Ownership (HPMS > derived from FC) ──
+    own = np.full(n, "", dtype=object)
+    for i, fc in enumerate(fc_codes):
+        own[i] = FC_TO_OWNERSHIP.get(fc, "")
+    if "hpms_ownership" in df.columns:
+        hpms_own = pd.to_numeric(df["hpms_ownership"], errors="coerce").fillna(0).astype(int).values
+        for i, code in enumerate(hpms_own):
+            label = OWNERSHIP_LABELS.get(code, "")
+            if label:
+                own[i] = label
+    df["Ownership"] = own
+
+    # ── Facility Type (HPMS) ──
+    df["Facility Type"] = ""
     if "hpms_facility_type" in df.columns:
         ft = pd.to_numeric(df["hpms_facility_type"], errors="coerce").fillna(0).astype(int).values
-        is_divided = np.isin(ft, [2, 4])  # 2=one-way divided, 4=two-way divided
-    elif "resolved_facility_type" in df.columns:
-        is_divided = df["resolved_facility_type"].astype(str).str.contains("Divided", case=False, na=False).values
-    df["te_wrong_way_on_divided"] = np.where((dne_count > 0) & is_divided, "Yes", "No")
+        df["Facility Type"] = [FACILITY_LABELS.get(f, "") for f in ft]
 
-    ww = (dne_count > 0).sum()
-    print(f"      Wrong-way: {ww:,} segments with DNE/one-way signs")
-    cols_added += 2
+    # ── Roadway Surface Type (HPMS > OSM) ──
+    df["Roadway Surface Type"] = ""
+    if "hpms_surface_type" in df.columns:
+        st = pd.to_numeric(df["hpms_surface_type"], errors="coerce").fillna(0).astype(int).values
+        df["Roadway Surface Type"] = [SURFACE_LABELS.get(s, "") for s in st]
 
-    print(f"    Traffic engineering metrics complete: {cols_added} new columns")
+    # ── RTE Name (HPMS > OSM ref > OSM name — filter junk) ──
+    import re
+    rte = np.full(n, "", dtype=object)
+    if "name" in df.columns:
+        for i, v in enumerate(df["name"].values):
+            s = str(v).strip()
+            if s and s != "nan" and not re.match(r'^-?\d+$', s):
+                rte[i] = s
+    if "ref" in df.columns:
+        for i, v in enumerate(df["ref"].values):
+            s = str(v).strip()
+            if s and s != "nan" and not re.match(r'^-?\d+$', s):
+                rte[i] = s
+    if "hpms_route_name" in df.columns:
+        for i, v in enumerate(df["hpms_route_name"].values):
+            s = str(v).strip()
+            if s and s not in ("nan", "0", "") and not re.match(r'^-?\d+$', s):
+                rte[i] = s
+    df["RTE Name"] = rte
+    filled = (rte != "").sum()
+    print(f"      RTE Name:           {filled:>7,}")
+
+    # ── Area Type (MPO membership → Urban/Rural, NOT from HPMS urban_code) ──
+    area = np.full(n, "Rural", dtype=object)
+    if "geo_mpo_name" in df.columns:
+        in_mpo = df["geo_mpo_name"].astype(str).str.strip() != ""
+        area[in_mpo.values] = "Urban"
+    df["Area Type"] = area
+    urban = (area == "Urban").sum()
+    print(f"      Area Type:          {urban:>7,} Urban, {n-urban:,} Rural")
+
+    # ── Geography → VDOT names ──
+    df["DOT District"] = df.get("geo_dot_region", "")
+    df["Planning District"] = df.get("geo_planning_district", "")
+    df["MPO Name"] = df.get("geo_mpo_name", "")
+    df["Physical Juris Name"] = df.get("geo_county_basename", "")
+    df["Juris Code"] = df.get("geo_juris_code", "")
+
+    # ── Speed / Lanes / AADT → VDOT names ──
+    if "resolved_speed_limit" in df.columns:
+        df["Max Speed Diff"] = df["resolved_speed_limit"]
+    if "resolved_lanes" in df.columns:
+        df["Through_Lanes"] = df["resolved_lanes"]
+    if "hpms_aadt" in df.columns:
+        df["AADT"] = pd.to_numeric(df["hpms_aadt"], errors="coerce").fillna(0).astype(int)
+
+    # ── Traffic Control Type (Signal > Stop > Yield > others from Mapillary) ──
+    tc = np.full(n, "", dtype=object)
+    # Yield signs (lowest priority of the three)
+    if "map_yield_sign" in df.columns:
+        tc = np.where(df["map_yield_sign"].values == "Yes", "8. Yield Sign", tc)
+    # Stop signs override yield
+    if "map_stop_sign" in df.columns:
+        stop = df["map_stop_sign"].values == "Yes"
+        tc[stop] = "4. Stop Sign"
+    if "Near_PoiStopSign_100ft" in df.columns:
+        stop2 = (df["Near_PoiStopSign_100ft"].values == "Yes") & (tc != "4. Stop Sign")
+        tc[stop2] = "4. Stop Sign"
+    # Signals override everything
+    if "resolved_has_signal" in df.columns:
+        tc = np.where(df["resolved_has_signal"].values == "Yes", "3. Traffic Signal", tc)
+    df["Traffic Control Type"] = tc
+    for val in ["3. Traffic Signal", "4. Stop Sign", "8. Yield Sign"]:
+        cnt = (tc == val).sum()
+        if cnt > 0:
+            print(f"      Traffic Control:    {cnt:>7,} {val}")
+
+    # ── Intersection Type (with degree from OSM) ──
+    df["Intersection Type"] = "1. Not at Intersection"
+    if "is_intersection" in df.columns and "intersection_degree" in df.columns:
+        is_int = df["is_intersection"].values == "Yes"
+        deg = pd.to_numeric(df["intersection_degree"], errors="coerce").fillna(0).astype(int).values
+        df.loc[is_int & (deg == 3), "Intersection Type"] = "3. T-Intersection"
+        df.loc[is_int & (deg == 4), "Intersection Type"] = "4. Four-Way Intersection"
+        df.loc[is_int & (deg >= 5), "Intersection Type"] = "5. Five-Point or More"
+        df.loc[is_int & (deg < 3) & (deg > 0), "Intersection Type"] = "2. Y-Intersection"
+
+    # ── School Zone ──
+    if "resolved_school_zone" in df.columns:
+        df["School Zone"] = df["resolved_school_zone"]
+
+    # ── Roadway Description (from HPMS median type) ──
+    df["Roadway Description"] = ""
+    if "hpms_median_type" in df.columns:
+        mt = pd.to_numeric(df["hpms_median_type"], errors="coerce").fillna(0).astype(int).values
+        desc_map = {1: "1. Two-Way, Not Divided", 2: "2. Two-Way, Divided, Unprotected Median",
+                    3: "3. Two-Way, Divided, Positive Median Barrier",
+                    4: "4. One-Way, Not Divided"}
+        df["Roadway Description"] = [desc_map.get(m, "") for m in mt]
+
+    # ── Roadway Alignment (from curve analysis) ──
+    if "curve_class_label" in df.columns:
+        align_map = {"Straight": "1. Straight - Level", "Slight": "1. Straight - Level",
+                     "Moderate": "2. Curve - Level", "Sharp": "4. Grade - Curve",
+                     "Extreme": "4. Grade - Curve"}
+        df["Roadway Alignment"] = df["curve_class_label"].map(align_map).fillna("")
+
+    # ── GPS: road_lon / road_lat (NOT x/y — avoid crash coordinate conflict) ──
+    df["road_lon"] = df.get("mid_lon", 0.0)
+    df["road_lat"] = df.get("mid_lat", 0.0)
+
+    # ── Length in feet (not meters) ──
+    if "length_m" in df.columns:
+        df["length_ft"] = (pd.to_numeric(df["length_m"], errors="coerce").fillna(0) * 3.28084).round(1)
+
+    # ── Rename u_node/v_node for clarity ──
+    if "u_node" in df.columns:
+        df.rename(columns={"u_node": "osm_u_node", "v_node": "osm_v_node"}, inplace=True)
+
+    print(f"    Frontend merge complete")

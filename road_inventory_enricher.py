@@ -103,16 +103,95 @@ class RoadInventorySession:
         else:
             self.ri = pd.read_parquet(ri_path)
 
+        # Proximity threshold cleanup — dist_ft=0 when beyond range, blank detail cols only
+        _ASSET_THRESHOLDS = {
+            "nearest_bridge_": 500, "nearest_rail_xing_": 500,
+            "nearest_school_": 2000, "nearest_transit_": 500,
+            "nearest_poi_bar_": 2000, "nearest_poi_clinic_": 2000,
+            "nearest_poi_college_": 2000, "nearest_poi_crossing_": 500,
+            "nearest_poi_fuel_": 1000, "nearest_poi_hospital_": 2000,
+            "nearest_poi_parking_": 500, "nearest_poi_rest_area_": 1000,
+            "nearest_poi_restaurant_": 1000, "nearest_poi_signal_": 500,
+            "nearest_poi_stop_sign_": 500,
+        }
+        cleaned = 0
+        for prefix, threshold in _ASSET_THRESHOLDS.items():
+            dist_col = f"{prefix}dist_ft"
+            if dist_col not in self.ri.columns:
+                continue
+            dists = pd.to_numeric(self.ri[dist_col], errors="coerce").fillna(0)
+            beyond = dists > threshold
+            if beyond.any():
+                # dist_ft → 0 (keeps column, signals "none within range")
+                self.ri.loc[beyond, dist_col] = 0
+                # Blank detail cols only (name, id, lat, lon, etc.)
+                detail_cols = [c for c in self.ri.columns
+                               if c.startswith(prefix) and c != dist_col]
+                for col in detail_cols:
+                    dt = self.ri[col].dtype
+                    if dt in (np.float32, np.float64, np.int32, np.int64, float, int):
+                        self.ri.loc[beyond, col] = 0
+                    else:
+                        self.ri.loc[beyond, col] = None
+                cleaned += beyond.sum()
+
+        # Drop columns that add no analytical value
+        _DROP_COLS = set()
+
+        # Duplicate geography (geo_ repeats frontend columns)
+        _DROP_COLS.update([
+            "geo_area_type", "geo_county_basename", "geo_county_fips",
+            "geo_county_name", "geo_dot_region", "geo_dot_region_id",
+            "geo_juris_code", "geo_mpo_id", "geo_mpo_name",
+            "geo_planning_district", "geo_planning_district_id",
+        ])
+
+        # HPMS raw duplicates (already resolved into frontend columns)
+        _DROP_COLS.update([
+            "hpms_aadt", "hpms_f_system", "hpms_facility_type",
+            "hpms_match_dist_ft", "hpms_matched", "hpms_ownership",
+            "hpms_speed_limit", "hpms_surface_type", "hpms_through_lanes",
+        ])
+
+        # Single-value subcategory columns (always same value → no signal)
+        for c in self.ri.columns:
+            if c.endswith("_subcategory") and c.startswith("nearest_"):
+                vals = self.ri[c].dropna().unique()
+                non_empty = [v for v in vals if str(v).strip() not in ("", "nan", "None")]
+                if len(non_empty) <= 1:
+                    _DROP_COLS.add(c)
+
+        # Drop columns that exist in the DataFrame
+        actual_drop = [c for c in _DROP_COLS if c in self.ri.columns]
+        if actual_drop:
+            self.ri.drop(columns=actual_drop, inplace=True)
+
         self.transfer_cols = [c for c in self.ri.columns if c not in EXCLUDE_COLUMNS]
-        print(f"    {len(self.ri):,} segments x {len(self.transfer_cols)} transfer cols")
+        msg = f"    {len(self.ri):,} segments x {len(self.transfer_cols)} transfer cols"
+        if cleaned:
+            msg += f" (proximity: {cleaned:,} → 0ft)"
+        if actual_drop:
+            msg += f" (dropped {len(actual_drop)} cols)"
+        print(msg)
+
+        # Data quality validation + auto-fix
+        try:
+            from road_inventory_validator import validate_and_fix
+            report = validate_and_fix(self.ri, verbose=True)
+            # Refresh transfer_cols after validator may have modified data
+            self.transfer_cols = [c for c in self.ri.columns if c not in EXCLUDE_COLUMNS]
+        except ImportError:
+            pass  # Validator not available — skip silently
 
         # Initialize spatial matcher (auto-detects best engine)
         try:
             from spatial_matcher import SpatialMatcher
+            geo_coords = self.ri.get("geometry_coords")
             self.matcher = SpatialMatcher(
                 self.ri["mid_lat"].values, self.ri["mid_lon"].values,
                 self.ri["u_lat"].values, self.ri["u_lon"].values,
                 self.ri["v_lat"].values, self.ri["v_lon"].values,
+                geometry_coords=geo_coords,
             )
         except ImportError:
             print("    spatial_matcher.py not found — using inline KDTree")
@@ -127,18 +206,28 @@ class RoadInventorySession:
         if not self.ready:
             return df
 
+        # Reset index to 0-based so matched_ci (positional) aligns with df.loc[]
+        orig_index = df.index
+        df = df.reset_index(drop=True)
+
         t0 = time.time()
         lons = pd.to_numeric(df.get(x_col, 0), errors="coerce").values
         lats = pd.to_numeric(df.get(y_col, 0), errors="coerce").values
 
         # ── Spatial matching (tiered: DuckDB → GeoPandas → KDTree) ──
+        confidence = None
         if self.matcher:
-            matched_ci, matched_ri, dists = self.matcher.match(
+            result = self.matcher.match(
                 lats, lons, threshold_ft=self.threshold, k=self.k)
+            if len(result) == 4:
+                matched_ci, matched_ri, dists, confidence = result
+            else:
+                matched_ci, matched_ri, dists = result
         else:
             matched_ci, matched_ri, dists = self._fallback_kdtree(lats, lons)
 
         if len(matched_ci) == 0:
+            df.index = orig_index
             return df
 
         # ── Vectorized column transfer ──
@@ -169,7 +258,7 @@ class RoadInventorySession:
             if col in ri_slice.columns:
                 if col not in df.columns:
                     df[col] = ""
-                crash_vals = df.loc[matched_ci, col].astype(str).str.strip()
+                crash_vals = df.loc[matched_ci, col].fillna("").astype(str).str.strip()
                 ri_vals = ri_slice[col].values
                 fill_mask = crash_vals.isin(["", "nan", "None", "0"]).values & \
                             np.array([bool(v.strip()) for v in ri_vals])
@@ -221,11 +310,50 @@ class RoadInventorySession:
             df.loc[mm, "Roadway Description"] = \
                 df.loc[mm, "Facility Type"].astype(str).map(dm).fillna("")
 
+        # ── Ramp derivation (from is_ramp/ramp_type in road inventory) ──
+        if "is_ramp" in df.columns:
+            on_ramp = mm & (df["is_ramp"].astype(str).str.strip() == "Yes")
+
+            if on_ramp.any():
+                # Roadway Alignment → "10. On/Off Ramp" (Tier C fill)
+                if "Roadway Alignment" not in df.columns:
+                    df["Roadway Alignment"] = ""
+                ra = df["Roadway Alignment"].fillna("").astype(str).str.strip()
+                ra_empty = on_ramp & ra.isin(["", "nan", "None"])
+                if ra_empty.any():
+                    df.loc[ra_empty, "Roadway Alignment"] = "10. On/Off Ramp"
+
+                # Relation To Roadway → ramp-specific values (Tier C fill)
+                if "Relation To Roadway" not in df.columns:
+                    df["Relation To Roadway"] = ""
+                rtr = df["Relation To Roadway"].fillna("").astype(str).str.strip()
+                rtr_empty = on_ramp & rtr.isin(["", "nan", "None", "Not Provided",
+                                                 "Not Applicable"])
+                if rtr_empty.any() and "ramp_type" in df.columns:
+                    rt_map = {"Exit": "5. On Entrance/Exit Ramp",
+                              "Entrance": "5. On Entrance/Exit Ramp",
+                              "Connector": "3. Gore Area (b/w Ramp and Highway Edgelines)",
+                              "Ramp": "5. On Entrance/Exit Ramp"}
+                    rt = df.loc[rtr_empty, "ramp_type"].astype(str).str.strip()
+                    mapped = rt.map(rt_map)
+                    has_val = mapped.notna() & (mapped != "")
+                    if has_val.any():
+                        df.loc[has_val[has_val].index, "Relation To Roadway"] = \
+                            mapped[has_val].values
+
         # Metadata
         df["ri_matched"] = "No"
         df.loc[matched_ci, "ri_matched"] = "Yes"
         df["ri_match_dist_ft"] = ""
         df.loc[matched_ci, "ri_match_dist_ft"] = dists.astype(int).astype(str)
+        df["ri_confidence"] = ""
+        if confidence is not None and len(confidence) > 0:
+            df.loc[matched_ci, "ri_confidence"] = confidence
+        else:
+            # Derive from distance if matcher didn't provide
+            conf = np.where(dists <= 100, "high",
+                   np.where(dists <= 200, "medium", "low"))
+            df.loc[matched_ci, "ri_confidence"] = conf
         df["ri_segment_id"] = ""
         df.loc[matched_ci, "ri_segment_id"] = matched_ri.astype(str)
 
@@ -234,6 +362,7 @@ class RoadInventorySession:
         md = int(np.median(dists)) if len(dists) > 0 else 0
         print(f"    Chunk: {mc:,}/{len(df):,} "
               f"({mc/len(df)*100:.0f}%, med={md}ft, {elapsed:.1f}s)")
+        df.index = orig_index
         return df
 
     def _fallback_kdtree(self, crash_lats, crash_lons):
