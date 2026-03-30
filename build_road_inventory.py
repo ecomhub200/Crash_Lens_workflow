@@ -170,6 +170,66 @@ def enrich_intersections(roads, ints):
     print(f"{n:,} segments ({n/len(roads)*100:.1f}%)")
 
 
+def enrich_ramps(roads):
+    """Derive ramp classification from highway tag + node connectivity.
+
+    Adds:
+      is_ramp:   "Yes" / "No"
+      ramp_type: "Exit" / "Entrance" / "Connector" / "Ramp" / ""
+    """
+    print("    Ramps...", end=" ", flush=True)
+    hw = roads["highway"].fillna("").str.strip()
+
+    # Any _link tag = ramp
+    is_ramp = hw.str.contains("_link", na=False)
+    roads["is_ramp"] = np.where(is_ramp, "Yes", "No")
+
+    if not is_ramp.any():
+        roads["ramp_type"] = ""
+        print("0 ramps"); return
+
+    # Build mainline node set (motorway + trunk = limited-access roads)
+    mainline_mask = hw.isin(["motorway", "trunk"])
+    mainline_nodes = set(roads.loc[mainline_mask, "u_node"].values) | \
+                     set(roads.loc[mainline_mask, "v_node"].values)
+
+    # Classify ramps by node connectivity + oneway direction
+    # OSM digraph: u→v = travel direction for oneway roads
+    # Exit ramp: u_node on mainline (starts on highway, goes to surface)
+    # Entrance ramp: v_node on mainline (starts on surface, merges to highway)
+    # Connector: both endpoints on mainline (motorway-to-motorway)
+    ow = roads["oneway"].fillna("").astype(str).str.strip().str.lower()
+    is_oneway = ow.isin(["yes", "true", "1"])
+
+    u_on_main = roads["u_node"].isin(mainline_nodes)
+    v_on_main = roads["v_node"].isin(mainline_nodes)
+
+    ramp_type = pd.Series("", index=roads.index)
+    ramp_type[is_ramp] = "Ramp"  # default for all ramps
+
+    # Connector: both ends on mainline
+    connector = is_ramp & u_on_main & v_on_main
+    ramp_type[connector] = "Connector"
+
+    # Exit: starts on mainline, oneway, other end NOT on mainline
+    exit_mask = is_ramp & u_on_main & ~v_on_main & is_oneway
+    ramp_type[exit_mask] = "Exit"
+
+    # Entrance: ends on mainline, oneway, other end NOT on mainline
+    entrance_mask = is_ramp & v_on_main & ~u_on_main & is_oneway
+    ramp_type[entrance_mask] = "Entrance"
+
+    roads["ramp_type"] = ramp_type
+
+    n_ramp = is_ramp.sum()
+    n_exit = exit_mask.sum()
+    n_entrance = entrance_mask.sum()
+    n_conn = connector.sum()
+    n_other = n_ramp - n_exit - n_entrance - n_conn
+    print(f"{n_ramp:,} ramps (exit={n_exit:,}, entrance={n_entrance:,}, "
+          f"connector={n_conn:,}, other={n_other:,})")
+
+
 def enrich_hpms(roads, hpms, threshold_m=100):
     print("    HPMS (all columns)...", end=" ", flush=True)
     if hpms is None or len(hpms) == 0:
@@ -881,6 +941,8 @@ def main():
                 "divider": "",
                 "curvature": 1.0,
                 "road_source": "HPMS",
+                # Orphan HPMS = point geometry (no linestring, just 2-point degenerate)
+                "geometry_coords": "",
             })
 
             roads = pd.concat([roads, orphan_rows], ignore_index=True).copy()  # .copy() prevents fragmentation
@@ -912,6 +974,7 @@ def main():
     # ── Enrichment pipeline ──
     enrich_geography(roads, abbr, state_fips, cache_dir, s3, bucket)
     enrich_intersections(roads, data["intersections"])
+    enrich_ramps(roads)
     enrich_hpms(roads, data["hpms"], args.hpms_threshold)
 
     # Derive area type from HPMS urban_code (must run after HPMS)
@@ -1025,6 +1088,112 @@ def main():
 
     gc.collect()
 
+    # ── Proximity threshold cleanup ──
+    # Blank out asset data beyond meaningful safety-analysis distance.
+    # A bridge 5 miles away is irrelevant to a road segment's safety profile.
+    ASSET_THRESHOLDS_FT = {
+        "nearest_bridge_":         500,
+        "nearest_rail_xing_":      500,
+        "nearest_school_":        2000,
+        "nearest_transit_":        500,
+        "nearest_poi_bar_":       2000,
+        "nearest_poi_clinic_":    2000,
+        "nearest_poi_college_":   2000,
+        "nearest_poi_crossing_":   500,
+        "nearest_poi_fuel_":      1000,
+        "nearest_poi_hospital_":  2000,
+        "nearest_poi_parking_":    500,
+        "nearest_poi_rest_area_": 1000,
+        "nearest_poi_restaurant_":1000,
+        "nearest_poi_signal_":     500,
+        "nearest_poi_stop_sign_":  500,
+    }
+
+    print(f"\n    Proximity cleanup (dist_ft → 0 beyond threshold, blank detail only):")
+    total_blanked = 0
+    for prefix, threshold in sorted(ASSET_THRESHOLDS_FT.items()):
+        dist_col = f"{prefix}dist_ft"
+        if dist_col not in roads.columns:
+            continue
+
+        dists = pd.to_numeric(roads[dist_col], errors="coerce").fillna(0)
+        beyond = dists > threshold
+        n_beyond = beyond.sum()
+
+        if n_beyond == 0:
+            continue
+
+        # dist_ft → 0 (keeps column, signals "none within range")
+        roads.loc[beyond, dist_col] = 0
+
+        # Blank detail cols only (name, id, lat, lon, etc.)
+        detail_cols = [c for c in roads.columns
+                       if c.startswith(prefix) and c != dist_col]
+        for col in detail_cols:
+            dt = roads[col].dtype
+            if dt in (np.float32, np.float64, np.int32, np.int64, float, int):
+                roads.loc[beyond, col] = 0
+            else:
+                roads.loc[beyond, col] = None
+
+        total_blanked += n_beyond
+        pct = n_beyond / len(roads) * 100
+        label = prefix.replace("nearest_", "").replace("poi_", "").rstrip("_")
+        print(f"      {label:<20s} >{threshold:>5}ft → {n_beyond:>6,} set to 0 "
+              f"({pct:.0f}% of {len(roads):,})")
+
+    if total_blanked > 0:
+        print(f"      Total: {total_blanked:,} distance entries → 0")
+
+    # ── Drop duplicate / low-value columns ──
+    drop_cols = set()
+
+    # Duplicate geography (geo_ repeats frontend columns)
+    drop_cols.update([
+        "geo_area_type", "geo_county_basename", "geo_county_fips",
+        "geo_county_name", "geo_dot_region", "geo_dot_region_id",
+        "geo_juris_code", "geo_mpo_id", "geo_mpo_name",
+        "geo_planning_district", "geo_planning_district_id",
+    ])
+
+    # HPMS raw duplicates (already resolved into frontend columns)
+    drop_cols.update([
+        "hpms_aadt", "hpms_f_system", "hpms_facility_type",
+        "hpms_match_dist_ft", "hpms_matched", "hpms_ownership",
+        "hpms_speed_limit", "hpms_surface_type", "hpms_through_lanes",
+    ])
+
+    # Single-value subcategory columns
+    for c in roads.columns:
+        if c.endswith("_subcategory") and c.startswith("nearest_"):
+            vals = roads[c].dropna().unique()
+            non_empty = [v for v in vals if str(v).strip() not in ("", "nan", "None")]
+            if len(non_empty) <= 1:
+                drop_cols.add(c)
+
+    actual_drop = sorted([c for c in drop_cols if c in roads.columns])
+    if actual_drop:
+        roads.drop(columns=actual_drop, inplace=True)
+        print(f"\n    Dropped {len(actual_drop)} duplicate/low-value columns")
+        for c in actual_drop[:5]:
+            print(f"      ✂️  {c}")
+        if len(actual_drop) > 5:
+            print(f"      ... and {len(actual_drop) - 5} more")
+
+    gc.collect()
+
+    # ── Data quality validation + auto-fix ──
+    try:
+        from road_inventory_validator import validate_and_fix
+        print(f"\n    Running data quality validator...")
+        report = validate_and_fix(roads, verbose=True)
+    except ImportError:
+        print(f"\n    road_inventory_validator.py not found — skipping validation")
+    except Exception as e:
+        print(f"\n    Validator error: {e} — continuing without validation")
+
+    gc.collect()
+
     # ── Column ordering ──
     # Frontend-standard columns go first (for crash_enricher / split.py compatibility)
     frontend = [
@@ -1039,9 +1208,11 @@ def main():
     frontend = [c for c in frontend if c in roads.columns]
 
     base = ["road_source", "u_node","v_node","u_lat","u_lon","v_lat","v_lon","mid_lat","mid_lon",
+            "geometry_coords",
             "highway","name","ref","oneway","lanes","maxspeed","length_m",
             "bridge","tunnel","surface","lit","sidewalk","cycleway","divider","curvature"]
     ints_c = ["is_intersection","intersection_degree"]
+    ramp_c = ["is_ramp","ramp_type"]
     geo_c = sorted([c for c in roads.columns if c.startswith("geo_")])
     resolved_c = sorted([c for c in roads.columns if c.startswith("resolved_")])
     conf_c = sorted([c for c in roads.columns if c.startswith("conf_") or c.startswith("xval_")])
@@ -1079,7 +1250,7 @@ def main():
     map_ordered.extend(map_remaining)
 
     # Assemble in order: frontend first, then analysis groups, deduplicating
-    all_grouped = (frontend + base + geo_c + resolved_c + conf_c + risk_c + curve_c + te_c + ints_c + hpms_c + bridge_c + rail_c +
+    all_grouped = (frontend + base + geo_c + resolved_c + conf_c + risk_c + curve_c + te_c + ints_c + ramp_c + hpms_c + bridge_c + rail_c +
                    school_c + transit_c + poi_c + map_ordered)
     ordered = []
     seen = set()
@@ -1240,6 +1411,7 @@ def main():
     print(f"    Curve analysis:      {len(curve_c)}")
     print(f"    Traffic engineering: {len(te_c)}")
     print(f"    Intersection:        {len([c for c in ordered if c in ints_c])}")
+    print(f"    Ramp:                {len([c for c in ordered if c in ramp_c])}")
     print(f"    HPMS:                {len(hpms_c)}")
     print(f"    Bridges:             {len(bridge_c)}")
     print(f"    Rail crossings:      {len(rail_c)}")

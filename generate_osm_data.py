@@ -39,6 +39,7 @@ POI PARQUET COLUMNS:
 import argparse
 import gc
 import gzip
+import json
 import os
 import shutil
 import sys
@@ -126,6 +127,7 @@ POI_TAGS = [
     ("stop_sign",   "highway",  ["stop"]),
     ("crossing",    "highway",  ["crossing"]),
     ("rest_area",   "highway",  ["rest_area", "services"]),
+    ("exit",        "highway",  ["motorway_junction"]),   # Interstate exit/entrance nodes
     ("rail_xing",   "railway",  ["level_crossing"]),
 ]
 
@@ -143,7 +145,6 @@ def convert_to_enricher_format(G):
     Has_Street_Lighting, Has_Sidewalk, Has_Bike_Lane
     """
     import osmnx as ox
-    ox.settings.useful_tags_way += ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
 
     nodes_gdf, edges_gdf = ox.graph_to_gdfs(G, nodes=True, edges=True)
 
@@ -203,6 +204,10 @@ def convert_to_enricher_format(G):
             'v_lat': v_lat, 'v_lon': v_lon,
             'mid_lat': (u_lat + v_lat) / 2,
             'mid_lon': (u_lon + v_lon) / 2,
+            # Full linestring for accurate perpendicular matching
+            # JSON array of [lon, lat] pairs (all intermediate vertices)
+            'geometry_coords': json.dumps(
+                [[round(c[0], 7), round(c[1], 7)] for c in coords]),
             'highway':   _clean(row.get('highway', '')),
             'name':      _clean(row.get('name', '')),
             'ref':       _clean(row.get('ref', '')),
@@ -251,11 +256,6 @@ def download_pois(state_name):
     """Download all POI categories for a state from OSM."""
     import osmnx as ox
 
-    # Ensure large-area settings (in case --pois-only skipped road config)
-    ox.settings.max_query_area_size = 50_000_000_000
-    ox.settings.overpass_rate_limit = False
-    ox.settings.timeout = 600
-
     if state_name == 'District of Columbia':
         place = 'Washington, DC, United States'
     elif state_name == 'Georgia':
@@ -290,6 +290,12 @@ def download_pois(state_name):
                 subcategory = str(row.get(osm_key, "")).strip()
                 if subcategory == "nan":
                     subcategory = osm_values[0]
+
+                # For exit nodes, store exit number (ref) in subcategory
+                if category == "exit":
+                    ref = str(row.get("ref", "") or "").strip()
+                    if ref and ref != "nan":
+                        subcategory = ref  # e.g. "1A", "23", "119B"
 
                 all_pois.append({
                     "osm_id": idx[1] if isinstance(idx, tuple) else idx,
@@ -399,22 +405,6 @@ def process_state(state_info, cache_dir, s3, bucket, force=False,
             try:
                 import osmnx as ox
                 place = get_place_name(name)
-
-                # ── Configure osmnx for large states ──
-                # Default max_query_area_size = 2.5B m² (~50km × 50km).
-                # Alabama alone is 60x that = 150B m². Texas is ~280x.
-                # Bump to 50B m² so even TX only subdivides into ~15 sub-queries
-                # instead of 280, massively reducing Overpass round-trips.
-                ox.settings.max_query_area_size = 50_000_000_000  # 50B m²
-                ox.settings.overpass_rate_limit = False  # single-runner, no throttle needed
-                ox.settings.timeout = 600   # 10 min per Overpass sub-query (default 180)
-                ox.settings.overpass_memory = 2_147_483_648  # 2GB Overpass memory allocation
-
-                # Ensure osmnx retains extra road tags we need for enrichment
-                extra_tags = ['surface', 'lit', 'sidewalk', 'cycleway', 'divider']
-                for tag in extra_tags:
-                    if tag not in ox.settings.useful_tags_way:
-                        ox.settings.useful_tags_way.append(tag)
 
                 try:
                     G = ox.graph_from_place(place, network_type='drive', simplify=True)
