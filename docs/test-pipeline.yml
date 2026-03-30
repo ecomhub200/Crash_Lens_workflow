@@ -1,0 +1,69 @@
+# ==============================================================================
+# Pipeline Test Suite — Validates all shared modules before merge
+# ==============================================================================
+# Runs synthetic data tests on every push/PR affecting pipeline files.
+# No network access, no R2, no large files — pure logic validation.
+#
+# Tests: imports, spatial matcher, validator (12 rules), enricher,
+#        crash enricher, value mappings, end-to-end pipeline.
+# ==============================================================================
+
+name: "Pipeline Tests"
+
+on:
+  push:
+    paths:
+      - 'spatial_matcher.py'
+      - 'road_inventory_enricher.py'
+      - 'road_inventory_validator.py'
+      - 'crash_enricher.py'
+      - 'road_data_authority.py'
+      - 'build_road_inventory.py'
+      - 'generate_osm_data.py'
+      - 'test_pipeline.py'
+      - 'states/*/de_normalize.py'
+
+  pull_request:
+    paths:
+      - 'spatial_matcher.py'
+      - 'road_inventory_enricher.py'
+      - 'road_inventory_validator.py'
+      - 'crash_enricher.py'
+      - 'road_data_authority.py'
+      - 'build_road_inventory.py'
+      - 'generate_osm_data.py'
+      - 'test_pipeline.py'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "Pipeline Tests"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas pyarrow scipy numpy geopandas
+
+      - name: Run test suite
+        run: python test_pipeline.py -v
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Pipeline Tests" >> $GITHUB_STEP_SUMMARY
+          if [ $? -eq 0 ]; then
+            echo "✅ All tests passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Some tests failed — check logs" >> $GITHUB_STEP_SUMMARY
+          fi

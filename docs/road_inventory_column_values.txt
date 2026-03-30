@@ -1,0 +1,958 @@
+
+===== Functional Class =====
+3-Principal Arterial
+4-Minor Arterial
+5-Major Collector
+6-Minor Collector
+7-Local
+... (5 unique values)
+
+===== SYSTEM =====
+DOT Primary
+DOT Secondary
+Non-DOT primary
+Non-DOT secondary
+... (4 unique values)
+
+===== Ownership =====
+1. State Hwy Agency
+2. County Hwy Agency
+3. City or Town Hwy Agency
+... (3 unique values)
+
+===== Facility Type =====
+1-One-Way Undivided
+2-One-Way Divided
+... (2 unique values)
+
+===== Roadway Surface Type =====
+2. Blacktop, Asphalt, Bituminous
+6. Other
+... (2 unique values)
+
+===== Roadway Description =====
+1. Two-Way, Not Divided
+2. Two-Way, Divided, Unprotected Median
+3. Two-Way, Divided, Positive Median Barrier
+... (3 unique values)
+
+===== Roadway Alignment =====
+1. Straight - Level
+2. Curve - Level
+4. Grade - Curve
+... (3 unique values)
+
+===== Area Type =====
+Rural
+... (1 unique values)
+
+===== DOT District =====
+South District
+... (1 unique values)
+
+===== Planning District =====
+Salisbury-Wicomico MPO
+... (1 unique values)
+
+===== MPO Name =====
+
+... (0 unique values)
+
+===== Physical Juris Name =====
+Sussex
+... (1 unique values)
+
+===== Traffic Control Type =====
+3. Traffic Signal
+4. Stop Sign
+8. Yield Sign
+... (3 unique values)
+
+===== Intersection Type =====
+4. Four-Way Intersection
+5. Five-Point or More
+... (2 unique values)
+
+===== School Zone =====
+No
+Yes
+... (2 unique values)
+
+===== road_source =====
+OSM
+... (1 unique values)
+
+===== highway =====
+residential
+secondary
+tertiary
+trunk
+trunk_link
+unclassified
+... (6 unique values)
+
+===== oneway =====
+False
+True
+... (2 unique values)
+
+===== conf_bridge =====
+0
+50
+90
+... (3 unique values)
+
+===== conf_crosswalk =====
+0
+50
+75
+90
+... (4 unique values)
+
+===== conf_school_zone =====
+0
+50
+90
+... (3 unique values)
+
+===== conf_signal =====
+0
+50
+... (2 unique values)
+
+===== conf_speed_limit =====
+0
+50
+80
+95
+... (4 unique values)
+
+===== conf_stop_sign =====
+0
+50
+75
+... (3 unique values)
+
+===== curve_advisory_speed =====
+0
+35
+... (2 unique values)
+
+===== curve_class =====
+1
+2
+3
+4
+5
+... (5 unique values)
+
+===== curve_class_label =====
+Extreme
+Moderate
+Sharp
+Slight
+Straight
+... (5 unique values)
+
+===== curve_has_warning_sign =====
+No
+Yes
+... (2 unique values)
+
+===== curve_is_curve =====
+No
+Yes
+... (2 unique values)
+
+===== curve_risk_score =====
+0
+10
+40
+45
+50
+55
+60
+65
+70
+80
+... (10 unique values)
+
+===== curve_speed_differential =====
+0
+20
+... (2 unique values)
+
+===== curve_warning_sign_type =====
+Turn
+... (1 unique values)
+
+===== risk_bridge_condition =====
+0
+35
+40
+70
+... (4 unique values)
+
+===== risk_departure_curve =====
+No
+Yes
+... (2 unique values)
+
+===== risk_departure_score =====
+0
+25
+50
+75
+... (4 unique values)
+
+===== risk_school_exposure =====
+0
+55
+65
+80
+... (4 unique values)
+
+===== risk_speed_transition =====
+No
+Yes
+... (2 unique values)
+
+===== risk_speed_transition_diff =====
+0
+10
+20
+30
+... (4 unique values)
+
+===== risk_unsignalized_xwalk =====
+No
+Yes
+... (2 unique values)
+
+===== xval_crosswalk_sources =====
+0
+1
+2
+3
+... (4 unique values)
+
+===== xval_school_sources =====
+0
+1
+2
+... (3 unique values)
+
+===== xval_signal_sources =====
+0
+1
+... (2 unique values)
+
+===== xval_stop_sign_sources =====
+0
+1
+2
+... (3 unique values)
+
+===== geo_area_type =====
+Rural
+... (1 unique values)
+
+===== geo_county_basename =====
+Sussex
+... (1 unique values)
+
+===== geo_county_fips =====
+005
+... (1 unique values)
+
+===== geo_county_name =====
+Sussex County
+... (1 unique values)
+
+===== geo_dot_region =====
+South District
+... (1 unique values)
+
+===== geo_dot_region_id =====
+de_3
+... (1 unique values)
+
+===== geo_juris_code =====
+10005
+... (1 unique values)
+
+===== geo_mpo_id =====
+
+... (0 unique values)
+
+===== geo_mpo_name =====
+
+... (0 unique values)
+
+===== geo_planning_district =====
+Salisbury-Wicomico MPO
+... (1 unique values)
+
+===== geo_planning_district_id =====
+swmpo
+... (1 unique values)
+
+===== resolved_bridge_source =====
+Federal
+OSM
+... (2 unique values)
+
+===== resolved_has_lighting =====
+No
+Yes
+... (2 unique values)
+
+===== resolved_has_signal =====
+No
+Yes
+... (2 unique values)
+
+===== resolved_lanes =====
+0
+2
+3
+4
+... (4 unique values)
+
+===== resolved_lanes_source =====
+HPMS
+OSM
+... (2 unique values)
+
+===== resolved_lighting_source =====
+Mapillary
+... (1 unique values)
+
+===== resolved_on_bridge =====
+No
+Yes
+... (2 unique values)
+
+===== resolved_school_source =====
+Mapillary
+... (1 unique values)
+
+===== resolved_school_zone =====
+No
+Yes
+... (2 unique values)
+
+===== resolved_signal_source =====
+HPMS
+Mapillary
+POI
+... (3 unique values)
+
+===== resolved_speed_limit =====
+0
+10
+15
+20
+25
+35
+40
+45
+50
+55
+... (10 unique values)
+
+===== resolved_speed_source =====
+HPMS
+Mapillary
+OSM
+... (3 unique values)
+
+===== resolved_surface_source =====
+HPMS
+... (1 unique values)
+
+===== resolved_surface_type =====
+Paved
+... (1 unique values)
+
+===== Near_Bridge_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== nearest_bridge_condition =====
+Fair
+... (1 unique values)
+
+===== nearest_bridge_facility =====
+BAYARD AVE./SR1A
+CENTRAL AVE
+COASTAL HWY/SR1 SB
+JOHN WILLIAMS HGWY
+... (4 unique values)
+
+===== nearest_bridge_feature =====
+ASSAWOMAN CANAL
+LEWES REHOBOTH CANAL
+LOVE CREEK
+SILVER LAKE
+... (4 unique values)
+
+===== nearest_bridge_status =====
+A
+... (1 unique values)
+
+===== Near_RailXing_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== nearest_rail_xing_railroad =====
+DCR
+... (1 unique values)
+
+===== nearest_rail_xing_warning_device =====
+Unknown
+... (1 unique values)
+
+===== nearest_rail_xing_warning_level =====
+Other
+... (1 unique values)
+
+===== Near_School_1500ft =====
+No
+Yes
+... (2 unique values)
+
+===== nearest_school_level =====
+0
+1
+... (2 unique values)
+
+===== nearest_school_type =====
+0
+1
+... (2 unique values)
+
+===== Near_Transit_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== nearest_transit_wheelchair =====
+0
+... (1 unique values)
+
+===== Near_PoiBar_1500ft =====
+No
+... (1 unique values)
+
+===== Near_PoiClinic_1500ft =====
+No
+... (1 unique values)
+
+===== Near_PoiCollege_1500ft =====
+No
+... (1 unique values)
+
+===== Near_PoiCrossing_100ft =====
+No
+Yes
+... (2 unique values)
+
+===== Near_PoiFuel_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== Near_PoiHospital_2000ft =====
+No
+... (1 unique values)
+
+===== Near_PoiParking_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== Near_PoiRestArea_1000ft =====
+No
+... (1 unique values)
+
+===== Near_PoiRestaurant_500ft =====
+No
+Yes
+... (2 unique values)
+
+===== Near_PoiSignal_100ft =====
+No
+Yes
+... (2 unique values)
+
+===== Near_PoiStopSign_100ft =====
+No
+Yes
+... (2 unique values)
+
+===== nearest_poi_bar_subcategory =====
+
+... (0 unique values)
+
+===== nearest_poi_clinic_subcategory =====
+
+... (0 unique values)
+
+===== nearest_poi_college_subcategory =====
+
+... (0 unique values)
+
+===== nearest_poi_crossing_subcategory =====
+crossing
+... (1 unique values)
+
+===== nearest_poi_fuel_subcategory =====
+fuel
+... (1 unique values)
+
+===== nearest_poi_hospital_subcategory =====
+
+... (0 unique values)
+
+===== nearest_poi_parking_subcategory =====
+parking
+... (1 unique values)
+
+===== nearest_poi_rest_area_subcategory =====
+
+... (0 unique values)
+
+===== nearest_poi_restaurant_subcategory =====
+fast_food
+restaurant
+... (2 unique values)
+
+===== nearest_poi_signal_subcategory =====
+traffic_signals
+... (1 unique values)
+
+===== nearest_poi_stop_sign_subcategory =====
+stop
+... (1 unique values)
+
+===== hpms_access_control =====
+0
+3
+... (2 unique values)
+
+===== hpms_county_code =====
+
+... (0 unique values)
+
+===== hpms_curve_class =====
+
+... (0 unique values)
+
+===== hpms_design_speed =====
+0
+... (1 unique values)
+
+===== hpms_f_system =====
+0
+3
+4
+5
+7
+... (5 unique values)
+
+===== hpms_facility_type =====
+0
+1
+2
+6
+... (4 unique values)
+
+===== hpms_grade_class =====
+
+... (0 unique values)
+
+===== hpms_matched =====
+No
+Yes
+... (2 unique values)
+
+===== hpms_median_type =====
+0
+1
+2
+3
+... (4 unique values)
+
+===== hpms_nhs =====
+0
+1
+... (2 unique values)
+
+===== hpms_num_signalized_int =====
+0
+... (1 unique values)
+
+===== hpms_num_signals =====
+0
+... (1 unique values)
+
+===== hpms_num_stop_int =====
+0
+... (1 unique values)
+
+===== hpms_ownership =====
+0
+5
+... (2 unique values)
+
+===== hpms_peak_parking =====
+0
+3
+... (2 unique values)
+
+===== hpms_route_name =====
+CR 1
+SR 113
+SR 9
+... (3 unique values)
+
+===== hpms_shoulder_type_l =====
+0
+... (1 unique values)
+
+===== hpms_shoulder_type_r =====
+0
+... (1 unique values)
+
+===== hpms_signal_type =====
+0
+3
+4
+5
+... (4 unique values)
+
+===== hpms_speed_limit =====
+0
+25
+35
+40
+50
+55
+... (6 unique values)
+
+===== hpms_surface_type =====
+0
+2
+6
+7
+... (4 unique values)
+
+===== hpms_terrain_type =====
+0
+1
+... (2 unique values)
+
+===== hpms_through_lanes =====
+0
+2
+4
+... (3 unique values)
+
+===== hpms_turn_lanes_l =====
+0
+2
+4
+5
+... (4 unique values)
+
+===== hpms_turn_lanes_r =====
+0
+4
+5
+... (3 unique values)
+
+===== hpms_urban_code =====
+
+... (0 unique values)
+
+===== lanes =====
+2
+3
+... (2 unique values)
+
+===== maxspeed =====
+15 mph
+25 mph
+35 mph
+40 mph
+40 mph; 50 mph
+50 mph
+55 mph
+... (7 unique values)
+
+===== bridge =====
+yes
+... (1 unique values)
+
+===== is_intersection =====
+Yes
+... (1 unique values)
+
+===== intersection_degree =====
+4
+5
+6
+8
+... (4 unique values)
+
+===== map_bollard =====
+No
+... (1 unique values)
+
+===== map_crosswalk_count =====
+0
+1
+2
+3
+4
+9
+... (6 unique values)
+
+===== map_curve_warning =====
+No
+... (1 unique values)
+
+===== map_curve_warning_count =====
+0
+... (1 unique values)
+
+===== map_do_not_enter =====
+No
+... (1 unique values)
+
+===== map_do_not_enter_count =====
+0
+... (1 unique values)
+
+===== map_guard_rail =====
+No
+... (1 unique values)
+
+===== map_keep_right =====
+No
+... (1 unique values)
+
+===== map_keep_right_count =====
+0
+... (1 unique values)
+
+===== map_no_left_turn =====
+No
+... (1 unique values)
+
+===== map_no_left_turn_count =====
+0
+... (1 unique values)
+
+===== map_no_parking =====
+No
+... (1 unique values)
+
+===== map_no_parking_count =====
+0
+... (1 unique values)
+
+===== map_no_right_turn =====
+No
+... (1 unique values)
+
+===== map_no_right_turn_count =====
+0
+... (1 unique values)
+
+===== map_no_u_turn =====
+No
+... (1 unique values)
+
+===== map_no_u_turn_count =====
+0
+... (1 unique values)
+
+===== map_one_way =====
+No
+... (1 unique values)
+
+===== map_one_way_count =====
+0
+... (1 unique values)
+
+===== map_ped_crossing_warning =====
+No
+... (1 unique values)
+
+===== map_ped_crossing_warning_count =====
+0
+... (1 unique values)
+
+===== map_rr_crossing_warning =====
+No
+Yes
+... (2 unique values)
+
+===== map_rr_crossing_warning_count =====
+0
+1
+... (2 unique values)
+
+===== map_school_zone =====
+No
+Yes
+... (2 unique values)
+
+===== map_school_zone_count =====
+0
+1
+2
+5
+6
+... (5 unique values)
+
+===== map_signal_ahead =====
+No
+... (1 unique values)
+
+===== map_signal_ahead_count =====
+0
+... (1 unique values)
+
+===== map_signal_present =====
+No
+Yes
+... (2 unique values)
+
+===== map_speed_10_count =====
+0
+1
+... (2 unique values)
+
+===== map_speed_15_count =====
+0
+1
+2
+... (3 unique values)
+
+===== map_speed_20_count =====
+0
+1
+... (2 unique values)
+
+===== map_speed_25_count =====
+0
+1
+2
+... (3 unique values)
+
+===== map_speed_30_count =====
+0
+2
+... (2 unique values)
+
+===== map_speed_35_count =====
+0
+1
+3
+4
+5
+... (5 unique values)
+
+===== map_speed_40_count =====
+0
+1
+... (2 unique values)
+
+===== map_speed_45_count =====
+0
+2
+4
+... (3 unique values)
+
+===== map_speed_50_count =====
+0
+1
+2
+... (3 unique values)
+
+===== map_speed_55_count =====
+0
+... (1 unique values)
+
+===== map_speed_5_count =====
+0
+1
+... (2 unique values)
+
+===== map_speed_60_count =====
+0
+... (1 unique values)
+
+===== map_speed_65_count =====
+0
+... (1 unique values)
+
+===== map_speed_70_count =====
+0
+... (1 unique values)
+
+===== map_stop_ahead =====
+No
+Yes
+... (2 unique values)
+
+===== map_stop_ahead_count =====
+0
+1
+4
+... (3 unique values)
+
+===== map_stop_sign =====
+No
+Yes
+... (2 unique values)
+
+===== map_stop_sign_count =====
+0
+1
+2
+... (3 unique values)
+
+===== map_turn_warning =====
+No
+Yes
+... (2 unique values)
+
+===== map_turn_warning_count =====
+0
+1
+... (2 unique values)
+
+===== map_winding_road =====
+No
+... (1 unique values)
+
+===== map_winding_road_count =====
+0
+... (1 unique values)
+
+===== map_yield_sign =====
+No
+Yes
+... (2 unique values)
+
+===== map_yield_sign_count =====
+0
+2
+4
+... (3 unique values)
