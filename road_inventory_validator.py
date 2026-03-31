@@ -142,10 +142,23 @@ def _cast_str(ri, col):
         ri[col] = ri[col].fillna("").astype(str)
 
 
-def validate_and_fix(ri, verbose=True):
-    """Run all 12 validation rule groups. Fixes in-place. Returns report."""
+def validate_and_fix(ri, verbose=True, state_abbr=""):
+    """Run all 12 validation rule groups. Fixes in-place. Returns report.
+
+    Args:
+        ri: Road inventory DataFrame (mutated in place)
+        verbose: Print progress
+        state_abbr: Two-letter state abbreviation for statutory speed lookup
+    """
     report = ValidationReport()
     n = len(ri)
+
+    # Try to import statutory speeds
+    try:
+        from states_registry import get_statutory_speed
+        _has_statutory = True
+    except ImportError:
+        _has_statutory = False
 
     # Pre-cast columns we'll modify to string
     for col in ["Max Speed Diff", "Roadway Surface Type", "Facility Type",
@@ -157,25 +170,46 @@ def validate_and_fix(ri, verbose=True):
     has_fc = fc.str.len() > 0
 
     # ═══════════════════════════════════════════════════════════
-    #  RULE 1: SPEED vs FC RANGE (FIX)
+    #  RULE 1: SPEED vs FC RANGE (FIX) — uses statutory speeds when available
     # ═══════════════════════════════════════════════════════════
     spd = _num(ri, "Max Speed Diff")
     has_speed = spd > 0
     total_spd_fix = 0
 
-    for prefix, (lo, hi, default) in FC_SPEED_RULES.items():
-        mask = fc.str.startswith(prefix) & has_speed
-        if not mask.any():
-            continue
-        bad = mask & ((spd < lo) | (spd > hi))
-        if bad.any():
-            ri.loc[bad, "Max Speed Diff"] = str(default)
-            total_spd_fix += bad.sum()
+    if _has_statutory and state_abbr:
+        # State-specific statutory speeds with area type awareness
+        area_type = ri["geo_area_type"].fillna("Rural").astype(str) if "geo_area_type" in ri.columns \
+            else pd.Series(["Rural"] * n, index=ri.index)
+
+        for prefix, (lo, hi, _) in FC_SPEED_RULES.items():
+            mask = fc.str.startswith(prefix) & has_speed
+            if not mask.any():
+                continue
+            bad = mask & ((spd < lo) | (spd > hi))
+            if bad.any():
+                # Apply per-row statutory speed based on area type
+                for idx in ri.index[bad]:
+                    fc_val = ri.at[idx, "Functional Class"]
+                    at = area_type.at[idx] if idx in area_type.index else "Rural"
+                    default = get_statutory_speed(fc_val, state_abbr, at)
+                    ri.at[idx, "Max Speed Diff"] = str(default)
+                total_spd_fix += bad.sum()
+    else:
+        # Generic FC defaults (no state info)
+        for prefix, (lo, hi, default) in FC_SPEED_RULES.items():
+            mask = fc.str.startswith(prefix) & has_speed
+            if not mask.any():
+                continue
+            bad = mask & ((spd < lo) | (spd > hi))
+            if bad.any():
+                ri.loc[bad, "Max Speed Diff"] = str(default)
+                total_spd_fix += bad.sum()
 
     report.check("SPD_RANGE", "Speed outside FC range", total_spd_fix, n,
                  "fixed" if total_spd_fix else "info")
     if total_spd_fix:
-        report.fix("SPD_FIX", "Speed reset to FC default", total_spd_fix)
+        src = f"statutory ({state_abbr.upper()})" if (_has_statutory and state_abbr) else "FC default"
+        report.fix("SPD_FIX", f"Speed reset to {src}", total_spd_fix)
 
     # Additional: 4+ lanes with speed < 25 → raise to 25
     lanes = _num(ri, "Through_Lanes")
@@ -184,6 +218,34 @@ def validate_and_fix(ri, verbose=True):
     if big_slow.any():
         ri.loc[big_slow, "Max Speed Diff"] = "25"
         report.fix("SPD_LANE", "4+ lane road speed → 25", big_slow.sum())
+
+    # ═══════════════════════════════════════════════════════════
+    #  RULE 1b: FILL EMPTY SPEED with statutory default
+    # ═══════════════════════════════════════════════════════════
+    spd = _num(ri, "Max Speed Diff")
+    no_speed = has_fc & (spd <= 0)
+    filled_speed = 0
+
+    if _has_statutory and state_abbr and no_speed.any():
+        area_type = ri["geo_area_type"].fillna("Rural").astype(str) if "geo_area_type" in ri.columns \
+            else pd.Series(["Rural"] * n, index=ri.index)
+
+        # Vectorized fill: group by (FC, area_type), apply statutory speed
+        for fc_val in ri.loc[no_speed, "Functional Class"].unique():
+            if not fc_val or fc_val == "nan":
+                continue
+            fc_mask = no_speed & (ri["Functional Class"] == fc_val)
+            for at_val in area_type[fc_mask].unique():
+                at_mask = fc_mask & (area_type == at_val)
+                if at_mask.any():
+                    statutory = get_statutory_speed(fc_val, state_abbr, at_val)
+                    ri.loc[at_mask, "Max Speed Diff"] = str(statutory)
+                    filled_speed += at_mask.sum()
+
+        report.check("SPD_FILL", "Empty speed filled with statutory default",
+                     filled_speed, n, "filled" if filled_speed else "info")
+        if filled_speed:
+            report.fix("SPD_STATUTORY", f"Speed set from {state_abbr.upper()} statutory law", filled_speed)
 
     # ═══════════════════════════════════════════════════════════
     #  RULE 2: SURFACE TYPE GAP (FIX)

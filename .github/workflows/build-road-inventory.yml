@@ -141,7 +141,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install pandas pyarrow scipy numpy boto3
+        run: pip install pandas pyarrow scipy numpy boto3 geopandas shapely
 
       - name: Download geography files
         env:
@@ -156,6 +156,22 @@ jobs:
             --endpoint-url "$R2" 2>/dev/null || echo "us_counties.json not found"
           aws s3 cp "s3://crash-lens-data/_national/us_mpos.json" cache/us_mpos.json \
             --endpoint-url "$R2" 2>/dev/null || echo "us_mpos.json not found"
+
+      - name: Restore boundary polygons from R2
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          mkdir -p cache/boundaries
+          for FILE in us_urban_area_boundaries.parquet.gz us_county_boundaries.parquet.gz; do
+            aws s3 cp "s3://crash-lens-data/_national/boundaries/$FILE" "cache/boundaries/$FILE" \
+              --endpoint-url "$R2" --only-show-errors 2>/dev/null && \
+              echo "✅ $FILE" || echo "⚠️ $FILE not found"
+          done
 
       - name: Build road database (${{ matrix.state }})
         env:

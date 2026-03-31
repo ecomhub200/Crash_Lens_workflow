@@ -1,28 +1,26 @@
-# """
-# boundary_resolver.py — Vectorized Point-in-Polygon for CrashLens
-#
-# Replaces row-by-row tigerweb_pip.py API calls with vectorized geopandas
-# sjoin against pre-downloaded boundary polygons.
-#
-# Performance:
-# tigerweb_pip:     566K × shapely.contains() = ~8 min + API calls
-# boundary_resolver: geopandas.sjoin(566K, 3222)  = ~2 seconds
-#
-# Usage:
-# from boundary_resolver import BoundaryResolver
-#
-# ```
-# resolver = BoundaryResolver(cache_dir="cache/boundaries")
-# df = resolver.resolve_counties(df, x_col="x", y_col="y")
-# df = resolver.resolve_places(df, x_col="x", y_col="y")
-# df = resolver.resolve_mpos(df, x_col="x", y_col="y")
-# ```
-#
-# Or use in de_normalize.py Phase 3.5:
-# resolver = BoundaryResolver(cache_dir="cache/boundaries")
-# df, stats = resolver.validate_jurisdiction(
-# df, state_fips="10", county_dict=DE_COUNTIES)
-# """
+"""
+boundary_resolver.py — Vectorized Point-in-Polygon for CrashLens
+=================================================================
+Replaces row-by-row tigerweb_pip.py API calls with vectorized geopandas
+sjoin against pre-downloaded boundary polygons.
+
+Performance:
+  tigerweb_pip:     566K × shapely.contains() = ~8 min + API calls
+  boundary_resolver: geopandas.sjoin(566K, 3222)  = ~2 seconds
+
+Usage:
+    from boundary_resolver import BoundaryResolver
+
+    resolver = BoundaryResolver(cache_dir="cache/boundaries")
+    df = resolver.resolve_counties(df, x_col="x", y_col="y")
+    df = resolver.resolve_places(df, x_col="x", y_col="y")
+    df = resolver.resolve_mpos(df, x_col="x", y_col="y")
+
+Or use in de_normalize.py Phase 3.5:
+    resolver = BoundaryResolver(cache_dir="cache/boundaries")
+    df, stats = resolver.validate_jurisdiction(
+        df, state_fips="10", county_dict=DE_COUNTIES)
+"""
 
 import time
 from pathlib import Path
@@ -30,6 +28,7 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+
 
 class BoundaryResolver:
     """Vectorized boundary resolution using pre-downloaded polygons."""
@@ -44,6 +43,7 @@ class BoundaryResolver:
         self._mpos = None
         self._county_subdivisions = None
         self._states = None
+        self._urban_areas = None
 
     def _load_boundaries(self, filename: str):
         """Load a boundary file, trying local cache then R2."""
@@ -109,6 +109,13 @@ class BoundaryResolver:
             self._county_subdivisions = self._load_boundaries(
                 "us_county_subdivision_boundaries.parquet.gz")
         return self._county_subdivisions
+
+    @property
+    def urban_areas(self):
+        if self._urban_areas is None:
+            self._urban_areas = self._load_boundaries(
+                "us_urban_area_boundaries.parquet.gz")
+        return self._urban_areas
 
     def _state_col(self, gdf):
         """Find the state FIPS column name (STATEFP or STATE)."""
@@ -282,6 +289,93 @@ class BoundaryResolver:
         elapsed = time.time() - t0
         print(f"    MPO PIP: {matched:,}/{valid.sum():,} in MPO area ({elapsed:.1f}s)")
         return df
+
+    def resolve_area_type(self, lats, lons):
+        """Classify each point as Urban / Suburban / Rural using Census boundaries.
+
+        Census Urban Area types:
+          - LSAD20 = '75' → Urbanized Area (pop 50K+) → "Urban"
+          - LSAD20 = '76' → Urban Cluster (pop 2,500-49,999) → "Suburban"
+          - Not in any UA/UC → "Rural"
+
+        Args:
+            lats: array of latitudes
+            lons: array of longitudes
+
+        Returns:
+            numpy array of "Urban" / "Suburban" / "Rural" strings
+        """
+        n = len(lats)
+        result = np.full(n, "Rural", dtype=object)
+
+        if self.urban_areas is None:
+            print("    ⚠️ Urban area boundaries not available — defaulting to Rural")
+            return result
+
+        t0 = time.time()
+        import geopandas as gpd
+        from shapely.geometry import Point
+
+        # Build points
+        valid = np.isfinite(lats) & np.isfinite(lons) & (lats != 0) & (lons != 0)
+        points = []
+        for i in range(n):
+            if valid[i]:
+                points.append(Point(lons[i], lats[i]))
+            else:
+                points.append(None)
+
+        point_gdf = gpd.GeoDataFrame(
+            {"idx": range(n)}, geometry=points, crs="EPSG:4326")
+        valid_gdf = point_gdf[valid].copy()
+
+        if len(valid_gdf) == 0:
+            return result
+
+        # Determine LSAD column (UA vs UC indicator)
+        ua = self.urban_areas
+        lsad_col = None
+        for candidate in ["LSAD20", "LSAD", "LSAD10"]:
+            if candidate in ua.columns:
+                lsad_col = candidate
+                break
+
+        name_col = None
+        for candidate in ["NAMELSAD20", "NAMELSAD", "NAME20", "NAME"]:
+            if candidate in ua.columns:
+                name_col = candidate
+                break
+
+        join_cols = ["geometry"]
+        if lsad_col:
+            join_cols.append(lsad_col)
+        if name_col:
+            join_cols.append(name_col)
+
+        # Spatial join
+        joined = gpd.sjoin(valid_gdf, ua[join_cols], how="left", predicate="within")
+        joined = joined[~joined.index.duplicated(keep="first")]
+
+        if lsad_col and lsad_col in joined.columns:
+            lsad = joined[lsad_col].fillna("").astype(str).str.strip()
+            # LSAD 75 = Urbanized Area (50K+), 76 = Urban Cluster (2.5K-50K)
+            is_urban = lsad == "75"
+            is_suburban = lsad == "76"
+            result[joined.index[is_urban].values] = "Urban"
+            result[joined.index[is_suburban].values] = "Suburban"
+        else:
+            # No LSAD column — any match = Urban (conservative)
+            matched_idx = joined.index[joined["index_right"].notna()]
+            result[matched_idx.values] = "Urban"
+
+        n_urban = (result == "Urban").sum()
+        n_suburban = (result == "Suburban").sum()
+        n_rural = (result == "Rural").sum()
+        elapsed = time.time() - t0
+        print(f"    Area type from Census UA/UC: Urban={n_urban:,}, "
+              f"Suburban={n_suburban:,}, Rural={n_rural:,} ({elapsed:.1f}s)")
+
+        return result
 
     def validate_jurisdiction(
         self,
