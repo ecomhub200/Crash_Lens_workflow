@@ -99,6 +99,14 @@ LAYERS = {
         "desc": "US MPO boundaries (~400 polygons)",
         "page_size": 500,
     },
+    "urban_areas": {
+        "shapefile_url": f"{TIGER_FTP}/UAC/tl_2025_us_uac20.zip",
+        "fields": "UACE20,GEOID20,NAME20,NAMELSAD20,LSAD20,ALAND20,AWATER20,INTPTLAT20,INTPTLON20",
+        "where": "1=1",
+        "filename": "us_urban_area_boundaries.parquet.gz",
+        "desc": "US Urban Areas + Urban Clusters (~3,600 polygons)",
+        "page_size": 500,
+    },
 }
 
 # Per-state FIPS for state-by-state download fallback

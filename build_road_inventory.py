@@ -6,7 +6,8 @@ Joins roads + intersections + HPMS + POIs + bridges + rail + schools + transit
 + Mapillary into a single statewide parquet file, spatially linked by GPS.
 
 BASE LAYER: OSM road segments (mid_lat, mid_lon)
-ENRICHMENT: Each data source joins to nearest road segment via KDTree
+ENRICHMENT: Each data source joins to nearest road segment via STRtree (linestring)
+    with KDTree (midpoint) fallback. STRtree matches to actual road geometry for accuracy.
 
 OUTPUT: {state}/cache/{abbr}_road_inventory.parquet.gz
 
@@ -79,7 +80,7 @@ STATES = {
 }
 
 # ═══════════════════════════════════════════════════════════════
-#  SPATIAL UTILITIES (KDTree-based)
+#  SPATIAL UTILITIES (KDTree + STRtree)
 # ═══════════════════════════════════════════════════════════════
 def _to_cartesian(lats, lons):
     """Convert lat/lon to 3D cartesian on unit sphere. Gives exact great-circle distances."""
@@ -100,6 +101,90 @@ def query_nearest(tree, lats, lons):
     # Convert chord distance to great-circle distance
     dists_m = 2 * EARTH_R * np.arcsin(np.clip(chord_dists / 2, 0, 1))
     return dists_m, indices
+
+
+# ── STRtree: point-to-linestring (accurate for road matching) ──
+
+_road_strtree = None
+_road_linestrings = None
+
+def build_road_strtree(roads):
+    """Build STRtree on road LineStrings for accurate point-to-road matching.
+    Call once after roads are loaded. All asset enrichment uses this.
+    """
+    global _road_strtree, _road_linestrings
+    try:
+        from shapely.geometry import LineString, Point
+        from shapely import STRtree
+    except ImportError:
+        try:
+            from shapely.geometry import LineString, Point
+            from shapely.strtree import STRtree
+        except ImportError:
+            print("    ⚠️ Shapely not available — using KDTree fallback")
+            return False
+
+    import json as _json
+    t0 = time.time()
+    lines = []
+    gc = roads["geometry_coords"].fillna("").astype(str).values if "geometry_coords" in roads.columns else None
+
+    for i in range(len(roads)):
+        parsed = False
+        if gc is not None and gc[i].startswith("["):
+            try:
+                coords = _json.loads(gc[i])
+                if len(coords) >= 2:
+                    lines.append(LineString(coords))
+                    parsed = True
+            except Exception:
+                pass
+        if not parsed:
+            # Fallback to u/v or midpoint
+            ml, mo = float(roads["mid_lat"].iloc[i]), float(roads["mid_lon"].iloc[i])
+            lines.append(Point(mo, ml).buffer(0.00001))
+
+    _road_linestrings = lines
+    _road_strtree = STRtree(lines)
+    elapsed = time.time() - t0
+    n_ls = sum(1 for l in lines if l.geom_type == "LineString")
+    print(f"    STRtree built: {n_ls:,} linestrings + {len(lines)-n_ls:,} points ({elapsed:.1f}s)")
+    return True
+
+
+def query_nearest_road_linestring(point_lats, point_lons, threshold_m=None):
+    """Find nearest road (linestring) for each point using STRtree.
+    Returns (indices, dists_m). Much more accurate than KDTree midpoint.
+    """
+    global _road_strtree, _road_linestrings
+    from shapely.geometry import Point
+
+    n = len(point_lats)
+    points = [Point(point_lons[i], point_lats[i]) for i in range(n)]
+
+    # STRtree nearest
+    try:
+        nearest_idx = _road_strtree.nearest(points)
+    except (TypeError, AttributeError):
+        nearest_idx = np.array([_road_strtree.nearest(pt) for pt in points], dtype=int)
+
+    nearest_idx = np.asarray(nearest_idx, dtype=int)
+
+    # Compute exact distance in meters
+    M = 111320.0
+    cos_lat = np.cos(np.radians(np.mean(point_lats)))
+    dists_m = np.zeros(n)
+
+    for i in range(n):
+        ri = nearest_idx[i]
+        geom = _road_linestrings[ri]
+        pt = points[i]
+        # Shapely distance is in degrees — convert to meters
+        deg_dist = pt.distance(geom)
+        # Approximate meters (good enough for thresholds)
+        dists_m[i] = deg_dist * M * cos_lat
+
+    return nearest_idx, dists_m
 
 def proximity_yesno(road_lats, road_lons, poi_lats, poi_lons, threshold_ft):
     if len(poi_lats) == 0:
@@ -235,14 +320,38 @@ def enrich_hpms(roads, hpms, threshold_m=100):
     if hpms is None or len(hpms) == 0:
         print("skipped"); return
 
-    tree = build_kdtree(hpms["mid_lat"].values, hpms["mid_lon"].values)
-    dists_m, indices = query_nearest(tree, roads["mid_lat"].values, roads["mid_lon"].values)
-    matched = dists_m <= threshold_m
+    use_strtree = _road_strtree is not None
+
+    if use_strtree:
+        # STRtree: HPMS point → nearest road linestring (accurate)
+        indices, dists_m = query_nearest_road_linestring(
+            hpms["mid_lat"].values, hpms["mid_lon"].values)
+
+        # Invert: for each ROAD, find closest HPMS that matched to it
+        n_roads = len(roads)
+        best_hpms_idx = np.full(n_roads, -1, dtype=int)
+        best_hpms_dist = np.full(n_roads, np.inf)
+
+        for hpms_i in range(len(hpms)):
+            road_i = indices[hpms_i]
+            d = dists_m[hpms_i]
+            if d < best_hpms_dist[road_i]:
+                best_hpms_dist[road_i] = d
+                best_hpms_idx[road_i] = hpms_i
+
+        matched = (best_hpms_idx >= 0) & (best_hpms_dist <= threshold_m)
+        final_indices = np.clip(best_hpms_idx, 0, len(hpms) - 1)
+        final_dists_m = best_hpms_dist
+    else:
+        # KDTree fallback (midpoint-to-midpoint)
+        tree = build_kdtree(hpms["mid_lat"].values, hpms["mid_lon"].values)
+        final_dists_m, final_indices = query_nearest(tree, roads["mid_lat"].values, roads["mid_lon"].values)
+        matched = final_dists_m <= threshold_m
 
     skip = {"mid_lat", "mid_lon"}
     for col in hpms.columns:
         if col in skip: continue
-        vals = hpms[col].values[indices]
+        vals = hpms[col].values[final_indices]
         try:
             _ = vals + 0  # numeric check
             is_numeric = True
@@ -253,15 +362,19 @@ def enrich_hpms(roads, hpms, threshold_m=100):
         else:
             roads[f"hpms_{col}"] = np.where(matched, vals, "")
 
-    roads["hpms_match_dist_ft"] = np.round(dists_m * M_TO_FT, 1)
+    roads["hpms_match_dist_ft"] = np.round(final_dists_m * M_TO_FT, 1)
     roads["hpms_matched"] = np.where(matched, "Yes", "No")
     n = matched.sum()
-    print(f"{n:,}/{len(roads):,} matched ({n/len(roads)*100:.1f}%)")
+    tag = "STRtree" if use_strtree else "KDTree"
+    print(f"{n:,}/{len(roads):,} matched ({n/len(roads)*100:.1f}%) [{tag}]")
 
 
 def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
     """
     Comprehensive asset enrichment: nearest GPS + attributes + count + Yes/No.
+    
+    Uses STRtree (point-to-linestring) when available for accurate matching.
+    Falls back to KDTree (point-to-midpoint) if STRtree not built.
     
     For each road segment, finds nearest asset and captures:
       nearest_{prefix}_dist_ft    — distance to nearest
@@ -269,15 +382,6 @@ def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
       nearest_{prefix}_{attr}     — each attribute from attr_cols
       {prefix}_count_{threshold}ft — count within threshold
       Near_{Prefix}_{threshold}ft — Yes/No
-    
-    Args:
-        roads: road DataFrame (mutated in place)
-        df: asset DataFrame with 'lat' and 'lon' columns
-        prefix: column prefix (e.g. 'bridge', 'school')
-        threshold_ft: proximity threshold in feet
-        attr_cols: list of (source_col, output_suffix) pairs
-                   e.g. [("condition", "condition"), ("year_built", "year_built")]
-        label: display name for logging
     """
     desc = label or prefix
     print(f"    {desc} ({threshold_ft}ft)...", end=" ", flush=True)
@@ -300,22 +404,47 @@ def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
         print("skipped (no data)")
         return
 
-    rl = roads["mid_lat"].values
-    ro = roads["mid_lon"].values
     al = df["lat"].values
     ao = df["lon"].values
 
-    # Build tree, find nearest
-    tree = build_kdtree(al, ao)
-    dists_m, indices = query_nearest(tree, rl, ro)
-    dists_ft = dists_m * M_TO_FT
-    threshold_m = threshold_ft * FT_TO_M
-    matched = dists_m <= threshold_m
+    # ── Two-pass matching: STRtree finds nearest road per asset, ──
+    # ── then we invert to find nearest asset per road              ──
+    use_strtree = _road_strtree is not None
+
+    if use_strtree:
+        # For each ASSET, find nearest ROAD via STRtree (point-to-linestring)
+        asset_road_idx, asset_road_dists_m = query_nearest_road_linestring(al, ao)
+        threshold_m = threshold_ft * FT_TO_M
+
+        # Invert: for each ROAD, find closest asset that matched to it
+        n_roads = len(roads)
+        best_asset_idx = np.full(n_roads, -1, dtype=int)
+        best_asset_dist = np.full(n_roads, np.inf)
+
+        for asset_i in range(len(df)):
+            road_i = asset_road_idx[asset_i]
+            d = asset_road_dists_m[asset_i]
+            if d < best_asset_dist[road_i]:
+                best_asset_dist[road_i] = d
+                best_asset_idx[road_i] = asset_i
+
+        dists_ft = best_asset_dist * M_TO_FT
+        indices = np.clip(best_asset_idx, 0, len(df) - 1)  # clip -1 for unmatched
+        matched = (best_asset_idx >= 0) & (best_asset_dist <= threshold_m)
+    else:
+        # KDTree fallback (midpoint-to-midpoint)
+        rl = roads["mid_lat"].values
+        ro = roads["mid_lon"].values
+        tree = build_kdtree(al, ao)
+        dists_m, indices = query_nearest(tree, rl, ro)
+        dists_ft = dists_m * M_TO_FT
+        threshold_m = threshold_ft * FT_TO_M
+        matched = dists_m <= threshold_m
 
     # Yes/No
     roads[yesno_col] = np.where(matched, "Yes", "No")
 
-    # Distance (always set — even beyond threshold, so engineer can see how far)
+    # Distance (always set — even beyond threshold)
     roads[dist_col] = np.round(dists_ft, 1)
 
     # Nearest asset GPS
@@ -339,7 +468,8 @@ def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
             roads[f"nearest_{prefix}_{out_suffix}"] = ""
 
     # Count within radius
-    counts = count_within_radius(rl, ro, al, ao, threshold_ft)
+    counts = count_within_radius(
+        roads["mid_lat"].values, roads["mid_lon"].values, al, ao, threshold_ft)
     roads[count_col] = counts
 
     n = matched.sum()
@@ -975,48 +1105,75 @@ def main():
     enrich_geography(roads, abbr, state_fips, cache_dir, s3, bucket)
     enrich_intersections(roads, data["intersections"])
     enrich_ramps(roads)
+
+    # Build STRtree on road linestrings (once — used by all asset enrichment)
+    strtree_ok = build_road_strtree(roads)
+    if not strtree_ok:
+        print("    Using KDTree midpoint fallback for all enrichment")
+
     enrich_hpms(roads, data["hpms"], args.hpms_threshold)
 
-    # Derive area type from HPMS urban_code (must run after HPMS)
-    if "hpms_urban_code" in roads.columns:
+    # Derive area type: Census UA/UC boundaries → HPMS urban_code → AADT fallback
+    _area_type_resolved = False
+
+    # Tier 1: Census Urban Area boundaries (most accurate — polygon PIP)
+    try:
+        from boundary_resolver import BoundaryResolver
+        br = BoundaryResolver(cache_dir=str(cache_dir / "boundaries"))
+        if br.urban_areas is not None:
+            roads["geo_area_type"] = br.resolve_area_type(
+                roads["mid_lat"].astype(float).values,
+                roads["mid_lon"].astype(float).values)
+            _area_type_resolved = True
+        else:
+            print("    Census UA boundaries not cached — trying HPMS fallback")
+    except ImportError:
+        print("    boundary_resolver.py not found — trying HPMS fallback")
+
+    # Tier 2: HPMS urban_code (if Census boundaries unavailable)
+    if not _area_type_resolved and "hpms_urban_code" in roads.columns:
         uc = roads["hpms_urban_code"].astype(str).str.strip()
         uc_numeric = pd.to_numeric(uc, errors="coerce").fillna(0)
         has_urban_data = (uc_numeric > 0).sum()
 
         if has_urban_data > 0:
-            # HPMS urban_code populated — use it
             roads["geo_area_type"] = np.where(
                 uc_numeric == 0, "Rural",
-                np.where(uc_numeric >= 99999, "Small Urban", "Urban"))
-            n_urban = ((uc_numeric > 0) & (uc_numeric < 99999)).sum()
+                np.where(uc_numeric >= 50000, "Suburban",
+                np.where(uc_numeric > 0, "Urban", "Rural")))
+            n_urban = ((uc_numeric > 0) & (uc_numeric < 50000)).sum()
+            n_suburban = ((uc_numeric >= 50000) & (uc_numeric < 99999)).sum()
             n_rural = (uc_numeric == 0).sum()
-            print(f"    Area type from HPMS urban_code: Urban={n_urban:,}, Rural={n_rural:,}")
+            print(f"    Area type from HPMS urban_code: Urban={n_urban:,}, "
+                  f"Suburban={n_suburban:,}, Rural={n_rural:,}")
+            _area_type_resolved = True
+
+    # Tier 3: AADT-based heuristic (last resort)
+    if not _area_type_resolved:
+        aadt = pd.to_numeric(roads.get("hpms_aadt", 0), errors="coerce").fillna(0)
+        if "Functional Class" in roads.columns:
+            fc = roads["Functional Class"].astype(str)
+        elif "resolved_functional_class" in roads.columns:
+            fc = roads["resolved_functional_class"].astype(str)
         else:
-            # HPMS urban_code empty — fallback to AADT-based classification
-            # FHWA threshold: roads with AADT >= 5,000 in areas with AADT density → Urban
-            aadt = pd.to_numeric(roads.get("hpms_aadt", 0), errors="coerce").fillna(0)
-            # Use whichever FC column exists at this point in the pipeline
-            if "Functional Class" in roads.columns:
-                fc = roads["Functional Class"].astype(str)
-            elif "resolved_functional_class" in roads.columns:
-                fc = roads["resolved_functional_class"].astype(str)
-            else:
-                fc = pd.Series([""] * len(roads), index=roads.index)
+            fc = pd.Series([""] * len(roads), index=roads.index)
 
-            # Heuristic: Interstate/Freeway/Principal Arterial with AADT > 5K → Urban context
-            # Collectors/Locals with AADT > 2K → Urban context
-            # Everything else → Rural
-            is_major = fc.astype(str).str.startswith(("1-", "2-", "3-"))
-            is_urban = np.where(
-                is_major & (aadt >= 5000), True,
-                np.where(aadt >= 2000, True, False))
+        is_major = fc.str.startswith(("1-", "2-", "3-"))
+        # Urban: major road with AADT > 10K, or any road AADT > 5K
+        # Suburban: major road AADT 2K-10K, or minor road AADT 1K-5K
+        # Rural: everything else
+        is_urban = (is_major & (aadt >= 10000)) | (aadt >= 5000)
+        is_suburban = ~is_urban & ((is_major & (aadt >= 2000)) | (aadt >= 1000))
 
-            roads["geo_area_type"] = np.where(is_urban, "Urban", "Rural")
-            urban_count = is_urban.sum()
-            print(f"    ⚠️  HPMS urban_code empty — Area type from AADT fallback: "
-                  f"Urban={urban_count:,}, Rural={len(roads)-urban_count:,}")
-    else:
-        roads["geo_area_type"] = "Rural"
+        roads["geo_area_type"] = np.where(
+            is_urban, "Urban",
+            np.where(is_suburban, "Suburban", "Rural"))
+
+        n_u = is_urban.sum()
+        n_s = is_suburban.sum()
+        n_r = len(roads) - n_u - n_s
+        print(f"    ⚠️  Area type from AADT fallback: Urban={n_u:,}, "
+              f"Suburban={n_s:,}, Rural={n_r:,}")
         print(f"    ⚠️  No HPMS data — Area type defaulting to Rural")
 
     enrich_bridges(roads, data["bridges"])
@@ -1187,7 +1344,7 @@ def main():
     try:
         from road_inventory_validator import validate_and_fix
         print(f"\n    Running data quality validator...")
-        report = validate_and_fix(roads, verbose=True)
+        report = validate_and_fix(roads, verbose=True, state_abbr=abbr)
     except ImportError:
         print(f"\n    road_inventory_validator.py not found — skipping validation")
     except Exception as e:
