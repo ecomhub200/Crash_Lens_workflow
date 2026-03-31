@@ -1,26 +1,28 @@
-"""
-boundary_resolver.py — Vectorized Point-in-Polygon for CrashLens
-=================================================================
-Replaces row-by-row tigerweb_pip.py API calls with vectorized geopandas
-sjoin against pre-downloaded boundary polygons.
-
-Performance:
-  tigerweb_pip:     566K × shapely.contains() = ~8 min + API calls
-  boundary_resolver: geopandas.sjoin(566K, 3222)  = ~2 seconds
-
-Usage:
-    from boundary_resolver import BoundaryResolver
-
-    resolver = BoundaryResolver(cache_dir="cache/boundaries")
-    df = resolver.resolve_counties(df, x_col="x", y_col="y")
-    df = resolver.resolve_places(df, x_col="x", y_col="y")
-    df = resolver.resolve_mpos(df, x_col="x", y_col="y")
-
-Or use in de_normalize.py Phase 3.5:
-    resolver = BoundaryResolver(cache_dir="cache/boundaries")
-    df, stats = resolver.validate_jurisdiction(
-        df, state_fips="10", county_dict=DE_COUNTIES)
-"""
+# """
+# boundary_resolver.py — Vectorized Point-in-Polygon for CrashLens
+#
+# Replaces row-by-row tigerweb_pip.py API calls with vectorized geopandas
+# sjoin against pre-downloaded boundary polygons.
+#
+# Performance:
+# tigerweb_pip:     566K × shapely.contains() = ~8 min + API calls
+# boundary_resolver: geopandas.sjoin(566K, 3222)  = ~2 seconds
+#
+# Usage:
+# from boundary_resolver import BoundaryResolver
+#
+# ```
+# resolver = BoundaryResolver(cache_dir="cache/boundaries")
+# df = resolver.resolve_counties(df, x_col="x", y_col="y")
+# df = resolver.resolve_places(df, x_col="x", y_col="y")
+# df = resolver.resolve_mpos(df, x_col="x", y_col="y")
+# ```
+#
+# Or use in de_normalize.py Phase 3.5:
+# resolver = BoundaryResolver(cache_dir="cache/boundaries")
+# df, stats = resolver.validate_jurisdiction(
+# df, state_fips="10", county_dict=DE_COUNTIES)
+# """
 
 import time
 from pathlib import Path
@@ -28,7 +30,6 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-
 
 class BoundaryResolver:
     """Vectorized boundary resolution using pre-downloaded polygons."""
@@ -109,6 +110,34 @@ class BoundaryResolver:
                 "us_county_subdivision_boundaries.parquet.gz")
         return self._county_subdivisions
 
+    def _state_col(self, gdf):
+        """Find the state FIPS column name (STATEFP or STATE)."""
+        for col in ["STATEFP", "STATE", "STATEFP20", "STATEFP10"]:
+            if col in gdf.columns:
+                return col
+        return "STATE"  # will raise KeyError with clear message
+
+    def _county_col(self, gdf):
+        """Find the county FIPS column name (COUNTYFP or COUNTY)."""
+        for col in ["COUNTYFP", "COUNTY", "COUNTYFP20", "COUNTYFP10"]:
+            if col in gdf.columns:
+                return col
+        return "COUNTY"
+
+    def _name_col(self, gdf):
+        """Find the name column (NAME or BASENAME)."""
+        for col in ["BASENAME", "NAME", "NAMELSAD"]:
+            if col in gdf.columns:
+                return col
+        return "NAME"
+
+    def _place_col(self, gdf):
+        """Find the place FIPS column (PLACEFP or PLACE)."""
+        for col in ["PLACEFP", "PLACE", "PLACEFP20"]:
+            if col in gdf.columns:
+                return col
+        return "PLACE"
+
     def _make_crash_gdf(self, df, x_col="x", y_col="y"):
         """Convert crash DataFrame to GeoDataFrame with Point geometries."""
         import geopandas as gpd
@@ -141,13 +170,22 @@ class BoundaryResolver:
 
         counties = self.counties
         if state_fips:
-            counties = counties[counties["STATE"] == state_fips].copy()
+            counties = counties[counties[self._state_col(counties)] == state_fips].copy()
 
         crash_gdf, valid = self._make_crash_gdf(df, x_col, y_col)
 
+        county_col = self._county_col(counties)
+        name_col = self._name_col(counties)
+        geoid_col = "GEOID" if "GEOID" in counties.columns else "GEOID20"
+
         # Spatial join — only valid GPS rows
         valid_gdf = crash_gdf[valid].copy()
-        joined = gpd.sjoin(valid_gdf, counties[["geometry", "COUNTY", "BASENAME", "GEOID"]],
+        join_cols = ["geometry"]
+        for c in [county_col, name_col, geoid_col]:
+            if c in counties.columns:
+                join_cols.append(c)
+
+        joined = gpd.sjoin(valid_gdf, counties[join_cols],
                             how="left", predicate="within")
 
         # Handle duplicates (crash in overlapping boundaries)
@@ -157,9 +195,12 @@ class BoundaryResolver:
         df["resolved_county_fips"] = ""
         df["resolved_county_name"] = ""
         df["resolved_county_geoid"] = ""
-        df.loc[joined.index, "resolved_county_fips"] = joined["COUNTY"].fillna("").values
-        df.loc[joined.index, "resolved_county_name"] = joined["BASENAME"].fillna("").values
-        df.loc[joined.index, "resolved_county_geoid"] = joined["GEOID"].fillna("").values
+        if county_col in joined.columns:
+            df.loc[joined.index, "resolved_county_fips"] = joined[county_col].fillna("").values
+        if name_col in joined.columns:
+            df.loc[joined.index, "resolved_county_name"] = joined[name_col].fillna("").values
+        if geoid_col in joined.columns:
+            df.loc[joined.index, "resolved_county_geoid"] = joined[geoid_col].fillna("").values
 
         matched = (df["resolved_county_fips"] != "").sum()
         elapsed = time.time() - t0
@@ -178,19 +219,29 @@ class BoundaryResolver:
 
         places = self.places
         if state_fips:
-            places = places[places["STATE"] == state_fips].copy()
+            places = places[places[self._state_col(places)] == state_fips].copy()
 
         crash_gdf, valid = self._make_crash_gdf(df, x_col, y_col)
         valid_gdf = crash_gdf[valid].copy()
 
-        joined = gpd.sjoin(valid_gdf, places[["geometry", "PLACE", "BASENAME", "GEOID", "NAMELSAD"]],
+        place_col = self._place_col(places)
+        name_col = self._name_col(places)
+
+        join_cols = ["geometry"]
+        for c in [place_col, name_col]:
+            if c in places.columns:
+                join_cols.append(c)
+
+        joined = gpd.sjoin(valid_gdf, places[join_cols],
                             how="left", predicate="within")
         joined = joined[~joined.index.duplicated(keep="first")]
 
         df["resolved_place_fips"] = ""
         df["resolved_place_name"] = ""
-        df.loc[joined.index, "resolved_place_fips"] = joined["PLACE"].fillna("").values
-        df.loc[joined.index, "resolved_place_name"] = joined["BASENAME"].fillna("").values
+        if place_col in joined.columns:
+            df.loc[joined.index, "resolved_place_fips"] = joined[place_col].fillna("").values
+        if name_col in joined.columns:
+            df.loc[joined.index, "resolved_place_name"] = joined[name_col].fillna("").values
 
         matched = (df["resolved_place_fips"] != "").sum()
         elapsed = time.time() - t0
@@ -261,7 +312,7 @@ class BoundaryResolver:
         import geopandas as gpd
 
         # Filter to state
-        state_counties = self.counties[self.counties["STATE"] == state_fips].copy()
+        state_counties = self.counties[self.counties[self._state_col(self.counties)] == state_fips].copy()
         if len(state_counties) == 0:
             print(f"        ⚠️ No county boundaries for state FIPS {state_fips}")
             return self._centroid_fallback(df, county_dict, x_col, y_col, juris_col)
@@ -270,9 +321,17 @@ class BoundaryResolver:
         crash_gdf, valid = self._make_crash_gdf(df, x_col, y_col)
         valid_gdf = crash_gdf[valid].copy()
 
+        county_col = self._county_col(state_counties)
+        name_col = self._name_col(state_counties)
+
+        join_cols = ["geometry"]
+        for c in [county_col, name_col]:
+            if c in state_counties.columns:
+                join_cols.append(c)
+
         # Spatial join — find containing county
         joined = gpd.sjoin(
-            valid_gdf, state_counties[["geometry", "COUNTY", "BASENAME"]],
+            valid_gdf, state_counties[join_cols],
             how="left", predicate="within")
         joined = joined[~joined.index.duplicated(keep="first")]
 
@@ -290,7 +349,8 @@ class BoundaryResolver:
             b = str(basename).strip()
             return basename_to_county.get(b.lower(), b)
 
-        true_county = joined["BASENAME"].apply(_resolve_name)
+        true_county = joined[name_col].apply(_resolve_name) if name_col in joined.columns \
+            else pd.Series("", index=joined.index)
 
         # Find mismatches
         stated = df.loc[joined.index, juris_col].fillna("").astype(str).str.strip()
