@@ -38,6 +38,7 @@ on:
           - subdivisions           # County subdivisions (MCDs, townships)
           - mpos                   # MPO boundaries from BTS
           - counties-and-mpos      # Counties + MPOs (most useful combo)
+          - county-boundaries      # TIGERweb county polygon GeoJSON (for Tier 1 PIP cache)
       state_fips:
         description: 'Limit to single state (2-digit FIPS, e.g., 51 for VA). Leave blank for nationwide.'
         required: false
@@ -166,6 +167,12 @@ jobs:
               python scripts/download_geographic_data.py --layer counties $STATE_ARG
               echo "=== Downloading MPOs ==="
               python scripts/download_geographic_data.py --layer mpos $STATE_ARG
+              DONE=true
+              ;;
+            county-boundaries)
+              # Download TIGERweb county polygon GeoJSON for Tier 1 PIP cache
+              echo "=== Downloading TIGERweb county polygon boundaries ==="
+              python scripts/download_tigerweb_boundaries.py $STATE_ARG --include-state-outlines
               DONE=true
               ;;
             *)
