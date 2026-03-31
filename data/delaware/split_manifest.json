@@ -1,7 +1,7 @@
 {
   "state": "delaware",
-  "generated_at": "2026-03-25T19:16:11.587820+00:00",
-  "elapsed_s": 111.2,
+  "generated_at": "2026-03-31T04:13:39.644417+00:00",
+  "elapsed_s": 648.9,
   "total_input_rows": 566762,
   "dry_run": false,
   "strategies": {
@@ -12,89 +12,113 @@
   "splits": {
     "state": {
       "all_roads": 566762,
-      "dot_roads": 0,
-      "primary_roads": 0,
-      "non_dot_roads": 0,
+      "dot_roads": 147562,
+      "primary_roads": 56767,
+      "non_dot_roads": 296547,
       "statewide_all_roads": 566762
     },
     "regions": {
       "central_district": {
-        "all_roads": 97576,
-        "dot_roads": 0,
-        "primary_roads": 0,
-        "non_dot_roads": 0
+        "all_roads": 103080,
+        "dot_roads": 87521,
+        "primary_roads": 5759,
+        "non_dot_roads": 9408
       },
       "north_district": {
-        "all_roads": 336541,
-        "dot_roads": 0,
-        "primary_roads": 0,
-        "non_dot_roads": 0
+        "all_roads": 334227,
+        "dot_roads": 55022,
+        "primary_roads": 50065,
+        "non_dot_roads": 275127
       },
       "south_district": {
-        "all_roads": 132645,
-        "dot_roads": 0,
-        "primary_roads": 0,
-        "non_dot_roads": 0
+        "all_roads": 129455,
+        "dot_roads": 5019,
+        "primary_roads": 943,
+        "non_dot_roads": 12012
       }
     },
     "mpos": {
       "dover_kent_county_mpo": {
-        "all_roads": 97576,
+        "all_roads": 2489,
         "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 97576
+        "city_roads": 3,
+        "no_interstate": 2489
       },
       "salisbury_wicomico_mpo": {
-        "all_roads": 132645,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 132645
+        "all_roads": 125200,
+        "county_roads": 7024,
+        "city_roads": 4484,
+        "no_interstate": 124336
       },
       "wilmapco": {
-        "all_roads": 336541,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 336541
+        "all_roads": 24978,
+        "county_roads": 364,
+        "city_roads": 16134,
+        "no_interstate": 20758
+      },
+      "wilmington_area_planning_council": {
+        "all_roads": 309294,
+        "county_roads": 5462,
+        "city_roads": 253232,
+        "no_interstate": 263497
       }
     },
     "planning_districts": {
       "central_district": {
-        "all_roads": 97576,
+        "all_roads": 2392,
         "county_roads": 0,
         "city_roads": 0,
-        "no_interstate": 97576
+        "no_interstate": 2392
+      },
+      "dover_kent_county_mpo": {
+        "all_roads": 100688,
+        "county_roads": 4604,
+        "city_roads": 4804,
+        "no_interstate": 94929
       },
       "north_district": {
-        "all_roads": 336541,
+        "all_roads": 4039,
         "county_roads": 0,
         "city_roads": 0,
-        "no_interstate": 336541
+        "no_interstate": 4039
+      },
+      "salisbury_wicomico_mpo": {
+        "all_roads": 127897,
+        "county_roads": 7454,
+        "city_roads": 4558,
+        "no_interstate": 126954
       },
       "south_district": {
-        "all_roads": 132645,
+        "all_roads": 1558,
         "county_roads": 0,
         "city_roads": 0,
-        "no_interstate": 132645
+        "no_interstate": 1558
+      },
+      "wilmapco_wilmington_area_planning_council": {
+        "all_roads": 330188,
+        "county_roads": 5822,
+        "city_roads": 269305,
+        "no_interstate": 280123
       }
     },
     "counties": {
       "kent": {
-        "all_roads": 97576,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 97576
+        "all_roads": 103080,
+        "county_roads": 4604,
+        "city_roads": 4804,
+        "no_interstate": 97321
       },
       "new_castle": {
-        "all_roads": 336541,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 336541
+        "all_roads": 334227,
+        "county_roads": 5822,
+        "city_roads": 269305,
+        "no_interstate": 284162
       },
       "sussex": {
-        "all_roads": 132645,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 132645
+        "all_roads": 129455,
+        "county_roads": 7454,
+        "city_roads": 4558,
+        "no_interstate": 128512
       }
     },
     "cities": {}
