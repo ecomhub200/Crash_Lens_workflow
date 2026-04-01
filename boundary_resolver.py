@@ -303,14 +303,19 @@ class BoundaryResolver:
             lons: array of longitudes
 
         Returns:
-            numpy array of "Urban" / "Suburban" / "Rural" strings
+            tuple of 3 numpy arrays:
+              area_type:  "Urban" / "Suburban" / "Rural"
+              ua_name:    Census urban area name (e.g., "Dover, DE Urbanized Area") or ""
+              ua_geoid:   Census GEOID20 code (e.g., "24420") or ""
         """
         n = len(lats)
-        result = np.full(n, "Rural", dtype=object)
+        area_type = np.full(n, "Rural", dtype=object)
+        ua_name = np.full(n, "", dtype=object)
+        ua_geoid = np.full(n, "", dtype=object)
 
         if self.urban_areas is None:
             print("    ⚠️ Urban area boundaries not available — defaulting to Rural")
-            return result
+            return area_type, ua_name, ua_geoid
 
         t0 = time.time()
         import geopandas as gpd
@@ -330,9 +335,9 @@ class BoundaryResolver:
         valid_gdf = point_gdf[valid].copy()
 
         if len(valid_gdf) == 0:
-            return result
+            return area_type, ua_name, ua_geoid
 
-        # Determine LSAD column (UA vs UC indicator)
+        # Determine column names dynamically
         ua = self.urban_areas
         lsad_col = None
         for candidate in ["LSAD20", "LSAD", "LSAD10"]:
@@ -346,36 +351,53 @@ class BoundaryResolver:
                 name_col = candidate
                 break
 
+        geoid_col = None
+        for candidate in ["GEOID20", "GEOID", "UACE20"]:
+            if candidate in ua.columns:
+                geoid_col = candidate
+                break
+
         join_cols = ["geometry"]
-        if lsad_col:
-            join_cols.append(lsad_col)
-        if name_col:
-            join_cols.append(name_col)
+        for c in [lsad_col, name_col, geoid_col]:
+            if c and c in ua.columns:
+                join_cols.append(c)
 
         # Spatial join
         joined = gpd.sjoin(valid_gdf, ua[join_cols], how="left", predicate="within")
         joined = joined[~joined.index.duplicated(keep="first")]
 
+        # Area type classification
         if lsad_col and lsad_col in joined.columns:
             lsad = joined[lsad_col].fillna("").astype(str).str.strip()
-            # LSAD 75 = Urbanized Area (50K+), 76 = Urban Cluster (2.5K-50K)
             is_urban = lsad == "75"
             is_suburban = lsad == "76"
-            result[joined.index[is_urban].values] = "Urban"
-            result[joined.index[is_suburban].values] = "Suburban"
+            area_type[joined.index[is_urban].values] = "Urban"
+            area_type[joined.index[is_suburban].values] = "Suburban"
         else:
-            # No LSAD column — any match = Urban (conservative)
             matched_idx = joined.index[joined["index_right"].notna()]
-            result[matched_idx.values] = "Urban"
+            area_type[matched_idx.values] = "Urban"
 
-        n_urban = (result == "Urban").sum()
-        n_suburban = (result == "Suburban").sum()
-        n_rural = (result == "Rural").sum()
+        # Urban area name
+        if name_col and name_col in joined.columns:
+            names = joined[name_col].fillna("").astype(str).values
+            matched = joined["index_right"].notna()
+            ua_name[joined.index[matched].values] = names[matched.values]
+
+        # GEOID
+        if geoid_col and geoid_col in joined.columns:
+            geoids = joined[geoid_col].fillna("").astype(str).values
+            matched = joined["index_right"].notna()
+            ua_geoid[joined.index[matched].values] = geoids[matched.values]
+
+        n_urban = (area_type == "Urban").sum()
+        n_suburban = (area_type == "Suburban").sum()
+        n_rural = (area_type == "Rural").sum()
+        n_named = (ua_name != "").sum()
         elapsed = time.time() - t0
         print(f"    Area type from Census UA/UC: Urban={n_urban:,}, "
-              f"Suburban={n_suburban:,}, Rural={n_rural:,} ({elapsed:.1f}s)")
+              f"Suburban={n_suburban:,}, Rural={n_rural:,}, named={n_named:,} ({elapsed:.1f}s)")
 
-        return result
+        return area_type, ua_name, ua_geoid
 
     def validate_jurisdiction(
         self,
