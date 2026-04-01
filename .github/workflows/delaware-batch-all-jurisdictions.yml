@@ -342,7 +342,7 @@ jobs:
 
           mkdir -p cache/boundaries
           RESTORED=0
-          for FILE in us_county_boundaries.parquet.gz us_place_boundaries.parquet.gz us_mpo_boundaries.parquet.gz; do
+          for FILE in us_county_boundaries.parquet.gz us_place_boundaries.parquet.gz us_mpo_boundaries.parquet.gz us_urban_area_boundaries.parquet.gz; do
             if aws s3 cp "s3://$BUCKET/_national/boundaries/$FILE" "cache/boundaries/$FILE" \
                 --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null; then
               SIZE=$(stat -c%s "cache/boundaries/$FILE" 2>/dev/null || echo "0")
@@ -350,7 +350,7 @@ jobs:
               RESTORED=$((RESTORED + 1))
             fi
           done
-          echo "Restored $RESTORED/3 boundary files"
+          echo "Restored $RESTORED/4 boundary files"
 
       # ══════════════════════════════════════════════════════════════
       # DELAWARE-SPECIFIC: Normalize raw data to CrashLens 69-column standard

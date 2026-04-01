@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 crash_road_join.py — Spatial Join: Crash CSV + Road Inventory Parquet
-
+=====================================================================
 Single-purpose: take a normalized crash CSV, find the nearest road
 segment for each crash, attach road inventory columns, save output.
 
@@ -10,22 +10,22 @@ Separated from de_normalize.py so it can run independently, be retried,
 or moved to a faster machine (VPS vs CI runner).
 
 Usage:
-python crash_road_join.py --crashes normalized.csv --state de --output joined.csv
-python crash_road_join.py --crashes normalized.csv --state de --cache-dir cache
+    python crash_road_join.py --crashes normalized.csv --state de --output joined.csv
+    python crash_road_join.py --crashes normalized.csv --state de --cache-dir cache
 
 Architecture:
-1. Load road inventory parquet ONCE via RoadInventorySession (~10s)
-- Includes: proximity cleanup, column drops, 12-rule validator
-2. Load crash CSV
-3. Run Tier 1 self-enrichment (flags, severity — no spatial data needed)
-4. Per-county spatial join via KDTree + perpendicular refinement
-5. Derive Intersection Analysis (needs Ownership from road join)
-6. Save joined CSV
+    1. Load road inventory parquet ONCE via RoadInventorySession (~10s)
+       - Includes: proximity cleanup, column drops, 12-rule validator
+    2. Load crash CSV
+    3. Run Tier 1 self-enrichment (flags, severity — no spatial data needed)
+    4. Per-county spatial join via KDTree + perpendicular refinement
+    5. Derive Intersection Analysis (needs Ownership from road join)
+    6. Save joined CSV
 
 Memory budget (GitHub Actions 7GB):
-Road inventory session:  ~0.7 GB (stays loaded)
-One county chunk:        ~0.3 GB (freed after write)
-Peak:                    ~1.0 GB (no full dataset in memory)
+    Road inventory session:  ~0.7 GB (stays loaded)
+    One county chunk:        ~0.3 GB (freed after write)
+    Peak:                    ~1.0 GB (no full dataset in memory)
 """
 
 import argparse
@@ -36,6 +36,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
+
 
 def main():
     parser = argparse.ArgumentParser(
