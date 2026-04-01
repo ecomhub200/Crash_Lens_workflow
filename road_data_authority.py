@@ -7,13 +7,17 @@ When multiple sources provide the same attribute, the highest-authority source w
 When the best source is empty, falls through to next tier.
 
 AUTHORITY HIERARCHY:
-  Tier 1 — HPMS (Federal, FHWA-validated road inventory)
-  Tier 2 — Mapillary (Computer vision, photographed in field)
-  Tier 3 — OSM (Community-contributed, variable quality)
-  Tier 4 — Federal Point Data (BTS bridges/rail/transit, Urban Institute schools)
+  Tier A — State DOT Inventory (OPTIONAL — highest when available)
+           Source: {abbr}_state_dot.parquet.gz from generate_state_dot_data.py
+           Columns prefixed sdot_ (e.g. sdot_Functional Class, sdot_Through_Lanes)
+           If file missing → silently skipped, Tier B becomes highest.
+  Tier B — HPMS (Federal, FHWA-validated road inventory)
+  Tier C — Mapillary (Computer vision, photographed in field)
+  Tier D — OSM (Community-contributed, variable quality)
+  Tier E — Federal Point Data (BTS bridges/rail/transit, Urban Institute schools)
 
 RESOLVED COLUMNS:
-  resolved_speed_limit        HPMS > Mapillary > OSM
+  resolved_speed_limit        StateDOT > HPMS > Mapillary > OSM
   resolved_speed_source       Which tier provided the value
   resolved_lanes              HPMS > OSM
   resolved_lanes_source       Which tier provided the value
@@ -66,7 +70,7 @@ def resolve_speed_limit(df):
             except (ValueError, TypeError):
                 pass
 
-    # Tier 1: HPMS (highest authority — always wins)
+    # Tier 1: HPMS (high authority)
     if "hpms_speed_limit" in df.columns:
         for i, v in enumerate(df["hpms_speed_limit"].values):
             try:
@@ -74,6 +78,17 @@ def resolve_speed_limit(df):
                 if 5 <= spd <= 85:
                     values[i] = spd
                     sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
+
+    # Tier A: State DOT (HIGHEST authority — overwrites when available)
+    if "sdot_Max Speed Diff" in df.columns:
+        for i, v in enumerate(df["sdot_Max Speed Diff"].values):
+            try:
+                spd = int(float(v))
+                if 5 <= spd <= 85:
+                    values[i] = spd
+                    sources[i] = "StateDOT"
             except (ValueError, TypeError):
                 pass
 
@@ -104,6 +119,17 @@ def resolve_lanes(df):
                 if 1 <= ln <= 12:
                     values[i] = ln
                     sources[i] = "HPMS"
+            except (ValueError, TypeError):
+                pass
+
+    # Tier A: State DOT (HIGHEST — overwrites HPMS when available)
+    if "sdot_Through_Lanes" in df.columns:
+        for i, v in enumerate(df["sdot_Through_Lanes"].values):
+            try:
+                ln = int(float(v))
+                if 1 <= ln <= 12:
+                    values[i] = ln
+                    sources[i] = "StateDOT"
             except (ValueError, TypeError):
                 pass
 
@@ -145,6 +171,19 @@ def resolve_surface(df):
                     sources[i] = "HPMS"
             except (ValueError, TypeError):
                 pass
+
+    # Tier A: State DOT (HIGHEST — overwrites HPMS when available)
+    if "sdot_Roadway Surface Type" in df.columns:
+        paved_vals = {"1. Concrete", "2. Blacktop, Asphalt, Bituminous", "3. Brick or Block"}
+        unpaved_vals = {"4. Slag, Gravel, Stone", "5. Dirt"}
+        for i, v in enumerate(df["sdot_Roadway Surface Type"].values):
+            s = str(v).strip()
+            if s in paved_vals:
+                values[i] = "Paved"
+                sources[i] = "StateDOT"
+            elif s in unpaved_vals:
+                values[i] = "Unpaved"
+                sources[i] = "StateDOT"
 
     return values, sources
 
@@ -341,7 +380,7 @@ def apply_authority_layer(df):
     df["resolved_speed_source"] = srcs
     filled = (vals > 0).sum()
     print(f"      Speed limit:  {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(srcs=='HPMS').sum():,} Map:{(srcs=='Mapillary').sum():,} OSM:{(srcs=='OSM').sum():,}")
+          f" — DOT:{(srcs=='StateDOT').sum():,} HPMS:{(srcs=='HPMS').sum():,} Map:{(srcs=='Mapillary').sum():,} OSM:{(srcs=='OSM').sum():,}")
 
     vals, srcs = resolve_lanes(df)
     df["resolved_lanes"] = vals
@@ -1118,6 +1157,17 @@ def merge_frontend_columns(df):
         mask = hpms_fc > 0
         fc_codes[mask] = hpms_fc[mask]
         fc_source[mask] = "HPMS"
+
+    # Tier A: State DOT FC (HIGHEST — overwrites HPMS when available)
+    if "sdot_Functional Class" in df.columns:
+        sdot_fc_map = {"1-Interstate": 1, "2-Freeway/Expressway": 2,
+                       "3-Principal Arterial": 3, "4-Minor Arterial": 4,
+                       "5-Major Collector": 5, "6-Minor Collector": 6, "7-Local": 7}
+        for i, v in enumerate(df["sdot_Functional Class"].values):
+            fc = sdot_fc_map.get(str(v).strip(), 0)
+            if fc > 0:
+                fc_codes[i] = fc
+                fc_source[i] = "StateDOT"
     
     df["Functional Class"] = [FC_LABELS.get(fc, "") for fc in fc_codes]
     fc_filled = (fc_codes > 0).sum()
@@ -1136,6 +1186,16 @@ def merge_frontend_columns(df):
             label = OWNERSHIP_LABELS.get(code, "")
             if label:
                 own[i] = label
+
+    # Tier A: State DOT Ownership (HIGHEST — overwrites HPMS)
+    if "sdot_Ownership" in df.columns:
+        valid_own = {"1. State Hwy Agency", "2. County Hwy Agency",
+                     "3. City or Town Hwy Agency", "4. Federal Roads",
+                     "5. Toll Roads Maintained by Others", "6. Private/Unknown Roads"}
+        for i, v in enumerate(df["sdot_Ownership"].values):
+            s = str(v).strip()
+            if s in valid_own:
+                own[i] = s
     df["Ownership"] = own
 
     # ── Facility Type (HPMS) ──
@@ -1168,6 +1228,13 @@ def merge_frontend_columns(df):
             s = str(v).strip()
             if s and s not in ("nan", "0", "") and not re.match(r'^-?\d+$', s):
                 rte[i] = s
+
+    # Tier A: State DOT RTE Name (HIGHEST)
+    if "sdot_RTE Name" in df.columns:
+        for i, v in enumerate(df["sdot_RTE Name"].values):
+            s = str(v).strip()
+            if s and s not in ("nan", "0", ""):
+                rte[i] = s
     df["RTE Name"] = rte
     filled = (rte != "").sum()
     print(f"      RTE Name:           {filled:>7,}")
@@ -1193,6 +1260,7 @@ def merge_frontend_columns(df):
         df["Max Speed Diff"] = df["resolved_speed_limit"]
     if "resolved_lanes" in df.columns:
         df["Through_Lanes"] = df["resolved_lanes"]
+    # Tier A: State DOT lanes overwrite resolved (StateDOT already in resolved via resolve_lanes)
     if "hpms_aadt" in df.columns:
         df["AADT"] = pd.to_numeric(df["hpms_aadt"], errors="coerce").fillna(0).astype(int)
 

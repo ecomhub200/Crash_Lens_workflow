@@ -253,17 +253,52 @@ def fix_rte_name(ri, report, state_abbr=""):
 
 def fix_ownership(ri, report):
     """
-    FIX 2 — Ownership: Remap non-standard values to VDOT 6-value standard.
+    FIX 2 — Ownership: Remap non-standard values using HPMS raw ownership codes.
 
-    HPMS ownership codes 21/25/40 → "4. Other State Agency" is NOT in standard.
-    Remap based on FC:
-      FC 1-4 (state system roads)  → "1. State Hwy Agency"
-      FC 5-6 (collector roads)     → "2. County Hwy Agency"
-      FC 7   (local roads)         → "3. City or Town Hwy Agency"
+    When hpms_ownership column exists (preserved from build_road_inventory):
+      Uses FHWA ownership code → VDOT standard mapping (authoritative).
+    When hpms_ownership is missing (older builds):
+      Falls back to FC-based mapping (less accurate).
 
-    State-agnostic: HPMS ownership codes are federal standard, FC-based
-    ownership derivation works the same way in every state.
+    FHWA HPMS Ownership Codes → VDOT Standard:
+      1  = State Highway Agency       → "1. State Hwy Agency"
+      2  = County Highway Agency      → "2. County Hwy Agency"
+      3  = Town/Township Hwy Agency   → "3. City or Town Hwy Agency"
+      4  = City/Municipal Hwy Agency  → "3. City or Town Hwy Agency"
+      11 = State Park/Forest Agency   → "1. State Hwy Agency"
+      12 = Local Park/Forest Agency   → "3. City or Town Hwy Agency"
+      21 = Other State Agency         → "1. State Hwy Agency"
+      25 = Other Local Agency         → "3. City or Town Hwy Agency"
+      26 = Private (not Railroad)     → "6. Private/Unknown Roads"
+      27 = Railroad                   → "6. Private/Unknown Roads"
+      31 = State Toll Authority       → "5. Toll Roads Maintained by Others"
+      40 = Other Public Instrumentality → "1. State Hwy Agency"
+      60 = Bureau of Indian Affairs   → "4. Federal Roads"
+      62 = Indian Tribe Nation        → "4. Federal Roads"
+      70 = Other Federal Agency       → "4. Federal Roads"
+      80 = Unknown                    → "6. Private/Unknown Roads"
+
+    State-agnostic: FHWA ownership codes are a federal standard used in all states.
     """
+    HPMS_CODE_TO_OWNERSHIP = {
+        1:  "1. State Hwy Agency",
+        2:  "2. County Hwy Agency",
+        3:  "3. City or Town Hwy Agency",
+        4:  "3. City or Town Hwy Agency",
+        11: "1. State Hwy Agency",
+        12: "3. City or Town Hwy Agency",
+        21: "1. State Hwy Agency",
+        25: "3. City or Town Hwy Agency",
+        26: "6. Private/Unknown Roads",
+        27: "6. Private/Unknown Roads",
+        31: "5. Toll Roads Maintained by Others",
+        40: "1. State Hwy Agency",
+        60: "4. Federal Roads",
+        62: "4. Federal Roads",
+        70: "4. Federal Roads",
+        80: "6. Private/Unknown Roads",
+    }
+
     own = _s(ri, "Ownership")
     fc = _s(ri, "Functional Class")
     invalid = ~own.isin(VALID_OWNERSHIP_VALUES) & (own != "")
@@ -271,19 +306,44 @@ def fix_ownership(ri, report):
     if not invalid.any():
         return
 
-    for prefix, standard_own in FC_TO_OWNERSHIP_FALLBACK.items():
-        fix_mask = invalid & fc.str.startswith(prefix)
-        if fix_mask.any():
-            ri.loc[fix_mask, "Ownership"] = standard_own
+    has_hpms_own = "hpms_ownership" in ri.columns
+    hpms_fixed = 0
+    fc_fixed = 0
 
-    # Anything still invalid after FC fallback → Private/Unknown
+    if has_hpms_own:
+        # Use raw HPMS ownership codes (authoritative)
+        hpms_own = _n(ri, "hpms_ownership").astype(int)
+        has_code = invalid & (hpms_own > 0)
+
+        if has_code.any():
+            mapped = hpms_own[has_code].map(HPMS_CODE_TO_OWNERSHIP)
+            valid_mapped = mapped.notna() & (mapped != "")
+            if valid_mapped.any():
+                ri.loc[has_code & valid_mapped.reindex(ri.index, fill_value=False),
+                       "Ownership"] = mapped[valid_mapped].values
+                hpms_fixed = valid_mapped.sum()
+                report.fix("FIX_OWN", "Ownership from HPMS raw code (authoritative)", hpms_fixed)
+
+    # FC-based fallback for rows still invalid (no HPMS code, or unmapped code)
     own_after = _s(ri, "Ownership")
-    still_bad = ~own_after.isin(VALID_OWNERSHIP_VALUES) & (own_after != "")
+    still_invalid = ~own_after.isin(VALID_OWNERSHIP_VALUES) & (own_after != "")
+
+    if still_invalid.any():
+        for prefix, standard_own in FC_TO_OWNERSHIP_FALLBACK.items():
+            fix_mask = still_invalid & fc.str.startswith(prefix)
+            if fix_mask.any():
+                ri.loc[fix_mask, "Ownership"] = standard_own
+                fc_fixed += fix_mask.sum()
+
+        if fc_fixed:
+            report.fix("FIX_OWN", "Ownership from FC fallback (no HPMS code)", fc_fixed)
+
+    # Anything STILL invalid → Private/Unknown
+    own_final = _s(ri, "Ownership")
+    still_bad = ~own_final.isin(VALID_OWNERSHIP_VALUES) & (own_final != "")
     if still_bad.any():
         ri.loc[still_bad, "Ownership"] = "6. Private/Unknown Roads"
-
-    total = invalid.sum()
-    report.fix("FIX_OWN", "Non-standard Ownership remapped via FC", total)
+        report.fix("FIX_OWN", "Ownership unknown → Private/Unknown", still_bad.sum())
 
 
 def fix_intersection_type(ri, report):
@@ -533,20 +593,22 @@ def fix_through_lanes(ri, report):
 
 def fix_aadt(ri, report):
     """
-    FIX 10 — AADT: Propagate from same-road segments, FC average fallback.
+    FIX 10 — AADT: Propagate from same-road segments. No blanket fill.
 
     CRITICAL: All propagation is WITHIN THE SAME Functional Class to prevent
     cross-contamination. "Main Street" as FC-3 arterial (AADT 20K) must NOT
     bleed into "Main Street" as FC-7 local (AADT ~500).
 
-    Layer 1: HPMS direct (already populated)
-    Layer 2a: Same ref + same FC → median AADT
-    Layer 2b: Same name + same FC → median AADT
-    Layer 3: FC-based state average (computed from data, not hardcoded)
+    Layer 1: HPMS direct (already populated — ~26% coverage)
+    Layer 2a: Same ref + same FC → median AADT (~3%)
+    Layer 2b: Same name + same FC → median AADT (~7%)
+    Layer 3: REMOVED — FC-average was filling 55%+ with blanket numbers,
+             masking "no data" as if measured. AADT=0 now means "unknown".
 
-    State-agnostic: FC averages are computed from THIS state's own data.
+    State-agnostic: Propagation logic works for any state.
 
-    Adds AADT_source column: "direct"/"ref_propagation"/"name_propagation"/"fc_average"
+    Adds AADT_source column: "direct" / "ref_propagation" / "name_propagation"
+    AADT=0 with empty AADT_source = genuinely unknown.
     """
     aadt = _n(ri, "AADT").astype(int)
     fc = _s(ri, "Functional Class")
@@ -604,20 +666,16 @@ def fix_aadt(ri, report):
             ri.loc[actual_fill & valid, "AADT_source"] = "name_propagation"
             report.fix("FIX_ADT", "AADT from same-name+FC segments", (actual_fill & valid).sum())
 
-    # Layer 3: FC-based state average (computed from own data, not hardcoded)
-    aadt = _n(ri, "AADT").astype(int)
-    fc_has_aadt = (aadt > 0) & (fc != "")
-    if fc_has_aadt.any():
-        fc_avgs = (ri.loc[fc_has_aadt]
-                   .groupby(fc[fc_has_aadt])["AADT"]
-                   .median().round().astype(int))
-        needs_fill = (aadt == 0) & (fc != "") & fc.isin(fc_avgs.index)
-        if needs_fill.any():
-            filled_vals = fc[needs_fill].map(fc_avgs).fillna(0).astype(int)
-            valid = filled_vals > 0
-            ri.loc[needs_fill & valid, "AADT"] = filled_vals[valid].values
-            ri.loc[needs_fill & valid, "AADT_source"] = "fc_average"
-            report.fix("FIX_ADT", "AADT from FC state-average", (needs_fill & valid).sum())
+    # Layer 3 intentionally omitted.
+    # FC-based state average was filling 55-64% of rows with a single blanket
+    # number (e.g. every FC-7 Local got 490 AADT regardless of whether it's
+    # a cul-de-sac or a through-street). This masks "no data" as if it were
+    # measured. Downstream consumers should treat AADT=0 as "unknown" and
+    # check AADT_source for provenance.
+    aadt_final = _n(ri, "AADT").astype(int)
+    still_zero = (aadt_final == 0).sum()
+    if still_zero > 0:
+        report.fix("FIX_ADT", f"AADT still unknown (honest zero)", still_zero)
 
 
 def fix_sentinels(ri, report):
