@@ -128,10 +128,73 @@ def load_state_config(abbr):
 #  ARCGIS FEATURESERVER DOWNLOADER
 # ═══════════════════════════════════════════════════════════════
 
+def _try_json(resp):
+    """
+    Safely parse JSON from a response, handling empty bodies and HTML error pages.
+
+    Some ArcGIS servers return HTML error pages or empty bodies instead of JSON.
+    This helper catches those cases and returns None instead of crashing.
+    """
+    text = resp.text.strip()
+    if not text:
+        return None
+    if text.startswith("<"):
+        # HTML error page — not JSON
+        return None
+    try:
+        return resp.json()
+    except (json.JSONDecodeError, ValueError):
+        return None
+
+
+def _build_session():
+    """Create a requests.Session with a proper User-Agent header."""
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "CrashLens-StateDOT/1.0 (generate_state_dot_data.py)",
+        "Accept": "application/json",
+    })
+    return session
+
+
+def _request_with_fallback(session, url, params, timeout):
+    """
+    Try GET first, then fall back to POST if GET fails or returns HTML.
+
+    Some ArcGIS servers reject long GET query strings but accept POST.
+    Returns parsed JSON dict or raises on total failure.
+    """
+    # Try GET first
+    try:
+        resp = session.get(url, params=params, timeout=timeout)
+        resp.raise_for_status()
+        data = _try_json(resp)
+        if data is not None:
+            return data
+    except requests.exceptions.RequestException:
+        pass
+
+    # Fall back to POST
+    resp = session.post(url, data=params, timeout=timeout)
+    resp.raise_for_status()
+    data = _try_json(resp)
+    if data is not None:
+        return data
+
+    raise ValueError(f"Server returned non-JSON response from {url}")
+
+
 def download_features(endpoint_url, max_record_count=1000, out_sr=4326,
                       out_fields=None, timeout=120):
     """
     Download all features from an ArcGIS FeatureServer via pagination.
+
+    Robust version with:
+      - User-Agent header via requests.Session
+      - _try_json() to handle empty/HTML responses
+      - MapServer fallback if FeatureServer fails
+      - GET → POST fallback chain
+      - All pagination params as strings
 
     Args:
         endpoint_url: FeatureServer layer URL (e.g. .../FeatureServer/0)
@@ -143,28 +206,50 @@ def download_features(endpoint_url, max_record_count=1000, out_sr=4326,
     Returns:
         (features, fields) — list of feature dicts, list of field metadata dicts
     """
-    query_url = f"{endpoint_url}/query"
+    session = _build_session()
 
-    # First: get total count
-    count_params = {
-        "where": "1=1",
-        "returnCountOnly": "true",
-        "f": "json",
-    }
-    resp = requests.get(query_url, params=count_params, timeout=timeout)
-    resp.raise_for_status()
-    total = resp.json().get("count", 0)
-    print(f"  Total features: {total:,}")
+    # Build list of endpoint URLs to try: original first, then MapServer fallback
+    endpoints_to_try = [endpoint_url]
+    if "/FeatureServer/" in endpoint_url:
+        map_url = endpoint_url.replace("/FeatureServer/", "/MapServer/")
+        endpoints_to_try.append(map_url)
 
-    if total == 0:
+    query_url = None
+    total = 0
+    fields = []
+
+    for ep_url in endpoints_to_try:
+        q_url = f"{ep_url}/query"
+        try:
+            # Get total count
+            count_params = {
+                "where": "1=1",
+                "returnCountOnly": "true",
+                "f": "json",
+            }
+            data = _request_with_fallback(session, q_url, count_params, timeout)
+            total = data.get("count", 0)
+
+            if total > 0:
+                query_url = q_url
+                print(f"  Endpoint: {ep_url}")
+                print(f"  Total features: {total:,}")
+
+                # Get field metadata
+                meta_data = _request_with_fallback(
+                    session, f"{ep_url}?f=json", {}, timeout
+                )
+                fields = meta_data.get("fields", [])
+                break
+        except (requests.exceptions.RequestException, ValueError) as e:
+            print(f"  Endpoint failed ({ep_url}): {e}")
+            continue
+
+    if query_url is None or total == 0:
+        print(f"  No features found from any endpoint")
         return [], []
 
-    # Get field metadata
-    meta_resp = requests.get(f"{endpoint_url}?f=json", timeout=timeout)
-    meta_resp.raise_for_status()
-    fields = meta_resp.json().get("fields", [])
-
-    # Paginate
+    # Paginate — all params as strings for server compatibility
     all_features = []
     offset = 0
     batch_num = 0
@@ -173,21 +258,20 @@ def download_features(endpoint_url, max_record_count=1000, out_sr=4326,
         params = {
             "where": "1=1",
             "outFields": ",".join(out_fields) if out_fields else "*",
-            "outSR": out_sr,
+            "outSR": str(out_sr),
             "returnGeometry": "true",
-            "resultOffset": offset,
-            "resultRecordCount": max_record_count,
+            "resultOffset": str(offset),
+            "resultRecordCount": str(max_record_count),
             "orderByFields": "OBJECTID ASC",
             "f": "json",
         }
 
+        data = None
         for attempt in range(3):
             try:
-                resp = requests.get(query_url, params=params, timeout=timeout)
-                resp.raise_for_status()
-                data = resp.json()
+                data = _request_with_fallback(session, query_url, params, timeout)
                 break
-            except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
+            except (requests.exceptions.RequestException, ValueError) as e:
                 if attempt < 2:
                     wait = (attempt + 1) * 10
                     print(f"    Retry {attempt + 1}/3 in {wait}s: {e}")
