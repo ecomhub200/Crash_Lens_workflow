@@ -367,15 +367,30 @@ class BoundaryResolver:
         joined = joined[~joined.index.duplicated(keep="first")]
 
         # Area type classification
-        if lsad_col and lsad_col in joined.columns:
-            lsad = joined[lsad_col].fillna("").astype(str).str.strip()
-            is_urban = lsad == "75"
-            is_suburban = lsad == "76"
+        # 2020 Census eliminated Urban Clusters — all are "Urban Area" (UATYP20=U).
+        # Use land area (ALAND20) to distinguish major metros from small towns:
+        #   ≥ 100 sq mi (259 km²) → Urban (major metro: NYC, Philly, Chicago...)
+        #   < 100 sq mi           → Suburban (small city/town: Dover, Smyrna...)
+        #   Not in any polygon    → Rural
+        URBAN_THRESHOLD_SQM = 100 * 2_589_988  # 100 sq miles in sq meters
+
+        aland_col = None
+        for candidate in ["ALAND20", "ALAND", "ALAND10"]:
+            if candidate in joined.columns:
+                aland_col = candidate
+                break
+
+        matched = joined["index_right"].notna()
+
+        if aland_col and aland_col in joined.columns:
+            aland = pd.to_numeric(joined[aland_col], errors="coerce").fillna(0)
+            is_urban = matched & (aland >= URBAN_THRESHOLD_SQM)
+            is_suburban = matched & (aland < URBAN_THRESHOLD_SQM)
             area_type[joined.index[is_urban].values] = "Urban"
             area_type[joined.index[is_suburban].values] = "Suburban"
         else:
-            matched_idx = joined.index[joined["index_right"].notna()]
-            area_type[matched_idx.values] = "Urban"
+            # No area column — any match = Urban (conservative)
+            area_type[joined.index[matched].values] = "Urban"
 
         # Urban area name
         if name_col and name_col in joined.columns:
