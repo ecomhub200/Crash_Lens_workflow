@@ -1121,9 +1121,12 @@ def main():
         from boundary_resolver import BoundaryResolver
         br = BoundaryResolver(cache_dir=str(cache_dir / "boundaries"))
         if br.urban_areas is not None:
-            roads["geo_area_type"] = br.resolve_area_type(
+            area_type, ua_name, ua_geoid = br.resolve_area_type(
                 roads["mid_lat"].astype(float).values,
                 roads["mid_lon"].astype(float).values)
+            roads["geo_area_type"] = area_type
+            roads["Urban_Area_Name"] = ua_name
+            roads["Urban_Area_GEOID"] = ua_geoid
             _area_type_resolved = True
         else:
             print("    Census UA boundaries not cached — trying HPMS fallback")
@@ -1174,7 +1177,12 @@ def main():
         n_r = len(roads) - n_u - n_s
         print(f"    ⚠️  Area type from AADT fallback: Urban={n_u:,}, "
               f"Suburban={n_s:,}, Rural={n_r:,}")
-        print(f"    ⚠️  No HPMS data — Area type defaulting to Rural")
+
+    # Ensure Urban_Area_Name and Urban_Area_GEOID columns always exist
+    if "Urban_Area_Name" not in roads.columns:
+        roads["Urban_Area_Name"] = ""
+    if "Urban_Area_GEOID" not in roads.columns:
+        roads["Urban_Area_GEOID"] = ""
 
     enrich_bridges(roads, data["bridges"])
     enrich_rail_crossings(roads, data["rail_crossings"])
