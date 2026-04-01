@@ -11,7 +11,7 @@ ENRICHMENT: Each data source joins to nearest road segment via STRtree (linestri
 
 DATA AUTHORITY HIERARCHY:
     Tier A: State DOT Inventory (OPTIONAL — highest authority when available)
-            OVERWRITES all columns. File: {abbr}_state_dot.parquet.gz
+            OVERWRITES all columns. File: {abbr}_state_inventory_data.parquet.gz
             If file missing → silently skipped, Tier B becomes highest.
     Tier B: HPMS Federal Data (highest authority when Tier A unavailable)
             OVERWRITES FC, Ownership, SYSTEM, Facility Type, Surface Type.
@@ -23,7 +23,7 @@ OUTPUT: {state}/cache/{abbr}_road_inventory.parquet.gz
 INPUT FILES (from {state}/cache/):
     {abbr}_roads.parquet.gz          <- base road network
     {abbr}_intersections.parquet.gz  <- intersection nodes
-    {abbr}_state_dot.parquet.gz      <- State DOT inventory (Tier A, OPTIONAL)
+    {abbr}_state_inventory_data.parquet.gz  <- State DOT inventory (Tier A, OPTIONAL)
     {abbr}_hpms.parquet.gz           <- FHWA road inventory (Tier B, all 46 cols)
     {abbr}_pois.parquet.gz           <- OSM POIs (bars, schools, signals, etc.)
     {abbr}_bridges.parquet.gz        <- BTS bridges
@@ -392,7 +392,7 @@ def enrich_state_dot(roads, sdot, threshold_m=100):
       - Only applies where State DOT has a non-empty value
       - Runs BEFORE enrich_hpms() so HPMS only fills what DOT didn't cover
 
-    If {abbr}_state_dot.parquet.gz doesn't exist, this function skips silently
+    If {abbr}_state_inventory_data.parquet.gz doesn't exist, this function skips silently
     and Tier B (HPMS) becomes the highest authority automatically.
     """
     print("    State DOT Inventory (Tier A)...", end=" ", flush=True)
@@ -1101,7 +1101,7 @@ def main():
     file_map = {
         "roads":          f"{abbr}_roads.parquet.gz",
         "intersections":  f"{abbr}_intersections.parquet.gz",
-        "state_dot":      f"{abbr}_state_dot.parquet.gz",
+        "state_dot":      f"{abbr}_state_inventory_data.parquet.gz",
         "hpms":           f"{abbr}_hpms.parquet.gz",
         "pois":           f"{abbr}_pois.parquet.gz",
         "bridges":        f"{abbr}_bridges.parquet.gz",
@@ -1241,7 +1241,7 @@ def main():
         print("    Using KDTree midpoint fallback for all enrichment")
 
     # ── Tier A: State DOT Inventory (highest authority, optional) ──
-    # If {abbr}_state_dot.parquet.gz exists → Tier A overwrites all columns.
+    # If {abbr}_state_inventory_data.parquet.gz exists → Tier A overwrites all columns.
     # If missing → silently skipped, Tier B (HPMS) becomes highest authority.
     enrich_state_dot(roads, data.get("state_dot"), args.hpms_threshold)
 
