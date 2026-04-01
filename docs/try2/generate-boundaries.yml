@@ -1,0 +1,70 @@
+name: "Generate Boundary Polygons"
+
+on:
+  workflow_dispatch:
+    inputs:
+      layer:
+        description: "Which boundary layers to download"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - states
+          - counties
+          - places
+          - county_subdivisions
+          - mpos
+          - urban_areas
+      force:
+        description: "Re-download even if cached in R2"
+        required: false
+        default: "false"
+        type: boolean
+  schedule:
+    # Census boundaries update annually (~March)
+    - cron: "0 6 15 4 *"   # April 15, 6 AM UTC
+
+jobs:
+  download-boundaries:
+    name: "Download US Boundary Polygons"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    env:
+      R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+      R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: crash-lens-data
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install pandas pyarrow geopandas shapely requests boto3
+
+      - name: Download boundary polygons
+        run: |
+          LAYER="${{ github.event.inputs.layer || 'all' }}"
+          FORCE=""
+          [ "${{ github.event.inputs.force }}" = "true" ] && FORCE="--force"
+
+          python generate_boundaries.py \
+            --layer $LAYER \
+            --cache-dir cache/boundaries \
+            --upload \
+            $FORCE
+
+      - name: Summary
+        run: |
+          echo "### Boundary Polygons" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh cache/boundaries/*.gz 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "No files" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Files uploaded to R2 at _national/boundaries/" >> $GITHUB_STEP_SUMMARY
