@@ -263,6 +263,7 @@ def normalize(df):
       Has_Guardrail, RNS MP
     """
     import numpy as np
+    import pandas as pd
 
     n = len(df)
 
