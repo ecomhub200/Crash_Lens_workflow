@@ -2,19 +2,29 @@
 """
 build_road_inventory.py — Consolidate all cache files into one road database
 ===============================================================================
-Joins roads + intersections + HPMS + POIs + bridges + rail + schools + transit
-+ Mapillary into a single statewide parquet file, spatially linked by GPS.
+Joins roads + intersections + State DOT + HPMS + POIs + bridges + rail + schools
++ transit + Mapillary into a single statewide parquet file, spatially linked by GPS.
 
 BASE LAYER: OSM road segments (mid_lat, mid_lon)
 ENRICHMENT: Each data source joins to nearest road segment via STRtree (linestring)
     with KDTree (midpoint) fallback. STRtree matches to actual road geometry for accuracy.
+
+DATA AUTHORITY HIERARCHY:
+    Tier A: State DOT Inventory (OPTIONAL — highest authority when available)
+            OVERWRITES all columns. File: {abbr}_state_dot.parquet.gz
+            If file missing → silently skipped, Tier B becomes highest.
+    Tier B: HPMS Federal Data (highest authority when Tier A unavailable)
+            OVERWRITES FC, Ownership, SYSTEM, Facility Type, Surface Type.
+    Tier C: OSM Road Network (fills gaps left by A+B)
+    Tier D: POI Proximity (always runs last)
 
 OUTPUT: {state}/cache/{abbr}_road_inventory.parquet.gz
 
 INPUT FILES (from {state}/cache/):
     {abbr}_roads.parquet.gz          <- base road network
     {abbr}_intersections.parquet.gz  <- intersection nodes
-    {abbr}_hpms.parquet.gz           <- FHWA road inventory (all 46 cols)
+    {abbr}_state_dot.parquet.gz      <- State DOT inventory (Tier A, OPTIONAL)
+    {abbr}_hpms.parquet.gz           <- FHWA road inventory (Tier B, all 46 cols)
     {abbr}_pois.parquet.gz           <- OSM POIs (bars, schools, signals, etc.)
     {abbr}_bridges.parquet.gz        <- BTS bridges
     {abbr}_rail_crossings.parquet.gz <- BTS rail crossings
@@ -367,6 +377,124 @@ def enrich_hpms(roads, hpms, threshold_m=100):
     n = matched.sum()
     tag = "STRtree" if use_strtree else "KDTree"
     print(f"{n:,}/{len(roads):,} matched ({n/len(roads)*100:.1f}%) [{tag}]")
+
+
+def enrich_state_dot(roads, sdot, threshold_m=100):
+    """
+    Tier A: State DOT Road Inventory enrichment (HIGHEST AUTHORITY).
+
+    When a state DOT publishes its road inventory (e.g. DelDOT FeatureServer),
+    this data is the ORIGINAL SOURCE — HPMS is just the federal copy.
+    State DOT has more columns, more detail, and is more current.
+
+    TIER A BEHAVIOR:
+      - OVERWRITES any existing value for all matched columns
+      - Only applies where State DOT has a non-empty value
+      - Runs BEFORE enrich_hpms() so HPMS only fills what DOT didn't cover
+
+    If {abbr}_state_dot.parquet.gz doesn't exist, this function skips silently
+    and Tier B (HPMS) becomes the highest authority automatically.
+    """
+    print("    State DOT Inventory (Tier A)...", end=" ", flush=True)
+    if sdot is None or len(sdot) == 0:
+        print("not available — Tier B (HPMS) is highest authority")
+        return
+
+    use_strtree = _road_strtree is not None
+
+    if use_strtree and "mid_lat" in sdot.columns and "mid_lon" in sdot.columns:
+        indices, dists_m = query_nearest_road_linestring(
+            sdot["mid_lat"].values, sdot["mid_lon"].values)
+
+        n_roads = len(roads)
+        best_idx = np.full(n_roads, -1, dtype=int)
+        best_dist = np.full(n_roads, np.inf)
+
+        for sdot_i in range(len(sdot)):
+            road_i = indices[sdot_i]
+            d = dists_m[sdot_i]
+            if d < best_dist[road_i]:
+                best_dist[road_i] = d
+                best_idx[road_i] = sdot_i
+
+        matched = (best_idx >= 0) & (best_dist <= threshold_m)
+        final_indices = np.clip(best_idx, 0, len(sdot) - 1)
+        final_dists_m = best_dist
+    elif "mid_lat" in sdot.columns and "mid_lon" in sdot.columns:
+        tree = build_kdtree(sdot["mid_lat"].values, sdot["mid_lon"].values)
+        final_dists_m, final_indices = query_nearest(tree, roads["mid_lat"].values, roads["mid_lon"].values)
+        matched = final_dists_m <= threshold_m
+    else:
+        print("skipped — no mid_lat/mid_lon in State DOT data")
+        return
+
+    n_matched = matched.sum()
+    tag = "STRtree" if use_strtree else "KDTree"
+    print(f"{n_matched:,}/{len(roads):,} matched ({n_matched/len(roads)*100:.1f}%) [{tag}]")
+
+    if n_matched == 0:
+        return
+
+    # ── Store all State DOT columns with sdot_ prefix ──
+    skip = {"mid_lat", "mid_lon", "u_lat", "u_lon", "v_lat", "v_lon",
+            "length_m", "length_ft", "geometry_coords", "road_source",
+            "dot_state_abbr", "dot_state_fips", "dot_source", "dot_source_url"}
+    for col in sdot.columns:
+        if col in skip:
+            continue
+        vals = sdot[col].values[final_indices]
+        try:
+            _ = vals + 0
+            is_numeric = True
+        except (TypeError, ValueError):
+            is_numeric = False
+
+        out_col = col if col.startswith("sdot_") or col.startswith("dot_") else f"sdot_{col}"
+        if is_numeric:
+            roads[out_col] = np.where(matched, vals, 0)
+        else:
+            roads[out_col] = np.where(matched, vals, "")
+
+    roads["sdot_match_dist_ft"] = np.round(final_dists_m * M_TO_FT, 1)
+    roads["sdot_matched"] = np.where(matched, "Yes", "No")
+
+    # ── Tier A: OVERWRITE frontend standard columns ──
+    TIER_A_COLUMNS = [
+        "Functional Class", "SYSTEM", "Ownership", "Facility Type",
+        "Roadway Surface Type", "Area Type", "Roadway Description",
+        "DOT District", "Physical Juris Name",
+        "RTE Name", "Through_Lanes",
+        "Lane_Width_ft", "Median_Width_ft", "Shoulder_Width_ft",
+        "Has_Sidewalk", "Has_Bike_Lane", "Guardrail Related?",
+        "RNS MP",
+    ]
+
+    filled = {}
+    for col in TIER_A_COLUMNS:
+        if col not in sdot.columns:
+            continue
+
+        sdot_vals = sdot[col].values[final_indices]
+
+        if sdot_vals.dtype.kind in ("i", "f", "u"):
+            has_val = matched & (sdot_vals != 0)
+        else:
+            sdot_str = np.array([str(v).strip() if v is not None else "" for v in sdot_vals])
+            has_val = matched & (sdot_str != "") & (sdot_str != "0") & (sdot_str != "nan")
+            sdot_vals = sdot_str
+
+        if has_val.any():
+            if col not in roads.columns:
+                roads[col] = ""
+            roads.loc[has_val, col] = sdot_vals[has_val]
+            filled[col] = has_val.sum()
+
+    if filled:
+        total_fills = sum(filled.values())
+        top_cols = sorted(filled.items(), key=lambda x: -x[1])[:8]
+        top_str = ", ".join(f"{c}={n:,}" for c, n in top_cols)
+        print(f"      Tier A overwrites: {total_fills:,} across {len(filled)} columns")
+        print(f"      Top: {top_str}")
 
 
 def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
@@ -973,6 +1101,7 @@ def main():
     file_map = {
         "roads":          f"{abbr}_roads.parquet.gz",
         "intersections":  f"{abbr}_intersections.parquet.gz",
+        "state_dot":      f"{abbr}_state_dot.parquet.gz",
         "hpms":           f"{abbr}_hpms.parquet.gz",
         "pois":           f"{abbr}_pois.parquet.gz",
         "bridges":        f"{abbr}_bridges.parquet.gz",
@@ -1111,6 +1240,12 @@ def main():
     if not strtree_ok:
         print("    Using KDTree midpoint fallback for all enrichment")
 
+    # ── Tier A: State DOT Inventory (highest authority, optional) ──
+    # If {abbr}_state_dot.parquet.gz exists → Tier A overwrites all columns.
+    # If missing → silently skipped, Tier B (HPMS) becomes highest authority.
+    enrich_state_dot(roads, data.get("state_dot"), args.hpms_threshold)
+
+    # ── Tier B: HPMS Federal Data (highest authority when Tier A unavailable) ──
     enrich_hpms(roads, data["hpms"], args.hpms_threshold)
 
     # Derive area type: Census UA/UC boundaries → HPMS urban_code → AADT fallback
@@ -1397,9 +1532,10 @@ def main():
     ])
 
     # HPMS raw duplicates (already resolved into frontend columns)
+    # NOTE: hpms_ownership kept for postprocessor (accurate ownership mapping)
     drop_cols.update([
         "hpms_aadt", "hpms_f_system", "hpms_facility_type",
-        "hpms_match_dist_ft", "hpms_matched", "hpms_ownership",
+        "hpms_match_dist_ft", "hpms_matched",
         "hpms_speed_limit", "hpms_surface_type", "hpms_through_lanes",
     ])
 
@@ -1433,14 +1569,9 @@ def main():
         print(f"\n    Validator error: {e} — continuing without validation")
 
     # ── Post-processor: 13 systemic fixes (state-agnostic) ──
-    # Fixes Ownership, Intersection Type, Alignment, Surface, School Zone,
-    # RTE Name, Speed, Sentinels, Lanes, AADT, Geography, Duplicates.
-    # Must run AFTER validator (depends on validated FC/Ownership).
-    # Must run BEFORE Final FC cleanup (dedup may change row count).
     try:
         from road_inventory_postprocess import postprocess as ri_postprocess
         print(f"\n    Running post-processor...")
-        # Load hierarchy.json (was local to enrich_geography — reload here)
         _pp_hier_path = cache_dir / "hierarchy.json"
         _pp_hier = None
         if _pp_hier_path.exists():
