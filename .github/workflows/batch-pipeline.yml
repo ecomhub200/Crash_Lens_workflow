@@ -90,7 +90,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install pandas requests openpyxl awscli
+        run: pip install pandas requests openpyxl awscli pyarrow
 
       - name: Resolve scope
         id: resolve
@@ -214,7 +214,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas requests openpyxl awscli
+          pip install pandas requests openpyxl awscli pyarrow
 
       # ── Download statewide CSV from R2 (process job needs its own copy) ──
       - name: "Download statewide CSV from R2"
