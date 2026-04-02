@@ -356,60 +356,81 @@ jobs:
           success = failed = 0
           saved_bytes = 0
 
-          csv_files = []
+          data_files = []
           for root, dirs, files in os.walk(split_dir):
               for f in files:
-                  if f.endswith('.csv'):
-                      csv_files.append(os.path.join(root, f))
+                  if f.endswith('.csv') or f.endswith('.parquet.gz'):
+                      data_files.append(os.path.join(root, f))
 
-          csv_files.sort()
-          total = len(csv_files)
-          print(f'  Found {total} CSV files to upload')
+          data_files.sort()
+          total = len(data_files)
+          print(f'  Found {total} data files to upload')
 
-          for i, local in enumerate(csv_files):
+          for i, local in enumerate(data_files):
               rel = os.path.relpath(local, split_dir)
-              r2_key = f'{r2_prefix}/{rel}.gz'
+              is_parquet = local.endswith('.parquet.gz')
+              # .parquet.gz already has extension; .csv gets .gz appended
+              r2_key = f'{r2_prefix}/{rel}' if is_parquet else f'{r2_prefix}/{rel}.gz'
               try:
-                  gz_path = local + '.gz'
-                  orig_size = os.path.getsize(local)
-                  with open(local, 'rb') as f_in:
-                      with gz.open(gz_path, 'wb', compresslevel=6) as f_out:
-                          shutil.copyfileobj(f_in, f_out)
-                  gz_size = os.path.getsize(gz_path)
-                  saved_bytes += (orig_size - gz_size)
+                  if is_parquet:
+                      # Already compressed — upload directly
+                      upload_path = local
+                      content_type = 'application/octet-stream'
+                      extra_args = []
+                  else:
+                      # Gzip CSV before uploading
+                      upload_path = local + '.gz'
+                      orig_size = os.path.getsize(local)
+                      with open(local, 'rb') as f_in:
+                          with gz.open(upload_path, 'wb', compresslevel=6) as f_out:
+                              shutil.copyfileobj(f_in, f_out)
+                      gz_size = os.path.getsize(upload_path)
+                      saved_bytes += (orig_size - gz_size)
+                      content_type = 'text/csv'
+                      extra_args = ['--content-encoding', 'gzip']
 
                   # Retry up to 4 times with exponential backoff
                   uploaded = False
                   for attempt in range(1, 5):
                       result = subprocess.run([
-                          'aws', 's3', 'cp', gz_path, f's3://{bucket}/{r2_key}',
+                          'aws', 's3', 'cp', upload_path, f's3://{bucket}/{r2_key}',
                           '--endpoint-url', endpoint,
-                          '--content-type', 'text/csv',
-                          '--content-encoding', 'gzip',
+                          '--content-type', content_type,
                           '--only-show-errors'
-                      ], capture_output=True, timeout=120)
+                      ] + extra_args, capture_output=True, timeout=120)
                       if result.returncode == 0:
                           uploaded = True
                           break
                       import time
                       time.sleep(2 ** attempt)
 
-                  os.remove(gz_path)
+                  if not is_parquet:
+                      os.remove(upload_path)
                   if uploaded:
                       success += 1
-                      # Delete legacy .csv key (without .gz) to avoid duplicates in R2
-                      legacy_key = r2_key[:-3]  # strip .gz → gets the old .csv key
-                      subprocess.run([
-                          'aws', 's3', 'rm', f's3://{bucket}/{legacy_key}',
-                          '--endpoint-url', endpoint, '--only-show-errors'
-                      ], capture_output=True, timeout=30)
+                      if is_parquet:
+                          # Delete legacy .csv and .csv.gz keys (clean transition)
+                          base = rel[:-len('.parquet.gz')]
+                          for legacy_ext in ['.csv', '.csv.gz']:
+                              legacy_key = f'{r2_prefix}/{base}{legacy_ext}'
+                              subprocess.run([
+                                  'aws', 's3', 'rm', f's3://{bucket}/{legacy_key}',
+                                  '--endpoint-url', endpoint, '--only-show-errors'
+                              ], capture_output=True, timeout=30)
+                      else:
+                          # Delete legacy .csv key (without .gz) to avoid duplicates in R2
+                          legacy_key = r2_key[:-3]  # strip .gz → gets the old .csv key
+                          subprocess.run([
+                              'aws', 's3', 'rm', f's3://{bucket}/{legacy_key}',
+                              '--endpoint-url', endpoint, '--only-show-errors'
+                          ], capture_output=True, timeout=30)
                   else:
                       print(f'  FAIL after 4 attempts: {r2_key}')
                       failed += 1
               except Exception as e:
                   print(f'  FAIL: {r2_key}: {e}')
                   failed += 1
-                  if os.path.exists(local + '.gz'):
+                  if not is_parquet and os.path.exists(local + '.gz'):
                       os.remove(local + '.gz')
 
               if (i + 1) % 100 == 0 or (i + 1) == total:
