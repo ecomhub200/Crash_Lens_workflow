@@ -1,7 +1,7 @@
 {
   "state": "delaware",
-  "generated_at": "2026-03-31T21:56:09.105137+00:00",
-  "elapsed_s": 613.2,
+  "generated_at": "2026-04-02T22:02:41.233116+00:00",
+  "elapsed_s": 520.2,
   "total_input_rows": 566762,
   "dry_run": false,
   "strategies": {
@@ -12,113 +12,562 @@
   "splits": {
     "state": {
       "all_roads": 566762,
-      "dot_roads": 147562,
-      "primary_roads": 56767,
-      "non_dot_roads": 296547,
-      "statewide_all_roads": 566762
+      "dot_roads": 457958,
+      "primary_roads": 58230,
+      "non_dot_roads": 100813
     },
     "regions": {
       "central_district": {
-        "all_roads": 103080,
-        "dot_roads": 87521,
-        "primary_roads": 5759,
-        "non_dot_roads": 9408
+        "all_roads": 103081,
+        "dot_roads": 81833,
+        "primary_roads": 6692,
+        "non_dot_roads": 18800
       },
       "north_district": {
         "all_roads": 334227,
-        "dot_roads": 55022,
-        "primary_roads": 50065,
-        "non_dot_roads": 275127
+        "dot_roads": 271414,
+        "primary_roads": 50323,
+        "non_dot_roads": 58843
       },
       "south_district": {
-        "all_roads": 129455,
-        "dot_roads": 5019,
-        "primary_roads": 943,
-        "non_dot_roads": 12012
+        "all_roads": 129454,
+        "dot_roads": 104711,
+        "primary_roads": 1215,
+        "non_dot_roads": 23170
       }
     },
     "mpos": {
       "dover_kent_county_mpo": {
-        "all_roads": 2489,
-        "county_roads": 0,
-        "city_roads": 3,
-        "no_interstate": 2489
+        "all_roads": 2728,
+        "county_roads": 16,
+        "city_roads": 8,
+        "no_interstate": 2728
       },
       "salisbury_wicomico_mpo": {
-        "all_roads": 125200,
-        "county_roads": 7024,
-        "city_roads": 4484,
-        "no_interstate": 124336
+        "all_roads": 129361,
+        "county_roads": 8049,
+        "city_roads": 15064,
+        "no_interstate": 128146
       },
       "wilmapco": {
-        "all_roads": 24978,
-        "county_roads": 364,
-        "city_roads": 16134,
-        "no_interstate": 20758
+        "all_roads": 25147,
+        "county_roads": 452,
+        "city_roads": 1137,
+        "no_interstate": 21103
       },
       "wilmington_area_planning_council": {
-        "all_roads": 309294,
-        "county_roads": 5462,
-        "city_roads": 253232,
-        "no_interstate": 263497
+        "all_roads": 309191,
+        "county_roads": 10250,
+        "city_roads": 46895,
+        "no_interstate": 262912
       }
     },
     "planning_districts": {
       "central_district": {
-        "all_roads": 2392,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 2392
-      },
-      "dover_kent_county_mpo": {
-        "all_roads": 100688,
-        "county_roads": 4604,
-        "city_roads": 4804,
-        "no_interstate": 94929
+        "all_roads": 103081,
+        "county_roads": 4878,
+        "city_roads": 13890,
+        "no_interstate": 96389
       },
       "north_district": {
-        "all_roads": 4039,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 4039
-      },
-      "salisbury_wicomico_mpo": {
-        "all_roads": 127897,
-        "county_roads": 7454,
-        "city_roads": 4558,
-        "no_interstate": 126954
+        "all_roads": 334227,
+        "county_roads": 10679,
+        "city_roads": 48031,
+        "no_interstate": 283904
       },
       "south_district": {
-        "all_roads": 1558,
-        "county_roads": 0,
-        "city_roads": 0,
-        "no_interstate": 1558
-      },
-      "wilmapco_wilmington_area_planning_council": {
-        "all_roads": 330188,
-        "county_roads": 5822,
-        "city_roads": 269305,
-        "no_interstate": 280123
+        "all_roads": 129454,
+        "county_roads": 8053,
+        "city_roads": 15065,
+        "no_interstate": 128239
       }
     },
     "counties": {
+      "arden": {
+        "all_roads": 167,
+        "county_roads": 0,
+        "city_roads": 41,
+        "no_interstate": 167
+      },
+      "ardencroft": {
+        "all_roads": 29,
+        "county_roads": 5,
+        "city_roads": 6,
+        "no_interstate": 29
+      },
+      "ardentown": {
+        "all_roads": 42,
+        "county_roads": 0,
+        "city_roads": 9,
+        "no_interstate": 42
+      },
+      "bear": {
+        "all_roads": 8181,
+        "county_roads": 299,
+        "city_roads": 431,
+        "no_interstate": 7654
+      },
+      "bellefonte": {
+        "all_roads": 268,
+        "county_roads": 16,
+        "city_roads": 50,
+        "no_interstate": 268
+      },
+      "bethany_beach": {
+        "all_roads": 1230,
+        "county_roads": 102,
+        "city_roads": 366,
+        "no_interstate": 1227
+      },
+      "bethel": {
+        "all_roads": 29,
+        "county_roads": 4,
+        "city_roads": 4,
+        "no_interstate": 29
+      },
+      "blades": {
+        "all_roads": 393,
+        "county_roads": 6,
+        "city_roads": 119,
+        "no_interstate": 393
+      },
+      "bowers": {
+        "all_roads": 22,
+        "county_roads": 2,
+        "city_roads": 15,
+        "no_interstate": 22
+      },
+      "bridgeville": {
+        "all_roads": 1153,
+        "county_roads": 10,
+        "city_roads": 210,
+        "no_interstate": 1141
+      },
+      "brookside": {
+        "all_roads": 5173,
+        "county_roads": 57,
+        "city_roads": 321,
+        "no_interstate": 4461
+      },
+      "camden": {
+        "all_roads": 4056,
+        "county_roads": 110,
+        "city_roads": 862,
+        "no_interstate": 3905
+      },
+      "cheswold": {
+        "all_roads": 414,
+        "county_roads": 13,
+        "city_roads": 46,
+        "no_interstate": 414
+      },
+      "claymont": {
+        "all_roads": 5467,
+        "county_roads": 8,
+        "city_roads": 264,
+        "no_interstate": 4012
+      },
+      "clayton": {
+        "all_roads": 648,
+        "county_roads": 0,
+        "city_roads": 174,
+        "no_interstate": 648
+      },
+      "dagsboro": {
+        "all_roads": 1103,
+        "county_roads": 12,
+        "city_roads": 59,
+        "no_interstate": 1103
+      },
+      "delaware_city": {
+        "all_roads": 348,
+        "county_roads": 23,
+        "city_roads": 282,
+        "no_interstate": 348
+      },
+      "delmar": {
+        "all_roads": 1140,
+        "county_roads": 0,
+        "city_roads": 311,
+        "no_interstate": 1140
+      },
+      "dewey_beach": {
+        "all_roads": 931,
+        "county_roads": 11,
+        "city_roads": 57,
+        "no_interstate": 931
+      },
+      "dover": {
+        "all_roads": 33645,
+        "county_roads": 1494,
+        "city_roads": 6353,
+        "no_interstate": 31383
+      },
+      "dover_base_housing": {
+        "all_roads": 185,
+        "county_roads": 2,
+        "city_roads": 12,
+        "no_interstate": 68
+      },
+      "edgemoor": {
+        "all_roads": 2597,
+        "county_roads": 21,
+        "city_roads": 216,
+        "no_interstate": 2184
+      },
+      "ellendale": {
+        "all_roads": 225,
+        "county_roads": 0,
+        "city_roads": 21,
+        "no_interstate": 225
+      },
+      "elsmere": {
+        "all_roads": 2143,
+        "county_roads": 18,
+        "city_roads": 1008,
+        "no_interstate": 2143
+      },
+      "farmington": {
+        "all_roads": 10,
+        "county_roads": 1,
+        "city_roads": 0,
+        "no_interstate": 10
+      },
+      "felton": {
+        "all_roads": 345,
+        "county_roads": 7,
+        "city_roads": 75,
+        "no_interstate": 345
+      },
+      "fenwick_island": {
+        "all_roads": 248,
+        "county_roads": 0,
+        "city_roads": 97,
+        "no_interstate": 248
+      },
+      "frankford": {
+        "all_roads": 327,
+        "county_roads": 74,
+        "city_roads": 30,
+        "no_interstate": 327
+      },
+      "frederica": {
+        "all_roads": 308,
+        "county_roads": 4,
+        "city_roads": 39,
+        "no_interstate": 308
+      },
+      "georgetown": {
+        "all_roads": 8907,
+        "county_roads": 107,
+        "city_roads": 2341,
+        "no_interstate": 8343
+      },
+      "glasgow": {
+        "all_roads": 8388,
+        "county_roads": 353,
+        "city_roads": 197,
+        "no_interstate": 8298
+      },
+      "greenville": {
+        "all_roads": 1411,
+        "county_roads": 81,
+        "city_roads": 70,
+        "no_interstate": 1411
+      },
+      "greenwood": {
+        "all_roads": 665,
+        "county_roads": 4,
+        "city_roads": 119,
+        "no_interstate": 665
+      },
+      "harrington": {
+        "all_roads": 2082,
+        "county_roads": 16,
+        "city_roads": 375,
+        "no_interstate": 2065
+      },
+      "hartly": {
+        "all_roads": 33,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 33
+      },
+      "henlopen_acres": {
+        "all_roads": 11,
+        "county_roads": 0,
+        "city_roads": 3,
+        "no_interstate": 11
+      },
+      "highland_acres": {
+        "all_roads": 1008,
+        "county_roads": 1,
+        "city_roads": 86,
+        "no_interstate": 1008
+      },
+      "hockessin": {
+        "all_roads": 4291,
+        "county_roads": 293,
+        "city_roads": 63,
+        "no_interstate": 4183
+      },
+      "houston": {
+        "all_roads": 19,
+        "county_roads": 0,
+        "city_roads": 6,
+        "no_interstate": 19
+      },
       "kent": {
-        "all_roads": 103080,
-        "county_roads": 4604,
-        "city_roads": 4804,
-        "no_interstate": 97321
+        "all_roads": 37736,
+        "county_roads": 2290,
+        "city_roads": 1615,
+        "no_interstate": 34674
+      },
+      "kent_acres": {
+        "all_roads": 858,
+        "county_roads": 16,
+        "city_roads": 36,
+        "no_interstate": 858
+      },
+      "kenton": {
+        "all_roads": 87,
+        "county_roads": 0,
+        "city_roads": 11,
+        "no_interstate": 87
+      },
+      "laurel": {
+        "all_roads": 2276,
+        "county_roads": 77,
+        "city_roads": 640,
+        "no_interstate": 2259
+      },
+      "leipsic": {
+        "all_roads": 35,
+        "county_roads": 0,
+        "city_roads": 2,
+        "no_interstate": 35
+      },
+      "lewes": {
+        "all_roads": 1767,
+        "county_roads": 37,
+        "city_roads": 636,
+        "no_interstate": 1743
+      },
+      "lincoln": {
+        "all_roads": 417,
+        "county_roads": 47,
+        "city_roads": 9,
+        "no_interstate": 417
+      },
+      "little_creek": {
+        "all_roads": 51,
+        "county_roads": 0,
+        "city_roads": 0,
+        "no_interstate": 51
+      },
+      "long_neck": {
+        "all_roads": 470,
+        "county_roads": 3,
+        "city_roads": 139,
+        "no_interstate": 470
+      },
+      "magnolia": {
+        "all_roads": 117,
+        "county_roads": 0,
+        "city_roads": 4,
+        "no_interstate": 117
+      },
+      "middletown": {
+        "all_roads": 9867,
+        "county_roads": 653,
+        "city_roads": 2689,
+        "no_interstate": 9722
+      },
+      "milford": {
+        "all_roads": 11362,
+        "county_roads": 524,
+        "city_roads": 2554,
+        "no_interstate": 11014
+      },
+      "millsboro": {
+        "all_roads": 5945,
+        "county_roads": 168,
+        "city_roads": 1308,
+        "no_interstate": 5845
+      },
+      "millville": {
+        "all_roads": 868,
+        "county_roads": 2,
+        "city_roads": 128,
+        "no_interstate": 868
+      },
+      "milton": {
+        "all_roads": 1096,
+        "county_roads": 47,
+        "city_roads": 240,
+        "no_interstate": 1096
       },
       "new_castle": {
-        "all_roads": 334227,
-        "county_roads": 5822,
-        "city_roads": 269305,
-        "no_interstate": 284162
+        "all_roads": 187165,
+        "county_roads": 5461,
+        "city_roads": 7265,
+        "no_interstate": 147749
+      },
+      "newark": {
+        "all_roads": 22898,
+        "county_roads": 670,
+        "city_roads": 4587,
+        "no_interstate": 21863
+      },
+      "newport": {
+        "all_roads": 1769,
+        "county_roads": 4,
+        "city_roads": 275,
+        "no_interstate": 1769
+      },
+      "north_star": {
+        "all_roads": 1303,
+        "county_roads": 45,
+        "city_roads": 47,
+        "no_interstate": 1302
+      },
+      "ocean_view": {
+        "all_roads": 986,
+        "county_roads": 16,
+        "city_roads": 168,
+        "no_interstate": 986
+      },
+      "odessa": {
+        "all_roads": 660,
+        "county_roads": 0,
+        "city_roads": 29,
+        "no_interstate": 651
+      },
+      "pike_creek": {
+        "all_roads": 1493,
+        "county_roads": 18,
+        "city_roads": 59,
+        "no_interstate": 1488
+      },
+      "pike_creek_valley": {
+        "all_roads": 2807,
+        "county_roads": 121,
+        "city_roads": 267,
+        "no_interstate": 2796
+      },
+      "port_penn": {
+        "all_roads": 52,
+        "county_roads": 0,
+        "city_roads": 3,
+        "no_interstate": 52
+      },
+      "rehoboth_beach": {
+        "all_roads": 2760,
+        "county_roads": 187,
+        "city_roads": 1904,
+        "no_interstate": 2760
+      },
+      "rising_sun_lebanon": {
+        "all_roads": 901,
+        "county_roads": 1,
+        "city_roads": 49,
+        "no_interstate": 901
+      },
+      "riverview": {
+        "all_roads": 276,
+        "county_roads": 59,
+        "city_roads": 10,
+        "no_interstate": 276
+      },
+      "rodney_village": {
+        "all_roads": 1123,
+        "county_roads": 64,
+        "city_roads": 11,
+        "no_interstate": 1123
+      },
+      "seaford": {
+        "all_roads": 8253,
+        "county_roads": 212,
+        "city_roads": 2201,
+        "no_interstate": 8253
+      },
+      "selbyville": {
+        "all_roads": 1404,
+        "county_roads": 36,
+        "city_roads": 367,
+        "no_interstate": 1404
+      },
+      "slaughter_beach": {
+        "all_roads": 20,
+        "county_roads": 1,
+        "city_roads": 4,
+        "no_interstate": 20
+      },
+      "smyrna": {
+        "all_roads": 6354,
+        "county_roads": 176,
+        "city_roads": 1372,
+        "no_interstate": 5616
+      },
+      "south_bethany": {
+        "all_roads": 188,
+        "county_roads": 0,
+        "city_roads": 98,
+        "no_interstate": 182
+      },
+      "st_georges": {
+        "all_roads": 1233,
+        "county_roads": 9,
+        "city_roads": 7,
+        "no_interstate": 342
       },
       "sussex": {
-        "all_roads": 129455,
-        "county_roads": 7454,
-        "city_roads": 4558,
-        "no_interstate": 128512
+        "all_roads": 86429,
+        "county_roads": 6889,
+        "city_roads": 3444,
+        "no_interstate": 85940
+      },
+      "townsend": {
+        "all_roads": 312,
+        "county_roads": 5,
+        "city_roads": 52,
+        "no_interstate": 312
+      },
+      "viola": {
+        "all_roads": 19,
+        "county_roads": 0,
+        "city_roads": 4,
+        "no_interstate": 19
+      },
+      "wilmington": {
+        "all_roads": 61248,
+        "county_roads": 2352,
+        "city_roads": 29566,
+        "no_interstate": 56001
+      },
+      "wilmington_manor": {
+        "all_roads": 4912,
+        "county_roads": 167,
+        "city_roads": 227,
+        "no_interstate": 4657
+      },
+      "woodside": {
+        "all_roads": 87,
+        "county_roads": 0,
+        "city_roads": 2,
+        "no_interstate": 87
+      },
+      "woodside_east": {
+        "all_roads": 922,
+        "county_roads": 55,
+        "city_roads": 59,
+        "no_interstate": 922
+      },
+      "wyoming": {
+        "all_roads": 594,
+        "county_roads": 44,
+        "city_roads": 160,
+        "no_interstate": 594
       }
     },
     "cities": {}
