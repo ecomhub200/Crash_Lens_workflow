@@ -58,6 +58,15 @@ OUT_FIELDS = [
     "PRK_CODE", "SNOWPLAN_ROAD_CLASS", "BIKE_PATH_CODE",
     "INVNTRY_DIR_CODE", "ACCEPT_YEAR_CODE", "SURVEY_DATE",
     "ROW_WDTH_QTY",
+    # v3 additions — high-value fields missed in v1
+    "MAINT_RSP_CODE",     # Maintenance Responsibility → REAL Ownership
+    "LANE_WDTH",          # Actual lane width (not calculated)
+    "CONTROL_CODE",       # Control type (state/HPMS/traffic break)
+    "GUTTER_CODE",        # Gutter presence
+    "NHS_CODE",           # National Highway System
+    "SRFC_COND_CODE",     # Surface condition
+    "CONST_TYPE_CODE",    # Construction type
+    "HSIP_CODE",          # Highway Safety Improvement Program
 ]
 
 
@@ -121,6 +130,16 @@ FIELD_MAP = {
     "BIKE_PATH_CODE":       "dot_bike_path",           # Bike path
     "ACCEPT_YEAR_CODE":     "dot_accept_year",         # Year accepted
     "SURVEY_DATE":          "dot_survey_date",          # Last survey
+
+    # ── v3 additions — high-value fields ──
+    "MAINT_RSP_CODE":       "dot_maint_rsp_code",      # Maintenance responsibility → Ownership
+    "LANE_WDTH":            "dot_lane_width",           # Actual lane width (feet)
+    "CONTROL_CODE":         "dot_control_code",         # Control type
+    "GUTTER_CODE":          "dot_gutter_code",          # Gutter presence
+    "NHS_CODE":             "dot_nhs_code",             # National Highway System
+    "SRFC_COND_CODE":       "dot_surface_condition",    # Surface condition
+    "CONST_TYPE_CODE":      "dot_construction_type",    # Construction type
+    "HSIP_CODE":            "dot_hsip_code",            # Highway Safety Improvement Program
 }
 
 
@@ -162,6 +181,20 @@ OWNERSHIP_CODE_MAP = {
     "S": "1. State Hwy Agency",       # State (alternate code)
     "C": "2. County Hwy Agency",      # County (alternate code)
     "M": "3. City or Town Hwy Agency", # Municipal (alternate code)
+}
+
+# Maintenance Responsibility: MAINT_RSP_CODE → CrashLens standard
+# This is the REAL ownership data — who actually maintains the road.
+# Values: "D"=DelDOT, "M"=Municipal, "S"=Suburban(DelDOT), "C"=City(DelDOT), "O"=Other
+MAINT_RSP_MAP = {
+    "D": "1. State Hwy Agency",       # DelDOT maintains
+    "S": "1. State Hwy Agency",       # DelDOT in suburban development
+    "C": "1. State Hwy Agency",       # DelDOT in city
+    "M": "3. City or Town Hwy Agency", # Municipal maintains
+    "O": "6. Private/Unknown Roads",  # Other
+    "1": "1. State Hwy Agency",       # Numeric codes (if used)
+    "2": "3. City or Town Hwy Agency",
+    "3": "6. Private/Unknown Roads",
 }
 
 # Surface Type: SRFC_TYPE_CODE → CrashLens standard
@@ -294,10 +327,20 @@ def normalize(df):
     # ── SYSTEM (derived from FC) ──
     df["SYSTEM"] = df["Functional Class"].map(FC_TO_SYSTEM).fillna("")
 
-    # ── Ownership ──
-    own_raw = df["dot_ownership_code"].fillna("").astype(str).str.strip()
-    df["Ownership"] = own_raw.map(OWNERSHIP_CODE_MAP).fillna("")
-    # Fallback: empty ownership → derive from FC
+    # ── Ownership (MAINT_RSP_CODE > ROW_AUTHORITY_CODE > FC fallback) ──
+    # Try MAINT_RSP_CODE first — this is the REAL maintenance responsibility
+    maint_raw = df.get("dot_maint_rsp_code", pd.Series("", index=df.index))
+    maint_raw = maint_raw.fillna("").astype(str).str.strip()
+    df["Ownership"] = maint_raw.map(MAINT_RSP_MAP).fillna("")
+
+    # Fallback: ROW_AUTHORITY_CODE (often empty on enterprise endpoint)
+    empty_own = df["Ownership"] == ""
+    if empty_own.any():
+        own_raw = df["dot_ownership_code"].fillna("").astype(str).str.strip()
+        own_mapped = own_raw.map(OWNERSHIP_CODE_MAP).fillna("")
+        df.loc[empty_own & (own_mapped != ""), "Ownership"] = own_mapped[empty_own & (own_mapped != "")]
+
+    # Final fallback: derive from FC
     empty_own = df["Ownership"] == ""
     if empty_own.any():
         fc_own = {
@@ -326,11 +369,15 @@ def normalize(df):
     twoway = df["Facility Type"].str.contains("Two-Way", na=False)
     df.loc[has_median & twoway, "Facility Type"] = "4-Two-Way Divided"
 
-    # ── Roadway Surface Type ──
+    # ── Roadway Surface Type (with FC sanity override) ──
     surf_raw = df["dot_surface_type_code"].fillna("").astype(str).str.strip()
     df["Roadway Surface Type"] = surf_raw.map(SURFACE_TYPE_MAP).fillna(
         "2. Blacktop, Asphalt, Bituminous"
     )
+    # Override: Interstates/Freeways/Arterials are ALWAYS paved
+    fc_major = df["Functional Class"].str.match(r"^[123]-", na=False)
+    bad_surf = fc_major & df["Roadway Surface Type"].isin(["5. Dirt", "4. Slag, Gravel, Stone"])
+    df.loc[bad_surf, "Roadway Surface Type"] = "2. Blacktop, Asphalt, Bituminous"
 
     # ── Area Type (FIX: codes 4+ → county-based fallback) ──
     area_raw = df["dot_area_type_code"].fillna("").astype(str).str.strip()
@@ -357,7 +404,7 @@ def normalize(df):
     lanes = lanes.clip(upper=12)  # No Delaware road has >12 lanes
     df["Through_Lanes"] = np.where(lanes > 0, lanes.astype(str), "")
 
-    # ── RTE Name (FIX: use dot_route_number directly — already has "US13", "SR1") ──
+    # ── RTE Name (FIX: use dot_route_number + extract from ramp names) ──
     rte_raw = df["dot_route_number"].fillna("").astype(str).str.strip()
 
     # Add space after letter prefix: "US13"→"US 13", "SR1"→"SR 1", "I95"→"I 95"
@@ -369,16 +416,49 @@ def normalize(df):
             return f"{m.group(1)} {m.group(2)}"
         return val
 
-    df["RTE Name"] = rte_raw.apply(_add_space)
+    rte_series = rte_raw.apply(_add_space)
+
+    # Extract route from ramp names: "RAMP TO I 95 N" → "I 95"
+    road_name = df["dot_road_name"].fillna("").astype(str).str.strip()
+    empty_rte = rte_series == ""
+    if empty_rte.any():
+        def _extract_route(name):
+            m = re.search(r'(?:TO\s+|FROM\s+)((?:I|US|SR|DE)\s*-?\s*\d+)', name, re.IGNORECASE)
+            if m:
+                route = m.group(1).strip()
+                # Normalize: "I-95"→"I 95", "SR1"→"SR 1"
+                route = re.sub(r'([A-Za-z]+)\s*-?\s*(\d+)', r'\1 \2', route)
+                return route
+            return ""
+        rte_from_name = road_name[empty_rte].apply(_extract_route)
+        rte_series.loc[empty_rte] = rte_from_name
+
+    df["RTE Name"] = rte_series
 
     # ── RNS MP (milepoint) ──
     beg_mp = pd.to_numeric(df["dot_beg_mp"], errors="coerce").fillna(0)
     df["RNS MP"] = np.where(beg_mp > 0, beg_mp, 0)
 
-    # ── Road width → Lane_Width_ft estimate ──
+    # ── Lane_Width_ft (LANE_WDTH > corrected calculation > raw calculation) ──
+    # Priority 1: actual LANE_WDTH field from DOT (most accurate)
+    actual_lw = pd.to_numeric(df.get("dot_lane_width", pd.Series(0, index=df.index)),
+                               errors="coerce").fillna(0)
+
+    # Priority 2: (surface_width - shoulders) / lanes (correct formula)
+    surf_w = pd.to_numeric(df["dot_surface_width_ft"], errors="coerce").fillna(0)
+    lsh = pd.to_numeric(df["dot_lshldr_width_ft"], errors="coerce").fillna(0)
+    rsh = pd.to_numeric(df["dot_rshldr_width_ft"], errors="coerce").fillna(0)
+    travel_width = (surf_w - lsh - rsh).clip(lower=0)
+    lanes_num = np.maximum(lanes, 1)
+    calc_lw = np.where(travel_width > 0, np.round(travel_width / lanes_num, 1), 0)
+
+    # Priority 3: roadway_width / lanes (rough fallback)
     rdway_w = pd.to_numeric(df["dot_roadway_width_ft"], errors="coerce").fillna(0)
-    lanes_num = np.maximum(lanes, 1)  # avoid division by zero
-    df["Lane_Width_ft"] = np.where(rdway_w > 0, np.round(rdway_w / lanes_num, 1), 0)
+    rough_lw = np.where(rdway_w > 0, np.round(rdway_w / lanes_num, 1), 0)
+
+    # Merge: actual > calculated > rough
+    df["Lane_Width_ft"] = np.where(actual_lw > 0, actual_lw,
+                          np.where(calc_lw > 0, calc_lw, rough_lw))
 
     # ── Median_Width_ft ──
     df["Median_Width_ft"] = pd.to_numeric(
