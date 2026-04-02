@@ -106,6 +106,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: state-dot-${{ matrix.state }}
-          path: cache/${{ matrix.state }}_state_dot.parquet.gz
+          path: cache/${{ matrix.state }}_special_data.parquet.gz
           retention-days: 30
           if-no-files-found: ignore
