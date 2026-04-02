@@ -394,36 +394,15 @@ def normalize(df):
     lanes = lanes.clip(upper=12)  # No Delaware road has >12 lanes
     df["Through_Lanes"] = np.where(lanes > 0, lanes.astype(str), "")
 
-    # ── RTE Name (FIX: use dot_route_number + extract from ramp names) ──
-    rte_raw = df["dot_route_number"].fillna("").astype(str).str.strip()
+    # ── RTE Name (build from route type + number, fallback to road name) ──
+    rt_type = df["dot_route_type"].fillna("").astype(str).str.strip()
+    rt_num = df["dot_route_number"].fillna("").astype(str).str.strip()
+    rt_prefix = rt_type.map(ROUTE_TYPE_MAP).fillna("")
 
-    # Add space after letter prefix: "US13"→"US 13", "SR1"→"SR 1", "I95"→"I 95"
-    def _add_space(val):
-        if not val:
-            return ""
-        m = re.match(r'^([A-Za-z]+)(\d+.*)$', val)
-        if m:
-            return f"{m.group(1)} {m.group(2)}"
-        return val
-
-    rte_series = rte_raw.apply(_add_space)
-
-    # Extract route from ramp names: "RAMP TO I 95 N" → "I 95"
-    road_name = df["dot_road_name"].fillna("").astype(str).str.strip()
-    empty_rte = rte_series == ""
-    if empty_rte.any():
-        def _extract_route(name):
-            m = re.search(r'(?:TO\s+|FROM\s+)((?:I|US|SR|DE)\s*-?\s*\d+)', name, re.IGNORECASE)
-            if m:
-                route = m.group(1).strip()
-                # Normalize: "I-95"→"I 95", "SR1"→"SR 1"
-                route = re.sub(r'([A-Za-z]+)\s*-?\s*(\d+)', r'\1 \2', route)
-                return route
-            return ""
-        rte_from_name = road_name[empty_rte].apply(_extract_route)
-        rte_series.loc[empty_rte] = rte_from_name
-
-    df["RTE Name"] = rte_series
+    # Build route designation: "I 95", "US 13", "SR 9"
+    has_route = (rt_prefix != "") & (rt_num != "")
+    rte_name = np.where(has_route, rt_prefix + " " + rt_num, "")
+    df["RTE Name"] = rte_name
 
     # ── RNS MP (milepoint) ──
     beg_mp = pd.to_numeric(df["dot_beg_mp"], errors="coerce").fillna(0)
