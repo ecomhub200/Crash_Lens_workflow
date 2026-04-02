@@ -96,7 +96,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install pandas requests openpyxl awscli
+        run: pip install pandas requests openpyxl awscli pyarrow
 
       - name: Resolve scope
         id: resolve
@@ -163,7 +163,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas requests openpyxl awscli
+          pip install pandas requests openpyxl awscli pyarrow
 
       # ── Stage 0: Initialize Cache ──
       - name: "Stage 0: Initialize cache"
