@@ -464,7 +464,7 @@ def main():
     cache_dir = Path(args.cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    out_name = f"{abbr}_state_dot"
+    out_name = f"{abbr}_state_inventory_data"
     out_pq = cache_dir / f"{out_name}.parquet"
     out_gz = cache_dir / f"{out_name}.parquet.gz"
 
