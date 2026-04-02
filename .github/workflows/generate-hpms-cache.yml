@@ -55,7 +55,7 @@ jobs:
       github.event_name == 'schedule' ||
       github.event.inputs.scope == 'nationwide' ||
       github.event.inputs.scope == 'batch1-small'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
@@ -73,7 +73,7 @@ jobs:
       github.event_name == 'schedule' ||
       github.event.inputs.scope == 'nationwide' ||
       github.event.inputs.scope == 'batch2-medium'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
       github.event_name == 'schedule' ||
       github.event.inputs.scope == 'nationwide' ||
       github.event.inputs.scope == 'batch3-large'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
@@ -109,7 +109,7 @@ jobs:
       github.event_name == 'schedule' ||
       github.event.inputs.scope == 'nationwide' ||
       github.event.inputs.scope == 'batch4-west'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
       github.event_name == 'schedule' ||
       github.event.inputs.scope == 'nationwide' ||
       github.event.inputs.scope == 'batch5-remaining'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
@@ -142,7 +142,7 @@ jobs:
 
   single-state:
     if: github.event.inputs.scope == 'single-state' && github.event.inputs.single_state != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4

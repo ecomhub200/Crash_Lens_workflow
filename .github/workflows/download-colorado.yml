@@ -93,7 +93,7 @@ env:
 jobs:
   download:
     name: "Download Colorado (${{ github.event.inputs.scope || 'jurisdiction' }})"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
 
     outputs:
@@ -188,7 +188,7 @@ jobs:
     name: "Trigger pipeline"
     needs: download
     if: github.event.inputs.skip_pipeline != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/github-script@v7
         with:

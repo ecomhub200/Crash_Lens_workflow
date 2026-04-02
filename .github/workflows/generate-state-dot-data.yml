@@ -27,7 +27,7 @@ env:
 jobs:
   # ── Determine which states to process ──
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -51,7 +51,7 @@ jobs:
   # ── Download + normalize per state ──
   generate:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
       fail-fast: false

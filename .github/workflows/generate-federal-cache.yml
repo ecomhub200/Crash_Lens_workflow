@@ -103,7 +103,7 @@ jobs:
 
   alabama:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'al'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -121,7 +121,7 @@ jobs:
 
   alaska:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ak'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -139,7 +139,7 @@ jobs:
 
   arizona:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'az'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -157,7 +157,7 @@ jobs:
 
   arkansas:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ar'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -175,7 +175,7 @@ jobs:
 
   california:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ca'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -193,7 +193,7 @@ jobs:
 
   colorado:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'co'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -211,7 +211,7 @@ jobs:
 
   connecticut:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ct'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -229,7 +229,7 @@ jobs:
 
   delaware:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'de'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -247,7 +247,7 @@ jobs:
 
   district-of-columbia:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'dc'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -265,7 +265,7 @@ jobs:
 
   florida:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'fl'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -283,7 +283,7 @@ jobs:
 
   georgia:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ga'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -301,7 +301,7 @@ jobs:
 
   hawaii:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'hi'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -319,7 +319,7 @@ jobs:
 
   idaho:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'id'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -337,7 +337,7 @@ jobs:
 
   illinois:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'il'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -355,7 +355,7 @@ jobs:
 
   indiana:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'in'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -373,7 +373,7 @@ jobs:
 
   iowa:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ia'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -391,7 +391,7 @@ jobs:
 
   kansas:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ks'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -409,7 +409,7 @@ jobs:
 
   kentucky:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ky'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -427,7 +427,7 @@ jobs:
 
   louisiana:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'la'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -445,7 +445,7 @@ jobs:
 
   maine:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'me'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -463,7 +463,7 @@ jobs:
 
   maryland:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'md'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -481,7 +481,7 @@ jobs:
 
   massachusetts:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ma'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -499,7 +499,7 @@ jobs:
 
   michigan:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mi'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -517,7 +517,7 @@ jobs:
 
   minnesota:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mn'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -535,7 +535,7 @@ jobs:
 
   mississippi:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ms'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -553,7 +553,7 @@ jobs:
 
   missouri:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mo'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -571,7 +571,7 @@ jobs:
 
   montana:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'mt'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -589,7 +589,7 @@ jobs:
 
   nebraska:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ne'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -607,7 +607,7 @@ jobs:
 
   nevada:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nv'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -625,7 +625,7 @@ jobs:
 
   new-hampshire:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nh'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -643,7 +643,7 @@ jobs:
 
   new-jersey:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nj'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -661,7 +661,7 @@ jobs:
 
   new-mexico:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nm'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -679,7 +679,7 @@ jobs:
 
   new-york:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ny'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -697,7 +697,7 @@ jobs:
 
   north-carolina:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nc'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -715,7 +715,7 @@ jobs:
 
   north-dakota:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'nd'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -733,7 +733,7 @@ jobs:
 
   ohio:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'oh'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -751,7 +751,7 @@ jobs:
 
   oklahoma:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ok'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -769,7 +769,7 @@ jobs:
 
   oregon:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'or'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -787,7 +787,7 @@ jobs:
 
   pennsylvania:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'pa'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -805,7 +805,7 @@ jobs:
 
   rhode-island:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ri'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -823,7 +823,7 @@ jobs:
 
   south-carolina:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'sc'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -841,7 +841,7 @@ jobs:
 
   south-dakota:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'sd'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -859,7 +859,7 @@ jobs:
 
   tennessee:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'tn'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -877,7 +877,7 @@ jobs:
 
   texas:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'tx'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -895,7 +895,7 @@ jobs:
 
   utah:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'ut'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -913,7 +913,7 @@ jobs:
 
   vermont:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'vt'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -931,7 +931,7 @@ jobs:
 
   virginia:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'va'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -949,7 +949,7 @@ jobs:
 
   washington:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wa'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -967,7 +967,7 @@ jobs:
 
   west-virginia:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wv'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -985,7 +985,7 @@ jobs:
 
   wisconsin:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wi'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -1003,7 +1003,7 @@ jobs:
 
   wyoming:
     if: github.event_name == 'schedule' || github.event.inputs.scope == 'nationwide' || github.event.inputs.scope == 'wy'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -1021,7 +1021,7 @@ jobs:
 
   single-state:
     if: github.event.inputs.scope == 'single-state' && github.event.inputs.single_state != ''
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

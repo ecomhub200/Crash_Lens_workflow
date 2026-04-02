@@ -48,7 +48,7 @@ env:
 
 jobs:
   download-cdot-data:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

@@ -55,7 +55,7 @@ env:
 
 jobs:
   process-cdot-data:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     if: >
       github.event_name == 'workflow_dispatch' ||
