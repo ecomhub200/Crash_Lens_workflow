@@ -82,6 +82,28 @@ GOLDEN_COLUMNS = [
 
 ENRICHMENT_COLUMNS = ['FIPS', 'Place FIPS', 'EPDO_Score']
 
+# Columns from road inventory enrichment (crash_road_join.py).
+# Protected from state prefix (de_, va_, etc.) in prefix_extra_columns().
+ANALYSIS_COLUMNS = [
+    "AADT", "AADT_source", "Through_Lanes", "VMT_Annual",
+    "Roadway Condition", "Roadway Alignment", "Roadway Description",
+    "intersection_name", "intersection_degree", "is_intersection",
+    "road_source", "length_m", "length_mi",
+    "ri_matched", "ri_match_dist_ft", "ri_segment_id",
+    # HPMS v2: frontend columns from road_data_authority.py
+    "Capacity", "Directional_Lanes", "Peak_Lanes",
+    "Pct_Peak_Single_Unit", "Structure_Type", "Toll_Charged",
+    "HOV_Type", "Climate_Zone", "Cracking_Pct",
+    "ARNOLD_Route_ID", "ARNOLD_Begin_MP", "ARNOLD_End_MP",
+    "HPMS_Section_Length_mi", "HPMS_Year",
+]
+
+# Prefixes for road inventory columns — never get state prefix
+ROAD_INVENTORY_PREFIXES = (
+    "hpms_", "sdot_", "dot_", "te_", "curve_", "map_", "risk_",
+    "nearest_", "Near_", "poi_", "conf_", "xval_", "geo_", "resolved_", "ri_",
+)
+
 RANKING_SCOPES = ['District', 'Juris', 'PlanningDistrict', 'MPO']
 RANKING_METRICS = [
     'total_crash', 'total_ped_crash', 'total_bike_crash',

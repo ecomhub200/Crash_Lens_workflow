@@ -38,8 +38,22 @@ FC_TO_OWNERSHIP = {
     "5-Major Collector":"2. County Hwy Agency","6-Minor Collector":"2. County Hwy Agency",
     "7-Local":"3. City or Town Hwy Agency",
 }
-HPMS_OWNERSHIP_MAP = {1:"1. State Hwy Agency",2:"2. County Hwy Agency",
-                      3:"3. City or Town Hwy Agency",4:"3. City or Town Hwy Agency"}
+HPMS_OWNERSHIP_MAP = {
+    1: "1. State Hwy Agency", 2: "2. County Hwy Agency",
+    3: "3. City or Town Hwy Agency", 4: "3. City or Town Hwy Agency",
+    11: "1. State Hwy Agency", 12: "3. City or Town Hwy Agency",
+    21: "1. State Hwy Agency", 25: "3. City or Town Hwy Agency",
+    26: "6. Private/Unknown Roads", 27: "6. Private/Unknown Roads",
+    31: "1. State Hwy Agency", 32: "2. County Hwy Agency",
+    40: "1. State Hwy Agency", 50: "4. Federal Roads",
+    60: "4. Federal Roads", 62: "4. Federal Roads",
+    63: "4. Federal Roads", 64: "4. Federal Roads",
+    66: "4. Federal Roads", 67: "4. Federal Roads",
+    68: "4. Federal Roads", 69: "4. Federal Roads",
+    70: "4. Federal Roads", 72: "4. Federal Roads",
+    73: "4. Federal Roads", 74: "4. Federal Roads",
+    80: "6. Private/Unknown Roads",
+}
 HPMS_SURFACE_MAP = {1:"2. Blacktop, Asphalt, Bituminous",2:"1. Concrete",
                     3:"2. Blacktop, Asphalt, Bituminous",4:"2. Blacktop, Asphalt, Bituminous",
                     5:"4. Slag, Gravel, Stone",6:"4. Slag, Gravel, Stone",

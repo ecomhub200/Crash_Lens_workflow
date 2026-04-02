@@ -337,25 +337,45 @@ HPMS_FSYSTEM_TO_FC = {
     7: "7-Local (J,6)",
 }
 
-# HPMS Ownership → CrashLens Ownership
+# HPMS Ownership → CrashLens Ownership (full FHWA 27-code table)
+# Source: HPMS Field Manual Item 6 (Dec 2016 + 2022 draft)
+# Must match OWNERSHIP_LABELS in road_data_authority.py and
+# HPMS_CODE_TO_OWNERSHIP in road_inventory_postprocess.py
 HPMS_OWNERSHIP_MAP = {
-    1: "1. State Hwy Agency",
-    2: "2. County Hwy Agency",
-    3: "3. City or Town Hwy Agency",
-    4: "4. Federal Agency",
-    11: "1. State Hwy Agency",      # State Park or Forest
-    12: "1. State Hwy Agency",      # State Toll Authority
-    21: "2. County Hwy Agency",     # County Toll Authority
-    25: "3. City or Town Hwy Agency",
-    26: "3. City or Town Hwy Agency",  # Special District
-    31: "4. Federal Agency",        # National Forest
-    32: "4. Federal Agency",        # Indian Affairs
-    40: "4. Federal Agency",        # Other Federal
-    50: "4. Federal Agency",        # Railroad
-    60: "4. Federal Agency",        # Corps of Engineers
-    62: "4. Federal Agency",        # Nat'l Park Service
-    70: "4. Federal Agency",        # Military
-    80: "4. Federal Agency",        # Other
+    # Primary agencies
+    1:  "1. State Hwy Agency",
+    2:  "2. County Hwy Agency",
+    3:  "3. City or Town Hwy Agency",       # Town or Township
+    4:  "3. City or Town Hwy Agency",       # City or Municipal (NOT Federal!)
+    # State sub-agencies
+    11: "1. State Hwy Agency",              # State Park, Forest, Reservation
+    12: "3. City or Town Hwy Agency",       # Local Park, Forest, Reservation
+    21: "1. State Hwy Agency",              # Other State Agency
+    25: "3. City or Town Hwy Agency",       # Other Local Agency
+    # Private / Railroad
+    26: "6. Private/Unknown Roads",         # Private (other than Railroad)
+    27: "6. Private/Unknown Roads",         # Railroad
+    # Toll authorities
+    31: "1. State Hwy Agency",              # State Toll Road Authority
+    32: "2. County Hwy Agency",             # Local Toll Authority
+    # Public instrumentalities
+    40: "1. State Hwy Agency",              # Other Public Instrumentality
+    # Tribal
+    50: "4. Federal Roads",                 # Indian Tribe Nation
+    # Federal agencies
+    60: "4. Federal Roads",                 # Other Federal Agency
+    62: "4. Federal Roads",                 # Bureau of Indian Affairs
+    63: "4. Federal Roads",                 # Bureau of Fish and Wildlife
+    64: "4. Federal Roads",                 # U.S. Forest Service
+    66: "4. Federal Roads",                 # National Park Service
+    67: "4. Federal Roads",                 # Tennessee Valley Authority
+    68: "4. Federal Roads",                 # Bureau of Land Management
+    69: "4. Federal Roads",                 # Bureau of Reclamation
+    70: "4. Federal Roads",                 # Corps of Engineers (Civil)
+    72: "4. Federal Roads",                 # Air Force
+    73: "4. Federal Roads",                 # Navy/Marines
+    74: "4. Federal Roads",                 # Army
+    80: "6. Private/Unknown Roads",         # Other
 }
 
 # HPMS Surface_Type → CrashLens Roadway Surface Type

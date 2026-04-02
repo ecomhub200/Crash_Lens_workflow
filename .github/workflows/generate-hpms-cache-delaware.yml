@@ -35,7 +35,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state de $FORCE
+          python generate_hpms_data.py --skip-hm10 --state de $FORCE
 
       - name: Summary
         if: always()
@@ -46,9 +46,9 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Expected in R2 at delaware/cache/:" >> $GITHUB_STEP_SUMMARY
-          echo "- de_hpms.parquet.gz (AADT, FC, speed limit, lanes, surface, ownership, etc.)" >> $GITHUB_STEP_SUMMARY
+          echo "- de_hpms.parquet.gz (63 columns: AADT, FC, speed, lanes, surface, ownership, capacity, etc.)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Key fields downloaded:" >> $GITHUB_STEP_SUMMARY
+          echo "Key fields (v2 — 63 columns, was 46):" >> $GITHUB_STEP_SUMMARY
           echo "- AADT (traffic volume — enables crash rate calculation)" >> $GITHUB_STEP_SUMMARY
           echo "- F_System (official FHWA Functional Class)" >> $GITHUB_STEP_SUMMARY
           echo "- Speed_Limit (posted speed limit, mph)" >> $GITHUB_STEP_SUMMARY
