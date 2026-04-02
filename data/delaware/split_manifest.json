@@ -1,6 +1,6 @@
 {
   "state": "delaware",
-  "generated_at": "2026-04-02T22:02:41.233116+00:00",
+  "generated_at": "2026-04-02T23:13:28.888351+00:00",
   "elapsed_s": 520.2,
   "total_input_rows": 566762,
   "dry_run": false,
@@ -12,28 +12,28 @@
   "splits": {
     "state": {
       "all_roads": 566762,
-      "dot_roads": 457958,
-      "primary_roads": 58230,
-      "non_dot_roads": 100813
+      "dot_roads": 457973,
+      "primary_roads": 58231,
+      "non_dot_roads": 100798
     },
     "regions": {
       "central_district": {
         "all_roads": 103081,
-        "dot_roads": 81833,
+        "dot_roads": 81825,
         "primary_roads": 6692,
-        "non_dot_roads": 18800
+        "non_dot_roads": 18808
       },
       "north_district": {
         "all_roads": 334227,
-        "dot_roads": 271414,
-        "primary_roads": 50323,
-        "non_dot_roads": 58843
+        "dot_roads": 271417,
+        "primary_roads": 50324,
+        "non_dot_roads": 58840
       },
       "south_district": {
         "all_roads": 129454,
-        "dot_roads": 104711,
+        "dot_roads": 104731,
         "primary_roads": 1215,
-        "non_dot_roads": 23170
+        "non_dot_roads": 23150
       }
     },
     "mpos": {
@@ -45,8 +45,8 @@
       },
       "salisbury_wicomico_mpo": {
         "all_roads": 129361,
-        "county_roads": 8049,
-        "city_roads": 15064,
+        "county_roads": 8030,
+        "city_roads": 15063,
         "no_interstate": 128146
       },
       "wilmapco": {
@@ -57,28 +57,28 @@
       },
       "wilmington_area_planning_council": {
         "all_roads": 309191,
-        "county_roads": 10250,
-        "city_roads": 46895,
-        "no_interstate": 262912
+        "county_roads": 10272,
+        "city_roads": 46870,
+        "no_interstate": 262911
       }
     },
     "planning_districts": {
       "central_district": {
         "all_roads": 103081,
-        "county_roads": 4878,
-        "city_roads": 13890,
+        "county_roads": 4876,
+        "city_roads": 13900,
         "no_interstate": 96389
       },
       "north_district": {
         "all_roads": 334227,
-        "county_roads": 10679,
-        "city_roads": 48031,
-        "no_interstate": 283904
+        "county_roads": 10701,
+        "city_roads": 48006,
+        "no_interstate": 283903
       },
       "south_district": {
         "all_roads": 129454,
-        "county_roads": 8053,
-        "city_roads": 15065,
+        "county_roads": 8034,
+        "city_roads": 15064,
         "no_interstate": 128239
       }
     },
@@ -194,13 +194,13 @@
       "dewey_beach": {
         "all_roads": 931,
         "county_roads": 11,
-        "city_roads": 57,
+        "city_roads": 56,
         "no_interstate": 931
       },
       "dover": {
         "all_roads": 33645,
-        "county_roads": 1494,
-        "city_roads": 6353,
+        "county_roads": 1492,
+        "city_roads": 6363,
         "no_interstate": 31383
       },
       "dover_base_housing": {
@@ -223,7 +223,7 @@
       },
       "elsmere": {
         "all_roads": 2143,
-        "county_roads": 18,
+        "county_roads": 19,
         "city_roads": 1008,
         "no_interstate": 2143
       },
@@ -266,7 +266,7 @@
       "glasgow": {
         "all_roads": 8388,
         "county_roads": 353,
-        "city_roads": 197,
+        "city_roads": 199,
         "no_interstate": 8298
       },
       "greenville": {
@@ -307,7 +307,7 @@
       },
       "hockessin": {
         "all_roads": 4291,
-        "county_roads": 293,
+        "county_roads": 296,
         "city_roads": 63,
         "no_interstate": 4183
       },
@@ -380,7 +380,7 @@
       "middletown": {
         "all_roads": 9867,
         "county_roads": 653,
-        "city_roads": 2689,
+        "city_roads": 2688,
         "no_interstate": 9722
       },
       "milford": {
@@ -409,8 +409,8 @@
       },
       "new_castle": {
         "all_roads": 187165,
-        "county_roads": 5461,
-        "city_roads": 7265,
+        "county_roads": 5466,
+        "city_roads": 7262,
         "no_interstate": 147749
       },
       "newark": {
@@ -487,7 +487,7 @@
       },
       "seaford": {
         "all_roads": 8253,
-        "county_roads": 212,
+        "county_roads": 194,
         "city_roads": 2201,
         "no_interstate": 8253
       },
@@ -523,7 +523,7 @@
       },
       "sussex": {
         "all_roads": 86429,
-        "county_roads": 6889,
+        "county_roads": 6888,
         "city_roads": 3444,
         "no_interstate": 85940
       },
@@ -541,9 +541,9 @@
       },
       "wilmington": {
         "all_roads": 61248,
-        "county_roads": 2352,
-        "city_roads": 29566,
-        "no_interstate": 56001
+        "county_roads": 2365,
+        "city_roads": 29543,
+        "no_interstate": 56000
       },
       "wilmington_manor": {
         "all_roads": 4912,
