@@ -4,7 +4,8 @@ name: "Generate HPMS Cache (Nationwide)"
 #  CrashLens — HPMS Federal Road Data for All 51 States
 #  
 #  Downloads AADT, Functional Class, Speed Limit, Lanes, etc.
-#  from FHWA's Highway Performance Monitoring System.
+#  from FHWA's Highway Performance Monitoring System (63 cols v2).
+#  HM-10 ownership validation skipped in CI (--skip-hm10).
 #
 #  SCHEDULE: Annually on Jan 15 (HPMS updates ~annually)
 #  MANUAL: Select scope and run from Actions tab
@@ -66,7 +67,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state de ri ct dc nh vt hi wv me sd wy $FORCE
+          python generate_hpms_data.py --skip-hm10 --state de ri ct dc nh vt hi wv me sd wy $FORCE
 
   batch2-medium:
     if: >-
@@ -84,7 +85,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state nj md ma in ia ks ne nd sc ky $FORCE
+          python generate_hpms_data.py --skip-hm10 --state nj md ma in ia ks ne nd sc ky $FORCE
 
   batch3-large:
     if: >-
@@ -102,7 +103,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state tx ca fl ny pa il mi al ga nc $FORCE
+          python generate_hpms_data.py --skip-hm10 --state tx ca fl ny pa il mi al ga nc $FORCE
 
   batch4-west:
     if: >-
@@ -120,7 +121,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state az nm or wa mt id nv ut co wi $FORCE
+          python generate_hpms_data.py --skip-hm10 --state az nm or wa mt id nv ut co wi $FORCE
 
   batch5-remaining:
     if: >-
@@ -138,7 +139,7 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state va oh tn mo mn ms ar la ok ak $FORCE
+          python generate_hpms_data.py --skip-hm10 --state va oh tn mo mn ms ar la ok ak $FORCE
 
   single-state:
     if: github.event.inputs.scope == 'single-state' && github.event.inputs.single_state != ''
@@ -153,4 +154,4 @@ jobs:
         run: |
           FORCE=""
           [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
-          python generate_hpms_data.py --state ${{ github.event.inputs.single_state }} $FORCE
+          python generate_hpms_data.py --skip-hm10 --state ${{ github.event.inputs.single_state }} $FORCE

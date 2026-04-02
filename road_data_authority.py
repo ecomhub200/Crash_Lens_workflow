@@ -240,7 +240,7 @@ def resolve_lighting(df):
 
 
 def resolve_bridge(df):
-    """OSM(bridge tag on segment) > Federal(within 500ft)."""
+    """HPMS(structure_type) > OSM(bridge tag on segment) > Federal(within 500ft)."""
     n = len(df)
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
@@ -250,13 +250,20 @@ def resolve_bridge(df):
         values[mask] = "Yes"
         sources[mask] = "Federal"
 
-    # OSM bridge tag is directly ON the segment — higher authority
+    # OSM bridge tag is directly ON the segment — higher than proximity
     if "bridge" in df.columns:
         for i, v in enumerate(df["bridge"].values):
             s = str(v).strip().lower()
             if s and s not in ("", "no", "nan"):
                 values[i] = "Yes"
                 sources[i] = "OSM"
+
+    # HPMS structure_type: 1=bridge, 2=tunnel, 3=causeway (highest for bridge)
+    if "hpms_structure_type" in df.columns:
+        st = pd.to_numeric(df["hpms_structure_type"], errors="coerce").fillna(0).astype(int).values
+        mask = st > 0  # any structure (bridge, tunnel, causeway)
+        values[mask] = "Yes"
+        sources[mask] = "HPMS"
 
     return values, sources
 
@@ -1069,33 +1076,44 @@ FC_TO_OWNERSHIP = {
     7: "3. City or Town Hwy Agency",
 }
 
-# HPMS ownership code → VDOT string (comprehensive — all FHWA codes)
+# HPMS ownership code → CrashLens standard (full FHWA 27-code table)
+# Source: HPMS Field Manual Item 6 (Dec 2016 + 2022 draft)
+# Must match HPMS_OWNERSHIP_MAP in generate_hpms_data.py
 OWNERSHIP_LABELS = {
-    1: "1. State Hwy Agency",
-    2: "2. County Hwy Agency",
-    3: "3. City or Town Hwy Agency",
-    4: "3. City or Town Hwy Agency",    # HPMS: City/Municipal
-    5: "4. Other State Agency",          # HPMS: State Park/Forest/Reservation
-    11: "1. State Hwy Agency",           # State Toll Authority
-    12: "2. County Hwy Agency",          # Local Toll Authority
-    21: "4. Other State Agency",          # Other State Agency
-    25: "4. Other State Agency",          # Other Local Agency
-    26: "4. Other State Agency",          # Private
-    27: "4. Other State Agency",          # Railroad
-    31: "1. State Hwy Agency",           # State Toll Authority
-    32: "2. County Hwy Agency",          # Local Toll Authority
-    40: "4. Other State Agency",          # Other Public Instrumentality
-    50: "4. Other State Agency",          # Indian Tribe
-    60: "4. Other State Agency",          # Other Federal
-    62: "4. Other State Agency",          # Bureau of Indian Affairs
-    64: "4. Other State Agency",          # Bureau of Land Management
-    66: "4. Other State Agency",          # Bureau of Reclamation
-    68: "4. Other State Agency",          # Corps of Engineers
-    70: "4. Other State Agency",          # Federal Aviation Administration
-    72: "1. State Hwy Agency",           # Federal Highway Administration
-    74: "4. Other State Agency",          # FERC
-    76: "4. Other State Agency",          # National Park Service
-    80: "4. Other State Agency",          # Other
+    # Primary agencies
+    1:  "1. State Hwy Agency",
+    2:  "2. County Hwy Agency",
+    3:  "3. City or Town Hwy Agency",       # HPMS: Town or Township
+    4:  "3. City or Town Hwy Agency",       # HPMS: City or Municipal
+    # State sub-agencies
+    11: "1. State Hwy Agency",              # State Park, Forest, Reservation
+    12: "3. City or Town Hwy Agency",       # Local Park, Forest, Reservation
+    21: "1. State Hwy Agency",              # Other State Agency
+    25: "3. City or Town Hwy Agency",       # Other Local Agency
+    # Private / Railroad
+    26: "6. Private/Unknown Roads",         # Private (other than Railroad)
+    27: "6. Private/Unknown Roads",         # Railroad
+    # Toll authorities
+    31: "1. State Hwy Agency",              # State Toll Road Authority
+    32: "2. County Hwy Agency",             # Local Toll Authority
+    # Public instrumentalities
+    40: "1. State Hwy Agency",              # Other Public Instrumentality
+    # Tribal
+    50: "4. Federal Roads",                 # Indian Tribe Nation
+    # Federal agencies
+    60: "4. Federal Roads",                 # Other Federal Agency
+    62: "4. Federal Roads",                 # Bureau of Indian Affairs
+    63: "4. Federal Roads",                 # Bureau of Fish and Wildlife
+    64: "4. Federal Roads",                 # U.S. Forest Service
+    66: "4. Federal Roads",                 # National Park Service
+    67: "4. Federal Roads",                 # Tennessee Valley Authority
+    68: "4. Federal Roads",                 # Bureau of Land Management
+    69: "4. Federal Roads",                 # Bureau of Reclamation
+    70: "4. Federal Roads",                 # Corps of Engineers (Civil)
+    72: "4. Federal Roads",                 # Air Force
+    73: "4. Federal Roads",                 # Navy/Marines
+    74: "4. Federal Roads",                 # Army
+    80: "6. Private/Unknown Roads",         # Other
 }
 
 # HPMS facility_type → VDOT string (comprehensive)
@@ -1327,4 +1345,165 @@ def merge_frontend_columns(df):
     if "u_node" in df.columns:
         df.rename(columns={"u_node": "osm_u_node", "v_node": "osm_v_node"}, inplace=True)
 
+    # ── HPMS v2: New frontend columns from 63-field HPMS ──
+    # These are single-source (HPMS only), no conflict resolution needed.
+    # Just copy from hpms_ prefix to clean frontend names.
+    HPMS_V2_DIRECT = {
+        # hpms_ column → frontend column name
+        "hpms_capacity":                    "Capacity",
+        "hpms_directional_through_lanes":   "Directional_Lanes",
+        "hpms_peak_lanes":                  "Peak_Lanes",
+        "hpms_pct_peak_single":             "Pct_Peak_Single_Unit",
+        "hpms_structure_type":              "Structure_Type",
+        "hpms_toll_charged":                "Toll_Charged",
+        "hpms_hov_type":                    "HOV_Type",
+        "hpms_climate_zone":                "Climate_Zone",
+        "hpms_cracking_percent":            "Cracking_Pct",
+        "hpms_route_id":                    "ARNOLD_Route_ID",
+        "hpms_begin_point":                 "ARNOLD_Begin_MP",
+        "hpms_end_point":                   "ARNOLD_End_MP",
+        "hpms_section_length":              "HPMS_Section_Length_mi",
+        "hpms_year_record":                 "HPMS_Year",
+    }
+    v2_filled = 0
+    for src, tgt in HPMS_V2_DIRECT.items():
+        if src in df.columns:
+            df[tgt] = df[src]
+            if df[src].dtype in [np.float64, np.float32, np.int64, np.int32,
+                                  np.int16, np.int8, np.uint8, np.uint16]:
+                v2_filled += (pd.to_numeric(df[src], errors="coerce").fillna(0) != 0).sum()
+            else:
+                v2_filled += (df[src].astype(str).str.strip() != "").sum()
+    if v2_filled > 0:
+        print(f"      HPMS v2 columns:   {len([s for s in HPMS_V2_DIRECT if s in df.columns]):>3} of {len(HPMS_V2_DIRECT)} mapped")
+
     print(f"    Frontend merge complete")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  TRAFFIC ENGINEERING METRICS (uses HPMS v2 fields)
+# ═══════════════════════════════════════════════════════════════
+
+def compute_traffic_engineering_metrics(df):
+    """
+    Derive traffic engineering metrics from HPMS v2 enhanced fields.
+    Uses capacity, directional lanes, AADT, peak factors to compute
+    volume/capacity ratio, level of service estimates, and truck exposure.
+
+    Columns added:
+      te_volume_capacity_ratio    AADT / (capacity × dir_factor) — congestion indicator
+      te_level_of_service         A-F from V/C ratio (HCM 2010 approximation)
+      te_truck_pct                (AADT_single + AADT_combo) / AADT × 100
+      te_peak_hour_volume         AADT × K_factor — design hour volume
+      te_lane_utilization         AADT / (through_lanes × 365) — avg daily vehicles per lane
+      te_pavement_condition       Good/Fair/Poor from IRI + cracking + PSR
+      te_is_toll                  Yes/No from toll_charged
+      te_is_hov                  Yes/No from hov_type
+      te_on_structure             Yes/No/Bridge/Tunnel/Causeway from structure_type
+    """
+    print("    Traffic engineering metrics (HPMS v2)...")
+    n = len(df)
+    added = 0
+
+    # ── Volume/Capacity Ratio ──
+    aadt = pd.to_numeric(df.get("hpms_aadt", 0), errors="coerce").fillna(0).values
+    capacity = pd.to_numeric(df.get("hpms_capacity", 0), errors="coerce").fillna(0).values
+    dir_factor = pd.to_numeric(df.get("hpms_dir_factor", 0), errors="coerce").fillna(0.5).values
+    dir_factor = np.where(dir_factor <= 0, 0.5, dir_factor)  # default 50/50 split
+
+    vc = np.zeros(n, dtype=float)
+    has_cap = capacity > 0
+    if has_cap.sum() > 0:
+        vc[has_cap] = np.round(aadt[has_cap] / (capacity[has_cap] * dir_factor[has_cap] * 365) * 10, 2)
+        vc = np.clip(vc, 0, 5.0)  # cap at 5.0 (beyond F)
+    df["te_volume_capacity_ratio"] = vc
+
+    # Level of service: HCM 2010 approximation from V/C
+    los = np.full(n, "", dtype=object)
+    los[vc > 0] = np.where(vc[vc > 0] <= 0.6, "A",
+                  np.where(vc[vc > 0] <= 0.7, "B",
+                  np.where(vc[vc > 0] <= 0.8, "C",
+                  np.where(vc[vc > 0] <= 0.9, "D",
+                  np.where(vc[vc > 0] <= 1.0, "E", "F")))))
+    df["te_level_of_service"] = los
+    has_los = (los != "").sum()
+    if has_los > 0:
+        congested = ((los == "E") | (los == "F")).sum()
+        print(f"      V/C ratio: {has_los:,} segments scored, {congested:,} congested (E/F)")
+    added += 2
+
+    # ── Truck Percentage ──
+    aadt_su = pd.to_numeric(df.get("hpms_aadt_single_unit", 0), errors="coerce").fillna(0).values
+    aadt_co = pd.to_numeric(df.get("hpms_aadt_combination", 0), errors="coerce").fillna(0).values
+    truck_aadt = aadt_su + aadt_co
+    truck_pct = np.where(aadt > 0, np.round(truck_aadt / aadt * 100, 1), 0)
+    df["te_truck_pct"] = truck_pct
+    high_truck = (truck_pct > 10).sum()
+    print(f"      Truck exposure: {high_truck:,} segments >10% truck AADT")
+    added += 1
+
+    # ── Peak Hour Volume ──
+    k_factor = pd.to_numeric(df.get("hpms_k_factor", 0), errors="coerce").fillna(0).values
+    phv = np.where((aadt > 0) & (k_factor > 0), np.round(aadt * k_factor / 100, 0), 0)
+    df["te_peak_hour_volume"] = phv.astype(int)
+    added += 1
+
+    # ── Lane Utilization ──
+    lanes = pd.to_numeric(df.get("hpms_through_lanes", 0), errors="coerce").fillna(0).values
+    lane_util = np.where((aadt > 0) & (lanes > 0), np.round(aadt / (lanes * 365), 0), 0)
+    df["te_lane_utilization"] = lane_util.astype(int)
+    added += 1
+
+    # ── Pavement Condition (composite from IRI + cracking + PSR) ──
+    iri = pd.to_numeric(df.get("hpms_iri", 0), errors="coerce").fillna(0).values
+    crack = pd.to_numeric(df.get("hpms_cracking_percent", 0), errors="coerce").fillna(0).values
+    psr = pd.to_numeric(df.get("hpms_psr", 0), errors="coerce").fillna(0).values
+
+    pave_cond = np.full(n, "", dtype=object)
+    has_pave = (iri > 0) | (psr > 0)
+    if has_pave.sum() > 0:
+        # IRI: <95=Good, 95-170=Fair, >170=Poor (FHWA thresholds)
+        iri_score = np.where(iri <= 0, 50,
+                   np.where(iri <= 95, 90,
+                   np.where(iri <= 170, 60, 20)))
+        # PSR: >3.5=Good, 2.5-3.5=Fair, <2.5=Poor
+        psr_score = np.where(psr <= 0, 50,
+                   np.where(psr >= 3.5, 90,
+                   np.where(psr >= 2.5, 60, 20)))
+        # Cracking: <5%=Good, 5-20%=Fair, >20%=Poor
+        crack_score = np.where(crack <= 0, 50,
+                     np.where(crack <= 5, 90,
+                     np.where(crack <= 20, 60, 20)))
+        # Composite: weighted average (IRI has most data)
+        composite = (iri_score * 0.5 + psr_score * 0.3 + crack_score * 0.2)
+        pave_cond = np.where(~has_pave, "",
+                   np.where(composite >= 75, "Good",
+                   np.where(composite >= 45, "Fair", "Poor")))
+    df["te_pavement_condition"] = pave_cond
+    has_pc = (pave_cond != "").sum()
+    if has_pc > 0:
+        poor = (pave_cond == "Poor").sum()
+        print(f"      Pavement condition: {has_pc:,} scored, {poor:,} Poor")
+    added += 1
+
+    # ── Simple flag columns ──
+    if "hpms_toll_charged" in df.columns:
+        toll = pd.to_numeric(df["hpms_toll_charged"], errors="coerce").fillna(0).astype(int).values
+        df["te_is_toll"] = np.where(toll > 0, "Yes", "No")
+        print(f"      Toll roads: {(toll > 0).sum():,}")
+        added += 1
+
+    if "hpms_hov_type" in df.columns:
+        hov = pd.to_numeric(df["hpms_hov_type"], errors="coerce").fillna(0).astype(int).values
+        df["te_is_hov"] = np.where(hov > 0, "Yes", "No")
+        print(f"      HOV lanes: {(hov > 0).sum():,}")
+        added += 1
+
+    if "hpms_structure_type" in df.columns:
+        st = pd.to_numeric(df["hpms_structure_type"], errors="coerce").fillna(0).astype(int).values
+        st_map = {0: "No", 1: "Bridge", 2: "Tunnel", 3: "Causeway"}
+        df["te_on_structure"] = [st_map.get(v, "No") for v in st]
+        print(f"      On structure: {(st > 0).sum():,} (bridge/tunnel/causeway)")
+        added += 1
+
+    print(f"    Traffic engineering: {added} new te_ columns")

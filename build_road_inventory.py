@@ -24,7 +24,7 @@ INPUT FILES (from {state}/cache/):
     {abbr}_roads.parquet.gz          <- base road network
     {abbr}_intersections.parquet.gz  <- intersection nodes
     {abbr}_state_dot.parquet.gz      <- State DOT inventory (Tier A, OPTIONAL)
-    {abbr}_hpms.parquet.gz           <- FHWA road inventory (Tier B, all 46 cols)
+    {abbr}_hpms.parquet.gz           <- FHWA road inventory (Tier B, 63 cols v2)
     {abbr}_pois.parquet.gz           <- OSM POIs (bars, schools, signals, etc.)
     {abbr}_bridges.parquet.gz        <- BTS bridges
     {abbr}_rail_crossings.parquet.gz <- BTS rail crossings
@@ -1531,13 +1531,15 @@ def main():
         "geo_planning_district", "geo_planning_district_id",
     ])
 
-    # HPMS raw duplicates (already resolved into frontend columns)
-    # NOTE: hpms_ownership kept for postprocessor (accurate ownership mapping)
-    drop_cols.update([
-        "hpms_aadt", "hpms_f_system", "hpms_facility_type",
-        "hpms_match_dist_ft", "hpms_matched",
-        "hpms_speed_limit", "hpms_surface_type", "hpms_through_lanes",
-    ])
+    # HPMS columns: keep ALL hpms_ columns (v2 — 63 fields from FHWA).
+    # road_data_authority creates resolved_ columns from hpms_ data, but raw
+    # hpms_ columns are needed by: road_inventory_postprocess (ownership, route_name,
+    # grade_class, terrain_type), crash_enricher (authority hierarchy), and the
+    # 17 new fields (route_id, capacity, structure_type, etc.) have no resolved_
+    # equivalent. Dropping hpms_ columns was causing silent data loss.
+    # -- Previously dropped: hpms_aadt, hpms_f_system, hpms_facility_type,
+    #    hpms_match_dist_ft, hpms_matched, hpms_speed_limit, hpms_surface_type,
+    #    hpms_through_lanes. Now all kept.
 
     # Single-value subcategory columns
     for c in roads.columns:
@@ -1695,8 +1697,13 @@ def main():
     roads = roads[ordered].copy()  # Defragment after all column additions
 
     # ── Drop always-empty and low-value columns (Tier 4 cleanup) ──
+    # PROTECTED prefixes: hpms_, sdot_, resolved_ — these must survive even if
+    # empty for a particular state, to keep parquet schema consistent across states.
+    PROTECTED_PREFIXES = ("hpms_", "sdot_", "resolved_", "conf_", "risk_")
     empty_cols = []
     for col in roads.columns:
+        if any(col.startswith(p) for p in PROTECTED_PREFIXES):
+            continue  # Never drop protected columns
         if roads[col].dtype in [np.float32, np.float64, np.int64, np.int32, 
                                  np.int16, np.int8, np.uint8, np.uint16, np.uint32]:
             if (roads[col] != 0).sum() == 0:

@@ -260,7 +260,7 @@ def fix_ownership(ri, report):
     When hpms_ownership is missing (older builds):
       Falls back to FC-based mapping (less accurate).
 
-    FHWA HPMS Ownership Codes → VDOT Standard:
+    FHWA HPMS Ownership Codes → CrashLens Standard (full 27-code table):
       1  = State Highway Agency       → "1. State Hwy Agency"
       2  = County Highway Agency      → "2. County Hwy Agency"
       3  = Town/Township Hwy Agency   → "3. City or Town Hwy Agency"
@@ -272,31 +272,61 @@ def fix_ownership(ri, report):
       26 = Private (not Railroad)     → "6. Private/Unknown Roads"
       27 = Railroad                   → "6. Private/Unknown Roads"
       31 = State Toll Authority       → "5. Toll Roads Maintained by Others"
+      32 = Local Toll Authority       → "5. Toll Roads Maintained by Others"
       40 = Other Public Instrumentality → "1. State Hwy Agency"
-      60 = Bureau of Indian Affairs   → "4. Federal Roads"
-      62 = Indian Tribe Nation        → "4. Federal Roads"
-      70 = Other Federal Agency       → "4. Federal Roads"
-      80 = Unknown                    → "6. Private/Unknown Roads"
+      50 = Indian Tribe Nation        → "4. Federal Roads"
+      60 = Other Federal Agency       → "4. Federal Roads"
+      62 = Bureau of Indian Affairs   → "4. Federal Roads"
+      63 = Bureau of Fish & Wildlife  → "4. Federal Roads"
+      64 = U.S. Forest Service        → "4. Federal Roads"
+      66 = National Park Service      → "4. Federal Roads"
+      67 = Tennessee Valley Authority → "4. Federal Roads"
+      68 = Bureau of Land Management  → "4. Federal Roads"
+      69 = Bureau of Reclamation      → "4. Federal Roads"
+      70 = Corps of Engineers (Civil) → "4. Federal Roads"
+      72 = Air Force                  → "4. Federal Roads"
+      73 = Navy/Marines               → "4. Federal Roads"
+      74 = Army                       → "4. Federal Roads"
+      80 = Unknown/Other              → "6. Private/Unknown Roads"
 
     State-agnostic: FHWA ownership codes are a federal standard used in all states.
+    Must match OWNERSHIP_LABELS in road_data_authority.py (27 codes).
     """
     HPMS_CODE_TO_OWNERSHIP = {
+        # Primary agencies
         1:  "1. State Hwy Agency",
         2:  "2. County Hwy Agency",
-        3:  "3. City or Town Hwy Agency",
-        4:  "3. City or Town Hwy Agency",
-        11: "1. State Hwy Agency",
-        12: "3. City or Town Hwy Agency",
-        21: "1. State Hwy Agency",
-        25: "3. City or Town Hwy Agency",
-        26: "6. Private/Unknown Roads",
-        27: "6. Private/Unknown Roads",
-        31: "5. Toll Roads Maintained by Others",
-        40: "1. State Hwy Agency",
-        60: "4. Federal Roads",
-        62: "4. Federal Roads",
-        70: "4. Federal Roads",
-        80: "6. Private/Unknown Roads",
+        3:  "3. City or Town Hwy Agency",       # Town or Township
+        4:  "3. City or Town Hwy Agency",       # City or Municipal
+        # State sub-agencies
+        11: "1. State Hwy Agency",              # State Park, Forest, Reservation
+        12: "3. City or Town Hwy Agency",       # Local Park, Forest, Reservation
+        21: "1. State Hwy Agency",              # Other State Agency
+        25: "3. City or Town Hwy Agency",       # Other Local Agency
+        # Private / Railroad
+        26: "6. Private/Unknown Roads",         # Private (other than Railroad)
+        27: "6. Private/Unknown Roads",         # Railroad
+        # Toll authorities
+        31: "5. Toll Roads Maintained by Others",  # State Toll Road Authority
+        32: "5. Toll Roads Maintained by Others",  # Local Toll Authority
+        # Public instrumentalities
+        40: "1. State Hwy Agency",              # Other Public Instrumentality
+        # Tribal
+        50: "4. Federal Roads",                 # Indian Tribe Nation
+        # Federal agencies
+        60: "4. Federal Roads",                 # Other Federal Agency
+        62: "4. Federal Roads",                 # Bureau of Indian Affairs
+        63: "4. Federal Roads",                 # Bureau of Fish and Wildlife
+        64: "4. Federal Roads",                 # U.S. Forest Service
+        66: "4. Federal Roads",                 # National Park Service
+        67: "4. Federal Roads",                 # Tennessee Valley Authority
+        68: "4. Federal Roads",                 # Bureau of Land Management
+        69: "4. Federal Roads",                 # Bureau of Reclamation
+        70: "4. Federal Roads",                 # Corps of Engineers (Civil)
+        72: "4. Federal Roads",                 # Air Force
+        73: "4. Federal Roads",                 # Navy/Marines
+        74: "4. Federal Roads",                 # Army
+        80: "6. Private/Unknown Roads",         # Other
     }
 
     own = _s(ri, "Ownership")
