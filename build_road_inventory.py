@@ -1101,7 +1101,7 @@ def main():
     file_map = {
         "roads":          f"{abbr}_roads.parquet.gz",
         "intersections":  f"{abbr}_intersections.parquet.gz",
-        "state_dot":      f"{abbr}_state_dot.parquet.gz",
+        "state_dot":      f"{abbr}_special_data.parquet.gz",
         "hpms":           f"{abbr}_hpms.parquet.gz",
         "pois":           f"{abbr}_pois.parquet.gz",
         "bridges":        f"{abbr}_bridges.parquet.gz",
