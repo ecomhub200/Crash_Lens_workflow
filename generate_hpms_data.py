@@ -188,6 +188,8 @@ def get_state_hpms_url(state_name, state_abbr):
     
     candidates = [
         f"{HPMS_BASE_URL}/HPMS_FULL_{abbr_upper}_2023/FeatureServer/0",
+        f"{HPMS_BASE_URL}/HPMS_FULL_{abbr_upper}_2022/FeatureServer/0",
+        f"{HPMS_BASE_URL}/HPMS_FULL_{abbr_upper}_2021/FeatureServer/0",
         f"{HPMS_BASE_URL}/HPMS_FULL_{abbr_upper}_2020/FeatureServer/0",
         f"{HPMS_BASE_URL}/HPMS_Full_{abbr_upper}_2019/FeatureServer/0",
         f"{HPMS_BASE_URL}/{url_name}_2018_PR/FeatureServer/0",
@@ -230,12 +232,19 @@ def download_hpms_arcgis(service_url, max_pages=500):
             "resultRecordCount": page_size,
         }
 
-        try:
-            r = requests.get(f"{service_url}/query", params=params, timeout=60)
-            r.raise_for_status()
-            data = r.json()
-        except Exception as e:
-            print(f"      Page {page} error: {e}")
+        data = None
+        for attempt in range(3):
+            try:
+                r = requests.get(f"{service_url}/query", params=params, timeout=60)
+                r.raise_for_status()
+                data = r.json()
+                break
+            except Exception as e:
+                if attempt == 2:
+                    print(f"      Page {page} error after 3 retries: {e}")
+                else:
+                    time.sleep(2 ** attempt)
+        if data is None:
             break
 
         if "error" in data:
