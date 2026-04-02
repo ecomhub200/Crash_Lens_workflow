@@ -327,32 +327,21 @@ def normalize(df):
     # ── SYSTEM (derived from FC) ──
     df["SYSTEM"] = df["Functional Class"].map(FC_TO_SYSTEM).fillna("")
 
-    # ── Ownership (MAINT_RSP_CODE > ROW_AUTHORITY_CODE > FC fallback) ──
-    # Try MAINT_RSP_CODE first — this is the REAL maintenance responsibility
-    maint_raw = df.get("dot_maint_rsp_code", pd.Series("", index=df.index))
-    maint_raw = maint_raw.fillna("").astype(str).str.strip()
-    df["Ownership"] = maint_raw.map(MAINT_RSP_MAP).fillna("")
-
-    # Fallback: ROW_AUTHORITY_CODE (often empty on enterprise endpoint)
-    empty_own = df["Ownership"] == ""
-    if empty_own.any():
-        own_raw = df["dot_ownership_code"].fillna("").astype(str).str.strip()
-        own_mapped = own_raw.map(OWNERSHIP_CODE_MAP).fillna("")
-        df.loc[empty_own & (own_mapped != ""), "Ownership"] = own_mapped[empty_own & (own_mapped != "")]
-
-    # Final fallback: derive from FC
-    empty_own = df["Ownership"] == ""
-    if empty_own.any():
-        fc_own = {
-            "1-Interstate": "1. State Hwy Agency",
-            "2-Freeway/Expressway": "1. State Hwy Agency",
-            "3-Principal Arterial": "1. State Hwy Agency",
-            "4-Minor Arterial": "1. State Hwy Agency",
-            "5-Major Collector": "2. County Hwy Agency",
-            "6-Minor Collector": "2. County Hwy Agency",
-            "7-Local": "3. City or Town Hwy Agency",
-        }
-        df.loc[empty_own, "Ownership"] = df.loc[empty_own, "Functional Class"].map(fc_own).fillna("")
+    # ── Ownership (FC-based — standard for CrashLens split.py) ──
+    # MAINT_RSP_CODE tells who MAINTAINS (85% State in DE because DelDOT
+    # maintains most roads). But Ownership = who OWNS, which split.py uses
+    # for dot_roads/county_roads/city_roads filters.
+    # Keep dot_maint_rsp_code as raw column; derive Ownership from FC.
+    fc_own = {
+        "1-Interstate": "1. State Hwy Agency",
+        "2-Freeway/Expressway": "1. State Hwy Agency",
+        "3-Principal Arterial": "1. State Hwy Agency",
+        "4-Minor Arterial": "1. State Hwy Agency",
+        "5-Major Collector": "2. County Hwy Agency",
+        "6-Minor Collector": "2. County Hwy Agency",
+        "7-Local": "3. City or Town Hwy Agency",
+    }
+    df["Ownership"] = df["Functional Class"].map(fc_own).fillna("")
 
     # ── Facility Type (FIX: One-Way + median → "2-One-Way Divided") ──
     dir_raw = df["dot_traffic_dir"].fillna("").astype(str).str.strip()
@@ -434,11 +423,6 @@ def normalize(df):
         rte_from_name = road_name[empty_rte].apply(_extract_route)
         rte_series.loc[empty_rte] = rte_from_name
 
-    # Final fallback: use road name for local roads (not a route, but useful for matching)
-    still_empty = rte_series == ""
-    if still_empty.any():
-        rte_series.loc[still_empty] = road_name[still_empty]
-
     df["RTE Name"] = rte_series
 
     # ── RNS MP (milepoint) ──
@@ -517,11 +501,6 @@ def normalize(df):
     nhs = df.get("dot_nhs_code", pd.Series("", index=df.index))
     nhs = nhs.fillna("").astype(str).str.strip()
     df["Is_NHS"] = np.where((nhs != "") & (nhs != "0") & (nhs != "N"), "Yes", "No")
-
-    # ── Is_HSIP_Corridor (Highway Safety Improvement Program) ──
-    hsip = df.get("dot_hsip_code", pd.Series("", index=df.index))
-    hsip = hsip.fillna("").astype(str).str.strip()
-    df["Is_HSIP_Corridor"] = np.where((hsip != "") & (hsip != "0") & (hsip != "N"), "Yes", "No")
 
     # ── Surface_Condition (from SRFC_COND_CODE) ──
     scond = df.get("dot_surface_condition", pd.Series("", index=df.index))
