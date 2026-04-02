@@ -360,8 +360,9 @@ def normalize(df):
 
     # Median upgrade: DelDOT splits divided highways into two one-way segments,
     # each with median data. One-Way + median = "2-One-Way Divided".
+    # FIX: Code "1" = painted median (not a physical barrier) — exclude from upgrade.
     med_code = df["dot_median_code"].fillna("").astype(str).str.strip()
-    has_median = (med_code != "") & (med_code != "0") & (med_code != "N")
+    has_median = (med_code != "") & (med_code != "0") & (med_code != "1") & (med_code != "N")
 
     oneway = df["Facility Type"].str.contains("One-Way", na=False)
     df.loc[has_median & oneway, "Facility Type"] = "2-One-Way Divided"
@@ -433,11 +434,21 @@ def normalize(df):
         rte_from_name = road_name[empty_rte].apply(_extract_route)
         rte_series.loc[empty_rte] = rte_from_name
 
+    # Final fallback: use road name for local roads (not a route, but useful for matching)
+    still_empty = rte_series == ""
+    if still_empty.any():
+        rte_series.loc[still_empty] = road_name[still_empty]
+
     df["RTE Name"] = rte_series
 
     # ── RNS MP (milepoint) ──
     beg_mp = pd.to_numeric(df["dot_beg_mp"], errors="coerce").fillna(0)
     df["RNS MP"] = np.where(beg_mp > 0, beg_mp, 0)
+
+    # ── Segment_Length_mi (from milepoints) ──
+    end_mp = pd.to_numeric(df["dot_end_mp"], errors="coerce").fillna(0)
+    seg_len = (end_mp - beg_mp).clip(lower=0)
+    df["Segment_Length_mi"] = np.where(seg_len > 0, np.round(seg_len, 3), 0)
 
     # ── Lane_Width_ft (LANE_WDTH > corrected calculation > raw calculation) ──
     # Priority 1: actual LANE_WDTH field from DOT (most accurate)
@@ -456,9 +467,10 @@ def normalize(df):
     rdway_w = pd.to_numeric(df["dot_roadway_width_ft"], errors="coerce").fillna(0)
     rough_lw = np.where(rdway_w > 0, np.round(rdway_w / lanes_num, 1), 0)
 
-    # Merge: actual > calculated > rough
-    df["Lane_Width_ft"] = np.where(actual_lw > 0, actual_lw,
-                          np.where(calc_lw > 0, calc_lw, rough_lw))
+    # Merge: actual > calculated > rough, then clip to sane range (8-16 ft)
+    raw_lw = np.where(actual_lw > 0, actual_lw,
+                      np.where(calc_lw > 0, calc_lw, rough_lw))
+    df["Lane_Width_ft"] = np.where(raw_lw > 0, np.clip(raw_lw, 8, 16), 0)
 
     # ── Median_Width_ft ──
     df["Median_Width_ft"] = pd.to_numeric(
@@ -500,6 +512,53 @@ def normalize(df):
         "4-Two-Way Divided": "2. Two-Way, Divided, Unprotected Median",
     }
     df["Roadway Description"] = fac.map(desc_map).fillna("1. Two-Way, Not Divided")
+
+    # ── Is_NHS (National Highway System) ──
+    nhs = df.get("dot_nhs_code", pd.Series("", index=df.index))
+    nhs = nhs.fillna("").astype(str).str.strip()
+    df["Is_NHS"] = np.where((nhs != "") & (nhs != "0") & (nhs != "N"), "Yes", "No")
+
+    # ── Is_HSIP_Corridor (Highway Safety Improvement Program) ──
+    hsip = df.get("dot_hsip_code", pd.Series("", index=df.index))
+    hsip = hsip.fillna("").astype(str).str.strip()
+    df["Is_HSIP_Corridor"] = np.where((hsip != "") & (hsip != "0") & (hsip != "N"), "Yes", "No")
+
+    # ── Surface_Condition (from SRFC_COND_CODE) ──
+    scond = df.get("dot_surface_condition", pd.Series("", index=df.index))
+    scond = scond.fillna("").astype(str).str.strip()
+    cond_map = {
+        "1": "Good", "2": "Good",
+        "3": "Fair", "4": "Fair",
+        "5": "Poor", "6": "Poor",
+        "7": "Very Poor", "8": "Very Poor", "9": "Very Poor",
+        "G": "Good", "F": "Fair", "P": "Poor",
+    }
+    df["Surface_Condition"] = scond.map(cond_map).fillna("")
+
+    # ── Speed_Limit_Est (estimated from FC + Area Type — baseline for HPMS override) ──
+    fc = df["Functional Class"]
+    area = df["Area Type"]
+    spd = pd.Series("", index=df.index)
+    # Interstate
+    spd = np.where(fc == "1-Interstate", "65", spd)
+    # Freeway
+    spd = np.where(fc == "2-Freeway/Expressway", "55", spd)
+    # Principal Arterial
+    spd = np.where((fc == "3-Principal Arterial") & (area == "Urban"), "35", spd)
+    spd = np.where((fc == "3-Principal Arterial") & (area == "Suburban"), "45", spd)
+    spd = np.where((fc == "3-Principal Arterial") & (area == "Rural"), "55", spd)
+    # Minor Arterial
+    spd = np.where((fc == "4-Minor Arterial") & (area == "Urban"), "30", spd)
+    spd = np.where((fc == "4-Minor Arterial") & (area == "Suburban"), "40", spd)
+    spd = np.where((fc == "4-Minor Arterial") & (area == "Rural"), "50", spd)
+    # Collector
+    spd = np.where((fc == "5-Major Collector") & (area == "Urban"), "25", spd)
+    spd = np.where((fc == "5-Major Collector") & (area != "Urban"), "40", spd)
+    spd = np.where((fc == "6-Minor Collector") & (area == "Urban"), "25", spd)
+    spd = np.where((fc == "6-Minor Collector") & (area != "Urban"), "35", spd)
+    # Local
+    spd = np.where(fc == "7-Local", "25", spd)
+    df["Speed_Limit_Est"] = spd
 
     # ── Source tracking ──
     df["dot_source"] = "DelDOT Road Inventory"
