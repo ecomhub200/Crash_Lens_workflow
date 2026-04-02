@@ -165,13 +165,21 @@ OWNERSHIP_CODE_MAP = {
 }
 
 # Surface Type: SRFC_TYPE_CODE → CrashLens standard
+# DelDOT codes follow HPMS convention:
+# 1 = Portland Cement Concrete (Rigid)
+# 2 = Bituminous Concrete (Asphalt/Flexible)
+# 3 = Composite (Rigid base + Flexible overlay) — NOT Brick
+# 4 = Gravel/Stone
+# 5 = Dirt
+# 9 = Other
 SURFACE_TYPE_MAP = {
     "1":    "1. Concrete",
     "2":    "2. Blacktop, Asphalt, Bituminous",
-    "3":    "3. Brick or Block",
+    "3":    "2. Blacktop, Asphalt, Bituminous",  # Composite = asphalt overlay
     "4":    "4. Slag, Gravel, Stone",
     "5":    "5. Dirt",
     "6":    "6. Other",
+    "9":    "6. Other",
     "BITM": "2. Blacktop, Asphalt, Bituminous",
     "CONC": "1. Concrete",
     "GRVL": "4. Slag, Gravel, Stone",
@@ -179,6 +187,8 @@ SURFACE_TYPE_MAP = {
 }
 
 # Area Type: RURAL_URBAN_CODE → CrashLens standard
+# Codes 1-3 are direct classifications; codes 4+ are subdivision/municipality
+# types that need county-based derivation in normalize()
 AREA_TYPE_MAP = {
     "1":  "Urban",
     "2":  "Rural",
@@ -189,10 +199,13 @@ AREA_TYPE_MAP = {
 }
 
 # Traffic Direction → Facility Type
+# DelDOT splits divided highways into two one-way segments (code 2),
+# each with median data. Code 5 = undivided two-way (most common).
 TRAFFIC_DIR_MAP = {
-    "1":  "3-Two-Way Undivided",       # Two-way
-    "2":  "1-One-Way Undivided",       # One-way
-    "3":  "4-Two-Way Divided",         # Two-way divided
+    "1":  "3-Two-Way Undivided",       # Two-way (rare — mostly local/Interstate)
+    "2":  "1-One-Way Undivided",       # One-way (divided hwy = 2 one-way segments)
+    "3":  "4-Two-Way Divided",         # Two-way divided (rare in this dataset)
+    "5":  "3-Two-Way Undivided",       # Undivided two-way (81K — most roads)
     "N":  "1-One-Way Undivided",       # Northbound (one-way)
     "S":  "1-One-Way Undivided",       # Southbound
     "E":  "1-One-Way Undivided",       # Eastbound
@@ -208,10 +221,12 @@ COUNTY_MAP = {
 }
 
 # District → DOT District name
+# Code 4 = New Castle county maintenance areas (9,10,14,11) — maps to North
 DISTRICT_MAP = {
     "1": "North District",
     "2": "Central District",
     "3": "South District",
+    "4": "North District",      # New Castle county maintenance areas
 }
 
 # Route type code → prefix
@@ -257,15 +272,18 @@ def normalize(df):
     Input: DataFrame with dot_ prefixed columns from FIELD_MAP.
     Output: Same DataFrame with CrashLens standard columns added.
 
-    Standard columns added:
-      Functional Class, SYSTEM, Ownership, Facility Type,
-      Roadway Surface Type, Area Type, DOT District,
-      Physical Juris Name, RTE Name, Through_Lanes,
-      Median_Width_ft, Shoulder_Width_ft, Has_Sidewalk,
-      Has_Guardrail, RNS MP
+    Fixes applied (v2):
+      1. RTE Name: use dot_route_number directly ("US13"→"US 13")
+      2. Surface Type: code 3 = Composite (asphalt), not Brick
+      3. Facility Type: One-Way + median → "2-One-Way Divided"
+      4. Through_Lanes: capped at 12
+      5. DOT District: code 4 → North District
+      6. Area Type: codes 4+ → county-based fallback
+      7. import pandas as pd
     """
     import numpy as np
     import pandas as pd
+    import re
 
     n = len(df)
 
@@ -293,12 +311,18 @@ def normalize(df):
         }
         df.loc[empty_own, "Ownership"] = df.loc[empty_own, "Functional Class"].map(fc_own).fillna("")
 
-    # ── Facility Type ──
+    # ── Facility Type (FIX: One-Way + median → "2-One-Way Divided") ──
     dir_raw = df["dot_traffic_dir"].fillna("").astype(str).str.strip()
     df["Facility Type"] = dir_raw.map(TRAFFIC_DIR_MAP).fillna("3-Two-Way Undivided")
-    # If median exists → "4-Two-Way Divided"
+
+    # Median upgrade: DelDOT splits divided highways into two one-way segments,
+    # each with median data. One-Way + median = "2-One-Way Divided".
     med_code = df["dot_median_code"].fillna("").astype(str).str.strip()
     has_median = (med_code != "") & (med_code != "0") & (med_code != "N")
+
+    oneway = df["Facility Type"].str.contains("One-Way", na=False)
+    df.loc[has_median & oneway, "Facility Type"] = "2-One-Way Divided"
+
     twoway = df["Facility Type"].str.contains("Two-Way", na=False)
     df.loc[has_median & twoway, "Facility Type"] = "4-Two-Way Divided"
 
@@ -308,9 +332,17 @@ def normalize(df):
         "2. Blacktop, Asphalt, Bituminous"
     )
 
-    # ── Area Type ──
+    # ── Area Type (FIX: codes 4+ → county-based fallback) ──
     area_raw = df["dot_area_type_code"].fillna("").astype(str).str.strip()
     df["Area Type"] = area_raw.map(AREA_TYPE_MAP).fillna("")
+
+    # Fallback for unmapped codes: derive from county
+    empty_area = df["Area Type"] == ""
+    if empty_area.any():
+        county = df["dot_county_code"].fillna("").astype(str).str.strip()
+        # New Castle (1) = Suburban, Kent (2) = Rural, Sussex (3) = Rural
+        county_area = county.map({"1": "Suburban", "2": "Rural", "3": "Rural"}).fillna("Rural")
+        df.loc[empty_area, "Area Type"] = county_area[empty_area]
 
     # ── DOT District ──
     dist_raw = df["dot_district_id"].fillna("").astype(str).str.strip()
@@ -320,27 +352,27 @@ def normalize(df):
     county_raw = df["dot_county_code"].fillna("").astype(str).str.strip()
     df["Physical Juris Name"] = county_raw.map(COUNTY_MAP).fillna("")
 
-    # ── Through_Lanes ──
-    lanes = df["dot_lanes"].fillna(0)
-    try:
-        lanes = lanes.astype(int)
-    except (ValueError, TypeError):
-        lanes = pd.to_numeric(lanes, errors="coerce").fillna(0).astype(int)
+    # ── Through_Lanes (FIX: cap at 12) ──
+    lanes = pd.to_numeric(df["dot_lanes"], errors="coerce").fillna(0).astype(int)
+    lanes = lanes.clip(upper=12)  # No Delaware road has >12 lanes
     df["Through_Lanes"] = np.where(lanes > 0, lanes.astype(str), "")
 
-    # ── RTE Name (build from route type + number, fallback to road name) ──
-    rt_type = df["dot_route_type"].fillna("").astype(str).str.strip()
-    rt_num = df["dot_route_number"].fillna("").astype(str).str.strip()
-    rt_prefix = rt_type.map(ROUTE_TYPE_MAP).fillna("")
+    # ── RTE Name (FIX: use dot_route_number directly — already has "US13", "SR1") ──
+    rte_raw = df["dot_route_number"].fillna("").astype(str).str.strip()
 
-    # Build route designation: "I 95", "US 13", "SR 9"
-    has_route = (rt_prefix != "") & (rt_num != "")
-    rte_name = np.where(has_route, rt_prefix + " " + rt_num, "")
-    df["RTE Name"] = rte_name
+    # Add space after letter prefix: "US13"→"US 13", "SR1"→"SR 1", "I95"→"I 95"
+    def _add_space(val):
+        if not val:
+            return ""
+        m = re.match(r'^([A-Za-z]+)(\d+.*)$', val)
+        if m:
+            return f"{m.group(1)} {m.group(2)}"
+        return val
+
+    df["RTE Name"] = rte_raw.apply(_add_space)
 
     # ── RNS MP (milepoint) ──
     beg_mp = pd.to_numeric(df["dot_beg_mp"], errors="coerce").fillna(0)
-    end_mp = pd.to_numeric(df["dot_end_mp"], errors="coerce").fillna(0)
     df["RNS MP"] = np.where(beg_mp > 0, beg_mp, 0)
 
     # ── Road width → Lane_Width_ft estimate ──
@@ -379,7 +411,7 @@ def normalize(df):
     bike = df["dot_bike_path"].fillna("").astype(str).str.strip()
     df["Has_Bike_Lane"] = np.where((bike != "") & (bike != "0") & (bike != "N"), "Yes", "No")
 
-    # ── Roadway Description (from Facility Type) ──
+    # ── Roadway Description (from updated Facility Type) ──
     fac = df["Facility Type"]
     desc_map = {
         "1-One-Way Undivided": "4. One-Way, Not Divided",
