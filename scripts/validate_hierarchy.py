@@ -40,6 +40,7 @@ Exit codes:
 import argparse
 import json
 import math
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -333,6 +334,95 @@ def check_mpo_coverage(hierarchy):
     return issues
 
 
+# ─── Slug helpers ────────────────────────────────────────────────────────────
+
+def name_to_r2_key(name: str) -> str:
+    """Convert a jurisdiction name to an R2 folder key (mirrors split.py)."""
+    key = str(name).strip()
+    key = re.sub(r"^\d+\.\s*", "", key)
+    key = key.lower()
+    key = key.replace("'", "")
+    key = key.replace(".", "")
+    key = re.sub(r"[^a-z0-9\s_-]", " ", key)
+    key = re.sub(r"[\s\-]+", "_", key)
+    key = re.sub(r"_+", "_", key)
+    key = key.strip("_")
+    return key
+
+
+# ─── Slug collision checks ──────────────────────────────────────────────────
+
+def check_slug_collisions(hierarchy):
+    """Detect duplicate R2 slugs within tprs, regions, and planningDistricts."""
+    issues = []
+
+    for section_name in ("tprs", "regions", "planningDistricts"):
+        section = hierarchy.get(section_name, {})
+        if not section:
+            continue
+
+        # Check for entries whose names produce the same slug
+        slug_to_entries = defaultdict(list)
+        for key, data in section.items():
+            entry_name = data.get("name", key)
+            slug = name_to_r2_key(entry_name)
+            if slug:
+                slug_to_entries[slug].append((key, entry_name, data))
+
+        for slug, entries in slug_to_entries.items():
+            if len(entries) > 1:
+                names = [f"'{e[1]}' (key={e[0]})" for e in entries]
+
+                def make_fix(sec=section_name, s=slug, ents=entries):
+                    def fix(h):
+                        sect = h.get(sec, {})
+                        # Keep entry with non-empty counties[], remove others
+                        best = None
+                        for key, name, data in ents:
+                            if data.get("counties"):
+                                best = key
+                                break
+                        if not best:
+                            best = ents[0][0]
+                        for key, name, data in ents:
+                            if key != best and key in sect:
+                                del sect[key]
+                        return True
+                    return fix
+
+                issues.append(HierarchyIssue(
+                    "error", "slug_collision",
+                    f"{section_name}: slug '{slug}' produced by multiple entries: {', '.join(names)}",
+                    fix_fn=make_fix()
+                ))
+
+    return issues
+
+
+def check_key_slug_mismatch(hierarchy):
+    """Detect keys that don't match name_to_r2_key(entry['name'])."""
+    issues = []
+
+    for section_name in ("tprs", "regions", "planningDistricts"):
+        section = hierarchy.get(section_name, {})
+        if not section:
+            continue
+
+        for key, data in section.items():
+            entry_name = data.get("name", "")
+            if not entry_name:
+                continue
+            expected_slug = name_to_r2_key(entry_name)
+            if expected_slug and key != expected_slug:
+                issues.append(HierarchyIssue(
+                    "warning", "key_slug_mismatch",
+                    f"{section_name}.{key}: key doesn't match slug of name "
+                    f"'{entry_name}' (expected '{expected_slug}')"
+                ))
+
+    return issues
+
+
 # ─── Auto-fix functions ──────────────────────────────────────────────────────
 
 def assign_to_nearest_region(hierarchy, county_fips, state_fips):
@@ -478,6 +568,8 @@ def validate_state(state_dir_name, dry_run=False, verbose=True):
     all_issues.extend(check_unresolvable_fips(hierarchy))
     all_issues.extend(check_orphaned_counties(hierarchy, state_fips))
     all_issues.extend(check_empty_mpo_counties(hierarchy, state_fips))
+    all_issues.extend(check_slug_collisions(hierarchy))
+    all_issues.extend(check_key_slug_mismatch(hierarchy))
     all_issues.extend(check_region_completeness(hierarchy))
     all_issues.extend(check_mpo_coverage(hierarchy))
 

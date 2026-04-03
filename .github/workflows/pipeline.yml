@@ -319,6 +319,25 @@ jobs:
           "
           fi
 
+      # ── Pre-upload: Clean stale R2 split data ──
+      - name: "Pre-upload: Clean stale R2 split data"
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          echo "Cleaning stale split folders on R2..."
+          for PREFIX in _state _region _mpo _planning_district _city; do
+            aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$PREFIX/" --recursive \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
+          done
+          echo "R2 clean — ready for fresh upload"
+
       # ── Stage 4: Upload to R2 ──
       # Uploads all CSVs produced by split.py from the splits/ directory.
       # The directory structure maps 1:1 to R2 paths.
