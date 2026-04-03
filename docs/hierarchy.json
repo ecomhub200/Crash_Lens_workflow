@@ -1,0 +1,193 @@
+{
+  "state": {
+    "fips": "10",
+    "name": "Delaware",
+    "abbreviation": "DE",
+    "dot": "DelDOT",
+    "dotFullName": "Delaware Department of Transportation",
+    "center": [
+      -75.507141,
+      39.318523
+    ],
+    "zoom": 9,
+    "placesCount": 57
+  },
+  "regionType": {
+    "label": "DOT District",
+    "labelPlural": "DOT Districts",
+    "shortLabel": "District"
+  },
+  "regions": {
+    "de_1": {
+      "name": "North District",
+      "shortName": "North District",
+      "center": [
+        -75.6,
+        39.6
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "New Castle"
+      },
+      "mapBounds": {
+        "sw": [
+          39.3,
+          -75.8
+        ],
+        "ne": [
+          39.85,
+          -75.4
+        ]
+      },
+      "hq": "Bear"
+    },
+    "de_2": {
+      "name": "Central District",
+      "shortName": "Central District",
+      "center": [
+        -75.52,
+        39.15
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Kent"
+      },
+      "mapBounds": {
+        "sw": [
+          38.9,
+          -75.7
+        ],
+        "ne": [
+          39.35,
+          -75.35
+        ]
+      },
+      "hq": "Dover"
+    },
+    "de_3": {
+      "name": "South District",
+      "shortName": "South District",
+      "center": [
+        -75.38,
+        38.68
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Sussex"
+      },
+      "mapBounds": {
+        "sw": [
+          38.45,
+          -75.65
+        ],
+        "ne": [
+          38.95,
+          -75.05
+        ]
+      },
+      "hq": "Georgetown"
+    }
+  },
+  "tprType": {
+    "label": "MPO",
+    "labelPlural": "Metropolitan Planning Organizations"
+  },
+  "tprs": {
+    "wilmapco": {
+      "name": "WILMAPCO",
+      "shortName": "WILMAPCO",
+      "type": "mpo",
+      "center": [
+        -75.5398,
+        39.7391
+      ],
+      "zoom": 10,
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "New Castle"
+      },
+      "btsAcronym": "WAPC",
+      "mapBounds": {
+        "sw": [
+          39.4,
+          -75.8
+        ],
+        "ne": [
+          39.9,
+          -75.25
+        ]
+      }
+    },
+    "dover_kent_county_mpo": {
+      "name": "Dover/Kent County MPO",
+      "shortName": "Dover/Kent County",
+      "type": "mpo",
+      "center": [
+        -75.5244,
+        39.1582
+      ],
+      "zoom": 10,
+      "counties": [
+        "001"
+      ],
+      "countyNames": {
+        "001": "Kent"
+      },
+      "btsAcronym": "DCM",
+      "btsMpoId": "10199000",
+      "mapBounds": {
+        "sw": [
+          38.9,
+          -75.75
+        ],
+        "ne": [
+          39.4,
+          -75.3
+        ]
+      }
+    },
+    "salisbury_wicomico_mpo": {
+      "name": "Salisbury-Wicomico MPO",
+      "shortName": "Salisbury-Wicomico",
+      "type": "mpo",
+      "center": [
+        -75.5994,
+        38.3607
+      ],
+      "zoom": 10,
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Sussex"
+      },
+      "btsAcronym": "SM",
+      "mapBounds": {
+        "sw": [
+          38.1,
+          -75.85
+        ],
+        "ne": [
+          38.55,
+          -75.35
+        ]
+      }
+    }
+  },
+  "allCounties": {
+    "001": "Kent",
+    "003": "New Castle",
+    "005": "Sussex"
+  }
+}
