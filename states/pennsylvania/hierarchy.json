@@ -422,7 +422,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "dvrpcdvrpcp": {
+    "dvrpc_delaware_valley_regional_planning_commission_philadelphia": {
       "name": "DVRPC (Delaware Valley Regional Planning Commission / Philadelphia)",
       "shortName": "Delaware Valley Regional Planning Commission / Philadelphia",
       "type": "mpo",
@@ -457,7 +457,7 @@
         ]
       }
     },
-    "spcspacp": {
+    "spc_southwestern_pa_commission_pittsburgh": {
       "name": "SPC (Southwestern PA Commission / Pittsburgh)",
       "shortName": "Southwestern PA Commission / Pittsburgh",
       "type": "mpo",
@@ -502,7 +502,7 @@
         ]
       }
     },
-    "lvpclvpc": {
+    "lvpc_lehigh_valley_planning_commission": {
       "name": "LVPC (Lehigh Valley Planning Commission)",
       "shortName": "Lehigh Valley Planning Commission",
       "type": "mpo",
@@ -531,7 +531,7 @@
         ]
       }
     },
-    "latsllmposwb": {
+    "lats_lackawanna_luzerne_mpo_scranton_wilkes_barre": {
       "name": "LATS (Lackawanna-Luzerne MPO / Scranton-Wilkes Barre)",
       "shortName": "Lackawanna-Luzerne MPO / Scranton-Wilkes Barre",
       "type": "mpo",
@@ -560,7 +560,7 @@
         ]
       }
     },
-    "hats": {
+    "harrisburg_area_transportation_study": {
       "name": "Harrisburg Area Transportation Study",
       "shortName": "Harrisburg Area Transportation Study",
       "type": "mpo",
@@ -591,7 +591,7 @@
         ]
       }
     },
-    "lcmpo": {
+    "lebanon_county_mpo": {
       "name": "Lebanon County MPO",
       "shortName": "Lebanon County",
       "type": "mpo",
@@ -618,7 +618,7 @@
         ]
       }
     },
-    "yampo": {
+    "york_area_mpo": {
       "name": "York Area MPO",
       "shortName": "York Area",
       "type": "mpo",
@@ -645,7 +645,7 @@
         ]
       }
     },
-    "ratsb": {
+    "reading_area_transportation_study_berks": {
       "name": "Reading Area Transportation Study (Berks)",
       "shortName": "Berks",
       "type": "mpo",
@@ -672,7 +672,7 @@
         ]
       }
     },
-    "eampo": {
+    "erie_area_mpo": {
       "name": "Erie Area MPO",
       "shortName": "Erie Area",
       "type": "mpo",
@@ -699,7 +699,7 @@
         ]
       }
     },
-    "ccmpo": {
+    "centre_county_mpo": {
       "name": "Centre County MPO",
       "shortName": "Centre County",
       "type": "mpo",
@@ -726,7 +726,7 @@
         ]
       }
     },
-    "bcmpoa": {
+    "blair_county_mpo_altoona": {
       "name": "Blair County MPO (Altoona)",
       "shortName": "Altoona",
       "type": "mpo",
@@ -753,7 +753,7 @@
         ]
       }
     },
-    "jampo": {
+    "johnstown_area_mpo": {
       "name": "Johnstown Area MPO",
       "shortName": "Johnstown Area",
       "type": "mpo",
@@ -782,7 +782,7 @@
         ]
       }
     },
-    "wampo": {
+    "williamsport_area_mpo": {
       "name": "Williamsport Area MPO",
       "shortName": "Williamsport Area",
       "type": "mpo",
@@ -809,7 +809,7 @@
         ]
       }
     },
-    "acmpo": {
+    "adams_county_mpo": {
       "name": "Adams County MPO",
       "shortName": "Adams County",
       "type": "mpo",
@@ -836,7 +836,7 @@
         ]
       }
     },
-    "svampo": {
+    "shenango_valley_area_mpo": {
       "name": "Shenango Valley Area MPO",
       "shortName": "Shenango Valley Area",
       "type": "mpo",
@@ -863,7 +863,7 @@
         ]
       }
     },
-    "nepa": {
+    "northeast_pa_alliance_nepa_mpo": {
       "name": "Northeast PA Alliance (NEPA) MPO",
       "shortName": "NEPA",
       "type": "mpo",
@@ -898,19 +898,28 @@
         ]
       }
     },
-    "southwestern_pennsylvania_commission_mpo": {
+    "southwestern_pennsylvania_commission": {
       "name": "Southwestern Pennsylvania Commission",
       "shortName": "Southwestern Pennsylvania Commission",
       "type": "mpo",
       "btsMpoId": "42197400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "003",
+        "005",
+        "129"
+      ],
+      "countyNames": {
+        "129": "Westmoreland",
+        "005": "Armstrong",
+        "003": "Allegheny"
+      },
       "center": [
         -79.530278,
         40.489778
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "erie_mpo": {
       "name": "Erie MPO",
@@ -918,41 +927,66 @@
       "type": "mpo",
       "btsMpoId": "42196406",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "039",
+        "049"
+      ],
+      "countyNames": {
+        "049": "Erie",
+        "039": "Crawford"
+      },
       "center": [
         -80.061815,
         42.074737
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "lehigh_valley_transportation_study_mpo": {
+    "lehigh_valley_transportation_study": {
       "name": "Lehigh Valley Transportation Study",
       "shortName": "Lehigh Valley Transportation Study",
       "type": "mpo",
       "btsMpoId": "42196401",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "077",
+        "089",
+        "095"
+      ],
+      "countyNames": {
+        "095": "Northampton",
+        "077": "Lehigh",
+        "089": "Monroe"
+      },
       "center": [
         -75.224277,
         40.737572
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "lackawannaluzerne_mpo": {
+    "lackawanna_luzerne_mpo": {
       "name": "Lackawanna/Luzerne MPO",
       "shortName": "Lackawanna/Luzerne",
       "type": "mpo",
       "btsMpoId": "42196402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "069",
+        "079",
+        "089"
+      ],
+      "countyNames": {
+        "069": "Lackawanna",
+        "079": "Luzerne",
+        "089": "Monroe"
+      },
       "center": [
         -75.630158,
         41.246078
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "lancaster_county_mpo": {
       "name": "Lancaster County MPO",
@@ -960,41 +994,72 @@
       "type": "mpo",
       "btsMpoId": "42196403",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "071",
+        "075",
+        "133"
+      ],
+      "countyNames": {
+        "071": "Lancaster",
+        "133": "York",
+        "075": "Lebanon"
+      },
       "center": [
         -76.34022,
         40.002909
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "susquehanna_economic_development_association_council_of_governments_mpo": {
+    "susquehanna_economic_development_association_council_of_governments": {
       "name": "Susquehanna Economic Development Association Council of Governments",
       "shortName": "Susquehanna Economic Development Association Council of Governments",
       "type": "mpo",
       "btsMpoId": "42201312",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "027",
+        "067",
+        "087",
+        "109",
+        "119"
+      ],
+      "countyNames": {
+        "119": "Union",
+        "109": "Snyder",
+        "067": "Juniata",
+        "087": "Mifflin",
+        "027": "Centre"
+      },
       "center": [
         -77.308599,
         40.88617
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "blair_county_planning_commission_mpo": {
+    "blair_county_planning_commission": {
       "name": "Blair County Planning Commission",
       "shortName": "Blair County Planning Commission",
       "type": "mpo",
       "btsMpoId": "42196504",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013",
+        "021",
+        "061"
+      ],
+      "countyNames": {
+        "013": "Blair",
+        "061": "Huntingdon",
+        "021": "Cambria"
+      },
       "center": [
         -78.323313,
         40.506926
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "franklin_county_mpo": {
       "name": "Franklin County MPO",
@@ -1002,13 +1067,22 @@
       "type": "mpo",
       "btsMpoId": "42201313",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "041",
+        "055"
+      ],
+      "countyNames": {
+        "055": "Franklin",
+        "041": "Cumberland",
+        "001": "Adams"
+      },
       "center": [
         -77.623317,
         40.025659
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "cambria_county_mpo": {
       "name": "Cambria County MPO",
@@ -1016,13 +1090,22 @@
       "type": "mpo",
       "btsMpoId": "42196503",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "021",
+        "063",
+        "111"
+      ],
+      "countyNames": {
+        "021": "Cambria",
+        "063": "Indiana",
+        "111": "Somerset"
+      },
       "center": [
         -78.822886,
         40.332388
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

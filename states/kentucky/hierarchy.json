@@ -293,11 +293,13 @@
       "counties": [
         "005",
         "017",
+        "021",
         "049",
         "067",
         "073",
         "097",
         "113",
+        "151",
         "167",
         "181",
         "201",
@@ -316,7 +318,9 @@
         "181": "Nicholas",
         "201": "Robertson",
         "209": "Scott",
-        "239": "Woodford"
+        "239": "Woodford",
+        "021": "Boyle",
+        "151": "Madison"
       },
       "mapBounds": {
         "sw": [
@@ -548,7 +552,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "kipdalm": {
+    "kipda_louisville_metro": {
       "name": "KIPDA (Louisville Metro)",
       "shortName": "Louisville Metro",
       "type": "mpo",
@@ -579,7 +583,7 @@
         ]
       }
     },
-    "lampo": {
+    "lexington_area_mpo": {
       "name": "Lexington Area MPO",
       "shortName": "Lexington Area",
       "type": "mpo",
@@ -610,7 +614,7 @@
         ]
       }
     },
-    "okiokinky": {
+    "oki_ohio_kentucky_indiana_northern_ky": {
       "name": "OKI (Ohio-Kentucky-Indiana / Northern KY)",
       "shortName": "Ohio-Kentucky-Indiana / Northern KY",
       "type": "mpo",
@@ -641,7 +645,7 @@
         ]
       }
     },
-    "bgwcmpo": {
+    "bowling_green_warren_county_mpo": {
       "name": "Bowling Green-Warren County MPO",
       "shortName": "Bowling Green-Warren County",
       "type": "mpo",
@@ -668,7 +672,7 @@
         ]
       }
     },
-    "fivcoadda": {
+    "fivco_add_ashland_area": {
       "name": "FIVCO ADD (Ashland area)",
       "shortName": "Ashland area",
       "type": "mpo",
@@ -697,7 +701,7 @@
         ]
       }
     },
-    "odcmpo": {
+    "owensboro_daviess_county_mpo": {
       "name": "Owensboro-Daviess County MPO",
       "shortName": "Owensboro-Daviess County",
       "type": "mpo",
@@ -724,7 +728,7 @@
         ]
       }
     },
-    "empo": {
+    "elizabethtown_mpo": {
       "name": "Elizabethtown MPO",
       "shortName": "Elizabethtown",
       "type": "mpo",
@@ -751,7 +755,7 @@
         ]
       }
     },
-    "hmpo": {
+    "henderson_mpo": {
       "name": "Henderson MPO",
       "shortName": "Henderson",
       "type": "mpo",
@@ -784,27 +788,51 @@
       "type": "mpo",
       "btsMpoId": "21202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "139",
+        "145",
+        "157"
+      ],
+      "countyNames": {
+        "145": "McCracken",
+        "139": "Livingston",
+        "007": "Ballard",
+        "157": "Marshall"
+      },
       "center": [
         -88.641105,
         37.122471
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "louisvillejefferson_county_ky_in_mpo": {
+    "louisville_jefferson_county_ky_in_mpo": {
       "name": "Louisville/Jefferson County KY-IN MPO",
       "shortName": "Louisville/Jefferson County KY-IN",
       "type": "mpo",
       "btsMpoId": "21197300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "029",
+        "111",
+        "185",
+        "211",
+        "215"
+      ],
+      "countyNames": {
+        "111": "Jefferson",
+        "029": "Bullitt",
+        "185": "Oldham",
+        "215": "Spencer",
+        "211": "Shelby"
+      },
       "center": [
         -85.687155,
         38.172353
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

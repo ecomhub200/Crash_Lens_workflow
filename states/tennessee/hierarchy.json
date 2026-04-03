@@ -30,11 +30,16 @@
         "001",
         "009",
         "013",
+        "019",
         "025",
         "029",
         "057",
+        "059",
         "063",
+        "067",
+        "073",
         "089",
+        "091",
         "093",
         "105",
         "123",
@@ -42,7 +47,10 @@
         "145",
         "151",
         "155",
-        "173"
+        "163",
+        "171",
+        "173",
+        "179"
       ],
       "countyNames": {
         "001": "Anderson",
@@ -60,7 +68,15 @@
         "145": "Roane",
         "151": "Scott",
         "155": "Sevier",
-        "173": "Union"
+        "173": "Union",
+        "019": "Carter",
+        "059": "Greene",
+        "067": "Hancock",
+        "073": "Hawkins",
+        "091": "Johnson",
+        "163": "Sullivan",
+        "171": "Unicoi",
+        "179": "Washington"
       },
       "mapBounds": {
         "sw": [
@@ -85,11 +101,14 @@
       "counties": [
         "007",
         "011",
+        "031",
         "035",
         "049",
+        "051",
+        "061",
         "065",
-        "115",
         "107",
+        "115",
         "121",
         "133",
         "137",
@@ -118,7 +137,10 @@
         "153": "Sequatchie",
         "175": "Van Buren",
         "177": "Warren",
-        "185": "White"
+        "185": "White",
+        "031": "Coffee",
+        "051": "Franklin",
+        "061": "Grundy"
       },
       "mapBounds": {
         "sw": [
@@ -141,6 +163,7 @@
       ],
       "zoom": 8,
       "counties": [
+        "003",
         "015",
         "021",
         "027",
@@ -200,7 +223,8 @@
         "169": "Trousdale",
         "181": "Wayne",
         "187": "Williamson",
-        "189": "Wilson"
+        "189": "Wilson",
+        "003": "Bedford"
       },
       "mapBounds": {
         "sw": [
@@ -286,7 +310,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "gnrcnampo": {
+    "greater_nashville_regional_council_nashville_area_mpo": {
       "name": "Greater Nashville Regional Council (Nashville Area MPO)",
       "shortName": "Nashville Area MPO",
       "type": "mpo",
@@ -325,7 +349,7 @@
         ]
       }
     },
-    "muampo": {
+    "memphis_urban_area_mpo": {
       "name": "Memphis Urban Area MPO",
       "shortName": "Memphis Urban Area",
       "type": "mpo",
@@ -356,7 +380,7 @@
         ]
       }
     },
-    "krtpo": {
+    "knoxville_regional_tpo": {
       "name": "Knoxville Regional TPO",
       "shortName": "Knoxville Regional TPO",
       "type": "mpo",
@@ -389,7 +413,7 @@
         ]
       }
     },
-    "chcngtpo": {
+    "chattanooga_hamilton_county_north_georgia_tpo": {
       "name": "Chattanooga-Hamilton County/North Georgia TPO",
       "shortName": "Chattanooga-Hamilton County/North Georgia TPO",
       "type": "mpo",
@@ -416,7 +440,7 @@
         ]
       }
     },
-    "juampo": {
+    "jackson_urban_area_mpo": {
       "name": "Jackson Urban Area MPO",
       "shortName": "Jackson Urban Area",
       "type": "mpo",
@@ -443,7 +467,7 @@
         ]
       }
     },
-    "cuampo": {
+    "clarksville_urbanized_area_mpo": {
       "name": "Clarksville Urbanized Area MPO",
       "shortName": "Clarksville Urbanized Area",
       "type": "mpo",
@@ -470,7 +494,7 @@
         ]
       }
     },
-    "kbmpo": {
+    "kingsport_bristol_mpo": {
       "name": "Kingsport-Bristol MPO",
       "shortName": "Kingsport-Bristol",
       "type": "mpo",
@@ -497,7 +521,7 @@
         ]
       }
     },
-    "jcmtpo": {
+    "johnson_city_mtpo": {
       "name": "Johnson City MTPO",
       "shortName": "Johnson City MTPO",
       "type": "mpo",
@@ -524,7 +548,7 @@
         ]
       }
     },
-    "lamtpom": {
+    "lakeway_area_mtpo_morristown": {
       "name": "Lakeway Area MTPO (Morristown)",
       "shortName": "Morristown",
       "type": "mpo",
@@ -557,27 +581,51 @@
       "type": "mpo",
       "btsMpoId": "47200302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "065",
+        "107",
+        "139"
+      ],
+      "countyNames": {
+        "011": "Bradley",
+        "065": "Hamilton",
+        "139": "Polk",
+        "107": "McMinn"
+      },
       "center": [
         -84.884058,
         35.134804
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "knoxville_regional_transportation_planning_organization_mpo": {
+    "knoxville_regional_transportation_planning_organization": {
       "name": "Knoxville Regional Transportation Planning Organization",
       "shortName": "Knoxville Regional Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "47197801",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "009",
+        "093",
+        "105",
+        "145"
+      ],
+      "countyNames": {
+        "093": "Knox",
+        "105": "Loudon",
+        "009": "Blount",
+        "001": "Anderson",
+        "145": "Roane"
+      },
       "center": [
         -84.09876,
         35.881116
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "lakeway_mpo": {
       "name": "Lakeway MPO",
@@ -585,55 +633,97 @@
       "type": "mpo",
       "btsMpoId": "47200301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "029",
+        "057",
+        "063",
+        "067",
+        "089"
+      ],
+      "countyNames": {
+        "063": "Hamblen",
+        "057": "Grainger",
+        "089": "Jefferson",
+        "067": "Hancock",
+        "029": "Cocke"
+      },
       "center": [
         -83.317992,
         36.215015
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "johnson_city_metropolitan_transportation_planning_organization_mpo": {
+    "johnson_city_metropolitan_transportation_planning_organization": {
       "name": "Johnson City Metropolitan Transportation Planning Organization",
       "shortName": "Johnson City Metropolitan Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "47198201",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "163",
+        "179"
+      ],
+      "countyNames": {
+        "179": "Washington",
+        "163": "Sullivan",
+        "019": "Carter"
+      },
       "center": [
         -82.387071,
         36.328349
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "kingsport_mtpo_mpo": {
+    "kingsport_mtpo": {
       "name": "Kingsport MTPO",
       "shortName": "Kingsport MTPO",
       "type": "mpo",
       "btsMpoId": "47197704",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "073",
+        "163",
+        "179"
+      ],
+      "countyNames": {
+        "179": "Washington",
+        "163": "Sullivan",
+        "073": "Hawkins"
+      },
       "center": [
         -82.617774,
         36.497895
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "chattanooga_hamilton_countynorth_georgia_metropolitan_planning_organization_mpo": {
+    "chattanooga_hamilton_county_north_georgia_metropolitan_planning_organization": {
       "name": "Chattanooga-Hamilton County/North Georgia Metropolitan Planning Organization",
       "shortName": "Chattanooga-Hamilton County/North Georgia",
       "type": "mpo",
       "btsMpoId": "47197703",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "065",
+        "115",
+        "153"
+      ],
+      "countyNames": {
+        "065": "Hamilton",
+        "153": "Sequatchie",
+        "011": "Bradley",
+        "115": "Marion"
+      },
       "center": [
         -85.225853,
         35.149439
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

@@ -65,17 +65,20 @@
       ],
       "zoom": 5,
       "counties": [
-        "020",
-        "170",
-        "122",
-        "261",
-        "050",
-        "070",
-        "060",
-        "164",
         "013",
         "016",
+        "020",
+        "050",
+        "060",
+        "063",
+        "066",
+        "070",
+        "122",
         "150",
+        "158",
+        "164",
+        "170",
+        "261",
         "270"
       ],
       "countyNames": {
@@ -90,7 +93,10 @@
         "013": "Aleutians East Borough",
         "016": "Aleutians West Census Area",
         "150": "Kodiak Island Borough",
-        "270": "Wade Hampton Census Area"
+        "270": "Wade Hampton Census Area",
+        "063": "Chugach",
+        "066": "Copper River",
+        "158": "Kusilvak"
       },
       "mapBounds": {
         "sw": [
@@ -154,7 +160,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "amatsa": {
+    "amats_anchorage": {
       "name": "AMATS (Anchorage)",
       "shortName": "Anchorage",
       "type": "mpo",
@@ -181,7 +187,7 @@
         ]
       }
     },
-    "fastpf": {
+    "fast_planning_fairbanks": {
       "name": "FAST Planning (Fairbanks)",
       "shortName": "Fairbanks",
       "type": "mpo",
@@ -208,19 +214,24 @@
         ]
       }
     },
-    "matsu_valley_planning_for_transportation_mpo": {
+    "matsu_valley_planning_for_transportation": {
       "name": "MatSu Valley Planning for Transportation",
       "shortName": "MatSu Valley Planning for Transportation",
       "type": "mpo",
       "btsMpoId": "02202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "020"
+      ],
+      "countyNames": {
+        "020": "Anchorage"
+      },
       "center": [
         -149.373668,
         61.584062
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

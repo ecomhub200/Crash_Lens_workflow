@@ -374,7 +374,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "bmpo": {
+    "birmingham_mpo": {
       "name": "Birmingham MPO",
       "shortName": "Birmingham",
       "type": "mpo",
@@ -411,7 +411,7 @@
         ]
       }
     },
-    "mmpo": {
+    "montgomery_mpo": {
       "name": "Montgomery MPO",
       "shortName": "Montgomery",
       "type": "mpo",
@@ -442,7 +442,7 @@
         ]
       }
     },
-    "mats": {
+    "mobile_area_transportation_study_mats": {
       "name": "Mobile Area Transportation Study (MATS)",
       "shortName": "MATS",
       "type": "mpo",
@@ -469,7 +469,7 @@
         ]
       }
     },
-    "hampo": {
+    "huntsville_area_mpo": {
       "name": "Huntsville Area MPO",
       "shortName": "Huntsville Area",
       "type": "mpo",
@@ -500,7 +500,7 @@
         ]
       }
     },
-    "tampo": {
+    "tuscaloosa_area_mpo": {
       "name": "Tuscaloosa Area MPO",
       "shortName": "Tuscaloosa Area",
       "type": "mpo",
@@ -527,7 +527,7 @@
         ]
       }
     },
-    "aompo": {
+    "auburn_opelika_mpo": {
       "name": "Auburn-Opelika MPO",
       "shortName": "Auburn-Opelika",
       "type": "mpo",
@@ -554,7 +554,7 @@
         ]
       }
     },
-    "swampo": {
+    "southeast_wiregrass_area_mpo": {
       "name": "Southeast Wiregrass Area MPO",
       "shortName": "Southeast Wiregrass Area",
       "type": "mpo",
@@ -583,7 +583,7 @@
         ]
       }
     },
-    "esmpo": {
+    "eastern_shore_mpo": {
       "name": "Eastern Shore MPO",
       "shortName": "Eastern Shore",
       "type": "mpo",
@@ -610,7 +610,7 @@
         ]
       }
     },
-    "cpcmpo": {
+    "columbus_phenix_city_mpo": {
       "name": "Columbus-Phenix City MPO",
       "shortName": "Columbus-Phenix City",
       "type": "mpo",
@@ -637,7 +637,7 @@
         ]
       }
     },
-    "gempo": {
+    "gadsden_etowah_mpo": {
       "name": "Gadsden-Etowah MPO",
       "shortName": "Gadsden-Etowah",
       "type": "mpo",
@@ -664,7 +664,7 @@
         ]
       }
     },
-    "dmcmpo": {
+    "decatur_morgan_county_mpo": {
       "name": "Decatur-Morgan County MPO",
       "shortName": "Decatur-Morgan County",
       "type": "mpo",
@@ -691,7 +691,7 @@
         ]
       }
     },
-    "acmpo": {
+    "anniston_calhoun_mpo": {
       "name": "Anniston-Calhoun MPO",
       "shortName": "Anniston-Calhoun",
       "type": "mpo",
@@ -724,13 +724,22 @@
       "type": "mpo",
       "btsMpoId": "01197402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "033",
+        "077",
+        "079"
+      ],
+      "countyNames": {
+        "077": "Lauderdale",
+        "033": "Colbert",
+        "079": "Lawrence"
+      },
       "center": [
         -87.615542,
         34.771512
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "huntsville_mpo": {
       "name": "Huntsville MPO",
@@ -738,13 +747,22 @@
       "type": "mpo",
       "btsMpoId": "01197601",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "083",
+        "089",
+        "103"
+      ],
+      "countyNames": {
+        "089": "Madison",
+        "103": "Morgan",
+        "083": "Limestone"
+      },
       "center": [
         -86.523452,
         34.691636
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "decatur_area_mpo": {
       "name": "Decatur Area MPO",
@@ -752,41 +770,47 @@
       "type": "mpo",
       "btsMpoId": "01198200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "079",
+        "083",
+        "103"
+      ],
+      "countyNames": {
+        "103": "Morgan",
+        "079": "Lawrence",
+        "083": "Limestone"
+      },
       "center": [
         -87.025912,
         34.531337
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "calhoun_area_metropolitan_planning_organization_mpo": {
+    "calhoun_area_metropolitan_planning_organization": {
       "name": "Calhoun Area Metropolitan Planning Organization",
       "shortName": "Calhoun",
       "type": "mpo",
       "btsMpoId": "01197602",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "027",
+        "029",
+        "115"
+      ],
+      "countyNames": {
+        "015": "Calhoun",
+        "029": "Cleburne",
+        "027": "Clay",
+        "115": "St. Clair"
+      },
       "center": [
         -85.841465,
         33.660379
       ],
-      "zoom": 10
-    },
-    "auburn_opelika_mpo": {
-      "name": "Auburn - Opelika MPO",
-      "shortName": "Auburn - Opelika",
-      "type": "mpo",
-      "btsMpoId": "01197502",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -85.398352,
-        32.595005
-      ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

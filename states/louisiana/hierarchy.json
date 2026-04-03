@@ -192,6 +192,7 @@
         "019",
         "023",
         "051",
+        "053",
         "115"
       ],
       "countyNames": {
@@ -200,7 +201,8 @@
         "019": "Calcasieu",
         "023": "Cameron",
         "051": "Jeff Davis",
-        "115": "Vernon"
+        "115": "Vernon",
+        "053": "Jefferson Davis"
       },
       "mapBounds": {
         "sw": [
@@ -370,7 +372,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "rpcno": {
+    "regional_planning_commission_new_orleans": {
       "name": "Regional Planning Commission (New Orleans)",
       "shortName": "New Orleans",
       "type": "mpo",
@@ -411,7 +413,7 @@
         ]
       }
     },
-    "crpcbr": {
+    "capital_regional_planning_commission_baton_rouge": {
       "name": "Capital Regional Planning Commission (Baton Rouge)",
       "shortName": "Baton Rouge",
       "type": "mpo",
@@ -446,7 +448,7 @@
         ]
       }
     },
-    "lampo": {
+    "lafayette_area_mpo": {
       "name": "Lafayette Area MPO",
       "shortName": "Lafayette Area",
       "type": "mpo",
@@ -477,7 +479,7 @@
         ]
       }
     },
-    "nwlcogs": {
+    "nw_louisiana_cog_shreveport": {
       "name": "NW Louisiana COG (Shreveport)",
       "shortName": "Shreveport",
       "type": "mpo",
@@ -506,7 +508,7 @@
         ]
       }
     },
-    "ocogm": {
+    "ouachita_cog_monroe": {
       "name": "Ouachita COG (Monroe)",
       "shortName": "Monroe",
       "type": "mpo",
@@ -533,7 +535,7 @@
         ]
       }
     },
-    "iclc": {
+    "imperial_calcasieu_lake_charles": {
       "name": "Imperial Calcasieu (Lake Charles)",
       "shortName": "Lake Charles",
       "type": "mpo",
@@ -560,7 +562,7 @@
         ]
       }
     },
-    "apmpo": {
+    "alexandria_pineville_mpo": {
       "name": "Alexandria-Pineville MPO",
       "shortName": "Alexandria-Pineville",
       "type": "mpo",
@@ -587,7 +589,7 @@
         ]
       }
     },
-    "htmpo": {
+    "houma_thibodaux_mpo": {
       "name": "Houma-Thibodaux MPO",
       "shortName": "Houma-Thibodaux",
       "type": "mpo",
@@ -616,7 +618,7 @@
         ]
       }
     },
-    "stmpo": {
+    "south_tangipahoa_mpo": {
       "name": "South Tangipahoa MPO",
       "shortName": "South Tangipahoa",
       "type": "mpo",
@@ -643,47 +645,76 @@
         ]
       }
     },
-    "ouachata_council_of_governments_mpo": {
+    "ouachata_council_of_governments": {
       "name": "Ouachata Council of Governments",
       "shortName": "Ouachata Council of Governments",
       "type": "mpo",
       "btsMpoId": "22197300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "067",
+        "073",
+        "083",
+        "111"
+      ],
+      "countyNames": {
+        "073": "Ouachita",
+        "083": "Richland",
+        "111": "Union",
+        "067": "Morehouse"
+      },
       "center": [
         -92.114836,
         32.52351
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "northwest_louisiana_cog_mpo": {
+    "northwest_louisiana_cog": {
       "name": "Northwest Louisiana COG",
       "shortName": "Northwest Louisiana COG",
       "type": "mpo",
       "btsMpoId": "22196800",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013",
+        "031",
+        "081"
+      ],
+      "countyNames": {
+        "081": "Red River",
+        "031": "De Soto",
+        "013": "Bienville"
+      },
       "center": [
         -93.474373,
         32.269403
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "imperial_calcasieu_regional_planning_development_commission_mpo": {
+    "imperial_calcasieu_regional_planning_development_commission": {
       "name": "Imperial Calcasieu Regional Planning & Development Commission",
       "shortName": "Imperial Calcasieu Regional Planning & Development Commission",
       "type": "mpo",
       "btsMpoId": "22198400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "019",
+        "023"
+      ],
+      "countyNames": {
+        "019": "Calcasieu",
+        "023": "Cameron",
+        "011": "Beauregard"
+      },
       "center": [
         -93.313388,
         30.215777
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

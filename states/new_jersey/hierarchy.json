@@ -138,7 +138,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "njtpanjtpa": {
+    "njtpa_north_jersey_transportation_planning_authority": {
       "name": "NJTPA (North Jersey Transportation Planning Authority)",
       "shortName": "North Jersey Transportation Planning Authority",
       "type": "mpo",
@@ -189,7 +189,7 @@
         ]
       }
     },
-    "dvrpcdvrpc": {
+    "dvrpc_delaware_valley_regional_planning_commission": {
       "name": "DVRPC (Delaware Valley Regional Planning Commission)",
       "shortName": "Delaware Valley Regional Planning Commission",
       "type": "mpo",
@@ -222,7 +222,7 @@
         ]
       }
     },
-    "sjtposjtpo": {
+    "sjtpo_south_jersey_transportation_planning_organization": {
       "name": "SJTPO (South Jersey Transportation Planning Organization)",
       "shortName": "South Jersey Transportation Planning Organization",
       "type": "mpo",

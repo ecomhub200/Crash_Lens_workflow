@@ -366,7 +366,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "dmampo": {
+    "des_moines_area_mpo": {
       "name": "Des Moines Area MPO",
       "shortName": "Des Moines Area",
       "type": "mpo",
@@ -397,7 +397,7 @@
         ]
       }
     },
-    "bsrcqc": {
+    "bi_state_regional_commission_quad_cities": {
       "name": "Bi-State Regional Commission (Quad Cities)",
       "shortName": "Quad Cities",
       "type": "mpo",
@@ -424,7 +424,7 @@
         ]
       }
     },
-    "bhmatpbw": {
+    "black_hawk_metro_area_transportation_policy_board_waterloo": {
       "name": "Black Hawk Metro Area Transportation Policy Board (Waterloo)",
       "shortName": "Waterloo",
       "type": "mpo",
@@ -451,7 +451,7 @@
         ]
       }
     },
-    "jccogic": {
+    "johnson_county_cog_iowa_city": {
       "name": "Johnson County COG (Iowa City)",
       "shortName": "Iowa City",
       "type": "mpo",
@@ -478,7 +478,7 @@
         ]
       }
     },
-    "scmpo": {
+    "sioux_city_mpo": {
       "name": "Sioux City MPO",
       "shortName": "Sioux City",
       "type": "mpo",
@@ -505,7 +505,7 @@
         ]
       }
     },
-    "aampo": {
+    "ames_area_mpo": {
       "name": "Ames Area MPO",
       "shortName": "Ames Area",
       "type": "mpo",
@@ -532,7 +532,7 @@
         ]
       }
     },
-    "cmpocr": {
+    "corridor_mpo_cedar_rapids": {
       "name": "Corridor MPO (Cedar Rapids)",
       "shortName": "Cedar Rapids",
       "type": "mpo",
@@ -559,7 +559,7 @@
         ]
       }
     },
-    "dmpo": {
+    "dubuque_mpo": {
       "name": "Dubuque MPO",
       "shortName": "Dubuque",
       "type": "mpo",
@@ -586,61 +586,103 @@
         ]
       }
     },
-    "corridor_metropolitan_planning_organization_mpo": {
+    "corridor_metropolitan_planning_organization": {
       "name": "Corridor Metropolitan Planning Organization",
       "shortName": "Corridor",
       "type": "mpo",
       "btsMpoId": "19196400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "095",
+        "103",
+        "113"
+      ],
+      "countyNames": {
+        "113": "Linn",
+        "011": "Benton",
+        "103": "Johnson",
+        "095": "Iowa"
+      },
       "center": [
         -91.74975,
         42.022629
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "east_central_intergovernmental_association_mpo": {
+    "east_central_intergovernmental_association": {
       "name": "East Central Intergovernmental Association",
       "shortName": "East Central Intergovernmental Association",
       "type": "mpo",
       "btsMpoId": "19197400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "061",
+        "097",
+        "105"
+      ],
+      "countyNames": {
+        "061": "Dubuque",
+        "097": "Jackson",
+        "105": "Jones"
+      },
       "center": [
         -90.665099,
         42.49988
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "black_hawk_metropolitan_area_transportation_policy_board_mpo": {
+    "black_hawk_metropolitan_area_transportation_policy_board": {
       "name": "Black Hawk Metropolitan Area Transportation Policy Board",
       "shortName": "Black Hawk Metropolitan Transportation Policy Board",
       "type": "mpo",
       "btsMpoId": "19197300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013",
+        "017",
+        "023",
+        "075"
+      ],
+      "countyNames": {
+        "013": "Black Hawk",
+        "017": "Bremer",
+        "075": "Grundy",
+        "023": "Butler"
+      },
       "center": [
         -92.385852,
         42.512319
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "metropolitan_planning_organization_of_johnson_mpo": {
+    "metropolitan_planning_organization_of_johnson_county": {
       "name": "Metropolitan Planning Organization of Johnson County",
       "shortName": "Metropolitan Planning Organization of Johnson County",
       "type": "mpo",
       "btsMpoId": "19198000",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "031",
+        "095",
+        "103",
+        "113"
+      ],
+      "countyNames": {
+        "103": "Johnson",
+        "031": "Cedar",
+        "113": "Linn",
+        "095": "Iowa"
+      },
       "center": [
         -91.56818,
         41.717181
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

@@ -184,6 +184,7 @@
         "081",
         "093",
         "095",
+        "102",
         "103",
         "113",
         "121",
@@ -202,7 +203,8 @@
         "103": "Pennington",
         "113": "Shannon",
         "121": "Todd",
-        "123": "Tripp"
+        "123": "Tripp",
+        "102": "Oglala Lakota"
       },
       "mapBounds": {
         "sw": [
@@ -252,7 +254,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "secog": {
+    "sioux_falls_mpo_secog": {
       "name": "Sioux Falls MPO (SECOG)",
       "shortName": "SECOG",
       "type": "mpo",
@@ -281,7 +283,7 @@
         ]
       }
     },
-    "rcampo": {
+    "rapid_city_area_mpo": {
       "name": "Rapid City Area MPO",
       "shortName": "Rapid City Area",
       "type": "mpo",

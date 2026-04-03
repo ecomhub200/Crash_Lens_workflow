@@ -242,7 +242,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "bmc": {
+    "baltimore_regional_transportation_board_bmc": {
       "name": "Baltimore Regional Transportation Board (BMC)",
       "shortName": "BMC",
       "type": "mpo",
@@ -279,7 +279,7 @@
         ]
       }
     },
-    "mwcog": {
+    "national_capital_region_tpb_mwcog": {
       "name": "National Capital Region TPB (MWCOG)",
       "shortName": "MWCOG",
       "type": "mpo",
@@ -314,7 +314,7 @@
         ]
       }
     },
-    "hepmpo": {
+    "hagerstown_eastern_panhandle_mpo": {
       "name": "Hagerstown/Eastern Panhandle MPO",
       "shortName": "Hagerstown/Eastern Panhandle",
       "type": "mpo",
@@ -341,7 +341,7 @@
         ]
       }
     },
-    "swmpo": {
+    "salisbury_wicomico_mpo": {
       "name": "Salisbury-Wicomico MPO",
       "shortName": "Salisbury-Wicomico",
       "type": "mpo",
@@ -368,7 +368,7 @@
         ]
       }
     },
-    "csmmpo": {
+    "calvert_st_marys_mpo": {
       "name": "Calvert-St. Mary's MPO",
       "shortName": "Calvert-St. Mary's",
       "type": "mpo",
@@ -397,7 +397,7 @@
         ]
       }
     },
-    "campo": {
+    "cumberland_area_mpo": {
       "name": "Cumberland Area MPO",
       "shortName": "Cumberland Area",
       "type": "mpo",
@@ -424,33 +424,28 @@
         ]
       }
     },
-    "calvert_st_maryrs_metropolitan_planning_organization_mpo": {
+    "calvert_st_maryrs_metropolitan_planning_organization": {
       "name": "Calvert-St. Maryrs Metropolitan Planning Organization",
       "shortName": "Calvert-St. Maryrs",
       "type": "mpo",
       "btsMpoId": "24201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "019",
+        "037"
+      ],
+      "countyNames": {
+        "037": "St. Mary's",
+        "009": "Calvert",
+        "019": "Dorchester"
+      },
       "center": [
         -76.476928,
         38.300746
       ],
-      "zoom": 10
-    },
-    "hagerstown_eastern_panhandle_mpo": {
-      "name": "Hagerstown-Eastern Panhandle MPO",
-      "shortName": "Hagerstown-Eastern Panhandle",
-      "type": "mpo",
-      "btsMpoId": "24198600",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -77.849975,
-        39.500222
-      ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

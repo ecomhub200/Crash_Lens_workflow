@@ -27,11 +27,15 @@
       ],
       "zoom": 8,
       "counties": [
+        "021",
         "023",
+        "025",
         "043",
+        "045",
         "049",
         "057",
         "063",
+        "065",
         "081",
         "103",
         "111",
@@ -46,7 +50,11 @@
         "081": "Monroe",
         "103": "Richland",
         "111": "Sauk",
-        "123": "Vernon"
+        "123": "Vernon",
+        "021": "Columbia",
+        "025": "Dane",
+        "045": "Green",
+        "065": "Lafayette"
       },
       "mapBounds": {
         "sw": [
@@ -69,10 +77,14 @@
       ],
       "zoom": 9,
       "counties": [
+        "027",
+        "039",
+        "055",
         "059",
         "079",
         "089",
         "101",
+        "105",
         "127",
         "131",
         "133"
@@ -84,7 +96,11 @@
         "101": "Racine",
         "127": "Walworth",
         "131": "Washington",
-        "133": "Waukesha"
+        "133": "Waukesha",
+        "027": "Dodge",
+        "039": "Fond du Lac",
+        "055": "Jefferson",
+        "105": "Rock"
       },
       "mapBounds": {
         "sw": [
@@ -272,7 +288,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "sewrpcswrpcm": {
+    "sewrpc_southeastern_wisconsin_rpc_milwaukee": {
       "name": "SEWRPC (Southeastern Wisconsin RPC / Milwaukee)",
       "shortName": "Southeastern Wisconsin RPC / Milwaukee",
       "type": "mpo",
@@ -311,7 +327,7 @@
         ]
       }
     },
-    "matpb": {
+    "madison_area_tpb": {
       "name": "Madison Area TPB",
       "shortName": "Madison Area TPB",
       "type": "mpo",
@@ -338,7 +354,7 @@
         ]
       }
     },
-    "bcpcgb": {
+    "brown_county_planning_commission_green_bay": {
       "name": "Brown County Planning Commission (Green Bay)",
       "shortName": "Green Bay",
       "type": "mpo",
@@ -365,7 +381,7 @@
         ]
       }
     },
-    "ecwrpcao": {
+    "east_central_wisconsin_rpc_appleton_oshkosh": {
       "name": "East Central Wisconsin RPC (Appleton-Oshkosh)",
       "shortName": "Appleton-Oshkosh",
       "type": "mpo",
@@ -396,7 +412,7 @@
         ]
       }
     },
-    "cecmpo": {
+    "chippewa_eau_claire_mpo": {
       "name": "Chippewa-Eau Claire MPO",
       "shortName": "Chippewa-Eau Claire",
       "type": "mpo",
@@ -425,7 +441,7 @@
         ]
       }
     },
-    "lcapc": {
+    "la_crosse_area_planning_committee": {
       "name": "La Crosse Area Planning Committee",
       "shortName": "La Crosse Area Planning Committee",
       "type": "mpo",
@@ -452,7 +468,7 @@
         ]
       }
     },
-    "jampo": {
+    "janesville_area_mpo": {
       "name": "Janesville Area MPO",
       "shortName": "Janesville Area",
       "type": "mpo",
@@ -479,7 +495,7 @@
         ]
       }
     },
-    "flampo": {
+    "fond_du_lac_area_mpo": {
       "name": "Fond du Lac Area MPO",
       "shortName": "Fond du Lac Area",
       "type": "mpo",
@@ -506,7 +522,7 @@
         ]
       }
     },
-    "dsmic": {
+    "duluth_superior_metropolitan_interstate_council": {
       "name": "Duluth-Superior Metropolitan Interstate Council",
       "shortName": "Duluth-Superior",
       "type": "mpo",
@@ -533,7 +549,7 @@
         ]
       }
     },
-    "wampo": {
+    "wausau_area_mpo": {
       "name": "Wausau Area MPO",
       "shortName": "Wausau Area",
       "type": "mpo",
@@ -560,7 +576,7 @@
         ]
       }
     },
-    "sampo": {
+    "sheboygan_area_mpo": {
       "name": "Sheboygan Area MPO",
       "shortName": "Sheboygan Area",
       "type": "mpo",
@@ -587,33 +603,51 @@
         ]
       }
     },
-    "southeastern_wisconsin_regional_planning_commission_mpo": {
+    "southeastern_wisconsin_regional_planning_commission": {
       "name": "Southeastern Wisconsin Regional Planning Commission",
       "shortName": "Southeastern Wisconsin Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "55196100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "079",
+        "101",
+        "133"
+      ],
+      "countyNames": {
+        "133": "Waukesha",
+        "079": "Milwaukee",
+        "101": "Racine"
+      },
       "center": [
         -88.166678,
         42.917036
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "wausau_metropolitan_planning_organization_mpo": {
+    "wausau_metropolitan_planning_organization": {
       "name": "Wausau Metropolitan Planning Organization",
       "shortName": "Wausau",
       "type": "mpo",
       "btsMpoId": "55198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "069",
+        "073",
+        "097"
+      ],
+      "countyNames": {
+        "073": "Marathon",
+        "069": "Lincoln",
+        "097": "Portage"
+      },
       "center": [
         -89.651543,
         44.952048
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "sheboygan_mpo": {
       "name": "Sheboygan MPO",
@@ -621,55 +655,91 @@
       "type": "mpo",
       "btsMpoId": "55198202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "071",
+        "089",
+        "117"
+      ],
+      "countyNames": {
+        "117": "Sheboygan",
+        "089": "Ozaukee",
+        "071": "Manitowoc"
+      },
       "center": [
         -87.77643,
         43.754891
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "madison_area_transportation_planning_board_mpo": {
+    "madison_area_transportation_planning_board": {
       "name": "Madison Area Transportation Planning Board",
       "shortName": "Madison Transportation Planning Board",
       "type": "mpo",
       "btsMpoId": "55197100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "021",
+        "025",
+        "045"
+      ],
+      "countyNames": {
+        "025": "Dane",
+        "021": "Columbia",
+        "045": "Green"
+      },
       "center": [
         -89.395496,
         43.104541
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "state_line_area_transportation_study_mpo": {
+    "state_line_area_transportation_study": {
       "name": "State Line Area Transportation Study",
       "shortName": "State Line Transportation Study",
       "type": "mpo",
       "btsMpoId": "55197499",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "045",
+        "105",
+        "127"
+      ],
+      "countyNames": {
+        "105": "Rock",
+        "127": "Walworth",
+        "045": "Green"
+      },
       "center": [
         -89.029891,
         42.49272
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "appletonfox_cities_mpo": {
+    "appleton_fox_cities_mpo": {
       "name": "Appleton/Fox Cities MPO",
       "shortName": "Appleton/Fox Cities",
       "type": "mpo",
       "btsMpoId": "55197301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "087",
+        "139"
+      ],
+      "countyNames": {
+        "015": "Calumet",
+        "139": "Winnebago",
+        "087": "Outagamie"
+      },
       "center": [
         -88.429176,
         44.176433
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "oshkosh_mpo": {
       "name": "Oshkosh MPO",
@@ -677,13 +747,22 @@
       "type": "mpo",
       "btsMpoId": "55197302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "039",
+        "139"
+      ],
+      "countyNames": {
+        "139": "Winnebago",
+        "015": "Calumet",
+        "039": "Fond du Lac"
+      },
       "center": [
         -88.532651,
         44.01233
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

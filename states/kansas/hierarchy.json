@@ -408,7 +408,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "marcmarckc": {
+    "marc_mid_america_regional_council_kc_metro": {
       "name": "MARC (Mid-America Regional Council / KC metro)",
       "shortName": "Mid-America Regional Council / KC metro",
       "type": "mpo",
@@ -441,7 +441,7 @@
         ]
       }
     },
-    "wampowampo": {
+    "wampo_wichita_area_mpo": {
       "name": "WAMPO (Wichita Area MPO)",
       "shortName": "Wichita Area MPO",
       "type": "mpo",
@@ -474,7 +474,7 @@
         ]
       }
     },
-    "mtpomtpo": {
+    "mtpo_metropolitan_topeka_planning_organization": {
       "name": "MTPO (Metropolitan Topeka Planning Organization)",
       "shortName": "Metropolitan Topeka Planning Organization",
       "type": "mpo",
@@ -501,7 +501,7 @@
         ]
       }
     },
-    "ldcmpo": {
+    "lawrence_douglas_county_mpo": {
       "name": "Lawrence-Douglas County MPO",
       "shortName": "Lawrence-Douglas County",
       "type": "mpo",
@@ -528,7 +528,7 @@
         ]
       }
     },
-    "fhmpom": {
+    "flint_hills_mpo_manhattan": {
       "name": "Flint Hills MPO (Manhattan)",
       "shortName": "Manhattan",
       "type": "mpo",
@@ -559,19 +559,28 @@
         ]
       }
     },
-    "flint_hills_metropolitan_planning_organization_mpo": {
+    "flint_hills_metropolitan_planning_organization": {
       "name": "Flint Hills Metropolitan Planning Organization",
       "shortName": "Flint Hills",
       "type": "mpo",
       "btsMpoId": "20201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "061",
+        "149",
+        "161"
+      ],
+      "countyNames": {
+        "161": "Riley",
+        "061": "Geary",
+        "149": "Pottawatomie"
+      },
       "center": [
         -96.655959,
         39.144883
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

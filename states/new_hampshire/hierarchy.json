@@ -188,7 +188,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "nrpcmpo": {
+    "nashua_regional_planning_commission_mpo": {
       "name": "Nashua Regional Planning Commission MPO",
       "shortName": "Nashua Regional Planning Commission",
       "type": "mpo",
@@ -215,7 +215,7 @@
         ]
       }
     },
-    "snhpcm": {
+    "southern_nh_planning_commission_manchester": {
       "name": "Southern NH Planning Commission (Manchester)",
       "shortName": "Manchester",
       "type": "mpo",
@@ -242,7 +242,7 @@
         ]
       }
     },
-    "rpcp": {
+    "rockingham_planning_commission_portsmouth": {
       "name": "Rockingham Planning Commission (Portsmouth)",
       "shortName": "Portsmouth",
       "type": "mpo",
@@ -269,7 +269,7 @@
         ]
       }
     },
-    "smpod": {
+    "strafford_mpo_dover": {
       "name": "Strafford MPO (Dover)",
       "shortName": "Dover",
       "type": "mpo",
@@ -296,33 +296,51 @@
         ]
       }
     },
-    "southern_new_hampshire_planning_commission_mpo": {
+    "southern_new_hampshire_planning_commission": {
       "name": "Southern New Hampshire Planning Commission",
       "shortName": "Southern New Hampshire Planning Commission",
       "type": "mpo",
       "btsMpoId": "33197301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "013",
+        "015"
+      ],
+      "countyNames": {
+        "015": "Rockingham",
+        "011": "Hillsborough",
+        "013": "Merrimack"
+      },
       "center": [
         -71.400189,
         42.982141
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "strafford_regional_planning_commission_mpo": {
+    "strafford_regional_planning_commission": {
       "name": "Strafford Regional Planning Commission",
       "shortName": "Strafford Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "33198200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "015",
+        "017"
+      ],
+      "countyNames": {
+        "017": "Strafford",
+        "015": "Rockingham",
+        "001": "Belknap"
+      },
       "center": [
         -70.994627,
         43.260889
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

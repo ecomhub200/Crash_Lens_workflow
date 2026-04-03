@@ -27,14 +27,17 @@
       ],
       "zoom": 8,
       "counties": [
+        "007",
         "009",
         "011",
+        "025",
         "039",
         "043",
         "045",
         "059",
         "093",
         "129",
+        "139",
         "149",
         "153"
       ],
@@ -48,7 +51,10 @@
         "093": "Major",
         "129": "Roger Mills",
         "149": "Washita",
-        "153": "Woodward"
+        "153": "Woodward",
+        "007": "Beaver",
+        "025": "Cimarron",
+        "139": "Texas"
       },
       "mapBounds": {
         "sw": [
@@ -78,7 +84,8 @@
         "073",
         "083",
         "103",
-        "119"
+        "119",
+        "151"
       ],
       "countyNames": {
         "003": "Alfalfa",
@@ -88,7 +95,8 @@
         "073": "Kingfisher",
         "083": "Logan",
         "103": "Noble",
-        "119": "Payne"
+        "119": "Payne",
+        "151": "Woods"
       },
       "mapBounds": {
         "sw": [
@@ -283,6 +291,7 @@
       "counties": [
         "037",
         "101",
+        "107",
         "111",
         "113",
         "117",
@@ -298,7 +307,8 @@
         "117": "Pawnee",
         "131": "Rogers",
         "143": "Tulsa",
-        "145": "Wagoner"
+        "145": "Wagoner",
+        "107": "Okfuskee"
       },
       "mapBounds": {
         "sw": [
@@ -360,7 +370,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "acogacog": {
+    "acog_association_of_central_oklahoma_governments": {
       "name": "ACOG (Association of Central Oklahoma Governments)",
       "shortName": "Association of Central Oklahoma Governments",
       "type": "mpo",
@@ -397,7 +407,7 @@
         ]
       }
     },
-    "incogincogt": {
+    "incog_indian_nations_cog_tulsa": {
       "name": "INCOG (Indian Nations COG / Tulsa)",
       "shortName": "Indian Nations COG / Tulsa",
       "type": "mpo",
@@ -432,7 +442,7 @@
         ]
       }
     },
-    "lmpo": {
+    "lawton_mpo": {
       "name": "Lawton MPO",
       "shortName": "Lawton",
       "type": "mpo",
@@ -465,13 +475,22 @@
       "type": "mpo",
       "btsMpoId": "40202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "047",
+        "053",
+        "073"
+      ],
+      "countyNames": {
+        "047": "Garfield",
+        "053": "Grant",
+        "073": "Kingfisher"
+      },
       "center": [
         -97.874737,
         36.393025
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

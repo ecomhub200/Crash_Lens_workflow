@@ -93,14 +93,26 @@
       ],
       "zoom": 9,
       "counties": [
+        "007",
+        "009",
+        "013",
+        "015",
+        "019",
         "023",
+        "047",
         "049",
         "051"
       ],
       "countyNames": {
         "023": "Juab",
         "049": "Utah",
-        "051": "Wasatch"
+        "051": "Wasatch",
+        "007": "Carbon",
+        "009": "Daggett",
+        "013": "Duchesne",
+        "015": "Emery",
+        "019": "Grand",
+        "047": "Uintah"
       },
       "mapBounds": {
         "sw": [
@@ -129,6 +141,7 @@
         "025",
         "027",
         "031",
+        "037",
         "039",
         "041",
         "053",
@@ -144,7 +157,8 @@
         "039": "Sanpete",
         "041": "Sevier",
         "053": "Washington",
-        "055": "Wayne"
+        "055": "Wayne",
+        "037": "San Juan"
       },
       "mapBounds": {
         "sw": [
@@ -164,7 +178,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "wfrcwfrc": {
+    "wfrc_wasatch_front_regional_council": {
       "name": "WFRC (Wasatch Front Regional Council)",
       "shortName": "Wasatch Front Regional Council",
       "type": "mpo",
@@ -201,7 +215,7 @@
         ]
       }
     },
-    "magmag": {
+    "mag_mountainland_association_of_governments": {
       "name": "MAG (Mountainland Association of Governments)",
       "shortName": "Mountainland Association of Governments",
       "type": "mpo",
@@ -232,7 +246,7 @@
         ]
       }
     },
-    "cmpo": {
+    "cache_mpo": {
       "name": "Cache MPO",
       "shortName": "Cache",
       "type": "mpo",
@@ -259,7 +273,7 @@
         ]
       }
     },
-    "dmposg": {
+    "dixie_mpo_st_george": {
       "name": "Dixie MPO (St. George)",
       "shortName": "St. George",
       "type": "mpo",

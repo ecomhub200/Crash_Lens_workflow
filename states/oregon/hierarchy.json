@@ -216,7 +216,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mpa": {
+    "metro_portland_area": {
       "name": "Metro (Portland Area)",
       "shortName": "Portland Area",
       "type": "mpo",
@@ -247,7 +247,7 @@
         ]
       }
     },
-    "skats": {
+    "salem_keizer_area_transportation_study_skats": {
       "name": "Salem-Keizer Area Transportation Study (SKATS)",
       "shortName": "SKATS",
       "type": "mpo",
@@ -276,7 +276,7 @@
         ]
       }
     },
-    "clmpoes": {
+    "central_lane_mpo_eugene_springfield": {
       "name": "Central Lane MPO (Eugene-Springfield)",
       "shortName": "Eugene-Springfield",
       "type": "mpo",
@@ -303,7 +303,7 @@
         ]
       }
     },
-    "rvmpom": {
+    "rogue_valley_mpo_medford": {
       "name": "Rogue Valley MPO (Medford)",
       "shortName": "Medford",
       "type": "mpo",
@@ -330,7 +330,7 @@
         ]
       }
     },
-    "bmpo": {
+    "bend_mpo": {
       "name": "Bend MPO",
       "shortName": "Bend",
       "type": "mpo",
@@ -357,7 +357,7 @@
         ]
       }
     },
-    "campo": {
+    "corvallis_area_mpo": {
       "name": "Corvallis Area MPO",
       "shortName": "Corvallis Area",
       "type": "mpo",
@@ -384,7 +384,7 @@
         ]
       }
     },
-    "aampo": {
+    "albany_area_mpo": {
       "name": "Albany Area MPO",
       "shortName": "Albany Area",
       "type": "mpo",
@@ -411,7 +411,7 @@
         ]
       }
     },
-    "mrmpo": {
+    "middle_rogue_mpo": {
       "name": "Middle Rogue MPO",
       "shortName": "Middle Rogue",
       "type": "mpo",

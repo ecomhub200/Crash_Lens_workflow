@@ -506,7 +506,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "noacanoacac": {
+    "noaca_northeast_ohio_areawide_coordinating_agency_cleveland": {
       "name": "NOACA (Northeast Ohio Areawide Coordinating Agency / Cleveland)",
       "shortName": "Northeast Ohio Areawide Coordinating Agency / Cleveland",
       "type": "mpo",
@@ -541,7 +541,7 @@
         ]
       }
     },
-    "morpcmorpcc": {
+    "morpc_mid_ohio_regional_planning_commission_columbus": {
       "name": "MORPC (Mid-Ohio Regional Planning Commission / Columbus)",
       "shortName": "Mid-Ohio Regional Planning Commission / Columbus",
       "type": "mpo",
@@ -576,7 +576,7 @@
         ]
       }
     },
-    "okiokic": {
+    "oki_ohio_kentucky_indiana_cincinnati": {
       "name": "OKI (Ohio-Kentucky-Indiana / Cincinnati)",
       "shortName": "Ohio-Kentucky-Indiana / Cincinnati",
       "type": "mpo",
@@ -609,7 +609,7 @@
         ]
       }
     },
-    "mvrpcmvrpcd": {
+    "mvrpc_miami_valley_regional_planning_commission_dayton": {
       "name": "MVRPC (Miami Valley Regional Planning Commission / Dayton)",
       "shortName": "Miami Valley Regional Planning Commission / Dayton",
       "type": "mpo",
@@ -642,7 +642,7 @@
         ]
       }
     },
-    "amatsamats": {
+    "amats_akron_metropolitan_area_transportation_study": {
       "name": "AMATS (Akron Metropolitan Area Transportation Study)",
       "shortName": "Akron Metropolitan Area Transportation Study",
       "type": "mpo",
@@ -671,7 +671,7 @@
         ]
       }
     },
-    "tmacogtmacog": {
+    "tmacog_toledo_metropolitan_area_cog": {
       "name": "TMACOG (Toledo Metropolitan Area COG)",
       "shortName": "Toledo Metropolitan Area COG",
       "type": "mpo",
@@ -700,7 +700,7 @@
         ]
       }
     },
-    "scatsscatsc": {
+    "scats_stark_county_area_transportation_study_canton": {
       "name": "SCATS (Stark County Area Transportation Study / Canton)",
       "shortName": "Stark County Area Transportation Study / Canton",
       "type": "mpo",
@@ -727,7 +727,7 @@
         ]
       }
     },
-    "ercogy": {
+    "eastgate_regional_cog_youngstown": {
       "name": "Eastgate Regional COG (Youngstown)",
       "shortName": "Youngstown",
       "type": "mpo",
@@ -756,7 +756,7 @@
         ]
       }
     },
-    "lmpolfmpo": {
+    "lmpo_lancaster_fairfield_mpo": {
       "name": "LMPO (Lancaster-Fairfield MPO)",
       "shortName": "Lancaster-Fairfield MPO",
       "type": "mpo",
@@ -783,7 +783,7 @@
         ]
       }
     },
-    "rcrpcm": {
+    "richland_county_regional_planning_commission_mansfield": {
       "name": "Richland County Regional Planning Commission (Mansfield)",
       "shortName": "Mansfield",
       "type": "mpo",
@@ -810,7 +810,7 @@
         ]
       }
     },
-    "bhjmposw": {
+    "bhj_mpo_steubenville_weirton": {
       "name": "BHJ MPO (Steubenville-Weirton)",
       "shortName": "Steubenville-Weirton",
       "type": "mpo",
@@ -837,7 +837,7 @@
         ]
       }
     },
-    "sccts": {
+    "springfield_clark_county_transportation_study": {
       "name": "Springfield-Clark County Transportation Study",
       "shortName": "Springfield-Clark County Transportation Study",
       "type": "mpo",
@@ -864,89 +864,153 @@
         ]
       }
     },
-    "brook_hancock_jefferson_metropolitan_planning_commission_mpo": {
+    "brook_hancock_jefferson_metropolitan_planning_commission": {
       "name": "Brook-Hancock-Jefferson Metropolitan Planning Commission",
       "shortName": "Brook-Hancock-Jefferson Metropolitan Planning Commission",
       "type": "mpo",
       "btsMpoId": "39197304",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "067",
+        "081"
+      ],
+      "countyNames": {
+        "081": "Jefferson",
+        "067": "Harrison",
+        "019": "Carroll"
+      },
       "center": [
         -80.695826,
         40.416779
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "clark_county_springfield_transportation_study_mpo": {
+    "clark_county_springfield_transportation_study": {
       "name": "Clark County-Springfield Transportation Study",
       "shortName": "Clark County-Springfield Transportation Study",
       "type": "mpo",
       "btsMpoId": "39196401",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "021",
+        "023",
+        "057",
+        "097",
+        "109"
+      ],
+      "countyNames": {
+        "023": "Clark",
+        "057": "Greene",
+        "021": "Champaign",
+        "109": "Miami",
+        "097": "Madison"
+      },
       "center": [
         -83.845294,
         39.885014
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "licking_county_area_transportation_study_mpo": {
+    "licking_county_area_transportation_study": {
       "name": "Licking County Area Transportation Study",
       "shortName": "Licking County Transportation Study",
       "type": "mpo",
       "btsMpoId": "39198200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "045",
+        "083",
+        "089",
+        "127"
+      ],
+      "countyNames": {
+        "089": "Licking",
+        "045": "Fairfield",
+        "083": "Knox",
+        "127": "Perry"
+      },
       "center": [
         -82.524614,
         40.050761
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "policy_committee_of_the_erie_regional_planning_commission_mpo": {
+    "policy_committee_of_the_erie_regional_planning_commission": {
       "name": "Policy Committee of the Erie Regional Planning Commission",
       "shortName": "Policy Committee of the Erie Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "39200300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "043",
+        "077",
+        "123"
+      ],
+      "countyNames": {
+        "043": "Erie",
+        "077": "Huron",
+        "123": "Ottawa"
+      },
       "center": [
         -82.621284,
         41.436645
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "lima_allen_county_regional_planning_commission_mpo": {
+    "lima_allen_county_regional_planning_commission": {
       "name": "Lima-Allen County Regional Planning Commission",
       "shortName": "Lima-Allen County Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "39196402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "003",
+        "011",
+        "065",
+        "137",
+        "161"
+      ],
+      "countyNames": {
+        "003": "Allen",
+        "137": "Putnam",
+        "011": "Auglaize",
+        "161": "Van Wert",
+        "065": "Hardin"
+      },
       "center": [
         -84.12608,
         40.801628
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "ohio_kentucky_indiana_regional_council_of_governments_mpo": {
+    "ohio_kentucky_indiana_regional_council_of_governments": {
       "name": "Ohio-Kentucky-Indiana Regional Council of Governments",
       "shortName": "Ohio-Kentucky-Indiana Regional Council of Governments",
       "type": "mpo",
       "btsMpoId": "39197400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "017",
+        "025",
+        "061"
+      ],
+      "countyNames": {
+        "061": "Hamilton",
+        "017": "Butler",
+        "025": "Clermont"
+      },
       "center": [
         -84.649801,
         39.150507
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

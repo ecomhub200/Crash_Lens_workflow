@@ -125,6 +125,7 @@
         "237",
         "275",
         "337",
+        "447",
         "485",
         "487",
         "503"
@@ -142,7 +143,8 @@
         "337": "Montague",
         "485": "Wichita",
         "487": "Wilbarger",
-        "503": "Young"
+        "503": "Young",
+        "447": "Throckmorton"
       },
       "mapBounds": {
         "sw": [
@@ -709,6 +711,7 @@
         "091",
         "163",
         "187",
+        "255",
         "259",
         "265",
         "325",
@@ -728,7 +731,8 @@
         "325": "Medina",
         "385": "Real",
         "463": "Uvalde",
-        "493": "Wilson"
+        "493": "Wilson",
+        "255": "Karnes"
       },
       "mapBounds": {
         "sw": [
@@ -986,6 +990,7 @@
       "zoom": 8,
       "counties": [
         "127",
+        "271",
         "283",
         "323",
         "479",
@@ -996,7 +1001,8 @@
         "283": "La Salle",
         "323": "Maverick",
         "479": "Webb",
-        "507": "Zavala"
+        "507": "Zavala",
+        "271": "Kinney"
       },
       "mapBounds": {
         "sw": [
@@ -1142,7 +1148,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "nctcognctcogdfw": {
+    "nctcog_north_central_texas_cog_dallas_fort_worth": {
       "name": "NCTCOG (North Central Texas COG / Dallas-Fort Worth)",
       "shortName": "North Central Texas COG / Dallas-Fort Worth",
       "type": "mpo",
@@ -1191,7 +1197,7 @@
         ]
       }
     },
-    "hgachgac": {
+    "h_gac_houston_galveston_area_council": {
       "name": "H-GAC (Houston-Galveston Area Council)",
       "shortName": "Houston-Galveston Area Council",
       "type": "mpo",
@@ -1232,7 +1238,7 @@
         ]
       }
     },
-    "aamposa": {
+    "alamo_area_mpo_san_antonio": {
       "name": "Alamo Area MPO (San Antonio)",
       "shortName": "San Antonio",
       "type": "mpo",
@@ -1265,7 +1271,7 @@
         ]
       }
     },
-    "campocampoa": {
+    "campo_capital_area_mpo_austin": {
       "name": "CAMPO (Capital Area MPO / Austin)",
       "shortName": "Capital Area MPO / Austin",
       "type": "mpo",
@@ -1300,7 +1306,7 @@
         ]
       }
     },
-    "epmpo": {
+    "el_paso_mpo": {
       "name": "El Paso MPO",
       "shortName": "El Paso",
       "type": "mpo",
@@ -1327,7 +1333,7 @@
         ]
       }
     },
-    "ccmpo": {
+    "corpus_christi_mpo": {
       "name": "Corpus Christi MPO",
       "shortName": "Corpus Christi",
       "type": "mpo",
@@ -1356,7 +1362,7 @@
         ]
       }
     },
-    "wmpo": {
+    "waco_mpo": {
       "name": "Waco MPO",
       "shortName": "Waco",
       "type": "mpo",
@@ -1383,7 +1389,7 @@
         ]
       }
     },
-    "ktmpo": {
+    "killeen_temple_mpo": {
       "name": "Killeen-Temple MPO",
       "shortName": "Killeen-Temple",
       "type": "mpo",
@@ -1410,7 +1416,7 @@
         ]
       }
     },
-    "hcmpo": {
+    "hidalgo_county_mpo": {
       "name": "Hidalgo County MPO",
       "shortName": "Hidalgo County",
       "type": "mpo",
@@ -1437,7 +1443,7 @@
         ]
       }
     },
-    "bmpo": {
+    "brownsville_mpo": {
       "name": "Brownsville MPO",
       "shortName": "Brownsville",
       "type": "mpo",
@@ -1464,7 +1470,7 @@
         ]
       }
     },
-    "luts": {
+    "laredo_urban_transportation_study": {
       "name": "Laredo Urban Transportation Study",
       "shortName": "Laredo Urban Transportation Study",
       "type": "mpo",
@@ -1491,7 +1497,7 @@
         ]
       }
     },
-    "lmpo": {
+    "longview_mpo": {
       "name": "Longview MPO",
       "shortName": "Longview",
       "type": "mpo",
@@ -1520,7 +1526,7 @@
         ]
       }
     },
-    "ampo": {
+    "abilene_mpo": {
       "name": "Abilene MPO",
       "shortName": "Abilene",
       "type": "mpo",
@@ -1547,7 +1553,7 @@
         ]
       }
     },
-    "pbmpomo": {
+    "permian_basin_mpo_midland_odessa": {
       "name": "Permian Basin MPO (Midland-Odessa)",
       "shortName": "Midland-Odessa",
       "type": "mpo",
@@ -1576,7 +1582,7 @@
         ]
       }
     },
-    "sampo": {
+    "san_angelo_mpo": {
       "name": "San Angelo MPO",
       "shortName": "San Angelo",
       "type": "mpo",
@@ -1603,7 +1609,7 @@
         ]
       }
     },
-    "wfmpo": {
+    "wichita_falls_mpo": {
       "name": "Wichita Falls MPO",
       "shortName": "Wichita Falls",
       "type": "mpo",
@@ -1630,7 +1636,7 @@
         ]
       }
     },
-    "sdmpo": {
+    "sherman_denison_mpo": {
       "name": "Sherman-Denison MPO",
       "shortName": "Sherman-Denison",
       "type": "mpo",
@@ -1657,7 +1663,7 @@
         ]
       }
     },
-    "tampo": {
+    "tyler_area_mpo": {
       "name": "Tyler Area MPO",
       "shortName": "Tyler Area",
       "type": "mpo",
@@ -1684,7 +1690,7 @@
         ]
       }
     },
-    "bcsmpo": {
+    "bryan_college_station_mpo": {
       "name": "Bryan-College Station MPO",
       "shortName": "Bryan-College Station",
       "type": "mpo",
@@ -1711,7 +1717,7 @@
         ]
       }
     },
-    "vmpo": {
+    "victoria_mpo": {
       "name": "Victoria MPO",
       "shortName": "Victoria",
       "type": "mpo",
@@ -1738,7 +1744,7 @@
         ]
       }
     },
-    "tmpo": {
+    "texarkana_mpo": {
       "name": "Texarkana MPO",
       "shortName": "Texarkana",
       "type": "mpo",
@@ -1765,7 +1771,7 @@
         ]
       }
     },
-    "setrpcb": {
+    "south_east_texas_regional_planning_commission_beaumont": {
       "name": "South East Texas Regional Planning Commission (Beaumont)",
       "shortName": "Beaumont",
       "type": "mpo",
@@ -1796,7 +1802,7 @@
         ]
       }
     },
-    "hsbmpo": {
+    "harlingen_san_benito_mpo": {
       "name": "Harlingen-San Benito MPO",
       "shortName": "Harlingen-San Benito",
       "type": "mpo",
@@ -1829,13 +1835,22 @@
       "type": "mpo",
       "btsMpoId": "48197600",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "219",
+        "303",
+        "305"
+      ],
+      "countyNames": {
+        "303": "Lubbock",
+        "219": "Hockley",
+        "305": "Lynn"
+      },
       "center": [
         -101.933227,
         33.522814
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "grayson_county_mpo": {
       "name": "Grayson County MPO",
@@ -1843,13 +1858,22 @@
       "type": "mpo",
       "btsMpoId": "48198000",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "097",
+        "147",
+        "181"
+      ],
+      "countyNames": {
+        "181": "Grayson",
+        "097": "Cooke",
+        "147": "Fannin"
+      },
       "center": [
         -96.6815,
         33.761962
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "amarillo_mpo": {
       "name": "Amarillo MPO",
@@ -1857,13 +1881,22 @@
       "type": "mpo",
       "btsMpoId": "48197502",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "375",
+        "381"
+      ],
+      "countyNames": {
+        "381": "Randall",
+        "375": "Potter",
+        "011": "Armstrong"
+      },
       "center": [
         -101.762933,
         35.163693
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "laredo_webb_county_area_mpo": {
       "name": "Laredo & Webb County Area MPO",
@@ -1871,13 +1904,18 @@
       "type": "mpo",
       "btsMpoId": "48197304",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "479"
+      ],
+      "countyNames": {
+        "479": "Webb"
+      },
       "center": [
         -99.551013,
         27.548752
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "rio_grande_valley_mpo": {
       "name": "Rio Grande Valley MPO",
@@ -1885,13 +1923,22 @@
       "type": "mpo",
       "btsMpoId": "48201901",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "061",
+        "215",
+        "489"
+      ],
+      "countyNames": {
+        "215": "Hidalgo",
+        "489": "Willacy",
+        "061": "Cameron"
+      },
       "center": [
         -98.040154,
         26.193166
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "eagle_pass_mpo": {
       "name": "Eagle Pass MPO",
@@ -1899,13 +1946,18 @@
       "type": "mpo",
       "btsMpoId": "48202400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "323"
+      ],
+      "countyNames": {
+        "323": "Maverick"
+      },
       "center": [
         -100.480725,
         28.695205
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

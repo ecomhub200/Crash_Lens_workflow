@@ -194,7 +194,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "cmpo": {
+    "cheyenne_mpo": {
       "name": "Cheyenne MPO",
       "shortName": "Cheyenne",
       "type": "mpo",
@@ -221,7 +221,7 @@
         ]
       }
     },
-    "campo": {
+    "casper_area_mpo": {
       "name": "Casper Area MPO",
       "shortName": "Casper Area",
       "type": "mpo",

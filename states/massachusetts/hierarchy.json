@@ -145,14 +145,20 @@
       ],
       "zoom": 9,
       "counties": [
+        "001",
         "005",
-        "023",
-        "021"
+        "007",
+        "019",
+        "021",
+        "023"
       ],
       "countyNames": {
         "005": "Bristol",
         "023": "Plymouth",
-        "021": "Norfolk (partial)"
+        "021": "Norfolk (partial)",
+        "001": "Barnstable",
+        "007": "Dukes",
+        "019": "Nantucket"
       },
       "mapBounds": {
         "sw": [
@@ -198,7 +204,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "ctps": {
+    "boston_region_mpo_ctps": {
       "name": "Boston Region MPO (CTPS)",
       "shortName": "CTPS",
       "type": "mpo",
@@ -231,7 +237,7 @@
         ]
       }
     },
-    "cmmpow": {
+    "central_massachusetts_mpo_worcester": {
       "name": "Central Massachusetts MPO (Worcester)",
       "shortName": "Worcester",
       "type": "mpo",
@@ -258,7 +264,7 @@
         ]
       }
     },
-    "pvmpos": {
+    "pioneer_valley_mpo_springfield": {
       "name": "Pioneer Valley MPO (Springfield)",
       "shortName": "Springfield",
       "type": "mpo",
@@ -287,7 +293,7 @@
         ]
       }
     },
-    "srpedd": {
+    "southeastern_massachusetts_mpo_srpedd": {
       "name": "Southeastern Massachusetts MPO (SRPEDD)",
       "shortName": "SRPEDD",
       "type": "mpo",
@@ -316,7 +322,7 @@
         ]
       }
     },
-    "ccmpo": {
+    "cape_cod_mpo": {
       "name": "Cape Cod MPO",
       "shortName": "Cape Cod",
       "type": "mpo",
@@ -343,7 +349,7 @@
         ]
       }
     },
-    "mvmpo": {
+    "marthas_vineyard_mpo": {
       "name": "Martha's Vineyard MPO",
       "shortName": "Martha's Vineyard",
       "type": "mpo",
@@ -370,7 +376,7 @@
         ]
       }
     },
-    "mmpo": {
+    "montachusett_mpo": {
       "name": "Montachusett MPO",
       "shortName": "Montachusett",
       "type": "mpo",
@@ -397,7 +403,7 @@
         ]
       }
     },
-    "nmmpo": {
+    "northern_middlesex_mpo": {
       "name": "Northern Middlesex MPO",
       "shortName": "Northern Middlesex",
       "type": "mpo",
@@ -424,7 +430,7 @@
         ]
       }
     },
-    "nmpo": {
+    "nantucket_mpo": {
       "name": "Nantucket MPO",
       "shortName": "Nantucket",
       "type": "mpo",
@@ -451,7 +457,7 @@
         ]
       }
     },
-    "frcogmpo": {
+    "franklin_regional_cog_mpo": {
       "name": "Franklin Regional COG MPO",
       "shortName": "Franklin Regional COG",
       "type": "mpo",
@@ -478,7 +484,7 @@
         ]
       }
     },
-    "bmpo": {
+    "berkshire_mpo": {
       "name": "Berkshire MPO",
       "shortName": "Berkshire",
       "type": "mpo",
@@ -505,7 +511,7 @@
         ]
       }
     },
-    "ocmpo": {
+    "old_colony_mpo": {
       "name": "Old Colony MPO",
       "shortName": "Old Colony",
       "type": "mpo",
@@ -538,13 +544,22 @@
       "type": "mpo",
       "btsMpoId": "25197603",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "017",
+        "025"
+      ],
+      "countyNames": {
+        "009": "Essex",
+        "017": "Middlesex",
+        "025": "Suffolk"
+      },
       "center": [
         -70.962942,
         42.762373
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

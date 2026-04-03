@@ -28,6 +28,7 @@
       "zoom": 8,
       "counties": [
         "029",
+        "033",
         "055",
         "057",
         "061",
@@ -38,7 +39,8 @@
         "055": "San Juan",
         "057": "Skagit",
         "061": "Snohomish",
-        "073": "Whatcom"
+        "073": "Whatcom",
+        "033": "King"
       },
       "mapBounds": {
         "sw": [
@@ -101,6 +103,7 @@
         "035",
         "045",
         "049",
+        "053",
         "067"
       ],
       "countyNames": {
@@ -110,7 +113,8 @@
         "035": "Kitsap",
         "045": "Mason",
         "049": "Pacific",
-        "067": "Thurston"
+        "067": "Thurston",
+        "053": "Pierce"
       },
       "mapBounds": {
         "sw": [
@@ -242,7 +246,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "psrcpsrcs": {
+    "psrc_puget_sound_regional_council_seattle": {
       "name": "PSRC (Puget Sound Regional Council / Seattle)",
       "shortName": "Puget Sound Regional Council / Seattle",
       "type": "mpo",
@@ -275,7 +279,7 @@
         ]
       }
     },
-    "rtcswwv": {
+    "rtc_sw_washington_vancouver": {
       "name": "RTC (SW Washington / Vancouver)",
       "shortName": "SW Washington / Vancouver",
       "type": "mpo",
@@ -302,7 +306,7 @@
         ]
       }
     },
-    "srtcsrtc": {
+    "srtc_spokane_regional_transportation_council": {
       "name": "SRTC (Spokane Regional Transportation Council)",
       "shortName": "Spokane Regional Transportation Council",
       "type": "mpo",
@@ -329,7 +333,7 @@
         ]
       }
     },
-    "trpctrpco": {
+    "trpc_thurston_regional_planning_council_olympia": {
       "name": "TRPC (Thurston Regional Planning Council / Olympia)",
       "shortName": "Thurston Regional Planning Council / Olympia",
       "type": "mpo",
@@ -356,7 +360,7 @@
         ]
       }
     },
-    "yvmpo": {
+    "yakima_valley_mpo": {
       "name": "Yakima Valley MPO",
       "shortName": "Yakima Valley",
       "type": "mpo",
@@ -383,7 +387,7 @@
         ]
       }
     },
-    "bfcogtcmates": {
+    "bfcog_tri_cities_mates": {
       "name": "BFCOG (Tri-Cities MATES)",
       "shortName": "Tri-Cities MATES",
       "type": "mpo",
@@ -412,7 +416,7 @@
         ]
       }
     },
-    "wcogwcogb": {
+    "wcog_whatcom_cog_bellingham": {
       "name": "WCOG (Whatcom COG / Bellingham)",
       "shortName": "Whatcom COG / Bellingham",
       "type": "mpo",
@@ -439,7 +443,7 @@
         ]
       }
     },
-    "scogscog": {
+    "scog_skagit_cog": {
       "name": "SCOG (Skagit COG)",
       "shortName": "Skagit COG",
       "type": "mpo",
@@ -466,7 +470,7 @@
         ]
       }
     },
-    "cwcoglk": {
+    "cowlitz_wahkiakum_cog_longview_kelso": {
       "name": "Cowlitz-Wahkiakum COG (Longview-Kelso)",
       "shortName": "Longview-Kelso",
       "type": "mpo",
@@ -493,7 +497,7 @@
         ]
       }
     },
-    "cdtcw": {
+    "chelan_douglas_transportation_council_wenatchee": {
       "name": "Chelan-Douglas Transportation Council (Wenatchee)",
       "shortName": "Wenatchee",
       "type": "mpo",
@@ -522,7 +526,7 @@
         ]
       }
     },
-    "wwvmpo": {
+    "walla_walla_valley_mpo": {
       "name": "Walla Walla Valley MPO",
       "shortName": "Walla Walla Valley",
       "type": "mpo",
@@ -549,61 +553,93 @@
         ]
       }
     },
-    "benton_franklin_council_of_governments_mpo": {
+    "benton_franklin_council_of_governments": {
       "name": "Benton-Franklin Council of Governments",
       "shortName": "Benton-Franklin Council of Governments",
       "type": "mpo",
       "btsMpoId": "53197100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "021",
+        "071"
+      ],
+      "countyNames": {
+        "021": "Franklin",
+        "071": "Walla Walla"
+      },
       "center": [
         -118.782898,
         46.425019
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "cowlitz_wahkiakum_council_of_governments_mpo": {
+    "cowlitz_wahkiakum_council_of_governments": {
       "name": "Cowlitz-Wahkiakum Council of Governments",
       "shortName": "Cowlitz-Wahkiakum Council of Governments",
       "type": "mpo",
       "btsMpoId": "53198202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "015",
+        "069"
+      ],
+      "countyNames": {
+        "015": "Cowlitz",
+        "069": "Wahkiakum",
+        "011": "Clark"
+      },
       "center": [
         -122.944284,
         46.145451
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "southwest_washington_regional_transportation_council_mpo": {
+    "southwest_washington_regional_transportation_council": {
       "name": "Southwest Washington Regional Transportation Council",
       "shortName": "Southwest Washington Regional Transportation Council",
       "type": "mpo",
       "btsMpoId": "53199200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "015",
+        "059"
+      ],
+      "countyNames": {
+        "011": "Clark",
+        "015": "Cowlitz",
+        "059": "Skamania"
+      },
       "center": [
         -122.490684,
         45.882754
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "chelan_douglas_transportation_council_cdtc_mpo": {
+    "chelan_douglas_transportation_council_cdtc": {
       "name": "Chelan-Douglas Transportation Council (CDTC)",
       "shortName": "Chelan-Douglas Transportation Council (CDTC)",
       "type": "mpo",
       "btsMpoId": "53200302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "037"
+      ],
+      "countyNames": {
+        "007": "Chelan",
+        "037": "Kittitas"
+      },
       "center": [
         -120.716461,
         47.662961
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "skagit_mpo": {
       "name": "Skagit MPO",
@@ -611,13 +647,22 @@
       "type": "mpo",
       "btsMpoId": "53200301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "057",
+        "061",
+        "073"
+      ],
+      "countyNames": {
+        "057": "Skagit",
+        "073": "Whatcom",
+        "061": "Snohomish"
+      },
       "center": [
         -121.514269,
         48.461545
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

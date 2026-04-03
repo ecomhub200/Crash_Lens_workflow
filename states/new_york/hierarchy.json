@@ -255,6 +255,7 @@
       ],
       "zoom": 8,
       "counties": [
+        "019",
         "031",
         "033",
         "045",
@@ -266,7 +267,8 @@
         "033": "Franklin",
         "045": "Jefferson",
         "049": "Lewis",
-        "089": "St. Lawrence"
+        "089": "St. Lawrence",
+        "019": "Clinton"
       },
       "mapBounds": {
         "sw": [
@@ -420,7 +422,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "nymtcnymtc": {
+    "nymtc_new_york_metropolitan_transportation_council": {
       "name": "NYMTC (New York Metropolitan Transportation Council)",
       "shortName": "New York Metropolitan Transportation Council",
       "type": "mpo",
@@ -465,7 +467,7 @@
         ]
       }
     },
-    "cdtccdtca": {
+    "cdtc_capital_district_transportation_committee_albany": {
       "name": "CDTC (Capital District Transportation Committee / Albany)",
       "shortName": "Capital District Transportation Committee / Albany",
       "type": "mpo",
@@ -498,7 +500,7 @@
         ]
       }
     },
-    "smtcsmtc": {
+    "smtc_syracuse_metropolitan_transportation_council": {
       "name": "SMTC (Syracuse Metropolitan Transportation Council)",
       "shortName": "Syracuse Metropolitan Transportation Council",
       "type": "mpo",
@@ -525,7 +527,7 @@
         ]
       }
     },
-    "gtcgtcr": {
+    "gtc_genesee_transportation_council_rochester": {
       "name": "GTC (Genesee Transportation Council / Rochester)",
       "shortName": "Genesee Transportation Council / Rochester",
       "type": "mpo",
@@ -568,7 +570,7 @@
         ]
       }
     },
-    "gbnrtcgbnrtc": {
+    "gbnrtc_greater_buffalo_niagara_regional_transportation_council": {
       "name": "GBNRTC (Greater Buffalo-Niagara Regional Transportation Council)",
       "shortName": "Greater Buffalo-Niagara Regional Transportation Council",
       "type": "mpo",
@@ -597,7 +599,7 @@
         ]
       }
     },
-    "bmtsbmts": {
+    "bmts_binghamton_metropolitan_transportation_study": {
       "name": "BMTS (Binghamton Metropolitan Transportation Study)",
       "shortName": "Binghamton Metropolitan Transportation Study",
       "type": "mpo",
@@ -626,7 +628,7 @@
         ]
       }
     },
-    "octcoctc": {
+    "octc_orange_county_transportation_council": {
       "name": "OCTC (Orange County Transportation Council)",
       "shortName": "Orange County Transportation Council",
       "type": "mpo",
@@ -653,7 +655,7 @@
         ]
       }
     },
-    "uctcuctc": {
+    "uctc_ulster_county_transportation_council": {
       "name": "UCTC (Ulster County Transportation Council)",
       "shortName": "Ulster County Transportation Council",
       "type": "mpo",
@@ -680,7 +682,7 @@
         ]
       }
     },
-    "dctcdctc": {
+    "dctc_dutchess_county_transportation_council": {
       "name": "DCTC (Dutchess County Transportation Council)",
       "shortName": "Dutchess County Transportation Council",
       "type": "mpo",
@@ -707,7 +709,7 @@
         ]
       }
     },
-    "hoctchoctsur": {
+    "hoctc_herkimer_oneida_county_transportation_study_utica_rome": {
       "name": "HOCTC (Herkimer-Oneida County Transportation Study / Utica-Rome)",
       "shortName": "Herkimer-Oneida County Transportation Study / Utica-Rome",
       "type": "mpo",
@@ -736,7 +738,7 @@
         ]
       }
     },
-    "ithacatompkinsmpoi": {
+    "ithaca_tompkins_mpo_ithaca": {
       "name": "ITHACA-TOMPKINS MPO (Ithaca)",
       "shortName": "Ithaca",
       "type": "mpo",
@@ -763,7 +765,7 @@
         ]
       }
     },
-    "ecmpo": {
+    "elmira_chemung_mpo": {
       "name": "Elmira-Chemung MPO",
       "shortName": "Elmira-Chemung",
       "type": "mpo",
@@ -790,7 +792,7 @@
         ]
       }
     },
-    "gfmpo": {
+    "glens_falls_mpo": {
       "name": "Glens Falls MPO",
       "shortName": "Glens Falls",
       "type": "mpo",
@@ -819,7 +821,7 @@
         ]
       }
     },
-    "agftc": {
+    "adirondack_glens_falls_transportation_council": {
       "name": "Adirondack/Glens Falls Transportation Council",
       "shortName": "Adirondack/Glens Falls Transportation Council",
       "type": "mpo",
@@ -848,47 +850,72 @@
         ]
       }
     },
-    "watertown_jefferson_county_transportation_council_mpo": {
+    "watertown_jefferson_county_transportation_council": {
       "name": "Watertown-Jefferson County Transportation Council",
       "shortName": "Watertown-Jefferson County Transportation Council",
       "type": "mpo",
       "btsMpoId": "36201400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "045",
+        "049"
+      ],
+      "countyNames": {
+        "045": "Jefferson",
+        "049": "Lewis"
+      },
       "center": [
         -75.821771,
         44.001483
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "herkimer_oneida_counties_transportation_study_mpo": {
+    "herkimer_oneida_counties_transportation_study": {
       "name": "Herkimer-Oneida Counties Transportation Study",
       "shortName": "Herkimer-Oneida Counties Transportation Study",
       "type": "mpo",
       "btsMpoId": "36197200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "043",
+        "053",
+        "065"
+      ],
+      "countyNames": {
+        "065": "Oneida",
+        "053": "Madison",
+        "043": "Herkimer"
+      },
       "center": [
         -75.336343,
         43.208217
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "capital_region_transportation_council_mpo": {
+    "capital_region_transportation_council": {
       "name": "Capital Region Transportation Council",
       "shortName": "Capital Region Transportation Council",
       "type": "mpo",
       "btsMpoId": "36197300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "083",
+        "091",
+        "093"
+      ],
+      "countyNames": {
+        "091": "Saratoga",
+        "093": "Schenectady",
+        "083": "Rensselaer"
+      },
       "center": [
         -73.847537,
         42.926741
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

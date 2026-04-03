@@ -422,7 +422,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mapamapao": {
+    "mapa_metropolitan_area_planning_agency_omaha": {
       "name": "MAPA (Metropolitan Area Planning Agency / Omaha)",
       "shortName": "Metropolitan Area Planning Agency / Omaha",
       "type": "mpo",
@@ -453,7 +453,7 @@
         ]
       }
     },
-    "lampo": {
+    "lincoln_area_mpo": {
       "name": "Lincoln Area MPO",
       "shortName": "Lincoln Area",
       "type": "mpo",
@@ -480,7 +480,7 @@
         ]
       }
     },
-    "giampo": {
+    "grand_island_area_mpo": {
       "name": "Grand Island Area MPO",
       "shortName": "Grand Island Area",
       "type": "mpo",

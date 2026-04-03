@@ -314,13 +314,15 @@
       "zoom": 9,
       "counties": [
         "017",
+        "035",
         "077",
         "097"
       ],
       "countyNames": {
         "017": "Cass",
         "077": "Richland",
-        "097": "Traill"
+        "097": "Traill",
+        "035": "Grand Forks"
       },
       "mapBounds": {
         "sw": [
@@ -340,7 +342,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "fmmcog": {
+    "fargo_moorhead_metropolitan_cog": {
       "name": "Fargo-Moorhead Metropolitan COG",
       "shortName": "Fargo-Moorhead",
       "type": "mpo",
@@ -367,7 +369,7 @@
         ]
       }
     },
-    "bmmpo": {
+    "bismarck_mandan_mpo": {
       "name": "Bismarck-Mandan MPO",
       "shortName": "Bismarck-Mandan",
       "type": "mpo",
@@ -396,7 +398,7 @@
         ]
       }
     },
-    "gfegfmpo": {
+    "grand_forks_east_grand_forks_mpo": {
       "name": "Grand Forks-East Grand Forks MPO",
       "shortName": "Grand Forks-East Grand Forks",
       "type": "mpo",
@@ -423,19 +425,28 @@
         ]
       }
     },
-    "bismarck_mandan_metropolitan_planning_organization_mpo": {
+    "bismarck_mandan_metropolitan_planning_organization": {
       "name": "Bismarck Mandan Metropolitan Planning Organization",
       "shortName": "Bismarck Mandan",
       "type": "mpo",
       "btsMpoId": "38198201",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "059",
+        "065"
+      ],
+      "countyNames": {
+        "015": "Burleigh",
+        "059": "Morton",
+        "065": "Oliver"
+      },
       "center": [
         -100.807463,
         46.768807
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "central_dakota_mpo": {
       "name": "Central Dakota MPO",
@@ -443,13 +454,22 @@
       "type": "mpo",
       "btsMpoId": "38202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "049",
+        "075",
+        "101"
+      ],
+      "countyNames": {
+        "101": "Ward",
+        "049": "McHenry",
+        "075": "Renville"
+      },
       "center": [
         -101.285707,
         48.250967
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {
