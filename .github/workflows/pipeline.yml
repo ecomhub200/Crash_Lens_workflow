@@ -288,8 +288,8 @@ jobs:
             SPLIT_INPUT="$DATA_DIR/${SELECTION}_all_roads.csv"
           fi
           if [ ! -f "$SPLIT_INPUT" ]; then
-            echo "WARNING: No input CSV found for splitting"
-            exit 0
+            echo "::error::No input CSV found for splitting. The R2 download in Stage 0.5 may have failed — check that the crash data exists in R2 for this state/jurisdiction."
+            exit 1
           fi
 
           SPLIT_OUTPUT="data/$STATE"
