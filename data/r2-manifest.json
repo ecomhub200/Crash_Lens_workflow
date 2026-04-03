@@ -2,7 +2,7 @@
   "version": 4,
   "_comment": "Version 4: Added planning_district, city, town tiers. Geography JSON references added. All R2 paths lowercase.",
   "r2BaseUrl": "",
-  "updated": "2026-04-02T11:42:15.908671+00:00",
+  "updated": "2026-04-03T11:39:39.429856+00:00",
   "tiers": [
     "federal",
     "state",
@@ -67,7 +67,7 @@
     "virginia/henrico/all_roads.csv": {
       "size": 14533015,
       "md5": "3256b044e26f205482525c998e89127f",
-      "uploaded": "2026-04-02T11:42:17.636373+00:00"
+      "uploaded": "2026-04-03T11:39:41.544927+00:00"
     },
     "virginia/henrico/forecasts_county_roads.json": {
       "size": 358029,
