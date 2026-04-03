@@ -137,7 +137,7 @@ jobs:
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
 
-          PRIMARY_KEY="${R2_PREFIX}/_state/statewide_all_roads.parquet.gz"
+          PRIMARY_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
 
           echo "=========================================="
           echo "Downloading normalized Delaware data from R2"
@@ -147,14 +147,13 @@ jobs:
 
           mkdir -p "$DATA_DIR"
           LOCAL_CSV="$DATA_DIR/${STATE}_statewide_all_roads.csv"
-          LOCAL_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
           DOWNLOADED=false
 
-          # Try primary parquet key
+          # Try primary statewide/ CSV (uncompressed)
           for i in 1 2 3 4; do
-            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "$LOCAL_PQ" \
+            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "$LOCAL_CSV" \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
-              echo "Download succeeded from _state/ (parquet.gz)"
+              echo "Download succeeded from statewide/"
               DOWNLOADED=true
               break
             fi
@@ -162,12 +161,10 @@ jobs:
             sleep $((2 ** i))
           done
 
-          # Fallback: try the r2_data_key input (may be parquet.gz, csv.gz, or csv)
+          # Fallback: try the r2_data_key input (may be csv.gz or csv)
           if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
             echo "Primary key failed — trying fallback: $R2_KEY"
-            if echo "$R2_KEY" | grep -q '\.parquet\.gz$'; then
-              FALLBACK_LOCAL="$LOCAL_PQ"
-            elif echo "$R2_KEY" | grep -q '\.gz$'; then
+            if echo "$R2_KEY" | grep -q '\.gz$'; then
               FALLBACK_LOCAL="${LOCAL_CSV}.gz"
             else
               FALLBACK_LOCAL="$LOCAL_CSV"
@@ -190,20 +187,6 @@ jobs:
           if [ "$DOWNLOADED" = "false" ]; then
             echo "::error::Failed to download statewide data from R2"
             exit 1
-          fi
-
-          # Convert parquet → CSV if we got a parquet file
-          if [ -f "$LOCAL_PQ" ] && [ ! -f "$LOCAL_CSV" ]; then
-            echo "Converting parquet.gz → CSV..."
-            python3 -c "
-          import pandas as pd, sys
-          pq = sys.argv[1]
-          csv = sys.argv[2]
-          df = pd.read_parquet(pq, engine='pyarrow')
-          df.to_csv(csv, index=False)
-          print(f'  Converted: {len(df)} rows, {df.shape[1]} cols')
-          " "$LOCAL_PQ" "$LOCAL_CSV"
-            rm -f "$LOCAL_PQ"
           fi
 
           # Legacy safety: decompress gzip-wrapped CSV
@@ -255,7 +238,7 @@ jobs:
           R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
-          PRIMARY_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+          PRIMARY_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
 
           mkdir -p "$DATA_DIR"
           LOCAL_CSV="$DATA_DIR/${STATE}_statewide_all_roads.csv"
@@ -263,10 +246,9 @@ jobs:
 
           echo "Downloading statewide CSV from R2..."
           for i in 1 2 3 4; do
-            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "${LOCAL_CSV}.gz" \
+            if aws s3 cp "s3://$R2_BUCKET/$PRIMARY_KEY" "$LOCAL_CSV" \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
-              echo "Download succeeded from _state/"
-              gunzip -f "${LOCAL_CSV}.gz"
+              echo "Download succeeded from statewide/"
               DOWNLOADED=true
               break
             fi
@@ -376,9 +358,16 @@ jobs:
           R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
-          echo "Cleaning stale split folders on R2..."
-          for PREFIX in _state _region _mpo _planning_district _city; do
+          # Clean split output folders (preserve _state/ source files)
+          for PREFIX in _region _mpo _planning_district _city; do
+            echo "Cleaning $R2_PREFIX/$PREFIX/..."
             aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$PREFIX/" --recursive \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
+          done
+          # Clean only split OUTPUT files in _state/ — preserve hierarchy.json,
+          # statewide CSV, and any other source files
+          for FILE in all_roads.parquet.gz dot_roads.parquet.gz non_dot_roads.parquet.gz primary_roads.parquet.gz statewide_all_roads.csv.gz; do
+            aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/_state/$FILE" \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
           done
           echo "R2 clean — ready for fresh upload"
