@@ -441,9 +441,14 @@ jobs:
           R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
-          echo "Cleaning stale split folders on R2..."
-          for PREFIX in _state _region _mpo _planning_district _city; do
+          # Clean split output folders (but preserve statewide source data)
+          for PREFIX in _region _mpo _planning_district _city; do
             aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$PREFIX/" --recursive \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
+          done
+          # Clean _state/ split files only (preserve hierarchy.json and statewide CSV)
+          for FILE in all_roads.parquet.gz dot_roads.parquet.gz non_dot_roads.parquet.gz primary_roads.parquet.gz; do
+            aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/_state/$FILE" \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
           done
           echo "R2 clean — ready for fresh upload"
