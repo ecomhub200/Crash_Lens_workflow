@@ -163,10 +163,18 @@ jobs:
 
           if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
             echo "Primary key failed — trying fallback: $R2_KEY"
+            # Determine if the fallback key is gzipped
+            FALLBACK_LOCAL="$LOCAL_CSV"
+            if echo "$R2_KEY" | grep -q '\.gz$'; then
+              FALLBACK_LOCAL="${LOCAL_CSV}.gz"
+            fi
             for i in 1 2 3; do
-              if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$LOCAL_CSV" \
+              if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$FALLBACK_LOCAL" \
                 --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
                 echo "Fallback download succeeded"
+                if [ "$FALLBACK_LOCAL" != "$LOCAL_CSV" ]; then
+                  gunzip -f "$FALLBACK_LOCAL"
+                fi
                 DOWNLOADED=true
                 break
               fi
