@@ -102,9 +102,9 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "wilmapcowapc": {
-      "name": "WILMAPCO (Wilmington Area Planning Council)",
-      "shortName": "Wilmington Area Planning Council",
+    "wilmapco": {
+      "name": "WILMAPCO",
+      "shortName": "WILMAPCO",
       "type": "mpo",
       "center": [
         -75.5398,
@@ -129,7 +129,7 @@
         ]
       }
     },
-    "dkcmpo": {
+    "dover_kent_county_mpo": {
       "name": "Dover/Kent County MPO",
       "shortName": "Dover/Kent County",
       "type": "mpo",
@@ -145,6 +145,7 @@
         "001": "Kent"
       },
       "btsAcronym": "DCM",
+      "btsMpoId": "10199000",
       "mapBounds": {
         "sw": [
           38.9,
@@ -156,7 +157,7 @@
         ]
       }
     },
-    "swmpo": {
+    "salisbury_wicomico_mpo": {
       "name": "Salisbury-Wicomico MPO",
       "shortName": "Salisbury-Wicomico",
       "type": "mpo",
@@ -182,20 +183,6 @@
           -75.35
         ]
       }
-    },
-    "dover_kent_county_mpo": {
-      "name": "Dover / Kent County MPO",
-      "shortName": "Dover / Kent County",
-      "type": "mpo",
-      "btsMpoId": "10199000",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -75.493095,
-        39.109793
-      ],
-      "zoom": 10
     }
   },
   "allCounties": {
