@@ -130,7 +130,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "rtcsnlv": {
+    "rtc_of_southern_nevada_las_vegas": {
       "name": "RTC of Southern Nevada (Las Vegas)",
       "shortName": "Las Vegas",
       "type": "mpo",
@@ -157,7 +157,7 @@
         ]
       }
     },
-    "rtcwcr": {
+    "rtc_of_washoe_county_reno": {
       "name": "RTC of Washoe County (Reno)",
       "shortName": "Reno",
       "type": "mpo",
@@ -184,7 +184,7 @@
         ]
       }
     },
-    "campo": {
+    "carson_area_mpo": {
       "name": "Carson Area MPO",
       "shortName": "Carson Area",
       "type": "mpo",
@@ -211,7 +211,7 @@
         ]
       }
     },
-    "tmpo": {
+    "tahoe_mpo": {
       "name": "Tahoe MPO",
       "shortName": "Tahoe",
       "type": "mpo",
@@ -240,33 +240,43 @@
         ]
       }
     },
-    "regional_transportation_commission_of_southern_nevada_mpo": {
+    "regional_transportation_commission_of_southern_nevada": {
       "name": "Regional Transportation Commission of Southern Nevada",
       "shortName": "Regional Transportation Commission of Southern Nevada",
       "type": "mpo",
       "btsMpoId": "32198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "003"
+      ],
+      "countyNames": {
+        "003": "Clark"
+      },
       "center": [
         -114.721335,
         35.884187
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "regional_transportation_commission_of_washoe_mpo": {
+    "regional_transportation_commission_of_washoe_county": {
       "name": "Regional Transportation Commission of Washoe County",
       "shortName": "Regional Transportation Commission of Washoe County",
       "type": "mpo",
       "btsMpoId": "32197900",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "029"
+      ],
+      "countyNames": {
+        "029": "Storey"
+      },
       "center": [
         -119.690622,
         39.82425
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

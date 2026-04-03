@@ -244,7 +244,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "ccrpcccrpcb": {
+    "chittenden_county_rpc_ccrpc_burlington": {
       "name": "Chittenden County RPC / CCRPC (Burlington)",
       "shortName": "Burlington",
       "type": "mpo",

@@ -197,6 +197,7 @@
       ],
       "zoom": 9,
       "counties": [
+        "037",
         "063",
         "069",
         "077",
@@ -214,7 +215,8 @@
         "145": "Person",
         "181": "Vance",
         "183": "Wake",
-        "185": "Warren"
+        "185": "Warren",
+        "037": "Chatham"
       },
       "mapBounds": {
         "sw": [
@@ -457,6 +459,7 @@
       ],
       "zoom": 9,
       "counties": [
+        "035",
         "045",
         "071",
         "109"
@@ -464,7 +467,8 @@
       "countyNames": {
         "045": "Cleveland",
         "071": "Gaston",
-        "109": "Lincoln"
+        "109": "Lincoln",
+        "035": "Catawba"
       },
       "mapBounds": {
         "sw": [
@@ -568,7 +572,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "crtpo": {
+    "charlotte_regional_tpo_crtpo": {
       "name": "Charlotte Regional TPO (CRTPO)",
       "shortName": "CRTPO",
       "type": "mpo",
@@ -599,7 +603,7 @@
         ]
       }
     },
-    "tacampodchc": {
+    "triangle_area_campo_dchc": {
       "name": "Triangle Area (CAMPO/DCHC)",
       "shortName": "CAMPO/DCHC",
       "type": "mpo",
@@ -632,7 +636,7 @@
         ]
       }
     },
-    "gmpo": {
+    "greenville_mpo": {
       "name": "Greenville MPO",
       "shortName": "Greenville",
       "type": "mpo",
@@ -659,7 +663,7 @@
         ]
       }
     },
-    "wsmpo": {
+    "winston_salem_mpo": {
       "name": "Winston-Salem MPO",
       "shortName": "Winston-Salem",
       "type": "mpo",
@@ -686,7 +690,7 @@
         ]
       }
     },
-    "wmpo": {
+    "wilmington_mpo": {
       "name": "Wilmington MPO",
       "shortName": "Wilmington",
       "type": "mpo",
@@ -715,7 +719,7 @@
         ]
       }
     },
-    "fampo": {
+    "fayetteville_area_mpo_fampo": {
       "name": "Fayetteville Area MPO (FAMPO)",
       "shortName": "FAMPO",
       "type": "mpo",
@@ -744,7 +748,7 @@
         ]
       }
     },
-    "gclmpo": {
+    "gastonia_cleveland_mpo_gclmpo": {
       "name": "Gastonia-Cleveland MPO (GCLMPO)",
       "shortName": "GCLMPO",
       "type": "mpo",
@@ -775,7 +779,7 @@
         ]
       }
     },
-    "crmpo": {
+    "cabarrus_rowan_mpo": {
       "name": "Cabarrus-Rowan MPO",
       "shortName": "Cabarrus-Rowan",
       "type": "mpo",
@@ -804,7 +808,7 @@
         ]
       }
     },
-    "hpmpo": {
+    "high_point_mpo": {
       "name": "High Point MPO",
       "shortName": "High Point",
       "type": "mpo",
@@ -835,7 +839,7 @@
         ]
       }
     },
-    "bgmpo": {
+    "burlington_graham_mpo": {
       "name": "Burlington-Graham MPO",
       "shortName": "Burlington-Graham",
       "type": "mpo",
@@ -862,7 +866,7 @@
         ]
       }
     },
-    "ampofbrmpo": {
+    "asheville_mpo_french_broad_river_mpo": {
       "name": "Asheville MPO (French Broad River MPO)",
       "shortName": "French Broad River MPO",
       "type": "mpo",
@@ -891,7 +895,7 @@
         ]
       }
     },
-    "ghmpo": {
+    "hickory_lenoir_morganton_mpo_ghmpo": {
       "name": "Hickory-Lenoir-Morganton MPO (GHMPO)",
       "shortName": "GHMPO",
       "type": "mpo",
@@ -922,7 +926,7 @@
         ]
       }
     },
-    "rmmpo": {
+    "rocky_mount_mpo": {
       "name": "Rocky Mount MPO",
       "shortName": "Rocky Mount",
       "type": "mpo",
@@ -951,7 +955,7 @@
         ]
       }
     },
-    "jmpo": {
+    "jacksonville_mpo": {
       "name": "Jacksonville MPO",
       "shortName": "Jacksonville",
       "type": "mpo",
@@ -978,7 +982,7 @@
         ]
       }
     },
-    "nbmpo": {
+    "new_bern_mpo": {
       "name": "New Bern MPO",
       "shortName": "New Bern",
       "type": "mpo",
@@ -1005,7 +1009,7 @@
         ]
       }
     },
-    "derpok": {
+    "down_east_rpo_kinston": {
       "name": "Down East RPO (Kinston)",
       "shortName": "Kinston",
       "type": "mpo",
@@ -1032,47 +1036,53 @@
         ]
       }
     },
-    "cabarrus_rowan_mpo": {
-      "name": "Cabarrus Rowan MPO",
-      "shortName": "Cabarrus Rowan",
-      "type": "mpo",
-      "btsMpoId": "37198002",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -80.575264,
-        35.583506
-      ],
-      "zoom": 10
-    },
     "capital_area_mpo": {
       "name": "Capital Area MPO",
       "shortName": "Capital",
       "type": "mpo",
       "btsMpoId": "37196400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "063",
+        "101",
+        "183"
+      ],
+      "countyNames": {
+        "183": "Wake",
+        "101": "Johnston",
+        "063": "Durham"
+      },
       "center": [
         -78.570694,
         35.737924
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "charlotte_regional_transportation_planning_organization_mpo": {
+    "charlotte_regional_transportation_planning_organization": {
       "name": "Charlotte Regional Transportation Planning Organization",
       "shortName": "Charlotte Regional Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "37197900",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "025",
+        "071",
+        "119",
+        "159"
+      ],
+      "countyNames": {
+        "119": "Mecklenburg",
+        "025": "Cabarrus",
+        "071": "Gaston",
+        "159": "Rowan"
+      },
       "center": [
         -80.769057,
         35.362422
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "durham_chapel_hill_carrboro_mpo": {
       "name": "Durham Chapel Hill Carrboro MPO",
@@ -1080,13 +1090,24 @@
       "type": "mpo",
       "btsMpoId": "37198001",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "063",
+        "135",
+        "183"
+      ],
+      "countyNames": {
+        "063": "Durham",
+        "135": "Orange",
+        "183": "Wake",
+        "001": "Alamance"
+      },
       "center": [
         -78.989011,
         35.982684
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "gaston_cleveland_lincoln_mpo": {
       "name": "Gaston-Cleveland-Lincoln MPO",
@@ -1094,13 +1115,24 @@
       "type": "mpo",
       "btsMpoId": "37197403",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "035",
+        "045",
+        "071",
+        "109"
+      ],
+      "countyNames": {
+        "109": "Lincoln",
+        "071": "Gaston",
+        "045": "Cleveland",
+        "035": "Catawba"
+      },
       "center": [
         -81.312383,
         35.442704
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "goldsboro_urban_area_mpo": {
       "name": "Goldsboro Urban Area MPO",
@@ -1108,13 +1140,22 @@
       "type": "mpo",
       "btsMpoId": "37198202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "079",
+        "107",
+        "191"
+      ],
+      "countyNames": {
+        "191": "Wayne",
+        "079": "Greene",
+        "107": "Lenoir"
+      },
       "center": [
         -77.988852,
         35.360554
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "greater_hickory_mpo": {
       "name": "Greater Hickory MPO",
@@ -1122,13 +1163,26 @@
       "type": "mpo",
       "btsMpoId": "37198201",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "003",
+        "023",
+        "027",
+        "035",
+        "109"
+      ],
+      "countyNames": {
+        "027": "Caldwell",
+        "023": "Burke",
+        "003": "Alexander",
+        "035": "Catawba",
+        "109": "Lincoln"
+      },
       "center": [
         -81.458638,
         35.831962
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "greensboro_urban_area_mpo": {
       "name": "Greensboro Urban Area MPO",
@@ -1136,13 +1190,24 @@
       "type": "mpo",
       "btsMpoId": "37196000",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "081",
+        "151",
+        "157"
+      ],
+      "countyNames": {
+        "081": "Guilford",
+        "157": "Rockingham",
+        "001": "Alamance",
+        "151": "Randolph"
+      },
       "center": [
         -79.753132,
         36.097562
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "sandhills_mpo": {
       "name": "Sandhills MPO",
@@ -1150,13 +1215,24 @@
       "type": "mpo",
       "btsMpoId": "37202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "093",
+        "125",
+        "153",
+        "165"
+      ],
+      "countyNames": {
+        "125": "Moore",
+        "093": "Hoke",
+        "153": "Richmond",
+        "165": "Scotland"
+      },
       "center": [
         -79.466295,
         35.138711
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "winston_salem_urban_area_mpo": {
       "name": "Winston Salem Urban Area MPO",
@@ -1164,13 +1240,24 @@
       "type": "mpo",
       "btsMpoId": "37197401",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "059",
+        "067",
+        "169",
+        "197"
+      ],
+      "countyNames": {
+        "067": "Forsyth",
+        "169": "Stokes",
+        "197": "Yadkin",
+        "059": "Davie"
+      },
       "center": [
         -80.306007,
         36.148078
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

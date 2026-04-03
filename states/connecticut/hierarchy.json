@@ -28,11 +28,17 @@
       "zoom": 10,
       "counties": [
         "003",
-        "007"
+        "007",
+        "110",
+        "130",
+        "160"
       ],
       "countyNames": {
         "003": "Hartford (partial)",
-        "007": "Middlesex (partial)"
+        "007": "Middlesex (partial)",
+        "110": "Capitol Planning Region",
+        "130": "Lower Connecticut River Valley Planning Region",
+        "160": "Northwest Hills Planning Region"
       },
       "mapBounds": {
         "sw": [
@@ -56,11 +62,15 @@
       "zoom": 10,
       "counties": [
         "011",
-        "015"
+        "015",
+        "150",
+        "180"
       ],
       "countyNames": {
         "011": "New London",
-        "015": "Windham"
+        "015": "Windham",
+        "150": "Northeastern Connecticut Planning Region",
+        "180": "Southeastern Connecticut Planning Region"
       },
       "mapBounds": {
         "sw": [
@@ -83,12 +93,16 @@
       ],
       "zoom": 10,
       "counties": [
+        "007",
         "009",
-        "007"
+        "140",
+        "170"
       ],
       "countyNames": {
         "009": "New Haven",
-        "007": "Middlesex (partial)"
+        "007": "Middlesex (partial)",
+        "140": "Naugatuck Valley Planning Region",
+        "170": "South Central Connecticut Planning Region"
       },
       "mapBounds": {
         "sw": [
@@ -111,10 +125,14 @@
       ],
       "zoom": 10,
       "counties": [
-        "001"
+        "001",
+        "120",
+        "190"
       ],
       "countyNames": {
-        "001": "Fairfield"
+        "001": "Fairfield",
+        "120": "Greater Bridgeport Planning Region",
+        "190": "Western Connecticut Planning Region"
       },
       "mapBounds": {
         "sw": [
@@ -134,7 +152,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "crcogcrcog": {
+    "crcog_capitol_region_cog": {
       "name": "CRCOG (Capitol Region COG)",
       "shortName": "Capitol Region COG",
       "type": "mpo",
@@ -161,7 +179,7 @@
         ]
       }
     },
-    "mcoggbv": {
+    "metrocog_greater_bridgeport_valley": {
       "name": "MetroCOG (Greater Bridgeport/Valley)",
       "shortName": "Greater Bridgeport/Valley",
       "type": "mpo",
@@ -188,7 +206,7 @@
         ]
       }
     },
-    "scrcogscrcog": {
+    "scrcog_south_central_regional_cog": {
       "name": "SCRCOG (South Central Regional COG)",
       "shortName": "South Central Regional COG",
       "type": "mpo",
@@ -215,7 +233,7 @@
         ]
       }
     },
-    "wcogwctcog": {
+    "westcog_western_ct_cog": {
       "name": "WestCOG (Western CT COG)",
       "shortName": "Western CT COG",
       "type": "mpo",
@@ -244,7 +262,7 @@
         ]
       }
     },
-    "nvcognvcog": {
+    "nvcog_naugatuck_valley_cog": {
       "name": "NVCOG (Naugatuck Valley COG)",
       "shortName": "Naugatuck Valley COG",
       "type": "mpo",
@@ -271,7 +289,7 @@
         ]
       }
     },
-    "lcrvcoglctrvcog": {
+    "lcrvcog_lower_ct_river_valley_cog": {
       "name": "LCRVCOG (Lower CT River Valley COG)",
       "shortName": "Lower CT River Valley COG",
       "type": "mpo",
@@ -298,7 +316,7 @@
         ]
       }
     },
-    "rcog": {
+    "rivercog": {
       "name": "RiverCOG",
       "shortName": "RiverCOG",
       "type": "mpo",
@@ -324,7 +342,7 @@
         ]
       }
     },
-    "sccogsctcog": {
+    "sccog_southeastern_ct_cog": {
       "name": "SCCOG (Southeastern CT COG)",
       "shortName": "Southeastern CT COG",
       "type": "mpo",
@@ -351,7 +369,7 @@
         ]
       }
     },
-    "neccognctcog": {
+    "neccog_northeastern_ct_cog": {
       "name": "NECCOG (Northeastern CT COG)",
       "shortName": "Northeastern CT COG",
       "type": "mpo",
@@ -384,13 +402,22 @@
       "type": "mpo",
       "btsMpoId": "09198100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "120",
+        "140",
+        "190"
+      ],
+      "countyNames": {
+        "190": "Western Connecticut Planning Region",
+        "120": "Greater Bridgeport Planning Region",
+        "140": "Naugatuck Valley Planning Region"
+      },
       "center": [
         -73.506115,
         41.080263
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "housatonic_valley_mpo": {
       "name": "Housatonic Valley MPO",
@@ -398,55 +425,91 @@
       "type": "mpo",
       "btsMpoId": "09197504",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "120",
+        "140",
+        "190"
+      ],
+      "countyNames": {
+        "190": "Western Connecticut Planning Region",
+        "140": "Naugatuck Valley Planning Region",
+        "120": "Greater Bridgeport Planning Region"
+      },
       "center": [
         -73.346346,
         41.450547
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "capital_region_cog_mpo": {
+    "capital_region_cog": {
       "name": "Capital Region COG",
       "shortName": "Capital Region COG",
       "type": "mpo",
       "btsMpoId": "09197501",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "110",
+        "130",
+        "180"
+      ],
+      "countyNames": {
+        "110": "Capitol Planning Region",
+        "130": "Lower Connecticut River Valley Planning Region",
+        "180": "Southeastern Connecticut Planning Region"
+      },
       "center": [
         -72.562535,
         41.763905
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "south_central_regional_council_of_governments_scrcog_mpo": {
+    "south_central_regional_council_of_governments_scrcog": {
       "name": "South Central Regional Council of Governments (SCRCOG)",
       "shortName": "South Central Regional Council of Governments (SCRCOG)",
       "type": "mpo",
       "btsMpoId": "09197401",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "130",
+        "140",
+        "170"
+      ],
+      "countyNames": {
+        "170": "South Central Connecticut Planning Region",
+        "130": "Lower Connecticut River Valley Planning Region",
+        "140": "Naugatuck Valley Planning Region"
+      },
       "center": [
         -72.791971,
         41.315273
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "lower_connecticut_river_valley_cog_mpo": {
+    "lower_connecticut_river_valley_cog": {
       "name": "Lower Connecticut River Valley COG",
       "shortName": "Lower Connecticut River Valley COG",
       "type": "mpo",
       "btsMpoId": "09201499",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "130",
+        "170",
+        "180"
+      ],
+      "countyNames": {
+        "130": "Lower Connecticut River Valley Planning Region",
+        "180": "Southeastern Connecticut Planning Region",
+        "170": "South Central Connecticut Planning Region"
+      },
       "center": [
         -72.446388,
         41.353911
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "greater_bridgeport_valley_mpo": {
       "name": "Greater Bridgeport / Valley MPO",
@@ -454,41 +517,68 @@
       "type": "mpo",
       "btsMpoId": "09198101",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "120",
+        "170",
+        "190"
+      ],
+      "countyNames": {
+        "120": "Greater Bridgeport Planning Region",
+        "190": "Western Connecticut Planning Region",
+        "170": "South Central Connecticut Planning Region"
+      },
       "center": [
         -73.16615,
         41.276215
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "naugatuck_valley_council_of_governments_mpo": {
+    "naugatuck_valley_council_of_governments": {
       "name": "Naugatuck Valley Council of Governments",
       "shortName": "Naugatuck Valley Council of Governments",
       "type": "mpo",
       "btsMpoId": "09197502",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "140",
+        "160",
+        "170"
+      ],
+      "countyNames": {
+        "140": "Naugatuck Valley Planning Region",
+        "170": "South Central Connecticut Planning Region",
+        "160": "Northwest Hills Planning Region"
+      },
       "center": [
         -73.089898,
         41.547118
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "southeastern_connecticut_council_of_governments_secog_mpo": {
+    "southeastern_connecticut_council_of_governments_secog": {
       "name": "Southeastern Connecticut Council of Governments (SECOG)",
       "shortName": "Southeastern Connecticut Council of Governments (SECOG)",
       "type": "mpo",
       "btsMpoId": "09197402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "130",
+        "150",
+        "180"
+      ],
+      "countyNames": {
+        "180": "Southeastern Connecticut Planning Region",
+        "130": "Lower Connecticut River Valley Planning Region",
+        "150": "Northeastern Connecticut Planning Region"
+      },
       "center": [
         -72.102344,
         41.421136
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

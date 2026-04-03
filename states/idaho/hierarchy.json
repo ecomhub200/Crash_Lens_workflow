@@ -256,7 +256,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "compasscpaswi": {
+    "compass_community_planning_association_of_sw_idaho": {
       "name": "COMPASS (Community Planning Association of SW Idaho)",
       "shortName": "Community Planning Association of SW Idaho",
       "type": "mpo",
@@ -285,7 +285,7 @@
         ]
       }
     },
-    "bmpobmpo": {
+    "bmpo_bonneville_mpo": {
       "name": "BMPO (Bonneville MPO)",
       "shortName": "Bonneville MPO",
       "type": "mpo",
@@ -312,7 +312,7 @@
         ]
       }
     },
-    "btpobtpo": {
+    "btpo_bannock_transportation_planning_organization": {
       "name": "BTPO (Bannock Transportation Planning Organization)",
       "shortName": "Bannock Transportation Planning Organization",
       "type": "mpo",
@@ -339,7 +339,7 @@
         ]
       }
     },
-    "kmpokmpo": {
+    "kmpo_kootenai_mpo": {
       "name": "KMPO (Kootenai MPO)",
       "shortName": "Kootenai MPO",
       "type": "mpo",
@@ -366,7 +366,7 @@
         ]
       }
     },
-    "lcvmpo": {
+    "lewis_clark_valley_mpo": {
       "name": "Lewis-Clark Valley MPO",
       "shortName": "Lewis-Clark Valley",
       "type": "mpo",
@@ -393,19 +393,28 @@
         ]
       }
     },
-    "community_planning_association_of_southwest_idaho_mpo": {
+    "community_planning_association_of_southwest_idaho": {
       "name": "Community Planning Association of Southwest Idaho",
       "shortName": "Community Planning Association of Southwest Idaho",
       "type": "mpo",
       "btsMpoId": "16197700",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "001",
+        "027",
+        "075"
+      ],
+      "countyNames": {
+        "027": "Canyon",
+        "001": "Ada",
+        "075": "Payette"
+      },
       "center": [
         -116.582563,
         43.520441
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "magic_valley_mpo": {
       "name": "Magic Valley MPO",
@@ -413,13 +422,22 @@
       "type": "mpo",
       "btsMpoId": "16202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "053",
+        "063",
+        "083"
+      ],
+      "countyNames": {
+        "053": "Jerome",
+        "083": "Twin Falls",
+        "063": "Lincoln"
+      },
       "center": [
         -114.37791,
         42.612748
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

@@ -422,7 +422,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mlr": {
+    "metroplan_little_rock": {
       "name": "Metroplan (Little Rock)",
       "shortName": "Little Rock",
       "type": "mpo",
@@ -459,7 +459,7 @@
         ]
       }
     },
-    "nwarpc": {
+    "nw_arkansas_regional_planning_commission": {
       "name": "NW Arkansas Regional Planning Commission",
       "shortName": "NW Arkansas Regional Planning Commission",
       "type": "mpo",
@@ -490,7 +490,7 @@
         ]
       }
     },
-    "fmpofs": {
+    "frontier_mpo_fort_smith": {
       "name": "Frontier MPO (Fort Smith)",
       "shortName": "Fort Smith",
       "type": "mpo",
@@ -519,7 +519,7 @@
         ]
       }
     },
-    "jats": {
+    "jonesboro_area_transportation_study": {
       "name": "Jonesboro Area Transportation Study",
       "shortName": "Jonesboro Area Transportation Study",
       "type": "mpo",
@@ -546,7 +546,7 @@
         ]
       }
     },
-    "wmats": {
+    "west_memphis_area_transportation_study": {
       "name": "West Memphis Area Transportation Study",
       "shortName": "West Memphis Area Transportation Study",
       "type": "mpo",
@@ -573,7 +573,7 @@
         ]
       }
     },
-    "tlmpohs": {
+    "tri_lakes_mpo_hot_springs": {
       "name": "Tri-Lakes MPO (Hot Springs)",
       "shortName": "Hot Springs",
       "type": "mpo",
@@ -600,7 +600,7 @@
         ]
       }
     },
-    "sarpcpb": {
+    "southeast_arkansas_regional_planning_commission_pine_bluff": {
       "name": "Southeast Arkansas Regional Planning Commission (Pine Bluff)",
       "shortName": "Pine Bluff",
       "type": "mpo",
@@ -627,7 +627,7 @@
         ]
       }
     },
-    "tmpo": {
+    "texarkana_mpo": {
       "name": "Texarkana MPO",
       "shortName": "Texarkana",
       "type": "mpo",
@@ -654,61 +654,97 @@
         ]
       }
     },
-    "central_arkansas_regional_transportation_study_mpo": {
+    "central_arkansas_regional_transportation_study": {
       "name": "Central Arkansas Regional Transportation Study",
       "shortName": "Central Arkansas Regional Transportation Study",
       "type": "mpo",
       "btsMpoId": "05197400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "045",
+        "085",
+        "119"
+      ],
+      "countyNames": {
+        "045": "Faulkner",
+        "119": "Pulaski",
+        "085": "Lonoke"
+      },
       "center": [
         -92.24171,
         34.970388
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "northwest_arkansas_regional_planning_commission_mpo": {
+    "northwest_arkansas_regional_planning_commission": {
       "name": "Northwest Arkansas Regional Planning Commission",
       "shortName": "Northwest Arkansas Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "05198200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "015",
+        "143"
+      ],
+      "countyNames": {
+        "007": "Benton",
+        "015": "Carroll",
+        "143": "Washington"
+      },
       "center": [
         -94.038031,
         36.396226
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "west_memphis_marion_area_transportation_study_mpo": {
+    "west_memphis_marion_area_transportation_study": {
       "name": "West Memphis-Marion Area Transportation Study",
       "shortName": "West Memphis-Marion Transportation Study",
       "type": "mpo",
       "btsMpoId": "05198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "035",
+        "037",
+        "123"
+      ],
+      "countyNames": {
+        "035": "Crittenden",
+        "037": "Cross",
+        "123": "St. Francis"
+      },
       "center": [
         -90.135621,
         35.180041
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "northeast_arkansas_regional_transportation_planning_commission_mpo": {
+    "northeast_arkansas_regional_transportation_planning_commission": {
       "name": "Northeast Arkansas Regional Transportation Planning Commission",
       "shortName": "Northeast Arkansas Regional Transportation Planning Commission",
       "type": "mpo",
       "btsMpoId": "05200302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "031",
+        "055",
+        "111"
+      ],
+      "countyNames": {
+        "031": "Craighead",
+        "055": "Greene",
+        "111": "Poinsett"
+      },
       "center": [
         -90.669189,
         35.864121
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

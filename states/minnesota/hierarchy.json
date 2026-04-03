@@ -72,9 +72,13 @@
         "029",
         "035",
         "057",
+        "069",
         "077",
         "087",
+        "089",
         "097",
+        "113",
+        "125",
         "135",
         "153",
         "159"
@@ -90,7 +94,11 @@
         "097": "Morrison",
         "135": "Roseau",
         "153": "Todd",
-        "159": "Wadena"
+        "159": "Wadena",
+        "069": "Kittson",
+        "089": "Marshall",
+        "113": "Pennington",
+        "125": "Red Lake"
       },
       "mapBounds": {
         "sw": [
@@ -382,7 +390,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mctc": {
+    "metropolitan_council_twin_cities": {
       "name": "Metropolitan Council (Twin Cities)",
       "shortName": "Twin Cities",
       "type": "mpo",
@@ -421,7 +429,7 @@
         ]
       }
     },
-    "rocog": {
+    "rochester_olmsted_cog": {
       "name": "Rochester-Olmsted COG",
       "shortName": "Rochester-Olmsted COG",
       "type": "mpo",
@@ -448,7 +456,7 @@
         ]
       }
     },
-    "scapo": {
+    "st_cloud_apo": {
       "name": "St. Cloud APO",
       "shortName": "St. Cloud APO",
       "type": "mpo",
@@ -479,7 +487,7 @@
         ]
       }
     },
-    "fmmcog": {
+    "fargo_moorhead_metropolitan_cog": {
       "name": "Fargo-Moorhead Metropolitan COG",
       "shortName": "Fargo-Moorhead",
       "type": "mpo",
@@ -506,7 +514,7 @@
         ]
       }
     },
-    "micd": {
+    "metropolitan_interstate_council_duluth": {
       "name": "Metropolitan Interstate Council (Duluth)",
       "shortName": "Duluth",
       "type": "mpo",
@@ -533,7 +541,7 @@
         ]
       }
     },
-    "mnmapo": {
+    "mankato_north_mankato_apo": {
       "name": "Mankato/North Mankato APO",
       "shortName": "Mankato/North Mankato APO",
       "type": "mpo",
@@ -562,7 +570,7 @@
         ]
       }
     },
-    "lcapc": {
+    "la_crosse_area_planning_committee": {
       "name": "La Crosse Area Planning Committee",
       "shortName": "La Crosse Area Planning Committee",
       "type": "mpo",
@@ -589,33 +597,53 @@
         ]
       }
     },
-    "mankato_north_mankato_area_planning_organization_mpo": {
+    "mankato_north_mankato_area_planning_organization": {
       "name": "Mankato / North Mankato Area Planning Organization",
       "shortName": "Mankato / North Mankato Planning Organization",
       "type": "mpo",
       "btsMpoId": "27201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013",
+        "079",
+        "103",
+        "161"
+      ],
+      "countyNames": {
+        "013": "Blue Earth",
+        "103": "Nicollet",
+        "079": "Le Sueur",
+        "161": "Waseca"
+      },
       "center": [
         -93.982434,
         44.178602
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "st_cloud_area_planning_organization_mpo": {
+    "st_cloud_area_planning_organization": {
       "name": "St. Cloud Area Planning Organization",
       "shortName": "St. Cloud Planning Organization",
       "type": "mpo",
       "btsMpoId": "27197000",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "141",
+        "145"
+      ],
+      "countyNames": {
+        "009": "Benton",
+        "145": "Stearns",
+        "141": "Sherburne"
+      },
       "center": [
         -94.187842,
         45.609293
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

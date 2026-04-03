@@ -93,9 +93,11 @@
         "021",
         "023",
         "033",
+        "073",
         "079",
         "107",
         "125",
+        "133",
         "141",
         "153",
         "163",
@@ -109,6 +111,7 @@
         "225",
         "235",
         "237",
+        "245",
         "265",
         "289",
         "301",
@@ -142,7 +145,10 @@
         "301": "Warren",
         "303": "Washington",
         "317": "Wilkes",
-        "319": "Wilkinson"
+        "319": "Wilkinson",
+        "073": "Columbia",
+        "133": "Greene",
+        "245": "Richmond"
       },
       "mapBounds": {
         "sw": [
@@ -166,6 +172,7 @@
       "zoom": 8,
       "counties": [
         "045",
+        "053",
         "055",
         "077",
         "113",
@@ -175,12 +182,14 @@
         "145",
         "149",
         "171",
+        "197",
         "199",
         "215",
         "223",
         "231",
         "233",
         "255",
+        "259",
         "263",
         "269",
         "285",
@@ -206,7 +215,10 @@
         "263": "Talbot",
         "269": "Taylor",
         "285": "Troup",
-        "293": "Upson"
+        "293": "Upson",
+        "053": "Chattahoochee",
+        "197": "Marion",
+        "259": "Stewart"
       },
       "mapBounds": {
         "sw": [
@@ -230,25 +242,38 @@
       "zoom": 8,
       "counties": [
         "003",
+        "007",
         "017",
         "019",
         "027",
+        "037",
+        "061",
         "065",
         "069",
         "071",
         "075",
         "081",
+        "087",
         "091",
         "093",
+        "095",
+        "099",
         "101",
+        "131",
         "155",
         "173",
         "177",
         "185",
         "193",
+        "201",
+        "205",
+        "239",
+        "243",
         "249",
+        "253",
         "261",
         "271",
+        "273",
         "275",
         "277",
         "287",
@@ -284,7 +309,20 @@
         "307": "Webster",
         "309": "Wheeler",
         "315": "Wilcox",
-        "321": "Worth"
+        "321": "Worth",
+        "007": "Baker",
+        "037": "Calhoun",
+        "061": "Clay",
+        "087": "Decatur",
+        "095": "Dougherty",
+        "099": "Early",
+        "131": "Grady",
+        "201": "Miller",
+        "205": "Mitchell",
+        "239": "Quitman",
+        "243": "Randolph",
+        "253": "Seminole",
+        "273": "Terrell"
       },
       "mapBounds": {
         "sw": [
@@ -427,12 +465,15 @@
       ],
       "zoom": 9,
       "counties": [
+        "035",
         "063",
         "089",
         "097",
         "121",
         "135",
         "151",
+        "159",
+        "211",
         "217",
         "247",
         "297"
@@ -446,7 +487,10 @@
         "151": "Henry",
         "217": "Newton",
         "247": "Rockdale",
-        "297": "Walton"
+        "297": "Walton",
+        "035": "Butts",
+        "159": "Jasper",
+        "211": "Morgan"
       },
       "mapBounds": {
         "sw": [
@@ -466,7 +510,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "arcarc": {
+    "arc_atlanta_regional_commission": {
       "name": "ARC (Atlanta Regional Commission)",
       "shortName": "Atlanta Regional Commission",
       "type": "mpo",
@@ -513,7 +557,7 @@
         ]
       }
     },
-    "crmpos": {
+    "coastal_region_mpo_savannah": {
       "name": "Coastal Region MPO (Savannah)",
       "shortName": "Savannah",
       "type": "mpo",
@@ -544,7 +588,7 @@
         ]
       }
     },
-    "arts": {
+    "augusta_regional_transportation_study": {
       "name": "Augusta Regional Transportation Study",
       "shortName": "Augusta Regional Transportation Study",
       "type": "mpo",
@@ -575,7 +619,7 @@
         ]
       }
     },
-    "mats": {
+    "macon_area_transportation_study": {
       "name": "Macon Area Transportation Study",
       "shortName": "Macon Area Transportation Study",
       "type": "mpo",
@@ -606,7 +650,7 @@
         ]
       }
     },
-    "cpcmpo": {
+    "columbus_phenix_city_mpo": {
       "name": "Columbus-Phenix City MPO",
       "shortName": "Columbus-Phenix City",
       "type": "mpo",
@@ -635,7 +679,7 @@
         ]
       }
     },
-    "dartsa": {
+    "dougherty_area_regional_transportation_study_albany": {
       "name": "Dougherty Area Regional Transportation Study (Albany)",
       "shortName": "Albany",
       "type": "mpo",
@@ -662,7 +706,7 @@
         ]
       }
     },
-    "wrats": {
+    "warner_robins_area_transportation_study": {
       "name": "Warner Robins Area Transportation Study",
       "shortName": "Warner Robins Area Transportation Study",
       "type": "mpo",
@@ -691,7 +735,7 @@
         ]
       }
     },
-    "vlmpo": {
+    "valdosta_lowndes_mpo": {
       "name": "Valdosta-Lowndes MPO",
       "shortName": "Valdosta-Lowndes",
       "type": "mpo",
@@ -718,7 +762,7 @@
         ]
       }
     },
-    "bats": {
+    "brunswick_area_transportation_study": {
       "name": "Brunswick Area Transportation Study",
       "shortName": "Brunswick Area Transportation Study",
       "type": "mpo",
@@ -745,7 +789,7 @@
         ]
       }
     },
-    "hampo": {
+    "hinesville_area_mpo": {
       "name": "Hinesville Area MPO",
       "shortName": "Hinesville Area",
       "type": "mpo",
@@ -774,7 +818,7 @@
         ]
       }
     },
-    "ghmpo": {
+    "gainesville_hall_mpo": {
       "name": "Gainesville-Hall MPO",
       "shortName": "Gainesville-Hall",
       "type": "mpo",
@@ -801,33 +845,59 @@
         ]
       }
     },
-    "dougherty_area_regional_transportation_study_darts_mpo": {
+    "dougherty_area_regional_transportation_study_darts": {
       "name": "Dougherty Area Regional Transportation Study (DARTS)",
       "shortName": "Dougherty Regional Transportation Study (DARTS)",
       "type": "mpo",
       "btsMpoId": "13196500",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "037",
+        "095",
+        "177",
+        "273",
+        "321"
+      ],
+      "countyNames": {
+        "095": "Dougherty",
+        "177": "Lee",
+        "273": "Terrell",
+        "321": "Worth",
+        "007": "Baker",
+        "037": "Calhoun"
+      },
       "center": [
         -84.231796,
         31.602617
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "rome_floyd_county_metropolitan_planning_organization_mpo": {
+    "rome_floyd_county_metropolitan_planning_organization": {
       "name": "Rome-Floyd County Metropolitan Planning Organization",
       "shortName": "Rome-Floyd County",
       "type": "mpo",
       "btsMpoId": "13198302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "055",
+        "115",
+        "129"
+      ],
+      "countyNames": {
+        "115": "Floyd",
+        "055": "Chattooga",
+        "129": "Gordon",
+        "015": "Bartow"
+      },
       "center": [
         -85.166125,
         34.368367
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "greater_dalton_mpo": {
       "name": "Greater Dalton MPO",
@@ -835,27 +905,57 @@
       "type": "mpo",
       "btsMpoId": "13200302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "047",
+        "129",
+        "213",
+        "295",
+        "313"
+      ],
+      "countyNames": {
+        "313": "Whitfield",
+        "213": "Murray",
+        "047": "Catoosa",
+        "129": "Gordon",
+        "295": "Walker"
+      },
       "center": [
         -84.914292,
         34.821824
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "madison_athens_clarke_oconee_regional_transportation_study_macorts_mpo": {
+    "madison_athens_clarke_oconee_regional_transportation_study_macorts": {
       "name": "Madison Athens-Clarke Oconee Regional Transportation Study (MACORTS)",
       "shortName": "Madison Athens-Clarke Oconee Regional Transportation Study (MACORTS)",
       "type": "mpo",
       "btsMpoId": "13196900",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013",
+        "059",
+        "157",
+        "195",
+        "219",
+        "221",
+        "297"
+      ],
+      "countyNames": {
+        "059": "Clarke",
+        "219": "Oconee",
+        "195": "Madison",
+        "157": "Jackson",
+        "221": "Oglethorpe",
+        "013": "Barrow",
+        "297": "Walton"
+      },
       "center": [
         -83.371981,
         33.941464
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "cartersville_bartow_metropolitan_planning_organization_cb_mpo": {
       "name": "Cartersville-Bartow Metropolitan Planning Organization (CB-MPO)",
@@ -863,13 +963,26 @@
       "type": "mpo",
       "btsMpoId": "13201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "015",
+        "057",
+        "115",
+        "129",
+        "223"
+      ],
+      "countyNames": {
+        "015": "Bartow",
+        "129": "Gordon",
+        "057": "Cherokee",
+        "223": "Paulding",
+        "115": "Floyd"
+      },
       "center": [
         -84.828029,
         34.228886
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

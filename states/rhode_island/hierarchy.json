@@ -58,7 +58,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "spcrimpo": {
+    "state_planning_council_rhode_island_mpo": {
       "name": "State Planning Council / Rhode Island MPO",
       "shortName": "State Planning Council / Rhode Island",
       "type": "mpo",

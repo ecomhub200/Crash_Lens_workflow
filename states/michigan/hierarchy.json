@@ -81,9 +81,11 @@
       ],
       "zoom": 7,
       "counties": [
+        "007",
         "009",
         "019",
         "029",
+        "031",
         "035",
         "039",
         "047",
@@ -98,9 +100,11 @@
         "107",
         "113",
         "117",
+        "119",
         "123",
         "127",
         "133",
+        "135",
         "137",
         "141",
         "143",
@@ -130,7 +134,11 @@
         "137": "Otsego",
         "141": "Presque Isle",
         "143": "Roscommon",
-        "165": "Wexford"
+        "165": "Wexford",
+        "007": "Alpena",
+        "031": "Cheboygan",
+        "119": "Montmorency",
+        "135": "Oscoda"
       },
       "mapBounds": {
         "sw": [
@@ -189,6 +197,7 @@
       ],
       "zoom": 8,
       "counties": [
+        "001",
         "011",
         "017",
         "037",
@@ -216,7 +225,8 @@
         "145": "Saginaw",
         "151": "Sanilac",
         "155": "Shiawassee",
-        "157": "Tuscola"
+        "157": "Tuscola",
+        "001": "Alcona"
       },
       "mapBounds": {
         "sw": [
@@ -354,7 +364,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "semcogsmcog": {
+    "semcog_southeast_michigan_cog": {
       "name": "SEMCOG (Southeast Michigan COG)",
       "shortName": "Southeast Michigan COG",
       "type": "mpo",
@@ -393,7 +403,7 @@
         ]
       }
     },
-    "gvmcgvmc": {
+    "gvmc_grand_valley_metropolitan_council": {
       "name": "GVMC (Grand Valley Metropolitan Council)",
       "shortName": "Grand Valley Metropolitan Council",
       "type": "mpo",
@@ -422,7 +432,7 @@
         ]
       }
     },
-    "gcmpcf": {
+    "genesee_county_metropolitan_planning_commission_flint": {
       "name": "Genesee County Metropolitan Planning Commission (Flint)",
       "shortName": "Flint",
       "type": "mpo",
@@ -449,7 +459,7 @@
         ]
       }
     },
-    "kats": {
+    "kalamazoo_area_transportation_study": {
       "name": "Kalamazoo Area Transportation Study",
       "shortName": "Kalamazoo Area Transportation Study",
       "type": "mpo",
@@ -476,7 +486,7 @@
         ]
       }
     },
-    "tcrpcl": {
+    "tri_county_regional_planning_commission_lansing": {
       "name": "Tri-County Regional Planning Commission (Lansing)",
       "shortName": "Lansing",
       "type": "mpo",
@@ -507,7 +517,7 @@
         ]
       }
     },
-    "sampo": {
+    "saginaw_area_mpo": {
       "name": "Saginaw Area MPO",
       "shortName": "Saginaw Area",
       "type": "mpo",
@@ -534,7 +544,7 @@
         ]
       }
     },
-    "bcampo": {
+    "battle_creek_area_mpo": {
       "name": "Battle Creek Area MPO",
       "shortName": "Battle Creek Area",
       "type": "mpo",
@@ -561,7 +571,7 @@
         ]
       }
     },
-    "nwmcogtc": {
+    "nwmcog_traverse_city": {
       "name": "NWMCOG (Traverse City)",
       "shortName": "Traverse City",
       "type": "mpo",
@@ -588,7 +598,7 @@
         ]
       }
     },
-    "smpcbh": {
+    "southwest_michigan_planning_commission_benton_harbor": {
       "name": "Southwest Michigan Planning Commission (Benton Harbor)",
       "shortName": "Benton Harbor",
       "type": "mpo",
@@ -615,7 +625,7 @@
         ]
       }
     },
-    "jampo": {
+    "jackson_area_mpo": {
       "name": "Jackson Area MPO",
       "shortName": "Jackson Area",
       "type": "mpo",
@@ -642,7 +652,7 @@
         ]
       }
     },
-    "mampo": {
+    "muskegon_area_mpo": {
       "name": "Muskegon Area MPO",
       "shortName": "Muskegon Area",
       "type": "mpo",
@@ -669,103 +679,168 @@
         ]
       }
     },
-    "macatawa_area_coordinating_council_mpo": {
+    "macatawa_area_coordinating_council": {
       "name": "Macatawa Area Coordinating Council",
       "shortName": "Macatawa Coordinating Council",
       "type": "mpo",
       "btsMpoId": "26199100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "005",
+        "081",
+        "139"
+      ],
+      "countyNames": {
+        "139": "Ottawa",
+        "005": "Allegan",
+        "081": "Kent"
+      },
       "center": [
         -86.136311,
         42.809617
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "west_michigan_shoreline_regional_development_commission_mpo": {
+    "west_michigan_shoreline_regional_development_commission": {
       "name": "West Michigan Shoreline Regional Development Commission",
       "shortName": "West Michigan Shoreline Regional Development Commission",
       "type": "mpo",
       "btsMpoId": "26197302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "121",
+        "127",
+        "139"
+      ],
+      "countyNames": {
+        "121": "Muskegon",
+        "139": "Ottawa",
+        "127": "Oceana"
+      },
       "center": [
         -86.280615,
         43.274052
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "region_2_planning_commission_mpo": {
+    "region_2_planning_commission": {
       "name": "Region 2 Planning Commission",
       "shortName": "Region 2 Planning Commission",
       "type": "mpo",
       "btsMpoId": "26196800",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "059",
+        "065",
+        "075",
+        "091"
+      ],
+      "countyNames": {
+        "075": "Jackson",
+        "059": "Hillsdale",
+        "065": "Ingham",
+        "091": "Lenawee"
+      },
       "center": [
         -84.426214,
         42.224004
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "saginaw_metropolitan_area_transportation_study_mpo": {
+    "saginaw_metropolitan_area_transportation_study": {
       "name": "Saginaw Metropolitan Area Transportation Study",
       "shortName": "Saginaw Metropolitan Transportation Study",
       "type": "mpo",
       "btsMpoId": "26196500",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "017",
+        "049",
+        "145"
+      ],
+      "countyNames": {
+        "145": "Saginaw",
+        "049": "Genesee",
+        "017": "Bay"
+      },
       "center": [
         -83.986985,
         43.327589
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "midland_area_transportation_study_mpo": {
+    "midland_area_transportation_study": {
       "name": "Midland Area Transportation Study",
       "shortName": "Midland Transportation Study",
       "type": "mpo",
       "btsMpoId": "26201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "017",
+        "051",
+        "111"
+      ],
+      "countyNames": {
+        "111": "Midland",
+        "017": "Bay",
+        "051": "Gladwin"
+      },
       "center": [
         -84.355757,
         43.657239
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "bay_city_area_transportation_study_mpo": {
+    "bay_city_area_transportation_study": {
       "name": "Bay City Area Transportation Study",
       "shortName": "Bay City Transportation Study",
       "type": "mpo",
       "btsMpoId": "26197404",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "017",
+        "145",
+        "157"
+      ],
+      "countyNames": {
+        "017": "Bay",
+        "157": "Tuscola",
+        "145": "Saginaw"
+      },
       "center": [
         -83.830168,
         43.634439
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "traverse_transportation_coordinating_initiative_mpo": {
+    "traverse_transportation_coordinating_initiative": {
       "name": "Traverse Transportation Coordinating Initiative",
       "shortName": "Traverse Transportation Coordinating Initiative",
       "type": "mpo",
       "btsMpoId": "26202300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "055",
+        "079"
+      ],
+      "countyNames": {
+        "055": "Grand Traverse",
+        "009": "Antrim",
+        "079": "Kalkaska"
+      },
       "center": [
         -85.567679,
         44.834748
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

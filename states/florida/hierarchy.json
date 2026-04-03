@@ -326,7 +326,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mdtpo": {
+    "miami_dade_tpo": {
       "name": "Miami-Dade TPO",
       "shortName": "Miami-Dade TPO",
       "type": "mpo",
@@ -353,7 +353,7 @@
         ]
       }
     },
-    "bmpo": {
+    "broward_mpo": {
       "name": "Broward MPO",
       "shortName": "Broward",
       "type": "mpo",
@@ -380,7 +380,7 @@
         ]
       }
     },
-    "pbtpa": {
+    "palm_beach_tpa": {
       "name": "Palm Beach TPA",
       "shortName": "Palm Beach TPA",
       "type": "mpo",
@@ -407,7 +407,7 @@
         ]
       }
     },
-    "metroplano": {
+    "metroplan_orlando": {
       "name": "METROPLAN Orlando",
       "shortName": "METROPLAN Orlando",
       "type": "mpo",
@@ -438,7 +438,7 @@
         ]
       }
     },
-    "hmpo": {
+    "hillsborough_mpo": {
       "name": "Hillsborough MPO",
       "shortName": "Hillsborough",
       "type": "mpo",
@@ -465,7 +465,7 @@
         ]
       }
     },
-    "fp": {
+    "forward_pinellas": {
       "name": "Forward Pinellas",
       "shortName": "Forward Pinellas",
       "type": "mpo",
@@ -492,7 +492,7 @@
         ]
       }
     },
-    "nftpoj": {
+    "north_florida_tpo_jacksonville": {
       "name": "North Florida TPO (Jacksonville)",
       "shortName": "Jacksonville",
       "type": "mpo",
@@ -525,7 +525,7 @@
         ]
       }
     },
-    "lcmpo": {
+    "lee_county_mpo": {
       "name": "Lee County MPO",
       "shortName": "Lee County",
       "type": "mpo",
@@ -552,7 +552,7 @@
         ]
       }
     },
-    "smmpo": {
+    "sarasota_manatee_mpo": {
       "name": "Sarasota-Manatee MPO",
       "shortName": "Sarasota-Manatee",
       "type": "mpo",
@@ -581,7 +581,7 @@
         ]
       }
     },
-    "ptpo": {
+    "polk_tpo": {
       "name": "Polk TPO",
       "shortName": "Polk TPO",
       "type": "mpo",
@@ -608,7 +608,7 @@
         ]
       }
     },
-    "sctpo": {
+    "space_coast_tpo": {
       "name": "Space Coast TPO",
       "shortName": "Space Coast TPO",
       "type": "mpo",
@@ -635,7 +635,7 @@
         ]
       }
     },
-    "rstpod": {
+    "river_to_sea_tpo_daytona": {
       "name": "River to Sea TPO (Daytona)",
       "shortName": "Daytona",
       "type": "mpo",
@@ -664,7 +664,7 @@
         ]
       }
     },
-    "pcmpo": {
+    "pasco_county_mpo": {
       "name": "Pasco County MPO",
       "shortName": "Pasco County",
       "type": "mpo",
@@ -691,7 +691,7 @@
         ]
       }
     },
-    "lsmpo": {
+    "lake_sumter_mpo": {
       "name": "Lake-Sumter MPO",
       "shortName": "Lake-Sumter",
       "type": "mpo",
@@ -720,7 +720,7 @@
         ]
       }
     },
-    "omtpo": {
+    "ocala_marion_tpo": {
       "name": "Ocala-Marion TPO",
       "shortName": "Ocala-Marion TPO",
       "type": "mpo",
@@ -747,7 +747,7 @@
         ]
       }
     },
-    "cmpo": {
+    "collier_mpo": {
       "name": "Collier MPO",
       "shortName": "Collier",
       "type": "mpo",
@@ -774,7 +774,7 @@
         ]
       }
     },
-    "ccpgmpo": {
+    "charlotte_county_punta_gorda_mpo": {
       "name": "Charlotte County-Punta Gorda MPO",
       "shortName": "Charlotte County-Punta Gorda",
       "type": "mpo",
@@ -801,7 +801,7 @@
         ]
       }
     },
-    "hcmpo": {
+    "hernando_citrus_mpo": {
       "name": "Hernando/Citrus MPO",
       "shortName": "Hernando/Citrus",
       "type": "mpo",
@@ -830,7 +830,7 @@
         ]
       }
     },
-    "crtpat": {
+    "capital_region_tpa_tallahassee": {
       "name": "Capital Region TPA (Tallahassee)",
       "shortName": "Tallahassee",
       "type": "mpo",
@@ -863,7 +863,7 @@
         ]
       }
     },
-    "fatpop": {
+    "florida_alabama_tpo_pensacola": {
       "name": "Florida-Alabama TPO (Pensacola)",
       "shortName": "Pensacola",
       "type": "mpo",
@@ -892,7 +892,7 @@
         ]
       }
     },
-    "owtpo": {
+    "okaloosa_walton_tpo": {
       "name": "Okaloosa-Walton TPO",
       "shortName": "Okaloosa-Walton TPO",
       "type": "mpo",
@@ -921,7 +921,7 @@
         ]
       }
     },
-    "bctpo": {
+    "bay_county_tpo": {
       "name": "Bay County TPO",
       "shortName": "Bay County TPO",
       "type": "mpo",
@@ -948,7 +948,7 @@
         ]
       }
     },
-    "gmtpo": {
+    "gainesville_mtpo": {
       "name": "Gainesville MTPO",
       "shortName": "Gainesville MTPO",
       "type": "mpo",
@@ -975,7 +975,7 @@
         ]
       }
     },
-    "mcmpo": {
+    "martin_county_mpo": {
       "name": "Martin County MPO",
       "shortName": "Martin County",
       "type": "mpo",
@@ -1002,7 +1002,7 @@
         ]
       }
     },
-    "sltpo": {
+    "st_lucie_tpo": {
       "name": "St. Lucie TPO",
       "shortName": "St. Lucie TPO",
       "type": "mpo",
@@ -1029,7 +1029,7 @@
         ]
       }
     },
-    "ircmpo": {
+    "indian_river_county_mpo": {
       "name": "Indian River County MPO",
       "shortName": "Indian River County",
       "type": "mpo",
@@ -1056,7 +1056,7 @@
         ]
       }
     },
-    "hrtpo": {
+    "heartland_regional_tpo": {
       "name": "Heartland Regional TPO",
       "shortName": "Heartland Regional TPO",
       "type": "mpo",
@@ -1091,103 +1091,143 @@
         ]
       }
     },
-    "bay_county_transportation_planning_organization_mpo": {
+    "bay_county_transportation_planning_organization": {
       "name": "Bay County Transportation Planning Organization",
       "shortName": "Bay County Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12198002",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "005",
+        "013",
+        "133"
+      ],
+      "countyNames": {
+        "005": "Bay",
+        "133": "Washington",
+        "013": "Calhoun"
+      },
       "center": [
         -85.603112,
         30.309765
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "capital_region_transportation_planning_agency_mpo": {
+    "capital_region_transportation_planning_agency": {
       "name": "Capital Region Transportation Planning Agency",
       "shortName": "Capital Region Transportation Planning Agency",
       "type": "mpo",
       "btsMpoId": "12197706",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "065",
+        "073",
+        "129"
+      ],
+      "countyNames": {
+        "129": "Wakulla",
+        "073": "Leon",
+        "065": "Jefferson"
+      },
       "center": [
         -84.285121,
         30.251124
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "florida_alabama_transportation_planning_organization_mpo": {
+    "florida_alabama_transportation_planning_organization": {
       "name": "Florida-Alabama Transportation Planning Organization",
       "shortName": "Florida-Alabama Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12197000",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "033",
+        "091",
+        "113"
+      ],
+      "countyNames": {
+        "113": "Santa Rosa",
+        "033": "Escambia",
+        "091": "Okaloosa"
+      },
       "center": [
         -87.159661,
         30.615745
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "okaloosa_walton_transportation_planning_organization_mpo": {
+    "okaloosa_walton_transportation_planning_organization": {
       "name": "Okaloosa-Walton Transportation Planning Organization",
       "shortName": "Okaloosa-Walton Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12198001",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "091",
+        "113",
+        "131"
+      ],
+      "countyNames": {
+        "091": "Okaloosa",
+        "131": "Walton",
+        "113": "Santa Rosa"
+      },
       "center": [
         -86.465306,
         30.678445
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "st_lucie_transportation_planning_organization_mpo": {
+    "st_lucie_transportation_planning_organization": {
       "name": "St. Lucie Transportation Planning Organization",
       "shortName": "St. Lucie Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12198203",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "061",
+        "085",
+        "111"
+      ],
+      "countyNames": {
+        "111": "St. Lucie",
+        "061": "Indian River",
+        "085": "Martin"
+      },
       "center": [
         -80.326431,
         27.462807
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "north_florida_transportation_planning_organization_mpo": {
+    "north_florida_transportation_planning_organization": {
       "name": "North Florida Transportation Planning Organization",
       "shortName": "North Florida Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12197802",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "031",
+        "089"
+      ],
+      "countyNames": {
+        "031": "Duval",
+        "089": "Nassau",
+        "019": "Clay"
+      },
       "center": [
         -81.672508,
         30.343357
       ],
-      "zoom": 10
-    },
-    "ocalamarion_mpo": {
-      "name": "Ocala/Marion TPO",
-      "shortName": "Ocala/Marion TPO",
-      "type": "mpo",
-      "btsMpoId": "12198100",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -82.271097,
-        29.110292
-      ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "martin_mpo": {
       "name": "Martin MPO",
@@ -1195,69 +1235,89 @@
       "type": "mpo",
       "btsMpoId": "12199301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "085",
+        "099",
+        "111"
+      ],
+      "countyNames": {
+        "085": "Martin",
+        "111": "St. Lucie",
+        "099": "Palm Beach"
+      },
       "center": [
         -80.225784,
         27.131503
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "polk_county_transportation_planning_organization_mpo": {
+    "polk_county_transportation_planning_organization": {
       "name": "Polk County Transportation Planning Organization",
       "shortName": "Polk County Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12197805",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "097",
+        "105"
+      ],
+      "countyNames": {
+        "105": "Polk",
+        "097": "Osceola"
+      },
       "center": [
         -81.503662,
         27.997103
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "sarasotamanatee_mpo": {
-      "name": "Sarasota/Manatee MPO",
-      "shortName": "Sarasota/Manatee",
-      "type": "mpo",
-      "btsMpoId": "12197804",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -82.480492,
-        27.348185
-      ],
-      "zoom": 10
-    },
-    "space_coast_transportation_planning_organization_mpo": {
+    "space_coast_transportation_planning_organization": {
       "name": "Space Coast Transportation Planning Organization",
       "shortName": "Space Coast Transportation Planning Organization",
       "type": "mpo",
       "btsMpoId": "12198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "097",
+        "117"
+      ],
+      "countyNames": {
+        "009": "Brevard",
+        "117": "Seminole",
+        "097": "Osceola"
+      },
       "center": [
         -80.756231,
         28.404762
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "volusia_flagler_mpo": {
+    "volusia_flagler_tpo": {
       "name": "Volusia-Flagler TPO",
       "shortName": "Volusia-Flagler TPO",
       "type": "mpo",
       "btsMpoId": "12197705",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "035",
+        "117",
+        "127"
+      ],
+      "countyNames": {
+        "127": "Volusia",
+        "035": "Flagler",
+        "117": "Seminole"
+      },
       "center": [
         -81.181019,
         29.189241
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

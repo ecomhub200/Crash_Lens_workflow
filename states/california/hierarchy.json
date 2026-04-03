@@ -430,7 +430,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "scagscag": {
+    "scag_southern_california_association_of_governments": {
       "name": "SCAG (Southern California Association of Governments)",
       "shortName": "Southern California Association of Governments",
       "type": "mpo",
@@ -467,7 +467,7 @@
         ]
       }
     },
-    "mtcmtc": {
+    "mtc_metropolitan_transportation_commission": {
       "name": "MTC (Metropolitan Transportation Commission)",
       "shortName": "Metropolitan Transportation Commission",
       "type": "mpo",
@@ -510,7 +510,7 @@
         ]
       }
     },
-    "sandagsdag": {
+    "sandag_san_diego_association_of_governments": {
       "name": "SANDAG (San Diego Association of Governments)",
       "shortName": "San Diego Association of Governments",
       "type": "mpo",
@@ -537,7 +537,7 @@
         ]
       }
     },
-    "sacogsacog": {
+    "sacog_sacramento_area_cog": {
       "name": "SACOG (Sacramento Area COG)",
       "shortName": "Sacramento Area COG",
       "type": "mpo",
@@ -574,7 +574,7 @@
         ]
       }
     },
-    "fcog": {
+    "fresno_cog": {
       "name": "Fresno COG",
       "shortName": "Fresno COG",
       "type": "mpo",
@@ -601,7 +601,7 @@
         ]
       }
     },
-    "kcog": {
+    "kern_cog": {
       "name": "Kern COG",
       "shortName": "Kern COG",
       "type": "mpo",
@@ -628,7 +628,7 @@
         ]
       }
     },
-    "sjcog": {
+    "san_joaquin_cog": {
       "name": "San Joaquin COG",
       "shortName": "San Joaquin COG",
       "type": "mpo",
@@ -655,7 +655,7 @@
         ]
       }
     },
-    "scog": {
+    "stanislaus_cog": {
       "name": "Stanislaus COG",
       "shortName": "Stanislaus COG",
       "type": "mpo",
@@ -682,7 +682,7 @@
         ]
       }
     },
-    "tcag": {
+    "tulare_county_association_of_governments": {
       "name": "Tulare County Association of Governments",
       "shortName": "Tulare County Association of Governments",
       "type": "mpo",
@@ -709,7 +709,7 @@
         ]
       }
     },
-    "ambagambag": {
+    "ambag_association_of_monterey_bay_area_governments": {
       "name": "AMBAG (Association of Monterey Bay Area Governments)",
       "shortName": "Association of Monterey Bay Area Governments",
       "type": "mpo",
@@ -740,7 +740,7 @@
         ]
       }
     },
-    "sbcagsbcag": {
+    "sbcag_santa_barbara_county_association_of_governments": {
       "name": "SBCAG (Santa Barbara County Association of Governments)",
       "shortName": "Santa Barbara County Association of Governments",
       "type": "mpo",
@@ -767,7 +767,7 @@
         ]
       }
     },
-    "slocog": {
+    "san_luis_obispo_cog": {
       "name": "San Luis Obispo COG",
       "shortName": "San Luis Obispo COG",
       "type": "mpo",
@@ -794,7 +794,7 @@
         ]
       }
     },
-    "mcag": {
+    "merced_county_association_of_governments": {
       "name": "Merced County Association of Governments",
       "shortName": "Merced County Association of Governments",
       "type": "mpo",
@@ -821,7 +821,7 @@
         ]
       }
     },
-    "kcag": {
+    "kings_county_association_of_governments": {
       "name": "Kings County Association of Governments",
       "shortName": "Kings County Association of Governments",
       "type": "mpo",
@@ -848,7 +848,7 @@
         ]
       }
     },
-    "mctc": {
+    "madera_county_transportation_commission": {
       "name": "Madera County Transportation Commission",
       "shortName": "Madera County Transportation Commission",
       "type": "mpo",
@@ -875,7 +875,7 @@
         ]
       }
     },
-    "bcag": {
+    "butte_county_association_of_governments": {
       "name": "Butte County Association of Governments",
       "shortName": "Butte County Association of Governments",
       "type": "mpo",
@@ -902,7 +902,7 @@
         ]
       }
     },
-    "srta": {
+    "shasta_regional_transportation_agency": {
       "name": "Shasta Regional Transportation Agency",
       "shortName": "Shasta Regional Transportation Agency",
       "type": "mpo",
@@ -929,19 +929,26 @@
         ]
       }
     },
-    "fresno_council_of_governments_mpo": {
+    "fresno_council_of_governments": {
       "name": "Fresno Council of Governments",
       "shortName": "Fresno Council of Governments",
       "type": "mpo",
       "btsMpoId": "06197202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "039"
+      ],
+      "countyNames": {
+        "019": "Fresno",
+        "039": "Madera"
+      },
       "center": [
         -119.83441,
         36.716553
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

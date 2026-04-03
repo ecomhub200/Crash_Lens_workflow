@@ -129,7 +129,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "ompo": {
+    "oahumpo": {
       "name": "OahuMPO",
       "shortName": "OahuMPO",
       "type": "mpo",
@@ -155,7 +155,7 @@
         ]
       }
     },
-    "mmpo": {
+    "maui_mpo": {
       "name": "Maui MPO",
       "shortName": "Maui",
       "type": "mpo",

@@ -62,6 +62,7 @@
       "zoom": 9,
       "counties": [
         "001",
+        "003",
         "037",
         "047",
         "059",
@@ -76,7 +77,8 @@
         "059": "Laurens",
         "065": "McCormick",
         "071": "Newberry",
-        "081": "Saluda"
+        "081": "Saluda",
+        "003": "Aiken"
       },
       "mapBounds": {
         "sw": [
@@ -282,7 +284,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "chatscats": {
+    "chats_charleston_area_transportation_study": {
       "name": "CHATS (Charleston Area Transportation Study)",
       "shortName": "Charleston Area Transportation Study",
       "type": "mpo",
@@ -313,7 +315,7 @@
         ]
       }
     },
-    "gsatsgpa": {
+    "gsats_greenville_pickens_area": {
       "name": "GSATS (Greenville-Pickens Area)",
       "shortName": "Greenville-Pickens Area",
       "type": "mpo",
@@ -342,7 +344,7 @@
         ]
       }
     },
-    "coatscats": {
+    "coats_columbia_area_transportation_study": {
       "name": "COATS (Columbia Area Transportation Study)",
       "shortName": "Columbia Area Transportation Study",
       "type": "mpo",
@@ -371,7 +373,7 @@
         ]
       }
     },
-    "spatssa": {
+    "spats_spartanburg_area": {
       "name": "SPATS (Spartanburg Area)",
       "shortName": "Spartanburg Area",
       "type": "mpo",
@@ -398,7 +400,7 @@
         ]
       }
     },
-    "rfatsrhfmay": {
+    "rfats_rock_hill_fort_mill_area_york": {
       "name": "RFATS (Rock Hill-Fort Mill Area / York)",
       "shortName": "Rock Hill-Fort Mill Area / York",
       "type": "mpo",
@@ -425,7 +427,7 @@
         ]
       }
     },
-    "anatsaa": {
+    "anats_anderson_area": {
       "name": "ANATS (Anderson Area)",
       "shortName": "Anderson Area",
       "type": "mpo",
@@ -452,7 +454,7 @@
         ]
       }
     },
-    "flatsfa": {
+    "flats_florence_area": {
       "name": "FLATS (Florence Area)",
       "shortName": "Florence Area",
       "type": "mpo",
@@ -479,7 +481,7 @@
         ]
       }
     },
-    "gsatsgsamb": {
+    "gsats_grand_strand_area_myrtle_beach": {
       "name": "GSATS (Grand Strand Area / Myrtle Beach)",
       "shortName": "Grand Strand Area / Myrtle Beach",
       "type": "mpo",
@@ -508,7 +510,7 @@
         ]
       }
     },
-    "latsla": {
+    "lats_lowcountry_area": {
       "name": "LATS (Lowcountry Area)",
       "shortName": "Lowcountry Area",
       "type": "mpo",
@@ -537,7 +539,7 @@
         ]
       }
     },
-    "sampo": {
+    "sumter_area_mpo": {
       "name": "Sumter Area MPO",
       "shortName": "Sumter Area",
       "type": "mpo",
@@ -564,47 +566,72 @@
         ]
       }
     },
-    "grand_strand_area_transportation_study_mpo": {
+    "grand_strand_area_transportation_study": {
       "name": "Grand-Strand Area Transportation Study",
       "shortName": "Grand-Strand Transportation Study",
       "type": "mpo",
       "btsMpoId": "45199200",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "051",
+        "067"
+      ],
+      "countyNames": {
+        "051": "Horry",
+        "067": "Marion"
+      },
       "center": [
         -78.812013,
         33.817826
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "rock_hill_fort_mill_area_transportation_study_mpo": {
+    "rock_hill_fort_mill_area_transportation_study": {
       "name": "Rock Hill-Fort Mill Area Transportation Study",
       "shortName": "Rock Hill-Fort Mill Transportation Study",
       "type": "mpo",
       "btsMpoId": "45198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "023",
+        "057",
+        "091"
+      ],
+      "countyNames": {
+        "091": "York",
+        "023": "Chester",
+        "057": "Lancaster"
+      },
       "center": [
         -80.956884,
         34.939743
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "sumter_urban_area_transportation_study_mpo": {
+    "sumter_urban_area_transportation_study": {
       "name": "Sumter Urban Area Transportation Study",
       "shortName": "Sumter Urban Transportation Study",
       "type": "mpo",
       "btsMpoId": "45199100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "027",
+        "061",
+        "085"
+      ],
+      "countyNames": {
+        "085": "Sumter",
+        "061": "Lee",
+        "027": "Clarendon"
+      },
       "center": [
         -80.400485,
         33.92185
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

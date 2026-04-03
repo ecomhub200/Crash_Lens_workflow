@@ -505,11 +505,12 @@ jobs:
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
           R2_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
+          GZ_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
 
           echo "=========================================="
           echo "Uploading normalized statewide CSV to R2"
           echo "  Local:   $CSV_PATH"
-          echo "  R2:      s3://$R2_BUCKET/$R2_KEY"
+          echo "  R2:      s3://$R2_BUCKET/$GZ_KEY"
           echo "  Records: $TOTAL"
           echo "=========================================="
 
@@ -525,29 +526,35 @@ jobs:
           DATA_CHANGED="true"
 
           if [ "$INCREMENTAL" = "true" ]; then
-            echo "Incremental mode — checking R2..."
-            R2_ETAG=$(aws s3api head-object \
-              --bucket "$R2_BUCKET" --key "$R2_KEY" \
+            echo "Incremental mode — checking R2 (gzipped key)..."
+            # Compare local raw MD5 against metadata stored on the gzipped object
+            R2_META_MD5=$(aws s3api head-object \
+              --bucket "$R2_BUCKET" --key "$GZ_KEY" \
               --endpoint-url "$R2_ENDPOINT" \
-              --query 'ETag' --output text 2>/dev/null || echo "none")
-            R2_MD5=$(echo "$R2_ETAG" | tr -d '"')
-            if [ "$R2_MD5" = "$LOCAL_MD5" ]; then
+              --query 'Metadata.raw_md5' --output text 2>/dev/null || echo "none")
+            if [ "$R2_META_MD5" = "$LOCAL_MD5" ]; then
               echo "Data unchanged — skipping upload and pipeline"
               DATA_CHANGED="false"
-              echo "r2_data_key=$R2_KEY" >> $GITHUB_OUTPUT
+              echo "r2_data_key=$GZ_KEY" >> $GITHUB_OUTPUT
               echo "data_changed=false" >> $GITHUB_OUTPUT
               exit 0
             fi
           fi
 
-          # Upload raw CSV (not gzipped) so it's directly readable when
-          # downloaded from R2. The _state/ path has the gzipped version.
+          # Gzip the CSV to save ~1.1 GB of R2 storage (~5 MB compressed)
+          gzip -k "$CSV_PATH"
+          GZ_PATH="${CSV_PATH}.gz"
+          GZ_SIZE=$(stat -c%s "$GZ_PATH" 2>/dev/null || stat -f%z "$GZ_PATH")
+          echo "  Gzipped: ${GZ_SIZE} bytes ($(( GZ_SIZE / 1048576 ))MB)"
+
           for i in 1 2 3 4; do
-            if aws s3 cp "$CSV_PATH" "s3://$R2_BUCKET/$R2_KEY" \
+            if aws s3 cp "$GZ_PATH" "s3://$R2_BUCKET/$GZ_KEY" \
               --endpoint-url "$R2_ENDPOINT" \
               --content-type "text/csv" \
+              --content-encoding "gzip" \
+              --metadata "raw_md5=$LOCAL_MD5" \
               --only-show-errors; then
-              echo "Upload succeeded (raw CSV)"
+              echo "Upload succeeded (gzipped CSV)"
               break
             fi
             DELAY=$((2 ** i))
@@ -556,7 +563,7 @@ jobs:
           done
 
           SIZE=$(aws s3api head-object \
-            --bucket "$R2_BUCKET" --key "$R2_KEY" \
+            --bucket "$R2_BUCKET" --key "$GZ_KEY" \
             --endpoint-url "$R2_ENDPOINT" \
             --query 'ContentLength' --output text 2>/dev/null || echo "0")
 
@@ -566,8 +573,14 @@ jobs:
           fi
 
           SIZE_MB=$((SIZE / 1048576))
-          echo "Verified: $R2_KEY (${SIZE_MB}MB on R2)"
-          echo "r2_data_key=$R2_KEY" >> $GITHUB_OUTPUT
+          echo "Verified: $GZ_KEY (${SIZE_MB}MB on R2)"
+
+          # Remove the old uncompressed CSV from R2 (saves ~1.1 GB)
+          echo "Removing old uncompressed key: $R2_KEY"
+          aws s3 rm "s3://$R2_BUCKET/$R2_KEY" \
+            --endpoint-url "$R2_ENDPOINT" 2>/dev/null || true
+
+          echo "r2_data_key=$GZ_KEY" >> $GITHUB_OUTPUT
           echo "data_changed=$DATA_CHANGED" >> $GITHUB_OUTPUT
 
       # ── Progress manifest ──

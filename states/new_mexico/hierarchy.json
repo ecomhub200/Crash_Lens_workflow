@@ -60,6 +60,7 @@
       "zoom": 8,
       "counties": [
         "005",
+        "013",
         "015",
         "025",
         "027",
@@ -70,7 +71,8 @@
         "015": "Eddy",
         "025": "Lea",
         "027": "Lincoln",
-        "035": "Otero"
+        "035": "Otero",
+        "013": "Do\u00f1a Ana"
       },
       "mapBounds": {
         "sw": [
@@ -130,10 +132,13 @@
       "zoom": 8,
       "counties": [
         "007",
+        "009",
+        "011",
         "019",
         "021",
         "033",
         "037",
+        "041",
         "047",
         "059"
       ],
@@ -144,7 +149,10 @@
         "033": "Mora",
         "037": "Quay",
         "047": "San Miguel",
-        "059": "Union"
+        "059": "Union",
+        "009": "Curry",
+        "011": "De Baca",
+        "041": "Roosevelt"
       },
       "mapBounds": {
         "sw": [
@@ -226,7 +234,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mrcoga": {
+    "mid_region_cog_albuquerque": {
       "name": "Mid-Region COG (Albuquerque)",
       "shortName": "Albuquerque",
       "type": "mpo",
@@ -259,7 +267,7 @@
         ]
       }
     },
-    "mvmpolc": {
+    "mesilla_valley_mpo_las_cruces": {
       "name": "Mesilla Valley MPO (Las Cruces)",
       "shortName": "Las Cruces",
       "type": "mpo",
@@ -268,8 +276,14 @@
         35.6869
       ],
       "zoom": 10,
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "028",
+        "049"
+      ],
+      "countyNames": {
+        "049": "Santa Fe",
+        "028": "Los Alamos"
+      },
       "btsAcronym": "MVMC",
       "mapBounds": {
         "sw": [
@@ -280,9 +294,10 @@
           35.9,
           -105.65
         ]
-      }
+      },
+      "_autoAssigned": true
     },
-    "sfmpo": {
+    "santa_fe_mpo": {
       "name": "Santa Fe MPO",
       "shortName": "Santa Fe",
       "type": "mpo",
@@ -309,7 +324,7 @@
         ]
       }
     },
-    "fmpo": {
+    "farmington_mpo": {
       "name": "Farmington MPO",
       "shortName": "Farmington",
       "type": "mpo",
@@ -336,7 +351,7 @@
         ]
       }
     },
-    "epmponm": {
+    "el_paso_mpo_nm_portion": {
       "name": "El Paso MPO (NM portion)",
       "shortName": "NM portion",
       "type": "mpo",
@@ -345,8 +360,12 @@
         31.7619
       ],
       "zoom": 10,
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Do\u00f1a Ana"
+      },
       "btsAcronym": "EPMP",
       "mapBounds": {
         "sw": [
@@ -357,7 +376,8 @@
           32.0,
           -106.15
         ]
-      }
+      },
+      "_autoAssigned": true
     }
   },
   "allCounties": {

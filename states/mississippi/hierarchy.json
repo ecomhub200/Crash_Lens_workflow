@@ -336,7 +336,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "cmpddj": {
+    "central_mississippi_planning_development_district_jackson": {
       "name": "Central Mississippi Planning & Development District (Jackson)",
       "shortName": "Jackson",
       "type": "mpo",
@@ -367,7 +367,7 @@
         ]
       }
     },
-    "grpcgb": {
+    "gulf_regional_planning_commission_gulfport_biloxi": {
       "name": "Gulf Regional Planning Commission (Gulfport-Biloxi)",
       "shortName": "Gulfport-Biloxi",
       "type": "mpo",
@@ -398,7 +398,7 @@
         ]
       }
     },
-    "hpflmpo": {
+    "hattiesburg_petal_forrest_lamar_mpo": {
       "name": "Hattiesburg-Petal-Forrest-Lamar MPO",
       "shortName": "Hattiesburg-Petal-Forrest-Lamar",
       "type": "mpo",
@@ -427,7 +427,7 @@
         ]
       }
     },
-    "muampo": {
+    "memphis_urban_area_mpo": {
       "name": "Memphis Urban Area MPO",
       "shortName": "Memphis Urban Area",
       "type": "mpo",

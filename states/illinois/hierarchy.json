@@ -149,10 +149,11 @@
         "071",
         "073",
         "095",
-        "123",
         "109",
+        "123",
         "131",
         "143",
+        "161",
         "175",
         "179",
         "187",
@@ -170,7 +171,8 @@
         "175": "Stark",
         "179": "Tazewell",
         "187": "Warren",
-        "203": "Woodford"
+        "203": "Woodford",
+        "161": "Rock Island"
       },
       "mapBounds": {
         "sw": [
@@ -446,7 +448,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "cmapcmap": {
+    "cmap_chicago_metropolitan_agency_for_planning": {
       "name": "CMAP (Chicago Metropolitan Agency for Planning)",
       "shortName": "Chicago Metropolitan Agency for Planning",
       "type": "mpo",
@@ -485,7 +487,7 @@
         ]
       }
     },
-    "ewgcogsl": {
+    "east_west_gateway_cog_st_louis_metro": {
       "name": "East-West Gateway COG (St. Louis metro)",
       "shortName": "St. Louis metro",
       "type": "mpo",
@@ -520,7 +522,7 @@
         ]
       }
     },
-    "tcrpcp": {
+    "tri_county_regional_planning_commission_peoria": {
       "name": "Tri-County Regional Planning Commission (Peoria)",
       "shortName": "Peoria",
       "type": "mpo",
@@ -551,7 +553,7 @@
         ]
       }
     },
-    "sats": {
+    "springfield_area_transportation_study": {
       "name": "Springfield Area Transportation Study",
       "shortName": "Springfield Area Transportation Study",
       "type": "mpo",
@@ -578,7 +580,7 @@
         ]
       }
     },
-    "cuuats": {
+    "champaign_urbana_urbanized_area_transportation_study": {
       "name": "Champaign-Urbana Urbanized Area Transportation Study",
       "shortName": "Champaign-Urbana Urbanized Area Transportation Study",
       "type": "mpo",
@@ -605,7 +607,7 @@
         ]
       }
     },
-    "bsrcqc": {
+    "bi_state_regional_commission_quad_cities": {
       "name": "Bi-State Regional Commission (Quad Cities)",
       "shortName": "Quad Cities",
       "type": "mpo",
@@ -634,7 +636,7 @@
         ]
       }
     },
-    "duats": {
+    "decatur_urbanized_area_transportation_study": {
       "name": "Decatur Urbanized Area Transportation Study",
       "shortName": "Decatur Urbanized Area Transportation Study",
       "type": "mpo",
@@ -661,7 +663,7 @@
         ]
       }
     },
-    "bnats": {
+    "bloomington_normal_area_transportation_study": {
       "name": "Bloomington-Normal Area Transportation Study",
       "shortName": "Bloomington-Normal Area Transportation Study",
       "type": "mpo",
@@ -688,7 +690,7 @@
         ]
       }
     },
-    "rmpo": {
+    "rockford_mpo": {
       "name": "Rockford MPO",
       "shortName": "Rockford",
       "type": "mpo",
@@ -717,7 +719,7 @@
         ]
       }
     },
-    "kats": {
+    "kankakee_area_transportation_study": {
       "name": "Kankakee Area Transportation Study",
       "shortName": "Kankakee Area Transportation Study",
       "type": "mpo",
@@ -744,7 +746,7 @@
         ]
       }
     },
-    "simpoc": {
+    "southern_illinois_mpo_carbondale": {
       "name": "Southern Illinois MPO (Carbondale)",
       "shortName": "Carbondale",
       "type": "mpo",
@@ -773,75 +775,122 @@
         ]
       }
     },
-    "region_one_planning_council_r1pc_mpo": {
+    "region_one_planning_council_r1pc": {
       "name": "Region One Planning Council (R1PC)",
       "shortName": "Region One Planning Council (R1PC)",
       "type": "mpo",
       "btsMpoId": "17196401",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "141",
+        "201"
+      ],
+      "countyNames": {
+        "201": "Winnebago",
+        "007": "Boone",
+        "141": "Ogle"
+      },
       "center": [
         -89.077164,
         42.247348
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "dekalb_sycamore_area_transportation_study_mpo": {
+    "dekalb_sycamore_area_transportation_study": {
       "name": "DeKalb Sycamore Area Transportation Study",
       "shortName": "DeKalb Sycamore Transportation Study",
       "type": "mpo",
       "btsMpoId": "17200302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "037",
+        "089",
+        "111"
+      ],
+      "countyNames": {
+        "037": "DeKalb",
+        "089": "Kane",
+        "007": "Boone",
+        "111": "McHenry"
+      },
       "center": [
         -88.709847,
         41.96466
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "mclean_county_regional_planning_commission_mpo": {
+    "mclean_county_regional_planning_commission": {
       "name": "McLean County Regional Planning Commission",
       "shortName": "McLean County Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "17196700",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "039",
+        "113",
+        "203"
+      ],
+      "countyNames": {
+        "113": "McLean",
+        "039": "De Witt",
+        "203": "Woodford"
+      },
       "center": [
         -88.968583,
         40.478461
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "champaign_county_regional_planning_commission_mpo": {
+    "champaign_county_regional_planning_commission": {
       "name": "Champaign County Regional Planning Commission",
       "shortName": "Champaign County Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "17196402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "041",
+        "147"
+      ],
+      "countyNames": {
+        "019": "Champaign",
+        "147": "Piatt",
+        "041": "Douglas"
+      },
       "center": [
         -88.303151,
         40.149609
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "kankakee_county_regional_planning_commission_mpo": {
+    "kankakee_county_regional_planning_commission": {
       "name": "Kankakee County Regional Planning Commission",
       "shortName": "Kankakee County Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "17198300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "075",
+        "091",
+        "197"
+      ],
+      "countyNames": {
+        "091": "Kankakee",
+        "197": "Will",
+        "075": "Iroquois"
+      },
       "center": [
         -87.828694,
         41.14214
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

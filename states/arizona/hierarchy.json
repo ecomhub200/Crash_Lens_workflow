@@ -225,10 +225,12 @@
       ],
       "zoom": 8,
       "counties": [
+        "012",
         "027"
       ],
       "countyNames": {
-        "027": "Yuma"
+        "027": "Yuma",
+        "012": "La Paz"
       },
       "mapBounds": {
         "sw": [
@@ -248,7 +250,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "magmag": {
+    "mag_maricopa_association_of_governments": {
       "name": "MAG (Maricopa Association of Governments)",
       "shortName": "Maricopa Association of Governments",
       "type": "mpo",
@@ -275,7 +277,7 @@
         ]
       }
     },
-    "pagpag": {
+    "pag_pima_association_of_governments": {
       "name": "PAG (Pima Association of Governments)",
       "shortName": "Pima Association of Governments",
       "type": "mpo",
@@ -302,7 +304,7 @@
         ]
       }
     },
-    "fmpo": {
+    "flagstaff_mpo": {
       "name": "Flagstaff MPO",
       "shortName": "Flagstaff",
       "type": "mpo",
@@ -329,7 +331,7 @@
         ]
       }
     },
-    "ympo": {
+    "yuma_mpo": {
       "name": "Yuma MPO",
       "shortName": "Yuma",
       "type": "mpo",
@@ -356,7 +358,7 @@
         ]
       }
     },
-    "cympo": {
+    "central_yavapai_mpo_cympo": {
       "name": "Central Yavapai MPO (CYMPO)",
       "shortName": "CYMPO",
       "type": "mpo",
@@ -383,7 +385,7 @@
         ]
       }
     },
-    "scmpo": {
+    "sun_corridor_mpo": {
       "name": "Sun Corridor MPO",
       "shortName": "Sun Corridor",
       "type": "mpo",
@@ -410,7 +412,7 @@
         ]
       }
     },
-    "svmpo": {
+    "sierra_vista_mpo": {
       "name": "Sierra Vista MPO",
       "shortName": "Sierra Vista",
       "type": "mpo",
@@ -437,7 +439,7 @@
         ]
       }
     },
-    "lhmpo": {
+    "lake_havasu_mpo": {
       "name": "Lake Havasu MPO",
       "shortName": "Lake Havasu",
       "type": "mpo",
@@ -464,21 +466,26 @@
         ]
       }
     },
-    "metroplan_mpo": {
+    "metroplan": {
       "name": "MetroPlan",
       "shortName": "MetroPlan",
       "type": "mpo",
       "btsMpoId": "04199600",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "005"
+      ],
+      "countyNames": {
+        "005": "Coconino"
+      },
       "center": [
         -111.561143,
         35.17988
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "bullhead_city_metropolitan_planning_organization_mpo": {
+    "bullhead_city_metropolitan_planning_organization": {
       "name": "Bullhead City Metropolitan Planning Organization",
       "shortName": "Bullhead City",
       "type": "mpo",

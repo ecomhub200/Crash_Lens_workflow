@@ -352,7 +352,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "impo": {
+    "indianapolis_mpo": {
       "name": "Indianapolis MPO",
       "shortName": "Indianapolis",
       "type": "mpo",
@@ -393,7 +393,7 @@
         ]
       }
     },
-    "nirpcnwirpc": {
+    "nirpc_nw_indiana_regional_planning_commission": {
       "name": "NIRPC (NW Indiana Regional Planning Commission)",
       "shortName": "NW Indiana Regional Planning Commission",
       "type": "mpo",
@@ -424,7 +424,7 @@
         ]
       }
     },
-    "fwacmpo": {
+    "fort_wayne_allen_county_mpo": {
       "name": "Fort Wayne-Allen County MPO",
       "shortName": "Fort Wayne-Allen County",
       "type": "mpo",
@@ -451,7 +451,7 @@
         ]
       }
     },
-    "empo": {
+    "evansville_mpo": {
       "name": "Evansville MPO",
       "shortName": "Evansville",
       "type": "mpo",
@@ -480,7 +480,7 @@
         ]
       }
     },
-    "macogsb": {
+    "michiana_area_cog_south_bend": {
       "name": "Michiana Area COG (South Bend)",
       "shortName": "South Bend",
       "type": "mpo",
@@ -509,7 +509,7 @@
         ]
       }
     },
-    "apctcl": {
+    "area_plan_commission_of_tippecanoe_county_lafayette": {
       "name": "Area Plan Commission of Tippecanoe County (Lafayette)",
       "shortName": "Lafayette",
       "type": "mpo",
@@ -536,7 +536,7 @@
         ]
       }
     },
-    "bmcmpo": {
+    "bloomington_monroe_county_mpo": {
       "name": "Bloomington/Monroe County MPO",
       "shortName": "Bloomington/Monroe County",
       "type": "mpo",
@@ -563,7 +563,7 @@
         ]
       }
     },
-    "thampo": {
+    "terre_haute_area_mpo": {
       "name": "Terre Haute Area MPO",
       "shortName": "Terre Haute Area",
       "type": "mpo",
@@ -590,7 +590,7 @@
         ]
       }
     },
-    "dmmpo": {
+    "delaware_muncie_mpo": {
       "name": "Delaware-Muncie MPO",
       "shortName": "Delaware-Muncie",
       "type": "mpo",
@@ -617,7 +617,7 @@
         ]
       }
     },
-    "krpda": {
+    "kentuckiana_regional_planning_development_agency": {
       "name": "Kentuckiana Regional Planning & Development Agency",
       "shortName": "Kentuckiana Regional Planning & Development Agency",
       "type": "mpo",
@@ -646,7 +646,7 @@
         ]
       }
     },
-    "khcmpo": {
+    "kokomo_howard_county_mpo": {
       "name": "Kokomo/Howard County MPO",
       "shortName": "Kokomo/Howard County",
       "type": "mpo",
@@ -673,7 +673,7 @@
         ]
       }
     },
-    "ampo": {
+    "anderson_mpo": {
       "name": "Anderson MPO",
       "shortName": "Anderson",
       "type": "mpo",
@@ -700,7 +700,7 @@
         ]
       }
     },
-    "campo": {
+    "columbus_area_mpo": {
       "name": "Columbus Area MPO",
       "shortName": "Columbus Area",
       "type": "mpo",
@@ -727,61 +727,107 @@
         ]
       }
     },
-    "madison_county_cog_mpo": {
+    "madison_county_cog": {
       "name": "Madison County COG",
       "shortName": "Madison County COG",
       "type": "mpo",
       "btsMpoId": "18196900",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "035",
+        "057",
+        "059",
+        "065",
+        "095"
+      ],
+      "countyNames": {
+        "095": "Madison",
+        "057": "Hamilton",
+        "059": "Hancock",
+        "065": "Henry",
+        "035": "Delaware"
+      },
       "center": [
         -85.731118,
         40.063364
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "northwest_indiana_regional_planning_commission_mpo": {
+    "northwest_indiana_regional_planning_commission": {
       "name": "Northwest Indiana Regional Planning Commission",
       "shortName": "Northwest Indiana Regional Planning Commission",
       "type": "mpo",
       "btsMpoId": "18197501",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "089",
+        "091",
+        "127"
+      ],
+      "countyNames": {
+        "127": "Porter",
+        "091": "LaPorte",
+        "089": "Lake"
+      },
       "center": [
         -87.031695,
         41.508151
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "kokomo_howard_county_governmental_coordinating_council_mpo": {
+    "kokomo_howard_county_governmental_coordinating_council": {
       "name": "Kokomo & Howard County Governmental Coordinating Council",
       "shortName": "Kokomo & Howard County Governmental Coordinating Council",
       "type": "mpo",
       "btsMpoId": "18198202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "017",
+        "023",
+        "067",
+        "103",
+        "159"
+      ],
+      "countyNames": {
+        "067": "Howard",
+        "159": "Tipton",
+        "103": "Miami",
+        "023": "Clinton",
+        "017": "Cass"
+      },
       "center": [
         -86.133093,
         40.473984
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "northeastern_indiana_regional_coordinating_council_mpo": {
+    "northeastern_indiana_regional_coordinating_council": {
       "name": "Northeastern Indiana Regional Coordinating Council",
       "shortName": "Northeastern Indiana Regional Coordinating Council",
       "type": "mpo",
       "btsMpoId": "18197402",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "003",
+        "033",
+        "113",
+        "183"
+      ],
+      "countyNames": {
+        "003": "Allen",
+        "033": "DeKalb",
+        "183": "Whitley",
+        "113": "Noble"
+      },
       "center": [
         -85.082865,
         41.1246
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

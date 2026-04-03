@@ -386,7 +386,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "kyovahmpo": {
+    "kyova_huntington_mpo": {
       "name": "KYOVA (Huntington MPO)",
       "shortName": "Huntington MPO",
       "type": "mpo",
@@ -415,7 +415,7 @@
         ]
       }
     },
-    "kattskvc": {
+    "katts_kanawha_valley_charleston": {
       "name": "KATTS (Kanawha Valley / Charleston)",
       "shortName": "Kanawha Valley / Charleston",
       "type": "mpo",
@@ -444,7 +444,7 @@
         ]
       }
     },
-    "mmmpo": {
+    "morgantown_monongalia_mpo": {
       "name": "Morgantown-Monongalia MPO",
       "shortName": "Morgantown-Monongalia",
       "type": "mpo",
@@ -471,7 +471,7 @@
         ]
       }
     },
-    "wwwmpop": {
+    "wood_washington_wirt_mpo_parkersburg": {
       "name": "Wood-Washington-Wirt MPO (Parkersburg)",
       "shortName": "Parkersburg",
       "type": "mpo",
@@ -498,7 +498,7 @@
         ]
       }
     },
-    "bhjmpows": {
+    "bhj_mpo_weirton_steubenville_area": {
       "name": "BHJ MPO (Weirton-Steubenville area)",
       "shortName": "Weirton-Steubenville area",
       "type": "mpo",
@@ -527,7 +527,7 @@
         ]
       }
     },
-    "hepmpo": {
+    "hagerstown_eastern_panhandle_mpo": {
       "name": "Hagerstown/Eastern Panhandle MPO",
       "shortName": "Hagerstown/Eastern Panhandle",
       "type": "mpo",
@@ -556,89 +556,126 @@
         ]
       }
     },
-    "kyova_interstate_planning_commission_mpo": {
+    "kyova_interstate_planning_commission": {
       "name": "KYOVA Interstate Planning Commission",
       "shortName": "KYOVA Interstate Planning Commission",
       "type": "mpo",
       "btsMpoId": "54197400",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "011",
+        "043",
+        "099"
+      ],
+      "countyNames": {
+        "099": "Wayne",
+        "011": "Cabell",
+        "043": "Lincoln"
+      },
       "center": [
         -82.667543,
         38.392754
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "regional_intergovernmental_council_mpo": {
+    "regional_intergovernmental_council": {
       "name": "Regional Intergovernmental Council",
       "shortName": "Regional Intergovernmental Council",
       "type": "mpo",
       "btsMpoId": "54197501",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "005",
+        "039",
+        "043",
+        "079"
+      ],
+      "countyNames": {
+        "039": "Kanawha",
+        "005": "Boone",
+        "043": "Lincoln",
+        "079": "Putnam"
+      },
       "center": [
         -81.62231,
         38.194155
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "fayetteraleigh_frmpo_mpo": {
+    "fayette_raleigh_mpo_frmpo": {
       "name": "Fayette/Raleigh MPO (FRMPO)",
       "shortName": "Fayette/Raleigh (FRMPO)",
       "type": "mpo",
       "btsMpoId": "54201300",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "019",
+        "081",
+        "089",
+        "109"
+      ],
+      "countyNames": {
+        "081": "Raleigh",
+        "019": "Fayette",
+        "089": "Summers",
+        "109": "Wyoming"
+      },
       "center": [
         -81.184074,
         37.878248
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "wood_washington_wirt_interstate_planning_commission_mpo": {
+    "wood_washington_wirt_interstate_planning_commission": {
       "name": "Wood-Washington-Wirt Interstate Planning Commission",
       "shortName": "Wood-Washington-Wirt Interstate Planning Commission",
       "type": "mpo",
       "btsMpoId": "54197503",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "073",
+        "085",
+        "105",
+        "107"
+      ],
+      "countyNames": {
+        "107": "Wood",
+        "073": "Pleasants",
+        "105": "Wirt",
+        "085": "Ritchie"
+      },
       "center": [
         -81.442977,
         39.274561
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "morgantown_monongalia_mpo": {
-      "name": "Morgantown Monongalia MPO",
-      "shortName": "Morgantown Monongalia",
-      "type": "mpo",
-      "btsMpoId": "54200300",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -80.152542,
-        39.616273
-      ],
-      "zoom": 10
-    },
-    "belmont_ohio_marshall_transportation_study_mpo": {
+    "belmont_ohio_marshall_transportation_study": {
       "name": "Belmont-Ohio-Marshall Transportation Study",
       "shortName": "Belmont-Ohio-Marshall Transportation Study",
       "type": "mpo",
       "btsMpoId": "54197502",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "009",
+        "051",
+        "069"
+      ],
+      "countyNames": {
+        "051": "Marshall",
+        "069": "Ohio",
+        "009": "Brooke"
+      },
       "center": [
         -80.860463,
         39.998567
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

@@ -152,7 +152,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "pacts": {
+    "portland_area_comprehensive_transportation_system_pacts": {
       "name": "Portland Area Comprehensive Transportation System (PACTS)",
       "shortName": "PACTS",
       "type": "mpo",
@@ -179,7 +179,7 @@
         ]
       }
     },
-    "kacts": {
+    "kittery_area_comprehensive_transportation_study_kacts": {
       "name": "Kittery Area Comprehensive Transportation Study (KACTS)",
       "shortName": "KACTS",
       "type": "mpo",
@@ -206,7 +206,7 @@
         ]
       }
     },
-    "bacts": {
+    "bangor_area_comprehensive_transportation_system_bacts": {
       "name": "Bangor Area Comprehensive Transportation System (BACTS)",
       "shortName": "BACTS",
       "type": "mpo",
@@ -233,7 +233,7 @@
         ]
       }
     },
-    "atrc": {
+    "androscoggin_transportation_resource_center_atrc": {
       "name": "Androscoggin Transportation Resource Center (ATRC)",
       "shortName": "ATRC",
       "type": "mpo",
@@ -260,19 +260,24 @@
         ]
       }
     },
-    "kittery_area_comprehensive_transportation_system_mpo": {
+    "kittery_area_comprehensive_transportation_system": {
       "name": "Kittery Area Comprehensive Transportation System",
       "shortName": "Kittery Comprehensive Transportation System",
       "type": "mpo",
       "btsMpoId": "23198202",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "031"
+      ],
+      "countyNames": {
+        "031": "York"
+      },
       "center": [
         -70.720751,
         43.157252
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {

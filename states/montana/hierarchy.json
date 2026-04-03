@@ -280,7 +280,7 @@
     "labelPlural": "Metropolitan Planning Organizations"
   },
   "tprs": {
-    "mmpo": {
+    "missoula_mpo": {
       "name": "Missoula MPO",
       "shortName": "Missoula",
       "type": "mpo",
@@ -307,7 +307,7 @@
         ]
       }
     },
-    "gfpd": {
+    "great_falls_planning_department": {
       "name": "Great Falls Planning Department",
       "shortName": "Great Falls Planning Department",
       "type": "mpo",
@@ -334,7 +334,7 @@
         ]
       }
     },
-    "ycpbb": {
+    "yellowstone_county_planning_board_billings": {
       "name": "Yellowstone County Planning Board (Billings)",
       "shortName": "Billings",
       "type": "mpo",
@@ -361,33 +361,45 @@
         ]
       }
     },
-    "great_falls_planning_and_community_development_department_mpo": {
+    "great_falls_planning_and_community_development_department": {
       "name": "Great Falls Planning and Community Development Department",
       "shortName": "Great Falls Planning and Community Development Department",
       "type": "mpo",
       "btsMpoId": "30197100",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "013"
+      ],
+      "countyNames": {
+        "013": "Cascade"
+      },
       "center": [
         -111.248156,
         47.477741
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
-    "gallatin_valley_metropolitan_planning_organization_mpo": {
+    "gallatin_valley_metropolitan_planning_organization": {
       "name": "Gallatin Valley Metropolitan Planning Organization",
       "shortName": "Gallatin Valley",
       "type": "mpo",
       "btsMpoId": "30202301",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "031",
+        "067"
+      ],
+      "countyNames": {
+        "031": "Gallatin",
+        "067": "Park"
+      },
       "center": [
         -111.141436,
         45.699139
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     },
     "greater_helena_area_mpo": {
       "name": "Greater Helena Area MPO",
@@ -395,13 +407,20 @@
       "type": "mpo",
       "btsMpoId": "30202302",
       "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
+      "counties": [
+        "007",
+        "043"
+      ],
+      "countyNames": {
+        "007": "Broadwater",
+        "043": "Jefferson"
+      },
       "center": [
         -111.97638,
         46.626988
       ],
-      "zoom": 10
+      "zoom": 10,
+      "_autoAssigned": true
     }
   },
   "allCounties": {
