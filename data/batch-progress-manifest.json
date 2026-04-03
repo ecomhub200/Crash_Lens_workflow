@@ -301,9 +301,21 @@
           "workflow_run": "23932345773",
           "pipeline": "delaware-batch-all-jurisdictions",
           "normalized": true
+        },
+        {
+          "timestamp": "2026-04-03T23:46:18.302777+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/_state/statewide_all_roads.parquet.gz",
+          "data_changed": true,
+          "workflow_run": "23965913038",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true
         }
       ],
-      "last_updated": "2026-04-03T03:46:09.652645+00:00"
+      "last_updated": "2026-04-03T23:46:18.302766+00:00"
     }
   }
 }
