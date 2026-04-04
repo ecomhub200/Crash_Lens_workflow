@@ -233,6 +233,43 @@ def name_to_r2_key(name: str) -> str:
     return key
 
 
+def _normalize_jurisdiction_names(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    """Pre-merge jurisdiction names that would slugify to the same R2 key.
+    Prevents data loss from overwrite when two name variants exist."""
+    if column not in df.columns:
+        return df
+    col = df[column].fillna("").astype(str).str.strip()
+    populated = col != ""
+    if not populated.any():
+        return df
+
+    # Build slug → canonical name mapping (first occurrence wins)
+    slug_to_name = {}
+    for name in col[populated].unique():
+        slug = name_to_r2_key(name)
+        if slug and slug not in slug_to_name:
+            slug_to_name[slug] = name
+
+    # Build name → canonical name mapping
+    name_to_canonical = {}
+    for name in col[populated].unique():
+        slug = name_to_r2_key(name)
+        if slug and slug in slug_to_name:
+            name_to_canonical[name] = slug_to_name[slug]
+
+    # Check for merges
+    merged = {k: v for k, v in name_to_canonical.items() if k != v}
+    if merged:
+        df = df.copy()
+        for old_name, new_name in merged.items():
+            mask = df[column] == old_name
+            if mask.any():
+                df.loc[mask, column] = new_name
+                print(f"      Merged '{old_name}' → '{new_name}' ({mask.sum():,} rows)")
+
+    return df
+
+
 def strip_juris_prefix(name: str) -> str:
     """
     Strip VDOT-style "NNN. " numeric prefix from Physical Juris Name.
@@ -417,6 +454,7 @@ def split_region_level(
     all_counts: Dict[str, Dict[str, int]] = {}
 
     if strategy == "column":
+        df = _normalize_jurisdiction_names(df, "DOT District")
         groups = df[df["DOT District"].fillna("").str.strip() != ""].groupby("DOT District")
         for region_name, region_df in groups:
             region_key = name_to_r2_key(str(region_name))
@@ -476,6 +514,7 @@ def split_mpo_level(
     all_counts: Dict[str, Dict[str, int]] = {}
 
     if strategy == "column":
+        df = _normalize_jurisdiction_names(df, "MPO Name")
         groups = df[df["MPO Name"].fillna("").str.strip() != ""].groupby("MPO Name")
         for mpo_name, mpo_df in groups:
             mpo_key = name_to_r2_key(str(mpo_name))
@@ -534,6 +573,7 @@ def split_planning_district_level(
     all_counts: Dict[str, Dict[str, int]] = {}
 
     if strategy == "column":
+        df = _normalize_jurisdiction_names(df, "Planning District")
         groups = df[df["Planning District"].fillna("").str.strip() != ""].groupby("Planning District")
         for pd_name, pd_df in groups:
             pd_key = name_to_r2_key(str(pd_name))
@@ -1016,7 +1056,10 @@ def split(
 
     # Load normalized CSV
     print(f"\n  Loading {src.name}...")
-    df = pd.read_csv(src, dtype=str, low_memory=False)
+    if str(src).endswith(('.parquet.gz', '.parquet')):
+        df = pd.read_parquet(src).astype(str).replace({"nan": "", "None": "", "<NA>": ""})
+    else:
+        df = pd.read_csv(src, dtype=str, low_memory=False)
     total_rows = len(df)
     print(f"  Loaded {total_rows:,} rows x {len(df.columns)} columns")
 

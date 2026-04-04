@@ -469,11 +469,12 @@ def apply_value_transforms(df: pd.DataFrame) -> pd.DataFrame:
         mask_no_year = df["Crash Year"].fillna("").str.strip() == ""
         df.loc[mask_no_year, "Crash Year"] = year_from_dt[mask_no_year]
 
-    # ── Crash Year: strip commas (Socrata exports "2,012" → "2012") ──
+    # ── Crash Year: strip commas AND .0 decimal (Socrata float/comma artifacts) ──
     if "Crash Year" in df.columns:
         df["Crash Year"] = (
             df["Crash Year"].fillna("").astype(str)
             .str.replace(",", "", regex=False)
+            .str.replace(r"\.0$", "", regex=True)
             .str.strip()
         )
 
@@ -1072,9 +1073,9 @@ def run_enrichment(df: pd.DataFrame, skip_enrichment: bool = False,
       Peak:                       ~4.0 GB (well under 7GB)
     """
     if skip_enrichment:
-        print("  [8/8] Phase 8: Enrichment SKIPPED (--skip-enrichment)")
-        if "Intersection Name" not in df.columns:
-            df["Intersection Name"] = ""
+        print("  [8/8] Phase 8: Road enrichment SKIPPED (--skip-enrichment)")
+        print("         Running Tier 1 self-enrichment (flags, severity)...")
+        df = _inline_tier1_enrichment(df)
         return df
 
     try:
@@ -1307,6 +1308,23 @@ def _inline_tier1_enrichment(df: pd.DataFrame) -> pd.DataFrame:
 #  STATE-PREFIXED EXTRA COLUMNS  (v2.6)
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _clean_float_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Fix merge()-induced float reversion before CSV write.
+
+    pandas merge() silently converts string "2012" → float 2012.0 when columns
+    mix string and NaN. This cleanup strips trailing .0 from columns that should
+    be clean integer strings, preventing "2012.0" from appearing in output CSV.
+    """
+    for col in ["Crash Year", "Crash Military Time", "Juris Code", "K_People",
+                "A_People", "B_People", "C_People", "VSP"]:
+        if col in df.columns:
+            df[col] = (df[col].fillna("").astype(str)
+                       .str.replace(r"\.0$", "", regex=True)
+                       .str.strip()
+                       .replace({"nan": "", "NaN": ""}))
+    return df
+
+
 def prefix_extra_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Prefix non-standard columns with lowercase state abbreviation."""
     standard_set = set(GOLDEN_COLUMNS + ENRICHMENT_COLUMNS + ANALYSIS_COLUMNS)
@@ -1370,7 +1388,10 @@ def normalize(
 
     # [1/8] Load
     print("  [1/8] Loading CSV...")
-    df = pd.read_csv(src, dtype=str, low_memory=False)
+    if str(src).endswith(('.parquet.gz', '.parquet')):
+        df = pd.read_parquet(src).astype(str).replace({"nan": "", "None": "", "<NA>": ""})
+    else:
+        df = pd.read_csv(src, dtype=str, low_memory=False)
     df.columns = [c.strip() for c in df.columns]
     total_rows = len(df)
     print(f"        {total_rows:,} rows  ×  {len(df.columns)} columns")
@@ -1404,7 +1425,7 @@ def normalize(
 
         # Determine output paths
         if output_path is None:
-            output_path = str(src.parent / f"{src.stem}_normalized_ranked.csv")
+            output_path = str(src.parent / f"{src.stem}_normalized_ranked.parquet.gz")
 
         # Build output column order (same as full pipeline)
         ranking_cols = [f"{s}_Rank_{m}" for s in RANKING_SCOPES for m in RANKING_METRICS]
@@ -1415,8 +1436,12 @@ def normalize(
         extra_cols = [c for c in df.columns if c not in standard_set]
         all_out_cols = GOLDEN_COLUMNS + ENRICHMENT_COLUMNS + analysis_cols + ranking_cols + extra_cols
         all_out_cols = [c for c in all_out_cols if c in df.columns]
+        # Deduplicate: GOLDEN and ANALYSIS overlap (Roadway Alignment, Roadway Description)
+        seen = set()
+        all_out_cols = [c for c in all_out_cols if c not in seen and not seen.add(c)]
 
-        df[all_out_cols].to_csv(output_path, index=False)
+        df = _clean_float_columns(df)
+        df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='gzip', index=False)
 
         elapsed = time.time() - t0
         print(f"\n  ✅ Rerank done in {elapsed:.1f}s")
@@ -1467,7 +1492,7 @@ def normalize(
     # [8/8] Enrichment
     # Resolve output path early so stream-to-disk can use it
     if output_path is None:
-        output_path = str(src.parent / f"{src.stem}_normalized_ranked.csv")
+        output_path = str(src.parent / f"{src.stem}_normalized_ranked.parquet.gz")
     if report_path is None:
         report_path = str(src.parent / f"{src.stem}_validation_report.json")
 
@@ -1487,10 +1512,14 @@ def normalize(
 
     all_out_cols = GOLDEN_COLUMNS + ENRICHMENT_COLUMNS + analysis_cols + ranking_cols + extra_cols
     all_out_cols = [c for c in all_out_cols if c in df.columns]
+    # Deduplicate: GOLDEN and ANALYSIS overlap (Roadway Alignment, Roadway Description)
+    seen = set()
+    all_out_cols = [c for c in all_out_cols if c not in seen and not seen.add(c)]
 
     # Output paths already resolved above
 
-    df[all_out_cols].to_csv(output_path, index=False)
+    df = _clean_float_columns(df)
+    df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='gzip', index=False)
     with open(report_path, "w", encoding="utf-8") as fp:
         json.dump(report, fp, indent=2)
 
@@ -1512,7 +1541,7 @@ if __name__ == "__main__":
         description="CrashLens — Delaware (DelDOT) crash data normalization pipeline v2.6"
     )
     parser.add_argument("--input",  "-i", required=True,  help="Input CSV path")
-    parser.add_argument("--output", "-o", default=None,   help="Output CSV path (default: {stem}_normalized_ranked.csv)")
+    parser.add_argument("--output", "-o", default=None,   help="Output path (default: {stem}_normalized_ranked.parquet.gz)")
     parser.add_argument("--report", "-r", default=None,   help="Validation report JSON path")
     parser.add_argument(
         "--epdo", default=DEFAULT_EPDO_PRESET,
