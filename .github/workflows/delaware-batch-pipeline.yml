@@ -161,10 +161,13 @@ jobs:
             sleep $((2 ** i))
           done
 
-          # Fallback: try the r2_data_key input (may be csv.gz or csv)
+          # Fallback: try the r2_data_key input (may be parquet.gz, csv.gz, or csv)
           if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
             echo "Primary key failed — trying fallback: $R2_KEY"
-            if echo "$R2_KEY" | grep -q '\.gz$'; then
+            LOCAL_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
+            if echo "$R2_KEY" | grep -q '\.parquet\.gz$'; then
+              FALLBACK_LOCAL="$LOCAL_PQ"
+            elif echo "$R2_KEY" | grep -q '\.gz$'; then
               FALLBACK_LOCAL="${LOCAL_CSV}.gz"
             else
               FALLBACK_LOCAL="$LOCAL_CSV"
@@ -187,6 +190,21 @@ jobs:
           if [ "$DOWNLOADED" = "false" ]; then
             echo "::error::Failed to download statewide data from R2"
             exit 1
+          fi
+
+          # Convert parquet → CSV if we got a parquet file
+          LOCAL_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
+          if [ -f "$LOCAL_PQ" ] && [ ! -f "$LOCAL_CSV" ]; then
+            echo "Converting parquet.gz → CSV..."
+            python3 -c "
+          import pandas as pd, sys
+          pq = sys.argv[1]
+          csv = sys.argv[2]
+          df = pd.read_parquet(pq, engine='pyarrow')
+          df.to_csv(csv, index=False)
+          print(f'  Converted: {len(df)} rows, {df.shape[1]} cols')
+          " "$LOCAL_PQ" "$LOCAL_CSV"
+            rm -f "$LOCAL_PQ"
           fi
 
           # Legacy safety: decompress gzip-wrapped CSV
