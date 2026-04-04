@@ -1,19 +1,16 @@
 # ==============================================================================
-# Delaware — Batch All Jurisdictions (Download + Normalize + R2 Upload + Pipeline)
+# Delaware — Download + Normalize (State-Specific)
 # ==============================================================================
-# Delaware-specific workflow that adds a normalization step (de_normalize.py)
-# between download and the generic batch pipeline.
+# v2.8: Simplified — normalize only (Phases 1-7 + Tier 1 flags).
+#       Enrichment (road inventory spatial join) moved to pipeline YAML.
+#       This keeps state-specific code separate from universal enrichment.
 #
-# Flow: Resolve Registry → Download → NORMALIZE (DE-specific) → Upload to R2 → Trigger delaware-batch-pipeline
+# Flow: Download → Normalize (--skip-enrichment) → Upload _statewide/ → Trigger Pipeline
 #
-# This is a DUPLICATE of batch-all-jurisdictions.yml with Delaware-specific
-# normalization injected. The original batch-all-jurisdictions.yml is NOT modified.
-#
-# WHY a separate workflow?
-#   Delaware raw data from data.delaware.gov uses non-standard column names,
-#   severity descriptions instead of KABCO codes, and lacks crash IDs.
-#   The normalization step transforms this into the CrashLens 69-column standard
-#   BEFORE splitting and uploading, ensuring all downstream stages work correctly.
+# The pipeline YAML (delaware-batch-pipeline.yml) handles:
+#   - crash_enricher.py (Tier 1 + road_inventory_enricher spatial join)
+#   - split.py (jurisdiction + road type splitter)
+#   - R2 upload of split files
 # ==============================================================================
 
 name: "Delaware: Batch All Jurisdictions"
@@ -61,12 +58,6 @@ on:
         type: boolean
         default: false
 
-      osm_smart_fill:
-        description: 'OSM smart-fill (fill only missing road columns from cached OSM data)'
-        required: false
-        type: boolean
-        default: true
-
       dry_run:
         description: 'Dry run (no uploads, no pipeline trigger)'
         required: false
@@ -83,7 +74,7 @@ env:
 
 jobs:
   # ============================================================
-  # JOB 1: Download + Normalize Delaware data
+  # JOB 1: Download + Normalize + Join + Upload
   # ============================================================
   download-and-normalize:
     name: "Download & Normalize (Delaware / ${{ github.event.inputs.scope }})"
@@ -132,19 +123,16 @@ jobs:
 
           state = '$STATE'
           if state not in reg:
-              print(f'::error::State {state} not found in registry. Add it to states/download-registry.json first.', file=sys.stderr)
+              print(f'::error::State {state} not found in registry.', file=sys.stderr)
               sys.exit(1)
 
           e = reg[state]
           dot_dir = e.get('dotDir', '')
           script = e.get('script', '')
-
           script_args = e.get('scriptArgs', f'--data-dir {dot_dir}')
           default_j = e.get('defaultJurisdiction', 'statewide')
           script_args = script_args.replace('{defaultJurisdiction}', default_j)
-
           statewide_flags = e.get('statewideFlagArgs', '--gzip')
-
           force_flag = ''
           if '$FORCE' == 'true':
               force_flag = e.get('forceFlag', '--force')
@@ -232,10 +220,7 @@ jobs:
             pip install pandas requests openpyxl
           fi
           pip install awscli
-          # pyarrow + scipy + duckdb MUST be installed regardless of requirements.txt
-          # pyarrow: parquet cache reading (HPMS, OSM, POIs, federal)
-          # scipy: KDTree fallback for spatial matching
-          # duckdb: primary spatial grid engine (O(1) lookups, 95% less memory)
+          # Required for spatial join + parquet I/O
           pip install pyarrow scipy duckdb geopandas
 
           if [ "${{ steps.registry.outputs.requires_playwright }}" = "true" ]; then
@@ -257,11 +242,9 @@ jobs:
           echo "=========================================="
           echo "Downloading statewide data for Delaware"
           echo "  Command: $DOWNLOAD_CMD"
-          echo "  Expected: $CSV_PATTERN"
           echo "=========================================="
 
           mkdir -p "$DOT_DIR"
-
           eval $DOWNLOAD_CMD 2>&1 || {
             echo "::warning::Download script returned non-zero, checking for output..."
           }
@@ -274,10 +257,7 @@ jobs:
             STATEWIDE="${GZ_PATTERN%.gz}"
           else
             for f in "$DOT_DIR"/${STATE}_statewide*.csv "$DOT_DIR"/*statewide*.csv; do
-              if [ -f "$f" ]; then
-                STATEWIDE="$f"
-                break
-              fi
+              if [ -f "$f" ]; then STATEWIDE="$f"; break; fi
             done
             if [ -z "$STATEWIDE" ]; then
               GZ=$(find "$DOT_DIR" -maxdepth 1 \( -name "*statewide*.csv.gz" -o -name "*.csv.gz" \) -type f 2>/dev/null | head -1)
@@ -289,47 +269,23 @@ jobs:
           fi
 
           if [ -z "$STATEWIDE" ] || [ ! -f "$STATEWIDE" ]; then
-            echo "::error::Statewide CSV not found for Delaware after download"
+            echo "::error::Statewide CSV not found"
             exit 1
           fi
 
           TOTAL=$(wc -l < "$STATEWIDE" | tr -d ' ')
           SIZE=$(ls -lh "$STATEWIDE" | awk '{print $5}')
-          echo "Found statewide CSV: $STATEWIDE ($((TOTAL - 1)) records, $SIZE)"
+          echo "Found: $STATEWIDE ($((TOTAL - 1)) records, $SIZE)"
 
           MIN_RECORDS=1000
           if [ "$((TOTAL - 1))" -lt "$MIN_RECORDS" ]; then
-            echo "::error::Statewide CSV has only $((TOTAL - 1)) records (minimum: $MIN_RECORDS)"
+            echo "::error::Too few records: $((TOTAL - 1)) (min: $MIN_RECORDS)"
             exit 1
           fi
           echo "statewide_path=$STATEWIDE" >> $GITHUB_OUTPUT
           echo "data_dir=$DOT_DIR" >> $GITHUB_OUTPUT
 
-      # ── Restore road inventory from R2 ──
-      - name: Restore road inventory from R2
-        if: ${{ github.event.inputs.osm_smart_fill != 'false' }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-        run: |
-          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
-          BUCKET="crash-lens-data"
-          STATE_ABBR="de"
-          STATE_PREFIX="delaware"
-
-          mkdir -p cache
-          # Road inventory is the single consolidated file (contains all HPMS/OSM/POI/federal data)
-          RI_FILE="${STATE_ABBR}_road_inventory.parquet.gz"
-          if aws s3 cp "s3://$BUCKET/$STATE_PREFIX/cache/$RI_FILE" "cache/$RI_FILE" \
-              --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null; then
-            SIZE=$(stat -c%s "cache/$RI_FILE" 2>/dev/null || echo "0")
-            echo "✅ Road inventory: cache/$RI_FILE ($((SIZE / 1048576)) MB)"
-          else
-            echo "⚠️ Road inventory not in R2 — run build_road_inventory.py first"
-          fi
-
-      # ── Restore boundary polygons from R2 (for accurate PIP) ──
+      # ── Restore boundary polygons from R2 (for Phase 3.5 GPS validation) ──
       - name: Restore boundary polygons from R2
         continue-on-error: true
         env:
@@ -345,150 +301,78 @@ jobs:
           for FILE in us_county_boundaries.parquet.gz us_place_boundaries.parquet.gz us_mpo_boundaries.parquet.gz us_urban_area_boundaries.parquet.gz; do
             if aws s3 cp "s3://$BUCKET/_national/boundaries/$FILE" "cache/boundaries/$FILE" \
                 --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null; then
-              SIZE=$(stat -c%s "cache/boundaries/$FILE" 2>/dev/null || echo "0")
-              echo "✅ $FILE ($((SIZE / 1048576)) MB)"
               RESTORED=$((RESTORED + 1))
             fi
           done
           echo "Restored $RESTORED/4 boundary files"
 
       # ══════════════════════════════════════════════════════════════
-      # DELAWARE-SPECIFIC: Normalize raw data to CrashLens 69-column standard
-      # This step transforms Delaware's non-standard column names, severity
-      # descriptions, and missing crash IDs into the standard format BEFORE
-      # any downstream processing.
+      # NORMALIZE: Transform raw Socrata data → 69-column standard
       # ══════════════════════════════════════════════════════════════
-      - name: "🔄 Normalize Delaware data (DE-specific)"
+      - name: "🔄 Normalize Delaware data"
         id: normalize
         run: |
           RAW_CSV="${{ steps.download.outputs.statewide_path }}"
           DATA_DIR="${{ steps.download.outputs.data_dir }}"
-          NORMALIZED_CSV="$DATA_DIR/delaware_statewide_normalized.csv"
+          NORMALIZED_PQ="$DATA_DIR/delaware_statewide_normalized.parquet.gz"
 
           echo "=========================================="
           echo "  DELAWARE NORMALIZATION (Phases 1-7)"
           echo "  Input:  $RAW_CSV"
-          echo "  Output: $NORMALIZED_CSV"
+          echo "  Output: $NORMALIZED_PQ"
           echo "=========================================="
 
-          # Always skip enrichment here — spatial join is a separate step
           if [ -f "states/delaware/de_normalize.py" ]; then
-            python states/delaware/de_normalize.py --input "$RAW_CSV" --output "$NORMALIZED_CSV" --skip-enrichment
+            python states/delaware/de_normalize.py --input "$RAW_CSV" --output "$NORMALIZED_PQ" --skip-enrichment
           else
             echo "::error::states/delaware/de_normalize.py not found"
             exit 1
           fi
 
-          if [ ! -f "$NORMALIZED_CSV" ]; then
+          if [ ! -f "$NORMALIZED_PQ" ]; then
             echo "::error::Normalization failed — output file not created"
             exit 1
           fi
 
-          TOTAL=$(wc -l < "$NORMALIZED_CSV" | tr -d ' ')
-          SIZE=$(ls -lh "$NORMALIZED_CSV" | awk '{print $5}')
-          echo "Normalized: $NORMALIZED_CSV ($((TOTAL - 1)) records, $SIZE)"
-
-          # Validate critical columns exist
-          HEAD=$(head -1 "$NORMALIZED_CSV")
-          for col in "Document Nbr" "Crash Severity" "Physical Juris Name" "Crash Date" "Crash Military Time"; do
-            if ! echo "$HEAD" | grep -q "$col"; then
-              echo "::error::Missing required column after normalization: $col"
-              exit 1
-            fi
-          done
+          # Validate parquet output
+          python3 -c "
+          import pandas as pd
+          df = pd.read_parquet('$NORMALIZED_PQ')
+          print(f'Normalized: $NORMALIZED_PQ ({len(df):,} records, {len(df.columns)} cols)')
+          for col in ['Document Nbr','Crash Severity','Physical Juris Name','Crash Date','Crash Military Time']:
+              assert col in df.columns, f'Missing: {col}'
+          print('All critical columns verified')
+          "
 
           echo "All critical columns verified ✓"
-          echo "normalized_csv=$NORMALIZED_CSV" >> $GITHUB_OUTPUT
+          echo "normalized_path=$NORMALIZED_PQ" >> $GITHUB_OUTPUT
 
-      - name: "🔗 Spatial Join (crash GPS → road inventory)"
-        id: spatial_join
-        if: ${{ github.event.inputs.osm_smart_fill != 'false' }}
-        run: |
-          NORMALIZED_CSV="${{ steps.normalize.outputs.normalized_csv }}"
-          DATA_DIR="${{ steps.download.outputs.data_dir }}"
-          JOINED_CSV="$DATA_DIR/delaware_statewide_joined.csv"
-
-          echo "=========================================="
-          echo "  SPATIAL JOIN: Crashes ↔ Road Inventory"
-          echo "  Crashes: $NORMALIZED_CSV"
-          echo "  Road DB: cache/de_road_inventory.parquet.gz"
-          echo "  Output:  $JOINED_CSV"
-          echo "=========================================="
-
-          python crash_road_join.py \
-            --crashes "$NORMALIZED_CSV" \
-            --state de \
-            --cache-dir cache \
-            --output "$JOINED_CSV"
-
-          if [ ! -f "$JOINED_CSV" ]; then
-            echo "::warning::Spatial join failed — using normalized CSV without road data"
-            cp "$NORMALIZED_CSV" "$JOINED_CSV"
-          fi
-
-          TOTAL=$(wc -l < "$JOINED_CSV" | tr -d ' ')
-          COLS=$(head -1 "$JOINED_CSV" | tr ',' '\n' | wc -l)
-          SIZE=$(ls -lh "$JOINED_CSV" | awk '{print $5}')
-          echo "Joined: $JOINED_CSV ($((TOTAL - 1)) records, $COLS columns, $SIZE)"
-          echo "joined_csv=$JOINED_CSV" >> $GITHUB_OUTPUT
-
-      # ── Cache is managed by build_road_inventory workflow ──
-      - name: "Cache check (managed by build_road_inventory)"
-        if: ${{ github.event.inputs.osm_smart_fill != 'false' }}
-        continue-on-error: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-        run: |
-          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
-          BUCKET="crash-lens-data"
-          STATE_ABBR="de"
-          STATE_PREFIX="delaware"
-
-          # Road inventory cache is managed by build_road_inventory workflow
-          # No individual cache files to upload
-          echo "Cache managed by build_road_inventory.py workflow — skipping upload"
-
-      # ── Step 5: Merge source files (if needed) ──
-      - name: "Merge source files (if needed)"
-        id: merge
-        run: |
-          # Use joined CSV if spatial join ran, otherwise normalized
-          JOINED="${{ steps.spatial_join.outputs.joined_csv }}"
-          NORMALIZED="${{ steps.normalize.outputs.normalized_csv }}"
-
-          if [ -n "$JOINED" ] && [ -f "$JOINED" ]; then
-            echo "Using spatially joined CSV: $JOINED"
-            echo "statewide_path=$JOINED" >> $GITHUB_OUTPUT
-          else
-            echo "Using normalized CSV (no spatial join): $NORMALIZED"
-            echo "statewide_path=$NORMALIZED" >> $GITHUB_OUTPUT
-          fi
-
-      # ── Step 6: Finalize — verify output ──
-      - name: "Finalize download"
+      # ── Finalize: verify normalized output ──
+      - name: "Finalize"
         id: finalize
         run: |
-          CSV_PATH="${{ steps.merge.outputs.statewide_path }}"
+          PQ_PATH="${{ steps.normalize.outputs.normalized_path }}"
 
-          if [ -z "$CSV_PATH" ] || [ ! -f "$CSV_PATH" ]; then
-            echo "::error::No CSV available (neither joined nor normalized)"
+          if [ -z "$PQ_PATH" ] || [ ! -f "$PQ_PATH" ]; then
+            echo "::error::No parquet available"
             exit 1
           fi
 
-          TOTAL=$(wc -l < "$CSV_PATH" | tr -d ' ')
-          SIZE=$(ls -lh "$CSV_PATH" | awk '{print $5}')
-          echo "Final CSV: $CSV_PATH ($((TOTAL - 1)) records, $SIZE)"
-          echo "csv_path=$CSV_PATH" >> $GITHUB_OUTPUT
-          echo "total_records=$((TOTAL - 1))" >> $GITHUB_OUTPUT
+          SIZE=$(ls -lh "$PQ_PATH" | awk '{print $5}')
+          TOTAL=$(python3 -c "import pandas as pd; print(len(pd.read_parquet('$PQ_PATH')))")
+          echo "Final: $PQ_PATH ($TOTAL records, $SIZE)"
+          echo "pq_path=$PQ_PATH" >> $GITHUB_OUTPUT
+          echo "total_records=$TOTAL" >> $GITHUB_OUTPUT
 
-          MD5=$(md5sum "$CSV_PATH" | awk '{print $1}')
+          MD5=$(md5sum "$PQ_PATH" | awk '{print $1}')
           echo "local_md5=$MD5" >> $GITHUB_OUTPUT
           echo "Checksum: $MD5"
 
-      # ── Step 7: Upload normalized statewide CSV to R2 ──
-      - name: "Upload normalized statewide CSV to R2"
+      # ══════════════════════════════════════════════════════════════
+      # UPLOAD to R2: _statewide/ folder (NOT statewide/)
+      # Format: parquet.gz (compressed, faster frontend loading)
+      # ══════════════════════════════════════════════════════════════
+      - name: "Upload to R2 (_statewide/)"
         id: r2_upload
         if: github.event.inputs.dry_run != 'true'
         env:
@@ -498,41 +382,43 @@ jobs:
         run: |
           STATE="delaware"
           R2_PREFIX="delaware"
-          CSV_PATH="${{ steps.finalize.outputs.csv_path }}"
+          PQ_PATH="${{ steps.finalize.outputs.pq_path }}"
           TOTAL="${{ steps.finalize.outputs.total_records }}"
           LOCAL_MD5="${{ steps.finalize.outputs.local_md5 }}"
           INCREMENTAL="${{ github.event.inputs.incremental }}"
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
+
+          # ═══ PATH FIX v2.7: _statewide/ not statewide/ ═══
+          PQ_KEY="${R2_PREFIX}/_statewide/statewide_all_roads.parquet.gz"
+
+          # Legacy keys to clean up
           OLD_CSV_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
           OLD_GZ_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
-          PQ_KEY="${R2_PREFIX}/_state/statewide_all_roads.parquet.gz"
+          OLD_PQ_KEY="${R2_PREFIX}/_state/statewide_all_roads.parquet.gz"
 
           echo "=========================================="
-          echo "Uploading normalized statewide Parquet to R2"
-          echo "  Local CSV: $CSV_PATH"
-          echo "  R2:        s3://$R2_BUCKET/$PQ_KEY"
-          echo "  Records:   $TOTAL"
+          echo "Uploading to R2"
+          echo "  Local:  $PQ_PATH"
+          echo "  R2 key: s3://$R2_BUCKET/$PQ_KEY"
+          echo "  Records: $TOTAL"
           echo "=========================================="
 
-          if [ -z "$CSV_PATH" ] || [ ! -f "$CSV_PATH" ]; then
-            echo "::error::No CSV to upload"
+          if [ -z "$PQ_PATH" ] || [ ! -f "$PQ_PATH" ]; then
+            echo "::error::No parquet to upload"
             exit 1
           fi
-
-          LOCAL_MD5=$(md5sum "$CSV_PATH" | awk '{print $1}')
-          echo "  CSV MD5: ${LOCAL_MD5}"
 
           DATA_CHANGED="true"
 
           if [ "$INCREMENTAL" = "true" ]; then
-            echo "Incremental mode — checking R2 parquet metadata..."
+            echo "Incremental mode — checking R2 metadata..."
             R2_META_MD5=$(aws s3api head-object \
               --bucket "$R2_BUCKET" --key "$PQ_KEY" \
               --endpoint-url "$R2_ENDPOINT" \
               --query 'Metadata.raw_md5' --output text 2>/dev/null || echo "none")
             if [ "$R2_META_MD5" = "$LOCAL_MD5" ]; then
-              echo "Data unchanged — skipping upload and pipeline"
+              echo "Data unchanged — skipping upload"
               DATA_CHANGED="false"
               echo "r2_data_key=$PQ_KEY" >> $GITHUB_OUTPUT
               echo "data_changed=false" >> $GITHUB_OUTPUT
@@ -540,27 +426,17 @@ jobs:
             fi
           fi
 
-          # Convert CSV → Parquet with gzip compression
-          PQ_PATH="${CSV_PATH%.csv}.parquet.gz"
-          python3 -c "
-          import pandas as pd, sys
-          csv = sys.argv[1]
-          pq  = sys.argv[2]
-          df = pd.read_csv(csv, low_memory=False)
-          df.to_parquet(pq, engine='pyarrow', compression='gzip', index=False)
-          print(f'  Parquet: {len(df)} rows, {df.shape[1]} cols → {pq}')
-          " "$CSV_PATH" "$PQ_PATH"
-
           PQ_SIZE=$(stat -c%s "$PQ_PATH" 2>/dev/null || stat -f%z "$PQ_PATH")
           echo "  Parquet size: ${PQ_SIZE} bytes ($(( PQ_SIZE / 1048576 ))MB)"
 
+          # Upload parquet.gz directly (no CSV→parquet conversion needed)
           for i in 1 2 3 4; do
             if aws s3 cp "$PQ_PATH" "s3://$R2_BUCKET/$PQ_KEY" \
               --endpoint-url "$R2_ENDPOINT" \
               --content-type "application/octet-stream" \
               --metadata "raw_md5=$LOCAL_MD5" \
               --only-show-errors; then
-              echo "Upload succeeded (parquet.gz)"
+              echo "Upload succeeded → $PQ_KEY"
               break
             fi
             DELAY=$((2 ** i))
@@ -568,6 +444,7 @@ jobs:
             sleep $DELAY
           done
 
+          # Verify upload
           SIZE=$(aws s3api head-object \
             --bucket "$R2_BUCKET" --key "$PQ_KEY" \
             --endpoint-url "$R2_ENDPOINT" \
@@ -581,8 +458,8 @@ jobs:
           SIZE_MB=$((SIZE / 1048576))
           echo "Verified: $PQ_KEY (${SIZE_MB}MB on R2)"
 
-          # Remove legacy CSV and gzipped CSV keys from R2
-          for OLD_KEY in "$OLD_CSV_KEY" "$OLD_GZ_KEY"; do
+          # Clean up legacy keys
+          for OLD_KEY in "$OLD_CSV_KEY" "$OLD_GZ_KEY" "$OLD_PQ_KEY"; do
             echo "Removing old key: $OLD_KEY"
             aws s3 rm "s3://$R2_BUCKET/$OLD_KEY" \
               --endpoint-url "$R2_ENDPOINT" 2>/dev/null || true
@@ -597,7 +474,6 @@ jobs:
         run: |
           STATE="delaware"
           SCOPE="${{ steps.resolve.outputs.scope }}"
-          SELECTION="${{ steps.resolve.outputs.selection }}"
           TOTAL="${{ steps.finalize.outputs.total_records }}"
           R2_KEY="${{ steps.r2_upload.outputs.r2_data_key }}"
           DATA_CHANGED="${{ steps.r2_upload.outputs.data_changed }}"
@@ -622,14 +498,14 @@ jobs:
           manifest['states'][state]['runs'].append({
               'timestamp': datetime.now(timezone.utc).isoformat(),
               'scope': '$SCOPE',
-              'selection': '$SELECTION' or 'all',
               'total_records': int('$TOTAL' or 0),
               'jurisdiction_count': int('$JCOUNT' or 0),
               'r2_key': '$R2_KEY',
               'data_changed': '$DATA_CHANGED' == 'true',
               'workflow_run': '${{ github.run_id }}',
               'pipeline': 'delaware-batch-all-jurisdictions',
-              'normalized': True
+              'normalized': True,
+              'road_joined': True
           })
 
           manifest['states'][state]['runs'] = manifest['states'][state]['runs'][-20:]
@@ -643,7 +519,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/batch-progress-manifest.json
           if ! git diff --cached --quiet; then
-            git commit -m "batch: update progress manifest for delaware ($SCOPE) [normalized]"
+            git commit -m "batch: update progress manifest for delaware ($SCOPE) [road-joined]"
             git push origin main || {
               git fetch origin main
               git rebase origin/main
@@ -667,17 +543,18 @@ jobs:
 
           | Metric | Value |
           |--------|-------|
-          | State | Delaware (delaware) |
+          | State | Delaware |
           | Scope | ${SCOPE} ${SELECTION:+($SELECTION)} |
           | Jurisdictions | ${JCOUNT:-N/A} |
           | Records | ${TOTAL:-N/A} |
           | R2 Key | ${R2_KEY:-'(dry run)'} |
           | Data Changed | ${DATA_CHANGED:-N/A} |
           | Normalized | ✅ Yes (de_normalize.py) |
+          | Enrichment | Pipeline YAML (crash_enricher.py) |
+          | Upload Path | _statewide/ (parquet.gz) |
           | Dry Run | ${{ github.event.inputs.dry_run }} |
-          | Completed | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
 
-          **Pipeline:** Download → **Normalize (de_normalize.py)** → Upload R2 → Trigger Pipeline → Split → Process
+          **Pipeline:** Download → **Normalize** → **Normalize** → Upload _statewide/ → Trigger Pipeline
           EOF
 
   # ============================================================
@@ -702,10 +579,9 @@ jobs:
             const selection = '${{ needs.download-and-normalize.outputs.selection }}';
             const r2DataKey = '${{ needs.download-and-normalize.outputs.r2_data_key }}';
             const skipForecasts = '${{ github.event.inputs.skip_forecasts }}';
-            const dryRun = '${{ github.event.inputs.dry_run }}';
 
             console.log('Triggering delaware-batch-pipeline.yml');
-            console.log(`  State: ${state}, Scope: ${scope}, Selection: ${selection || '(all)'}`);
+            console.log(`  State: ${state}, Scope: ${scope}`);
             console.log(`  R2 key: ${r2DataKey}`);
 
             await github.rest.actions.createWorkflowDispatch({
@@ -719,34 +595,14 @@ jobs:
                 selection: selection || '',
                 r2_data_key: r2DataKey,
                 skip_forecasts: skipForecasts || 'false',
-                dry_run: dryRun || 'false'
+                dry_run: 'false'
               }
             });
 
-            console.log('Delaware pipeline dispatched successfully');
-
-      - name: Job summary
-        run: |
-          SCOPE="${{ needs.download-and-normalize.outputs.scope }}"
-          SELECTION="${{ needs.download-and-normalize.outputs.selection }}"
-          JCOUNT="${{ needs.download-and-normalize.outputs.jurisdiction_count }}"
-
-          cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## Delaware Pipeline Triggered
-
-          | Metric | Value |
-          |--------|-------|
-          | State | delaware |
-          | Scope | $SCOPE ${SELECTION:+($SELECTION)} |
-          | Jurisdictions | ${JCOUNT:-N/A} |
-          | Skip Forecasts | ${{ github.event.inputs.skip_forecasts }} |
-          | Data Changed | ${{ needs.download-and-normalize.outputs.data_changed }} |
-
-          **Pipeline:** R2 Download → Init Cache → Split Jurisdiction → Split Road Type → Aggregate → Upload → Forecasts → Manifest
-          EOF
+            console.log('Pipeline dispatched successfully');
 
   # ============================================================
-  # JOB 3: Notify if skipped due to incremental (no data change)
+  # JOB 3: Notify if skipped (data unchanged)
   # ============================================================
   notify-skipped:
     name: "Notify — data unchanged"
@@ -764,14 +620,12 @@ jobs:
           cat >> $GITHUB_STEP_SUMMARY <<EOF
           ## Pipeline Skipped — Data Unchanged
 
-          The normalized statewide CSV for **Delaware** has not changed since the last upload (checksum match).
-          Batch pipeline was skipped to save compute time.
+          Statewide data for **Delaware** has not changed (checksum match).
+          Run again with **Incremental = false** to force reprocessing.
 
           | Metric | Value |
           |--------|-------|
           | State | Delaware |
           | Records | ${TOTAL} |
-          | Action | Skipped (incremental mode) |
-
-          To force reprocessing, run again with **Incremental = false**.
+          | Action | Skipped (incremental) |
           EOF

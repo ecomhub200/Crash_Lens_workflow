@@ -516,6 +516,14 @@ class GeoResolver:
         # ── Build MPO radius table for centroid matching ──
         self._build_mpo_radius_table()
 
+        # ── BUG 2 FIX: Build BTS→hierarchy name mapping ──
+        # Maps BTS MPO names (from us_mpos.json) to hierarchy tprs names.
+        # Used as final normalization in resolve_mpo() when centroid matching
+        # returns a BTS name that differs from the hierarchy name.
+        # Example: "Wilmington Area Planning Council" → "WILMAPCO"
+        self.bts_to_hierarchy_mpo: Dict[str, str] = {}
+        self._build_bts_to_hierarchy_mapping()
+
         # ── Cache for repeated jurisdiction lookups ──
         self._juris_cache: Dict[str, Dict] = {}
 
@@ -658,6 +666,46 @@ class GeoResolver:
             else:
                 radius_miles = 25.0  # default 25-mile radius if no area data
             self.mpo_radius_table.append((lat, lon, radius_miles, m))
+
+    def _build_bts_to_hierarchy_mapping(self):
+        """
+        BUG 2 FIX: Build BTS MPO name → hierarchy tprs name mapping.
+
+        For each BTS MPO centroid (from us_mpos.json), find which county
+        it's closest to, then check if that county has a hierarchy MPO
+        mapping (from tprs). If the names differ, store the mapping.
+
+        Examples built for Delaware:
+          "Wilmington Area Planning Council" → "WILMAPCO"
+          "Dover / Kent County MPO"          → "Dover/Kent County MPO"
+
+        Used in resolve_mpo() as final normalization when centroid
+        matching returns a BTS name that differs from the hierarchy name.
+        Without this, split.py creates duplicate R2 folders for the
+        same MPO under different slugs.
+        """
+        if not self.mpo_radius_table or not self.fips_to_mpo:
+            return
+
+        for mlat, mlon, _, mpo_rec in self.mpo_radius_table:
+            bts_name = mpo_rec.get('MPO_NAME') or mpo_rec.get('NAME', '')
+            if not bts_name:
+                continue
+
+            # Find which county this BTS MPO centroid is closest to
+            nearest = self._match_by_centroid(mlat, mlon)
+            if nearest:
+                cf = nearest.get('fips', '')
+                if cf in self.fips_to_mpo:
+                    hier_name = self.fips_to_mpo[cf]
+                    if hier_name and hier_name != bts_name:
+                        self.bts_to_hierarchy_mpo[bts_name] = hier_name
+
+        if self.bts_to_hierarchy_mpo:
+            logger.info(f"  BTS→Hierarchy MPO mapping: "
+                         f"{len(self.bts_to_hierarchy_mpo)} entries")
+            for bts, hier in self.bts_to_hierarchy_mpo.items():
+                logger.info(f"    \"{bts}\" → \"{hier}\"")
 
     # ═══════════════════════════════════════════════════════════
     #  FIPS RESOLUTION (the foundation)
@@ -865,19 +913,43 @@ class GeoResolver:
     def resolve_mpo(self, county_fips: str, lat: float = 0.0, lon: float = 0.0) -> str:
         """
         Resolve MPO name for a jurisdiction.
-        Priority: hierarchy.json explicit mapping > centroid proximity to us_mpos.json.
+
+        Priority:
+          1. hierarchy.json explicit mapping (county_fips → tprs name)
+          2. GPS → county centroid → hierarchy mapping
+             (BUG 2 FIX: resolves county from GPS when county_fips is empty,
+              then uses hierarchy name instead of falling through to BTS)
+          3. BTS centroid proximity (us_mpos.json — last resort, may return
+             different names like "Wilmington Area Planning Council"
+             instead of "WILMAPCO")
         """
-        # Check hierarchy first
+        # 1. Check hierarchy by county_fips (fast, exact)
         cf = county_fips.zfill(3) if county_fips else ''
         if cf and cf in self.fips_to_mpo:
             return self.fips_to_mpo[cf]
 
-        # Centroid proximity against MPO radius table
+        # 2. BUG 2 FIX: GPS → county → hierarchy
+        #    If county_fips is empty but GPS is available, resolve county
+        #    from GPS centroid, then check hierarchy for that county's MPO name.
+        #    This prevents falling through to BTS centroid matching which returns
+        #    different names (e.g., "Wilmington Area Planning Council" instead of
+        #    "WILMAPCO"), creating duplicate R2 folders in split.py.
+        if lat != 0.0 and lon != 0.0 and not cf:
+            nearest = self._match_by_centroid(lat, lon)
+            if nearest:
+                resolved_cf = nearest.get('fips', '')
+                if resolved_cf and resolved_cf in self.fips_to_mpo:
+                    return self.fips_to_mpo[resolved_cf]
+
+        # 3. BTS centroid proximity (last resort — may return non-hierarchy names)
         if lat != 0.0 and lon != 0.0 and self.mpo_radius_table:
             for mlat, mlon, radius_miles, mpo_rec in self.mpo_radius_table:
                 dist = _haversine_miles(lat, lon, mlat, mlon)
                 if dist <= radius_miles:
-                    return mpo_rec.get('MPO_NAME') or mpo_rec.get('NAME', '')
+                    bts_name = mpo_rec.get('MPO_NAME') or mpo_rec.get('NAME', '')
+                    # Try to normalize BTS name to hierarchy name via
+                    # the bts_to_hierarchy mapping (built in __init__)
+                    return self.bts_to_hierarchy_mpo.get(bts_name, bts_name)
 
         return ''
 

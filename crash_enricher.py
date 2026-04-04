@@ -902,10 +902,16 @@ class CrashEnricher:
         if not skip_tier2:
             ri_path = Path(self.cache_dir) / f"{self.state_abbr.lower()}_road_inventory.parquet.gz"
             if ri_path.exists():
-                from road_inventory_enricher import enrich_from_road_inventory
-                df = enrich_from_road_inventory(
-                    df, self.state_abbr, self.cache_dir)
-                gc.collect()
+                try:
+                    from road_inventory_enricher import enrich_from_road_inventory
+                    df = enrich_from_road_inventory(
+                        df, self.state_abbr, self.cache_dir)
+                    gc.collect()
+                except ImportError:
+                    print(f"\n  ⚠️  road_inventory_enricher.py not found — Tier 1 only")
+                except Exception as e:
+                    print(f"\n  ⚠️  Road inventory enrichment failed: {e}")
+                    print(f"    Continuing with Tier 1 only")
             else:
                 print(f"\n  ⚠️  Road inventory not found: {ri_path}")
                 print(f"    Build with: python build_road_inventory.py --state {self.state_abbr.lower()}")
@@ -1236,7 +1242,12 @@ if __name__ == "__main__":
                         help="Contributing circumstance column name")
     args = parser.parse_args()
 
-    df = pd.read_csv(args.input, dtype=str, low_memory=False)
+    # Auto-detect input format (parquet.gz or CSV)
+    inp = args.input
+    if inp.endswith(('.parquet.gz', '.parquet')):
+        df = pd.read_parquet(inp).astype(str).replace({"nan": "", "None": "", "<NA>": ""})
+    else:
+        df = pd.read_csv(inp, dtype=str, low_memory=False)
     enricher = CrashEnricher(
         state_fips=args.state_fips,
         state_abbr=args.state_abbr,
@@ -1246,6 +1257,10 @@ if __name__ == "__main__":
     )
     df = enricher.enrich_all(df, skip_tier2=args.skip_osm)
 
-    out = args.output or args.input.replace(".csv", "_enriched.csv")
-    df.to_csv(out, index=False)
+    # Output as parquet.gz (default) or CSV
+    out = args.output or inp.replace(".csv", "_enriched.parquet.gz").replace(".parquet.gz", "_enriched.parquet.gz")
+    if out.endswith(('.parquet.gz', '.parquet')):
+        df.to_parquet(out, engine='pyarrow', compression='gzip', index=False)
+    else:
+        df.to_csv(out, index=False)
     print(f"\n  Output: {out}")
