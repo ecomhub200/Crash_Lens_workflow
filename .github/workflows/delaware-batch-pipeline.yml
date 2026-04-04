@@ -41,8 +41,9 @@ on:
         type: string
 
       r2_data_key:
-        description: 'R2 key for normalized statewide CSV'
-        required: true
+        description: 'R2 key for normalized statewide CSV (leave blank to use default statewide/ path)'
+        required: false
+        default: ''
         type: string
 
       skip_forecasts:
@@ -161,7 +162,7 @@ jobs:
             sleep $((2 ** i))
           done
 
-          # Fallback: try the r2_data_key input (may be csv.gz or csv)
+          # Fallback: try the r2_data_key input (csv.gz or csv only)
           if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
             echo "Primary key failed — trying fallback: $R2_KEY"
             if echo "$R2_KEY" | grep -q '\.gz$'; then
@@ -173,7 +174,6 @@ jobs:
               if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$FALLBACK_LOCAL" \
                 --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
                 echo "Fallback download succeeded"
-                # Decompress .csv.gz if needed
                 if [ "$FALLBACK_LOCAL" = "${LOCAL_CSV}.gz" ]; then
                   gunzip -f "$FALLBACK_LOCAL"
                 fi
