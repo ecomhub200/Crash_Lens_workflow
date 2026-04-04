@@ -1056,7 +1056,10 @@ def split(
 
     # Load normalized CSV
     print(f"\n  Loading {src.name}...")
-    df = pd.read_csv(src, dtype=str, low_memory=False)
+    if str(src).endswith(('.parquet.gz', '.parquet')):
+        df = pd.read_parquet(src).astype(str).replace({"nan": "", "None": "", "<NA>": ""})
+    else:
+        df = pd.read_csv(src, dtype=str, low_memory=False)
     total_rows = len(df)
     print(f"  Loaded {total_rows:,} rows x {len(df.columns)} columns")
 
