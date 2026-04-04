@@ -41,8 +41,9 @@ on:
         type: string
 
       r2_data_key:
-        description: 'R2 key for normalized statewide CSV'
-        required: true
+        description: 'R2 key for normalized statewide CSV (leave blank to use default statewide/ path)'
+        required: false
+        default: ''
         type: string
 
       skip_forecasts:
@@ -161,13 +162,10 @@ jobs:
             sleep $((2 ** i))
           done
 
-          # Fallback: try the r2_data_key input (may be parquet.gz, csv.gz, or csv)
+          # Fallback: try the r2_data_key input (csv.gz or csv only)
           if [ "$DOWNLOADED" = "false" ] && [ -n "$R2_KEY" ]; then
             echo "Primary key failed — trying fallback: $R2_KEY"
-            LOCAL_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
-            if echo "$R2_KEY" | grep -q '\.parquet\.gz$'; then
-              FALLBACK_LOCAL="$LOCAL_PQ"
-            elif echo "$R2_KEY" | grep -q '\.gz$'; then
+            if echo "$R2_KEY" | grep -q '\.gz$'; then
               FALLBACK_LOCAL="${LOCAL_CSV}.gz"
             else
               FALLBACK_LOCAL="$LOCAL_CSV"
@@ -176,7 +174,6 @@ jobs:
               if aws s3 cp "s3://$R2_BUCKET/$R2_KEY" "$FALLBACK_LOCAL" \
                 --endpoint-url "$R2_ENDPOINT" --only-show-errors; then
                 echo "Fallback download succeeded"
-                # Decompress .csv.gz if needed
                 if [ "$FALLBACK_LOCAL" = "${LOCAL_CSV}.gz" ]; then
                   gunzip -f "$FALLBACK_LOCAL"
                 fi
@@ -190,21 +187,6 @@ jobs:
           if [ "$DOWNLOADED" = "false" ]; then
             echo "::error::Failed to download statewide data from R2"
             exit 1
-          fi
-
-          # Convert parquet → CSV if we got a parquet file
-          LOCAL_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
-          if [ -f "$LOCAL_PQ" ] && [ ! -f "$LOCAL_CSV" ]; then
-            echo "Converting parquet.gz → CSV..."
-            python3 -c "
-          import pandas as pd, sys
-          pq = sys.argv[1]
-          csv = sys.argv[2]
-          df = pd.read_parquet(pq, engine='pyarrow')
-          df.to_csv(csv, index=False)
-          print(f'  Converted: {len(df)} rows, {df.shape[1]} cols')
-          " "$LOCAL_PQ" "$LOCAL_CSV"
-            rm -f "$LOCAL_PQ"
           fi
 
           # Legacy safety: decompress gzip-wrapped CSV
