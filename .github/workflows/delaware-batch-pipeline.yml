@@ -47,6 +47,12 @@ on:
         default: 'false'
         type: string
 
+      smart_fill:
+        description: 'Smart-fill: enrich crashes from road inventory (FC, Ownership, Speed, Lanes, AADT, etc.)'
+        required: false
+        default: 'true'
+        type: string
+
       dry_run:
         description: 'Dry run (no uploads, no commits)'
         required: false
@@ -334,6 +340,7 @@ jobs:
       # pre-built road inventory (HPMS + OSM + POI + Mapillary merged).
       # This is state-agnostic — works for any state with a road inventory.
       - name: "Stage 0.5: Download road inventory from R2"
+        if: github.event.inputs.smart_fill != 'false'
         continue-on-error: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
@@ -358,6 +365,7 @@ jobs:
           fi
 
       - name: "Stage 0.5: Enrich crashes (crash_enricher + road inventory)"
+        if: github.event.inputs.smart_fill != 'false'
         run: |
           STATE="${{ needs.prepare.outputs.state }}"
           DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
