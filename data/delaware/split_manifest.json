@@ -1,7 +1,7 @@
 {
   "state": "delaware",
-  "generated_at": "2026-04-04T22:59:37.961747+00:00",
-  "elapsed_s": 602.8,
+  "generated_at": "2026-04-05T02:34:59.136890+00:00",
+  "elapsed_s": 530.8,
   "total_input_rows": 566762,
   "dry_run": false,
   "strategies": {
@@ -18,68 +18,68 @@
     },
     "regions": {
       "central_district": {
-        "all_roads": 103081,
-        "dot_roads": 81974,
-        "primary_roads": 6505,
-        "non_dot_roads": 18659
+        "all_roads": 97609,
+        "dot_roads": 77562,
+        "primary_roads": 6170,
+        "non_dot_roads": 17599
       },
       "north_district": {
-        "all_roads": 334227,
-        "dot_roads": 271353,
-        "primary_roads": 50334,
-        "non_dot_roads": 58904
+        "all_roads": 335725,
+        "dot_roads": 272733,
+        "primary_roads": 50669,
+        "non_dot_roads": 59022
       },
       "south_district": {
-        "all_roads": 129454,
-        "dot_roads": 104792,
+        "all_roads": 133428,
+        "dot_roads": 107824,
         "primary_roads": 1162,
-        "non_dot_roads": 23089
+        "non_dot_roads": 24031
       }
     },
     "mpos": {
       "dover_kent_county_mpo": {
-        "all_roads": 103063,
-        "county_roads": 4774,
-        "city_roads": 13835,
-        "no_interstate": 96558
+        "all_roads": 107291,
+        "county_roads": 5269,
+        "city_roads": 13974,
+        "no_interstate": 100779
       },
       "salisbury_wicomico_mpo": {
-        "all_roads": 129361,
-        "county_roads": 7992,
-        "city_roads": 15050,
-        "no_interstate": 128199
+        "all_roads": 125200,
+        "county_roads": 7511,
+        "city_roads": 14911,
+        "no_interstate": 124045
       },
       "wilmapco": {
-        "all_roads": 25147,
-        "county_roads": 456,
-        "city_roads": 1141,
-        "no_interstate": 21103
+        "all_roads": 24903,
+        "county_roads": 415,
+        "city_roads": 1140,
+        "no_interstate": 20859
       },
       "wilmington_area_planning_council": {
-        "all_roads": 309191,
-        "county_roads": 10218,
-        "city_roads": 46976,
-        "no_interstate": 262901
+        "all_roads": 309368,
+        "county_roads": 10245,
+        "city_roads": 46977,
+        "no_interstate": 263078
       }
     },
     "planning_districts": {
       "central_district": {
-        "all_roads": 103081,
-        "county_roads": 4791,
-        "city_roads": 13835,
-        "no_interstate": 96576
+        "all_roads": 97609,
+        "county_roads": 4615,
+        "city_roads": 12952,
+        "no_interstate": 91439
       },
       "north_district": {
-        "all_roads": 334227,
-        "county_roads": 10652,
-        "city_roads": 48116,
-        "no_interstate": 283893
+        "all_roads": 335725,
+        "county_roads": 10765,
+        "city_roads": 48121,
+        "no_interstate": 285056
       },
       "south_district": {
-        "all_roads": 129454,
-        "county_roads": 7997,
-        "city_roads": 15051,
-        "no_interstate": 128292
+        "all_roads": 133428,
+        "county_roads": 8060,
+        "city_roads": 15929,
+        "no_interstate": 132266
       }
     },
     "counties": {
