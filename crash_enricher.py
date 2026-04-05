@@ -1260,7 +1260,7 @@ if __name__ == "__main__":
     # Output as parquet.gz (default) or CSV
     out = args.output or inp.replace(".csv", "_enriched.parquet.gz").replace(".parquet.gz", "_enriched.parquet.gz")
     if out.endswith(('.parquet.gz', '.parquet')):
-        df.to_parquet(out, engine='pyarrow', compression='gzip', index=False)
+        df.to_parquet(out, engine='pyarrow', compression='snappy', index=False)
     else:
         df.to_csv(out, index=False)
     print(f"\n  Output: {out}")

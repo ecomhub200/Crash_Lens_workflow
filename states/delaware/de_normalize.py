@@ -1534,7 +1534,7 @@ def normalize(
         all_out_cols = [c for c in all_out_cols if c not in seen and not seen.add(c)]
 
         df = _clean_float_columns(df)
-        df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='gzip', index=False)
+        df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='snappy', index=False)
 
         elapsed = time.time() - t0
         print(f"\n  ✅ Rerank done in {elapsed:.1f}s")
@@ -1611,7 +1611,7 @@ def normalize(
     # Output paths already resolved above
 
     df = _clean_float_columns(df)
-    df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='gzip', index=False)
+    df[all_out_cols].to_parquet(output_path, engine='pyarrow', compression='snappy', index=False)
     with open(report_path, "w", encoding="utf-8") as fp:
         json.dump(report, fp, indent=2)
 

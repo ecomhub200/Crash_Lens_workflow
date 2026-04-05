@@ -265,11 +265,11 @@ def _save_geoparquet(gdf, output_path):
 
     # Save as native geoparquet if pyarrow supports it
     try:
-        gdf.to_parquet(output_path, compression="gzip")
+        gdf.to_parquet(output_path, compression="snappy")
         return "geoparquet"
     except Exception:
         # Fallback: save with WKT geometry
-        df.to_parquet(output_path, compression="gzip", index=False)
+        df.to_parquet(output_path, compression="snappy", index=False)
         return "parquet+wkt"
 
 
