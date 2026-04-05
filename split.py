@@ -378,14 +378,14 @@ def write_file(
     output_path: Path,
     dry_run: bool = False,
 ) -> int:
-    """Write DataFrame to gzipped parquet. Returns row count."""
+    """Write DataFrame to snappy-compressed parquet. Returns row count."""
     if dry_run:
         print(f"      [DRY] {len(df):>7,} rows -> {output_path.name}.gz")
         return len(df)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     pq_path = Path(str(output_path) + ".gz")
-    df.to_parquet(pq_path, index=False, compression="gzip")
+    df.to_parquet(pq_path, index=False, compression="snappy")
     size_mb = pq_path.stat().st_size / 1024 / 1024
     print(f"      {len(df):>7,} rows -> {output_path.name}.gz ({size_mb:.1f} MB)")
     return len(df)
