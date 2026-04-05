@@ -72,9 +72,19 @@
           "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
           "data_changed": true,
           "workflow_run": "23178168563"
+        },
+        {
+          "timestamp": "2026-04-05T13:02:05.353074+00:00",
+          "scope": "statewide",
+          "selection": "all",
+          "total_records": 1097477,
+          "jurisdiction_count": 134,
+          "r2_key": "virginia/statewide/virginia_statewide_all_roads.csv",
+          "data_changed": true,
+          "workflow_run": "24001662278"
         }
       ],
-      "last_updated": "2026-03-17T04:44:00.908112+00:00"
+      "last_updated": "2026-04-05T13:02:05.353064+00:00"
     },
     "delaware": {
       "runs": [
