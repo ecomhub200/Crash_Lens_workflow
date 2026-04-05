@@ -58,6 +58,12 @@ on:
         type: boolean
         default: false
 
+      smart_fill:
+        description: 'Smart-fill: enrich crashes from road inventory (FC, Ownership, Speed, Lanes, AADT)'
+        required: false
+        type: boolean
+        default: true
+
       dry_run:
         description: 'Dry run (no uploads, no pipeline trigger)'
         required: false
@@ -579,10 +585,12 @@ jobs:
             const selection = '${{ needs.download-and-normalize.outputs.selection }}';
             const r2DataKey = '${{ needs.download-and-normalize.outputs.r2_data_key }}';
             const skipForecasts = '${{ github.event.inputs.skip_forecasts }}';
+            const smartFill = '${{ github.event.inputs.smart_fill }}';
 
             console.log('Triggering delaware-batch-pipeline.yml');
             console.log(`  State: ${state}, Scope: ${scope}`);
             console.log(`  R2 key: ${r2DataKey}`);
+            console.log(`  Smart-fill: ${smartFill}`);
 
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
@@ -595,6 +603,7 @@ jobs:
                 selection: selection || '',
                 r2_data_key: r2DataKey,
                 skip_forecasts: skipForecasts || 'false',
+                smart_fill: smartFill || 'true',
                 dry_run: 'false'
               }
             });

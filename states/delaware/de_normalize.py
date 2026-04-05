@@ -111,10 +111,23 @@ ROAD_INVENTORY_PREFIXES = (
 )
 
 RANKING_SCOPES  = ["District", "Juris", "PlanningDistrict", "MPO"]
-RANKING_METRICS = [
+RANKING_METRICS_COUNT = [
     "total_crash", "total_ped_crash", "total_bike_crash",
     "total_fatal", "total_fatal_serious_injury", "total_epdo",
 ]
+RANKING_METRICS_TREND = [
+    "trend_total_crash", "trend_fatal", "trend_ksi", "trend_epdo",
+    "trend_ped_crash", "trend_bike_crash",
+]
+RANKING_METRICS_PROPORTION = [
+    "pct_night_fatal", "pct_impaired_crash",
+    "pct_distracted_crash", "pct_speed_crash",
+]
+RANKING_METRICS_SEVERITY = ["severity_index", "fatality_rate"]
+RANKING_METRICS_COMPOSITE = ["safety_score"]
+RANKING_METRICS = (RANKING_METRICS_COUNT + RANKING_METRICS_TREND +
+                   RANKING_METRICS_PROPORTION + RANKING_METRICS_SEVERITY +
+                   RANKING_METRICS_COMPOSITE)
 
 EPDO_PRESETS = {
     "hsm2010":  {"K": 462,  "A": 62, "B": 12, "C": 5,  "O": 1},
@@ -792,107 +805,187 @@ def compute_epdo(df: pd.DataFrame, weights: dict) -> pd.DataFrame:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def compute_rankings(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Compute jurisdiction rankings using vectorized groupby.
-    VECTORIZED: groupby + rank + merge instead of iterrows (~0.3s for 566K).
+    """Comprehensive ranking engine v2 — 76 Phase 1 columns.
+    Vectorized with pandas groupby (~8s for 566K rows).
+
+    Groups:
+      Count (24)     → Where do crashes happen?
+      Trend (24)     → Getting worse? (3-year % change)
+      Proportion (16)→ Night/impaired/speed/distracted %
+      Severity (8)   → How bad per crash? (EPDO/crash, fatals/1K)
+      Composite (4)  → Where to invest? (weighted safety score)
     """
-    # Drop any pre-existing ranking columns (re-run safe)
+    import time as _t
+    _t0 = _t.time()
+
+    def _is_yes(series):
+        return series.fillna("").astype(str).str.strip().isin(["Yes", "Y", "1", "TRUE", "true"])
+
+    # Drop pre-existing ranking columns
     existing_rank = [c for c in df.columns if "_Rank_" in c]
     if existing_rank:
-        df.drop(columns=existing_rank, inplace=True)
+        df = df.drop(columns=existing_rank)
 
-    # Build ranking key (FIPS preferred, fallback to Physical Juris Name)
+    # Build rank key
     fips = df["FIPS"].fillna("").astype(str).str.strip()
     juris = df["Physical Juris Name"].fillna("").astype(str).str.strip()
-    key = fips.where(fips != "", juris)
-    df["_rank_key"] = key
+    df["_rank_key"] = fips.where(fips.ne(""), juris)
 
-    # Vectorized metric computation per jurisdiction
-    agg_df = df.groupby("_rank_key", dropna=False).agg(
+    # Boolean columns for aggregation
+    df["_is_ped"] = _is_yes(df.get("Pedestrian?", pd.Series("", index=df.index)))
+    df["_is_bike"] = _is_yes(df.get("Bike?", pd.Series("", index=df.index)))
+    df["_is_moto"] = _is_yes(df.get("Motorcycle?", pd.Series("", index=df.index)))
+    df["_is_night"] = _is_yes(df.get("Night?", pd.Series("", index=df.index)))
+    df["_is_impaired"] = (_is_yes(df.get("Alcohol?", pd.Series("", index=df.index))) |
+                          _is_yes(df.get("Drug Related?", pd.Series("", index=df.index))))
+    df["_is_distracted"] = _is_yes(df.get("Distracted?", pd.Series("", index=df.index)))
+    df["_is_speed"] = _is_yes(df.get("Speed?", pd.Series("", index=df.index)))
+    df["_is_fatal"] = df["Crash Severity"].fillna("").astype(str).str.strip() == "K"
+    df["_is_ksi"] = df["Crash Severity"].fillna("").astype(str).str.strip().isin(["K", "A"])
+    df["_epdo"] = pd.to_numeric(df.get("EPDO_Score", 1), errors="coerce").fillna(1).astype(int)
+    df["_night_fatal"] = df["_is_night"] & df["_is_fatal"]
+
+    # ── Aggregate by jurisdiction ──
+    agg = df.groupby("_rank_key", dropna=False).agg(
         total_crash=("_rank_key", "size"),
-        total_ped_crash=("Pedestrian?", lambda s: s.isin(["Yes", "Y"]).sum()),
-        total_bike_crash=("Bike?", lambda s: s.isin(["Yes", "Y"]).sum()),
-        total_fatal=("Crash Severity", lambda s: (s == "K").sum()),
-        total_fatal_serious_injury=("Crash Severity", lambda s: s.isin(["K", "A"]).sum()),
-        total_epdo=("EPDO_Score", lambda s: pd.to_numeric(s, errors="coerce").fillna(1).sum()),
-    ).reset_index()
-
-    # Get scope columns per key (first occurrence)
-    scope_cols = df.groupby("_rank_key", dropna=False).agg(
+        total_fatal=("_is_fatal", "sum"),
+        total_fatal_serious_injury=("_is_ksi", "sum"),
+        total_ped_crash=("_is_ped", "sum"),
+        total_bike_crash=("_is_bike", "sum"),
+        total_motorcycle_crash=("_is_moto", "sum"),
+        total_epdo=("_epdo", "sum"),
+        total_night_crash=("_is_night", "sum"),
+        total_night_fatal=("_night_fatal", "sum"),
+        total_impaired_crash=("_is_impaired", "sum"),
+        total_distracted_crash=("_is_distracted", "sum"),
+        total_speed_crash=("_is_speed", "sum"),
         district=("DOT District", "first"),
         mpo=("MPO Name", "first"),
-        pd_col=("Planning District", "first"),
+        pd_=("Planning District", "first"),
+        juris_name=("Physical Juris Name", "first"),
+        fips_val=("FIPS", "first"),
     ).reset_index()
+    agg = agg[agg["_rank_key"].ne("")]
 
-    agg_df = agg_df.merge(scope_cols, on="_rank_key", how="left")
+    # ── Trends (3-year % change) ──
+    years = df["Crash Year"].fillna("").astype(str).str.strip()
+    valid_years = sorted(years[years.str.isdigit()].unique())
+    if len(valid_years) >= 2:
+        last_yr, prev_yr = valid_years[-1], valid_years[-2]
+        if (years == last_yr).sum() < (years == prev_yr).sum() * 0.5:
+            valid_years = valid_years[:-1]
 
-    # Convert to metrics dict for backward compatibility
+    if len(valid_years) >= 6:
+        recent = valid_years[-3:]
+        prior = valid_years[-6:-3]
+        df["_yr"] = years
+        df["_in_recent"] = df["_yr"].isin(recent)
+        df["_in_prior"] = df["_yr"].isin(prior)
+        for trend_name, col, agg_func in [
+            ("trend_total_crash", "_rank_key", "size"),
+            ("trend_fatal", "_is_fatal", "sum"),
+            ("trend_ksi", "_is_ksi", "sum"),
+            ("trend_epdo", "_epdo", "sum"),
+            ("trend_ped_crash", "_is_ped", "sum"),
+            ("trend_bike_crash", "_is_bike", "sum"),
+        ]:
+            recent_agg = df[df["_in_recent"]].groupby("_rank_key")[col].agg(agg_func)
+            prior_agg = df[df["_in_prior"]].groupby("_rank_key")[col].agg(agg_func)
+            pct_change = ((recent_agg - prior_agg) / prior_agg.replace(0, np.nan) * 100).fillna(0).round(1)
+            agg[trend_name] = agg["_rank_key"].map(pct_change).fillna(0)
+    else:
+        for m in RANKING_METRICS_TREND:
+            agg[m] = 0.0
+
+    # ── Proportions ──
+    total = agg["total_crash"].clip(lower=1)
+    fatal = agg["total_fatal"].clip(lower=1)
+    agg["pct_night_fatal"] = (agg["total_night_fatal"] / fatal.where(agg["total_fatal"] > 0, np.nan) * 100).fillna(0).round(1)
+    agg["pct_impaired_crash"] = (agg["total_impaired_crash"] / total * 100).round(1)
+    agg["pct_distracted_crash"] = (agg["total_distracted_crash"] / total * 100).round(1)
+    agg["pct_speed_crash"] = (agg["total_speed_crash"] / total * 100).round(1)
+
+    # ── Severity indices ──
+    agg["severity_index"] = (agg["total_epdo"] / total).round(1)
+    agg["fatality_rate"] = (agg["total_fatal"] / total * 1000).round(2)
+
+    # ── Composite safety score (0-100, higher = more dangerous) ──
+    def _norm(s):
+        lo, hi = s.min(), s.max()
+        return ((s - lo) / (hi - lo) * 100).fillna(50) if hi > lo else pd.Series(50, index=s.index)
+
+    vru_raw = agg["total_ped_crash"] * 0.50 + agg["total_bike_crash"] * 0.30 + agg["total_motorcycle_crash"] * 0.20
+    ksi_rate = agg["total_fatal_serious_injury"] / total * 1000
+    agg["safety_score"] = (
+        _norm(ksi_rate) * 0.40 +
+        _norm(agg.get("trend_fatal", pd.Series(0, index=agg.index))) * 0.25 +
+        _norm(vru_raw) * 0.15 +
+        _norm(agg["pct_impaired_crash"]) * 0.10 +
+        _norm(agg["total_epdo"].astype(float)) * 0.10
+    ).round(1)
+
+    # ── Assign ranks within each scope ──
+    active_metrics = [m for m in RANKING_METRICS if m in agg.columns]
+    result = agg[["_rank_key"]].copy()
+
+    for metric in active_metrics:
+        # Juris scope — all jurisdictions
+        result[f"Juris_Rank_{metric}"] = agg[metric].rank(ascending=False, method="min").astype(int).astype(str)
+
+        # District scope
+        col = f"District_Rank_{metric}"
+        result[col] = ""
+        for dist, grp in agg.groupby("district", dropna=False):
+            if not dist or str(dist).strip() == "":
+                continue
+            idx = grp.index
+            result.loc[idx, col] = agg.loc[idx, metric].rank(ascending=False, method="min").astype(int).astype(str)
+
+        # MPO scope
+        col = f"MPO_Rank_{metric}"
+        result[col] = ""
+        for mpo_name, grp in agg.groupby("mpo", dropna=False):
+            if not mpo_name or str(mpo_name).strip() == "":
+                continue
+            idx = grp.index
+            result.loc[idx, col] = agg.loc[idx, metric].rank(ascending=False, method="min").astype(int).astype(str)
+
+        # PD scope
+        col = f"PlanningDistrict_Rank_{metric}"
+        result[col] = ""
+        for pd_name, grp in agg.groupby("pd_", dropna=False):
+            if not pd_name or str(pd_name).strip() == "":
+                continue
+            idx = grp.index
+            result.loc[idx, col] = agg.loc[idx, metric].rank(ascending=False, method="min").astype(int).astype(str)
+
+    # ── Merge ranks back to every crash row ──
+    rank_lookup = result.set_index("_rank_key")
+    rank_col_names = [c for c in rank_lookup.columns]
+    crash_keys = df["_rank_key"]
+    for col in rank_col_names:
+        df[col] = crash_keys.map(rank_lookup[col]).fillna("")
+
+    # ── Build metrics dict for backward compatibility ──
     metrics = {}
-    for _, row in agg_df.iterrows():
+    for _, row in agg.iterrows():
         k = row["_rank_key"]
         if not k:
             continue
-        metrics[k] = {col: row[col] for col in agg_df.columns if col != "_rank_key"}
+        metrics[k] = {c: row[c] for c in agg.columns if c != "_rank_key"}
 
-    # ── Rank within each scope ──
-    rank_results = {}  # key → {col_name: rank_value}
-    for k in agg_df["_rank_key"]:
-        rank_results[k] = {}
+    # ── Cleanup temp columns ──
+    temp_cols = [c for c in df.columns if c.startswith("_")]
+    df = df.drop(columns=temp_cols, errors="ignore")
 
-    for metric in RANKING_METRICS:
-        metric_vals = agg_df.set_index("_rank_key")[metric]
-
-        # Juris scope — rank across all jurisdictions
-        ranks = metric_vals.rank(ascending=False, method="min").astype(int)
-        for k, r in ranks.items():
-            rank_results[k][f"Juris_Rank_{metric}"] = r
-
-        # District scope — rank within each district
-        for dist, grp in agg_df.groupby("district", dropna=False):
-            if not dist or str(dist).strip() == "":
-                for k in grp["_rank_key"]:
-                    rank_results[k][f"District_Rank_{metric}"] = ""
-                continue
-            dist_ranks = grp.set_index("_rank_key")[metric].rank(
-                ascending=False, method="min").astype(int)
-            for k, r in dist_ranks.items():
-                rank_results[k][f"District_Rank_{metric}"] = r
-
-        # MPO scope
-        for mpo_name, grp in agg_df.groupby("mpo", dropna=False):
-            if not mpo_name or str(mpo_name).strip() == "":
-                for k in grp["_rank_key"]:
-                    rank_results[k][f"MPO_Rank_{metric}"] = ""
-                continue
-            mpo_ranks = grp.set_index("_rank_key")[metric].rank(
-                ascending=False, method="min").astype(int)
-            for k, r in mpo_ranks.items():
-                rank_results[k][f"MPO_Rank_{metric}"] = r
-
-        # Planning District scope
-        for pd_name, grp in agg_df.groupby("pd_col", dropna=False):
-            if not pd_name or str(pd_name).strip() == "":
-                for k in grp["_rank_key"]:
-                    rank_results[k][f"PlanningDistrict_Rank_{metric}"] = ""
-                continue
-            pd_ranks = grp.set_index("_rank_key")[metric].rank(
-                ascending=False, method="min").astype(int)
-            for k, r in pd_ranks.items():
-                rank_results[k][f"PlanningDistrict_Rank_{metric}"] = r
-
-    # ── Map ranks back to every row via vectorized merge ──
-    rank_df = pd.DataFrame.from_dict(rank_results, orient="index")
-    rank_df.index.name = "_rank_key"
-    rank_df = rank_df.reset_index()
-
-    # Convert rank values to string (empty for None)
-    for col in rank_df.columns:
-        if col != "_rank_key":
-            rank_df[col] = rank_df[col].apply(
-                lambda v: "" if v == "" or pd.isna(v) else str(int(v)))
-
-    # Merge into main df
-    df = df.merge(rank_df, on="_rank_key", how="left")
-    df.drop(columns=["_rank_key"], inplace=True)
+    elapsed = _t.time() - _t0
+    n_metrics = len(active_metrics)
+    n_cols = len(rank_col_names)
+    print(f"        Ranked {len(agg)} jurisdictions × {n_metrics} metrics × {len(RANKING_SCOPES)} scopes")
+    print(f"        {n_cols} ranking columns in {elapsed:.1f}s")
+    print(f"        Groups: {len(RANKING_METRICS_COUNT)} count, {len(RANKING_METRICS_TREND)} trend, "
+          f"{len(RANKING_METRICS_PROPORTION)} proportion, {len(RANKING_METRICS_SEVERITY)} severity, "
+          f"{len(RANKING_METRICS_COMPOSITE)} composite")
 
     return df, metrics
 
@@ -1328,9 +1421,10 @@ def _clean_float_columns(df: pd.DataFrame) -> pd.DataFrame:
 def prefix_extra_columns(df: pd.DataFrame) -> pd.DataFrame:
     """Prefix non-standard columns with lowercase state abbreviation."""
     standard_set = set(GOLDEN_COLUMNS + ENRICHMENT_COLUMNS + ANALYSIS_COLUMNS)
-    for s in RANKING_SCOPES:
-        for m in RANKING_METRICS:
-            standard_set.add(f"{s}_Rank_{m}")
+    # Protect ALL ranking columns (both v1 24-col and v2 76+ col)
+    for c in df.columns:
+        if "_Rank_" in c:
+            standard_set.add(c)
 
     # Ensure Intersection Name is always present (empty if Tier 2 not run)
     if "Intersection Name" not in df.columns:
@@ -1421,14 +1515,13 @@ def normalize(
         # Recompute rankings
         print(f"     Recomputing rankings...")
         df, metrics = compute_rankings(df)
-        print(f"     Ranked {len(metrics)} jurisdictions across {len(RANKING_SCOPES)} scopes × {len(RANKING_METRICS)} metrics")
 
         # Determine output paths
         if output_path is None:
             output_path = str(src.parent / f"{src.stem}_normalized_ranked.parquet.gz")
 
         # Build output column order (same as full pipeline)
-        ranking_cols = [f"{s}_Rank_{m}" for s in RANKING_SCOPES for m in RANKING_METRICS]
+        ranking_cols = [c for c in df.columns if "_Rank_" in c]
         analysis_cols = [c for c in ANALYSIS_COLUMNS if c in df.columns]
         ri_cols = [c for c in df.columns if c.startswith(ROAD_INVENTORY_PREFIXES) and c not in analysis_cols]
         analysis_cols = analysis_cols + ri_cols
@@ -1479,7 +1572,6 @@ def normalize(
     print(f"  [6/8] Phase 5+6: EPDO scoring ({epdo_preset.upper()}) + Ranking...")
     df = compute_epdo(df, weights)
     df, metrics = compute_rankings(df)
-    print(f"        Ranked {len(metrics)} jurisdictions across {len(RANKING_SCOPES)} scopes × {len(RANKING_METRICS)} metrics")
 
     # [7/8] Validation + Fill Strategies
     print("  [7/8] Phase 7: Validation report...")
@@ -1502,7 +1594,7 @@ def normalize(
     df = prefix_extra_columns(df)
 
     # Build output column order: 69 standard + 4 enrichment + road inventory + 24 ranking + prefixed extras
-    ranking_cols = [f"{s}_Rank_{m}" for s in RANKING_SCOPES for m in RANKING_METRICS]
+    ranking_cols = [c for c in df.columns if "_Rank_" in c]
     # Road inventory columns: anything in ANALYSIS_COLUMNS or with protected prefix
     analysis_cols = [c for c in ANALYSIS_COLUMNS if c in df.columns]
     ri_cols = [c for c in df.columns if c.startswith(ROAD_INVENTORY_PREFIXES) and c not in analysis_cols]
