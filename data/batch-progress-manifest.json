@@ -79,18 +79,6 @@
     "delaware": {
       "runs": [
         {
-          "timestamp": "2026-03-22T21:51:52.219784+00:00",
-          "scope": "statewide",
-          "selection": "all",
-          "total_records": 566762,
-          "jurisdiction_count": 3,
-          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
-          "data_changed": true,
-          "workflow_run": "23413042667",
-          "pipeline": "delaware-batch-all-jurisdictions",
-          "normalized": true
-        },
-        {
           "timestamp": "2026-03-23T00:58:25.035086+00:00",
           "scope": "statewide",
           "selection": "all",
@@ -317,9 +305,21 @@
           "pipeline": "delaware-batch-all-jurisdictions",
           "normalized": true,
           "road_joined": true
+        },
+        {
+          "timestamp": "2026-04-05T06:05:12.085543+00:00",
+          "scope": "statewide",
+          "total_records": 566762,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/_statewide/statewide_all_roads.parquet.gz",
+          "data_changed": true,
+          "workflow_run": "23995523585",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true,
+          "road_joined": true
         }
       ],
-      "last_updated": "2026-04-05T02:10:49.127027+00:00"
+      "last_updated": "2026-04-05T06:05:12.085534+00:00"
     }
   }
 }
