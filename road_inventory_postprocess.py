@@ -126,8 +126,13 @@ FC_DEFAULT_SPEED = {
 
 # --- FIX_THL: FC minimum lanes (known minimums) ---
 FC_MIN_LANES = {
-    "1-": 4,   # Interstate: min 2 lanes each direction = 4 total
-    "2-": 2,   # Freeway: min 2
+    "1-": 4,   # Interstate: min 2 each direction = 4 total
+    "2-": 4,   # Freeway: min 2 each direction = 4 total
+    "3-": 2,   # Principal Arterial: min 1 each direction = 2
+    "4-": 2,   # Minor Arterial: min 1 each direction = 2
+    "5-": 2,   # Major Collector: min 1 each direction = 2
+    "6-": 2,   # Minor Collector: min 1 each direction = 2
+    "7-": 2,   # Local: min 1 each direction = 2
 }
 
 
@@ -620,6 +625,28 @@ def fix_through_lanes(ri, report):
             ri.loc[empty_fc, "Through_Lanes"] = str(min_lanes)
             report.fix("FIX_THL", f"FC {prefix[0]} empty → min {min_lanes} lanes", empty_fc.sum())
 
+    # Propagate from same-ref + same-FC segments (like AADT Layer 2a)
+    tl = _n(ri, "Through_Lanes").astype(int)
+    ref = _s(ri, "ref")
+    fc = _s(ri, "Functional Class")
+    ref_has_lanes = (tl > 0) & (ref != "") & (fc != "")
+    if ref_has_lanes.any():
+        ref_fc_key = ref + "|||" + fc
+        lane_medians = (ri.loc[ref_has_lanes]
+                        .assign(_key=ref_fc_key[ref_has_lanes].values)
+                        .groupby("_key")["Through_Lanes"]
+                        .apply(lambda s: int(pd.to_numeric(s, errors="coerce").median()))
+                       )
+        needs_fill = (tl == 0) & (ref != "") & (fc != "")
+        fill_keys = ref_fc_key[needs_fill]
+        in_lookup = fill_keys.isin(lane_medians.index)
+        if in_lookup.any():
+            actual = needs_fill & in_lookup.reindex(ri.index, fill_value=False)
+            filled_vals = ref_fc_key[actual].map(lane_medians).fillna(0).astype(int)
+            valid = filled_vals > 0
+            ri.loc[actual & valid, "Through_Lanes"] = filled_vals[valid].astype(str)
+            report.fix("FIX_THL", "Lanes from same-ref+FC segments", (actual & valid).sum())
+
 
 def fix_aadt(ri, report):
     """
@@ -696,12 +723,21 @@ def fix_aadt(ri, report):
             ri.loc[actual_fill & valid, "AADT_source"] = "name_propagation"
             report.fix("FIX_ADT", "AADT from same-name+FC segments", (actual_fill & valid).sum())
 
-    # Layer 3 intentionally omitted.
-    # FC-based state average was filling 55-64% of rows with a single blanket
-    # number (e.g. every FC-7 Local got 490 AADT regardless of whether it's
-    # a cul-de-sac or a through-street). This masks "no data" as if it were
-    # measured. Downstream consumers should treat AADT=0 as "unknown" and
-    # check AADT_source for provenance.
+    # Layer 2c: Geographic proximity — FC 1-6 only
+    # For higher FC roads with no AADT, use median of same-FC segments
+    # within the state. NOT applied to FC-7 (too many, too varied).
+    aadt = _n(ri, "AADT").astype(int)
+    for fc_prefix in ["1-", "2-", "3-", "4-", "5-", "6-"]:
+        needs = (aadt == 0) & fc.str.startswith(fc_prefix)
+        donors = (aadt > 0) & fc.str.startswith(fc_prefix)
+        if not needs.any() or not donors.any():
+            continue
+        fc_median = int(aadt[donors].median())
+        if fc_median > 0:
+            ri.loc[needs, "AADT"] = fc_median
+            ri.loc[needs, "AADT_source"] = "fc_median"
+            report.fix("FIX_ADT", f"AADT FC-{fc_prefix[0]} median ({fc_median:,})", needs.sum())
+
     aadt_final = _n(ri, "AADT").astype(int)
     still_zero = (aadt_final == 0).sum()
     if still_zero > 0:
@@ -875,8 +911,28 @@ def fix_max_speed_diff(ri, report):
         ri.loc[better, "Max Speed Diff"] = rsl[better].astype(str)
         report.fix("FIX_SPD", "Max Speed Diff←resolved_speed_limit", better.sum())
 
-    # Where both are 0 → apply FC default
+    # Clamp resolved speeds to FC range (prevent e.g. 5 mph Interstate)
+    FC_SPEED_FLOOR = {"1-": 45, "2-": 35, "3-": 25, "4-": 20, "5-": 15, "6-": 15, "7-": 5}
+    FC_SPEED_CEIL  = {"1-": 75, "2-": 70, "3-": 60, "4-": 55, "5-": 50, "6-": 45, "7-": 35}
+    spd_now = _n(ri, "Max Speed Diff").astype(int)
     fc = _s(ri, "Functional Class")
+    clamped = 0
+    for prefix in FC_SPEED_FLOOR:
+        mask = fc.str.startswith(prefix) & (spd_now > 0)
+        floor = FC_SPEED_FLOOR[prefix]
+        ceil = FC_SPEED_CEIL[prefix]
+        too_low = mask & (spd_now < floor)
+        too_high = mask & (spd_now > ceil)
+        if too_low.any():
+            ri.loc[too_low, "Max Speed Diff"] = str(floor)
+            clamped += too_low.sum()
+        if too_high.any():
+            ri.loc[too_high, "Max Speed Diff"] = str(ceil)
+            clamped += too_high.sum()
+    if clamped:
+        report.fix("FIX_SPD", "Speed clamped to FC range (post-resolve)", clamped)
+
+    # Where both are 0 → apply FC default
     both_zero = (rsl == 0) & (msd == 0) & (fc != "")
     if both_zero.any():
         filled = 0
