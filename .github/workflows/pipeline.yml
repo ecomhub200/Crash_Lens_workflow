@@ -378,7 +378,7 @@ jobs:
           data_files = []
           for root, dirs, files in os.walk(split_dir):
               for f in files:
-                  if f.endswith('.csv') or f.endswith('.parquet.gz'):
+                  if f.endswith('.csv') or f.endswith('.parquet'):
                       data_files.append(os.path.join(root, f))
 
           data_files.sort()
@@ -387,12 +387,12 @@ jobs:
 
           for i, local in enumerate(data_files):
               rel = os.path.relpath(local, split_dir)
-              is_parquet = local.endswith('.parquet.gz')
-              # .parquet.gz already has extension; .csv gets .gz appended
+              is_parquet = local.endswith('.parquet')
+              # .parquet already has extension; .csv gets .gz appended
               r2_key = f'{r2_prefix}/{rel}' if is_parquet else f'{r2_prefix}/{rel}.gz'
               try:
                   if is_parquet:
-                      # Already compressed — upload directly
+                      # Snappy-compressed parquet — upload directly
                       upload_path = local
                       content_type = 'application/octet-stream'
                       extra_args = []
@@ -428,9 +428,9 @@ jobs:
                   if uploaded:
                       success += 1
                       if is_parquet:
-                          # Delete legacy .csv and .csv.gz keys (clean transition)
-                          base = rel[:-len('.parquet.gz')]
-                          for legacy_ext in ['.csv', '.csv.gz']:
+                          # Delete legacy .csv, .csv.gz, and .parquet.gz keys (clean transition)
+                          base = rel[:-len('.parquet')]
+                          for legacy_ext in ['.csv', '.csv.gz', '.parquet.gz']:
                               legacy_key = f'{r2_prefix}/{base}{legacy_ext}'
                               subprocess.run([
                                   'aws', 's3', 'rm', f's3://{bucket}/{legacy_key}',

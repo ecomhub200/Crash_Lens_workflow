@@ -24,35 +24,35 @@ R2 OUTPUT STRUCTURE (mirrors create_r2_folders.py exactly)
 -----------------------------------------------------------
   {state_prefix}/
     _state/
-      all_roads.parquet.gz           All crashes
-      dot_roads.parquet.gz           State DOT-maintained only
-      primary_roads.parquet.gz       Interstate + Freeway only
-      non_dot_roads.parquet.gz       Non-DOT (county + city + local)
+      all_roads.parquet           All crashes
+      dot_roads.parquet           State DOT-maintained only
+      primary_roads.parquet       Interstate + Freeway only
+      non_dot_roads.parquet       Non-DOT (county + city + local)
     _region/{region_id}/
-      all_roads.parquet.gz
-      dot_roads.parquet.gz
-      primary_roads.parquet.gz
-      non_dot_roads.parquet.gz
+      all_roads.parquet
+      dot_roads.parquet
+      primary_roads.parquet
+      non_dot_roads.parquet
     _mpo/{mpo_id}/
-      all_roads.parquet.gz
-      county_roads.parquet.gz
-      city_roads.parquet.gz
-      no_interstate.parquet.gz
+      all_roads.parquet
+      county_roads.parquet
+      city_roads.parquet
+      no_interstate.parquet
     _planning_district/{pd_id}/
-      all_roads.parquet.gz
-      county_roads.parquet.gz
-      city_roads.parquet.gz
-      no_interstate.parquet.gz
+      all_roads.parquet
+      county_roads.parquet
+      city_roads.parquet
+      no_interstate.parquet
     _city/{city_slug}/
-      all_roads.parquet.gz
-      county_roads.parquet.gz
-      city_roads.parquet.gz
-      no_interstate.parquet.gz
+      all_roads.parquet
+      county_roads.parquet
+      city_roads.parquet
+      no_interstate.parquet
     {county_key}/
-      all_roads.parquet.gz
-      county_roads.parquet.gz
-      city_roads.parquet.gz
-      no_interstate.parquet.gz
+      all_roads.parquet
+      county_roads.parquet
+      city_roads.parquet
+      no_interstate.parquet
 
 TWO ROAD TYPE SETS — matching frontend getActiveRoadTypeSuffix()
 ----------------------------------------------------------------
@@ -380,14 +380,14 @@ def write_file(
 ) -> int:
     """Write DataFrame to snappy-compressed parquet. Returns row count."""
     if dry_run:
-        print(f"      [DRY] {len(df):>7,} rows -> {output_path.name}.gz")
+        print(f"      [DRY] {len(df):>7,} rows -> {output_path.name}")
         return len(df)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    pq_path = Path(str(output_path) + ".gz")
+    pq_path = output_path
     df.to_parquet(pq_path, index=False, compression="snappy")
     size_mb = pq_path.stat().st_size / 1024 / 1024
-    print(f"      {len(df):>7,} rows -> {output_path.name}.gz ({size_mb:.1f} MB)")
+    print(f"      {len(df):>7,} rows -> {output_path.name} ({size_mb:.1f} MB)")
     return len(df)
 
 
@@ -421,7 +421,7 @@ def split_state_level(
     """
     Write _state/ files. Uses ROAD_TYPES_STATE_REGION (SET A).
     Also writes statewide_all_roads.parquet alias removed in v3.0 —
-    _state/all_roads.parquet.gz IS the statewide file.
+    _state/all_roads.parquet IS the statewide file.
     """
     print(f"\n  [STATE] _state/ — {len(df):,} total records")
     state_dir = output_dir / "_state"
@@ -756,7 +756,7 @@ def upload_to_r2(
     Retries 4 times with exponential backoff on failure.
     Returns count of successfully uploaded files.
     """
-    ext   = ".parquet.gz"
+    ext   = ".parquet"
     files = sorted(output_dir.rglob(f"*{ext}"))
 
     if not files:
@@ -778,7 +778,6 @@ def upload_to_r2(
             f"s3://{r2_bucket}/{r2_key}",
             "--endpoint-url", r2_endpoint,
             "--content-type", "application/octet-stream",
-            "--content-encoding", "gzip",
             "--only-show-errors",
         ]
 
@@ -819,10 +818,10 @@ def cleanup_legacy_r2(
 
     Scans ALL folders under {state_prefix}/ for:
       1. statewide_all_roads.csv.gz — duplicate of all_roads (removed in v3.0)
-      2. Old .csv.gz files that now have .parquet.gz replacements
+      2. Old .csv.gz files that now have .parquet replacements
 
     Safety: only deletes statewide file if all_roads exists with matching size.
-    Only deletes .csv.gz if .parquet.gz replacement exists in same folder.
+    Only deletes .csv.gz if .parquet replacement exists in same folder.
     """
     print(f"\n  [R2 CLEANUP] Scanning {state_prefix}/ for legacy files...")
     removed = 0
@@ -855,7 +854,7 @@ def cleanup_legacy_r2(
     all_roads_key = None
     all_roads_size = 0
 
-    for candidate in [f"{state_prefix}/_state/all_roads.parquet.gz",
+    for candidate in [f"{state_prefix}/_state/all_roads.parquet",
                       f"{state_prefix}/_state/all_roads.csv.gz"]:
         if candidate in r2_files:
             all_roads_key = candidate
@@ -890,10 +889,10 @@ def cleanup_legacy_r2(
             else:
                 print(f"    ⚠️ statewide size mismatch — keeping")
 
-    # ── Check 2: Old .csv.gz replaced by .parquet.gz (all folders) ──
+    # ── Check 2: Old .csv.gz replaced by .parquet (all folders) ──
     csv_keys = [k for k in r2_files if k.endswith(".csv.gz")]
     for csv_key in csv_keys:
-        parquet_key = csv_key.replace(".csv.gz", ".parquet.gz")
+        parquet_key = csv_key.replace(".csv.gz", ".parquet")
         if parquet_key not in r2_files:
             continue
 
@@ -901,7 +900,7 @@ def cleanup_legacy_r2(
         short_name = csv_key.replace(f"{state_prefix}/", "")
 
         if dry_run:
-            print(f"    [DRY] Would delete {short_name} ({size_mb:.1f} MB) — .parquet.gz exists")
+            print(f"    [DRY] Would delete {short_name} ({size_mb:.1f} MB) — .parquet exists")
             removed += 1
         else:
             cmd = ["aws", "s3", "rm", f"s3://{r2_bucket}/{csv_key}",
@@ -909,14 +908,14 @@ def cleanup_legacy_r2(
             try:
                 res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
                 if res.returncode == 0:
-                    print(f"    ✅ Deleted {short_name} ({size_mb:.1f} MB) — replaced by .parquet.gz")
+                    print(f"    ✅ Deleted {short_name} ({size_mb:.1f} MB) — replaced by .parquet")
                     removed += 1
             except Exception:
                 pass
 
     # ── Check 3: Statewide source CSV (949MB) — delete after split verified ──
-    #    Only delete if _state/all_roads.parquet.gz exists (proves split succeeded)
-    if all_roads_key and all_roads_key.endswith(".parquet.gz"):
+    #    Only delete if _state/all_roads.parquet exists (proves split succeeded)
+    if all_roads_key and all_roads_key.endswith(".parquet"):
         # Find statewide source CSVs
         statewide_patterns = [
             f"{state_prefix}/statewide/",  # delaware/statewide/*.csv
