@@ -322,7 +322,7 @@ def test_spatial_matcher(t):
             geometry_coords=coords)
         assert m._has_linestrings
 
-    def _match_returns_4tuple():
+    def _match_returns_5tuple():
         m = SpatialMatcher(
             ri["mid_lat"].values, ri["mid_lon"].values,
             ri["u_lat"].values, ri["u_lon"].values,
@@ -331,9 +331,9 @@ def test_spatial_matcher(t):
         result = m.match(
             pd.to_numeric(crashes["y"]).values,
             pd.to_numeric(crashes["x"]).values)
-        assert len(result) == 4, f"Expected 4-tuple, got {len(result)}"
-        ci, road_idx, dists, conf = result
-        assert len(ci) == len(road_idx) == len(dists) == len(conf)
+        assert len(result) == 5, f"Expected 5-tuple, got {len(result)}"
+        ci, road_idx, dists, conf, meth = result
+        assert len(ci) == len(road_idx) == len(dists) == len(conf) == len(meth)
 
     def _confidence_labels_correct():
         dists = np.array([5, 50, 150, 250, 320])
@@ -363,7 +363,7 @@ def test_spatial_matcher(t):
 
     t.test("SpatialMatcher init (no linestring)", _init_no_linestring)
     t.test("SpatialMatcher init (with linestring)", _init_with_linestring)
-    t.test("match returns 4-tuple", _match_returns_4tuple)
+    t.test("match returns 5-tuple", _match_returns_5tuple)
     t.test("confidence labels", _confidence_labels_correct)
     t.test("GPS validation", _validate_gps_correct)
     t.test("vectorized distance", _vec_dist_correct)
