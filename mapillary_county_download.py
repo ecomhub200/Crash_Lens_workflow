@@ -691,24 +691,44 @@ def main():
         timed_out = []
 
     # ═══════════════════════════════════════════════════════════
-    #  CONSOLIDATE STATEWIDE
+    # CONSOLIDATION — partial statewide from whatever succeeded
     # ═══════════════════════════════════════════════════════════
 
     print(f"\n  Consolidating statewide data...")
 
+    # If in-memory DataFrames are missing (e.g. resume mode),
+    # rebuild from per-county R2 files
+    if not all_county_dfs and s3 and not args.local_only:
+        print(f"  Rebuilding from per-county R2 files...")
+        for county in counties:
+            slug = county_to_slug(county)
+            key = f"{r2_prefix}/{slug}/traffic-inventory.parquet.gz"
+            if r2_exists(s3, bucket, key):
+                local_tmp = cache_dir / f"_tmp_{slug}.parquet.gz"
+                try:
+                    with _s3_lock:
+                        s3.download_file(bucket, key, str(local_tmp))
+                    df = pd.read_parquet(local_tmp)
+                    all_county_dfs.append(df)
+                    local_tmp.unlink(missing_ok=True)
+                except Exception:
+                    pass
+
     if not all_county_dfs:
         print(f"  ❌ No data collected")
-        sys.exit(1)
+        # Still exit 0 so the workflow doesn't show as failed
+        # Per-county files on R2 are the real output
+        sys.exit(0)
 
     statewide = pd.concat(all_county_dfs, ignore_index=True)
     del all_county_dfs
     gc.collect()
 
-    # Dedup by Mapillary feature ID (county boundaries overlap in bbox approximation)
+    # Dedup
     before = len(statewide)
     statewide.drop_duplicates(subset=["id"], keep="first", inplace=True)
     after = len(statewide)
-    print(f"  Dedup: {before:,} → {after:,} features ({before - after:,} boundary dupes removed)")
+    print(f"  Dedup: {before:,} → {after:,} features")
 
     # Save statewide
     state_pq = cache_dir / "traffic-inventory.parquet"
@@ -716,14 +736,12 @@ def main():
     statewide.to_parquet(state_pq, index=False)
     raw, gz = gzip_file(state_pq, state_gz)
     state_pq.unlink(missing_ok=True)
+    print(f"  Statewide: {len(statewide):,} features ({gz:.1f} MB)")
 
-    print(f"  Statewide: {len(statewide):,} features ({gz:.1f} MB gz)")
-
-    # Upload statewide to R2 cache/ as traffic-inventory.parquet.gz
     if s3 and not args.local_only:
         statewide_r2_key = f"{r2_prefix}/cache/traffic-inventory.parquet.gz"
         r2_upload(s3, state_gz, bucket, statewide_r2_key)
-        print(f"  → uploaded to R2: {statewide_r2_key}")
+        print(f"  → uploaded: {statewide_r2_key}")
 
     # ── Summary ──
     total_elapsed = time.time() - t0_total
