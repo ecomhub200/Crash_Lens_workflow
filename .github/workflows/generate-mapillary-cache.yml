@@ -37,6 +37,7 @@ on:
           - fl
           - ga
           - il
+          - in
           - ma
           - ny
           - nc
@@ -113,7 +114,7 @@ jobs:
           declare -A PREFIXES=(
             [de]=delaware [va]=virginia [co]=colorado [md]=maryland
             [ct]=connecticut [fl]=florida [ga]=georgia [il]=illinois
-            [ma]=massachusetts [ny]=new_york [nc]=north_carolina [oh]=ohio
+            [in]=indiana [ma]=massachusetts [ny]=new_york [nc]=north_carolina [oh]=ohio
             [pa]=pennsylvania [sc]=south_carolina [tx]=texas [wa]=washington
           )
           PREFIX="${PREFIXES[$STATE]:-$STATE}"
