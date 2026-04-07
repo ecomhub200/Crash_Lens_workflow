@@ -1,0 +1,465 @@
+# ==============================================================================
+# Mapillary Traffic Inventory — Nationwide Download
+# ==============================================================================
+# Same design as generate-mapillary-cache.yml but runs ALL 51 states.
+# 1 state at a time. Within each state: 1 county at a time, sequential.
+# Big+small interleaved. Resume-safe. Retry for timed-out states.
+#
+# SCALE: ~3-5 days for all 51 states with re-runs.
+# ==============================================================================
+
+name: "Mapillary: Nationwide Download"
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Which states'
+        required: true
+        default: 'nationwide'
+        type: choice
+        options:
+          - nationwide
+          - small_states
+          - medium_states
+          - large_states
+          - single_state
+
+      state:
+        description: 'State abbreviation (only for single_state)'
+        required: false
+        default: ''
+        type: string
+
+      tile_size:
+        description: 'Tile size in degrees'
+        required: false
+        type: choice
+        default: '0.02'
+        options: ['0.01', '0.02', '0.03']
+
+      force:
+        description: 'Force re-download'
+        required: false
+        type: boolean
+        default: false
+
+  schedule:
+    - cron: '0 4 1 1,4,7,10 *'
+
+permissions:
+  contents: read
+
+env:
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  #  PREFLIGHT
+  # ════════════════════════════════════════════════════════════════
+  preflight:
+    name: "Preflight"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      total: ${{ steps.matrix.outputs.total }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build state matrix
+        id: matrix
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          SCOPE="${{ github.event.inputs.scope || 'nationwide' }}"
+          FORCE="${{ github.event.inputs.force || 'false' }}"
+          SINGLE="${{ github.event.inputs.state || '' }}"
+
+          SMALL="dc ri de ct nj nh vt ma md hi me wv"
+          MEDIUM="sc nc ky ar ms al la ia ok ks ne nd sd wy nm id nv ut az co va ga wi mn mo"
+          LARGE="oh pa il mi fl ny wa or tn tx ca ak in mt"
+
+          if [ "$SCOPE" = "single_state" ] && [ -n "$SINGLE" ]; then ALL_STATES="$SINGLE"
+          elif [ "$SCOPE" = "small_states" ]; then ALL_STATES="$SMALL"
+          elif [ "$SCOPE" = "medium_states" ]; then ALL_STATES="$MEDIUM"
+          elif [ "$SCOPE" = "large_states" ]; then ALL_STATES="$LARGE"
+          else ALL_STATES="$SMALL $MEDIUM $LARGE"
+          fi
+
+          # Get R2 prefixes from script (single source of truth)
+          python3 -c "
+          from mapillary_county_download import STATES
+          for abbr in STATES:
+              print(f'{abbr}={STATES[abbr][2]}')
+          " > /tmp/prefixes.txt
+
+          declare -A PREFIXES
+          while IFS='=' read -r key val; do
+            PREFIXES[$key]=$val
+          done < /tmp/prefixes.txt
+
+          NEEDED=""
+          SKIPPED=""
+          for STATE in $ALL_STATES; do
+            PREFIX="${PREFIXES[$STATE]:-$STATE}"
+            if [ "$FORCE" = "true" ]; then
+              NEEDED="$NEEDED $STATE"
+            elif aws s3 ls "s3://${R2_BUCKET}/${PREFIX}/cache/traffic-inventory.parquet.gz" \
+                --endpoint-url "$R2" 2>/dev/null | grep -q traffic-inventory; then
+              SKIPPED="$SKIPPED $STATE"
+            else
+              NEEDED="$NEEDED $STATE"
+            fi
+          done
+
+          NEEDED=$(echo $NEEDED | xargs)
+          SKIPPED=$(echo $SKIPPED | xargs)
+          TOTAL=$(echo $NEEDED | wc -w | xargs)
+
+          echo "Needed ($TOTAL): $NEEDED"
+          echo "Skipped: $SKIPPED"
+
+          if [ -z "$NEEDED" ] || [ "$TOTAL" = "0" ]; then
+            echo "All states complete!"
+            echo 'matrix={"state":[]}' >> $GITHUB_OUTPUT
+            echo "total=0" >> $GITHUB_OUTPUT
+          else
+            JSON="["
+            FIRST=true
+            for STATE in $NEEDED; do
+              [ "$FIRST" = true ] && FIRST=false || JSON="$JSON,"
+              JSON="$JSON\"$STATE\""
+            done
+            JSON="$JSON]"
+            echo "matrix={\"state\":$JSON}" >> $GITHUB_OUTPUT
+            echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Preflight
+          | States needed | ${{ steps.matrix.outputs.total }} |
+          | Mode | 1 state, 1 county at a time |
+          EOF
+
+  # ════════════════════════════════════════════════════════════════
+  #  DOWNLOAD: 1 state at a time, 1 county at a time, 6h per state
+  # ════════════════════════════════════════════════════════════════
+  download:
+    name: "${{ matrix.state }}"
+    needs: preflight
+    if: needs.preflight.outputs.total != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      matrix: ${{ fromJson(needs.preflight.outputs.matrix) }}
+      max-parallel: 1
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pandas pyarrow requests boto3
+      - name: Download us_counties.json
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          aws s3 cp "s3://${R2_BUCKET}/_national/us_counties.json" us_counties.json \
+            --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --only-show-errors
+
+      - name: "Download ${{ matrix.state }}"
+        id: download
+        env:
+          MAPILLARY_TOKEN: ${{ secrets.MAPILLARY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+        run: |
+          STATE="${{ matrix.state }}"
+          TILE="${{ github.event.inputs.tile_size || '0.02' }}"
+
+          if [ -z "$MAPILLARY_TOKEN" ]; then
+            echo "::error::MAPILLARY_TOKEN secret not set"
+            exit 1
+          fi
+          mkdir -p cache
+
+          python3 << PYEOF
+          import json, subprocess, sys, time, os, gzip, shutil, io
+          import pandas as pd
+          import boto3
+
+          state = "$STATE"
+          tile_size = "$TILE"
+
+          # Import from script = single source of truth
+          from mapillary_county_download import STATES as M, load_counties
+
+          _, fips, prefix = M[state]
+
+          # Load, sort big-first, interleave
+          counties = load_counties(fips)
+          total = len(counties)
+          if total == 0:
+              print(f"No counties for {state}")
+              sys.exit(0)
+
+          counties.sort(key=lambda c: int(c.get("AREALAND", 0)), reverse=True)
+          interleaved = []
+          front, back = 0, total - 1
+          while front <= back:
+              interleaved.append(counties[front])
+              front += 1
+              if front <= back:
+                  interleaved.append(counties[back])
+                  back -= 1
+
+          print(f"\n{'=' * 65}")
+          print(f"  {state.upper()}: {total} counties, 1 at a time")
+          print(f"{'=' * 65}\n")
+
+          t0 = time.time()
+          completed, failed = 0, []
+
+          for i, county in enumerate(interleaved):
+              name = county.get("NAMELSAD", county.get("NAME", "?"))
+              area = int(county.get("AREALAND", 0)) / 1e6
+
+              elapsed = time.time() - t0
+              remaining = (6 * 3600) - elapsed - 300  # 5 min safety
+              if remaining < 120:
+                  print(f"\n  STOPPING: {remaining:.0f}s left. Re-run to continue.")
+                  break
+
+              print(f"\n  [{i+1}/{total}] {name} ({area:.0f}km2)"
+                    f"  [{elapsed/60:.0f}m elapsed, {remaining/60:.0f}m left]")
+
+              tc = time.time()
+              try:
+                  r = subprocess.run([
+                      "python", "mapillary_county_download.py",
+                      "--state", state, "--tile-size", tile_size,
+                      "--cache-dir", "cache", "--resume",
+                      "--parallel", "4", "--county", name,
+                  ], timeout=18000)
+                  if r.returncode == 0:
+                      completed += 1
+                      print(f"  OK ({(time.time()-tc)/60:.1f}m)")
+                  else:
+                      failed.append(name)
+                      print(f"  WARN: exit {r.returncode}")
+              except subprocess.TimeoutExpired:
+                  failed.append(name)
+                  print(f"  TIMEOUT after {(time.time()-tc)/60:.1f}m")
+              except Exception as e:
+                  failed.append(name)
+                  print(f"  ERROR: {str(e)[:80]}")
+              time.sleep(3)
+
+          # ── Consolidate ──
+          print(f"\n  Consolidating {state.upper()}...")
+          try:
+              s3 = boto3.client("s3",
+                  endpoint_url=os.environ["R2_ENDPOINT"],
+                  aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+                  aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"],
+                  region_name="auto")
+
+              all_dfs, r2c = [], 0
+              for page in s3.get_paginator("list_objects_v2").paginate(
+                  Bucket=os.environ["R2_BUCKET"], Prefix=f"{prefix}/"):
+                  for obj in page.get("Contents", []):
+                      key = obj["Key"]
+                      if key.endswith("/traffic-inventory.parquet.gz") and "/cache/" not in key:
+                          r2c += 1
+                          try:
+                              body = s3.get_object(Bucket=os.environ["R2_BUCKET"], Key=key)["Body"].read()
+                              with gzip.open(io.BytesIO(body), "rb") as f:
+                                  all_dfs.append(pd.read_parquet(io.BytesIO(f.read())))
+                          except: pass
+
+              if all_dfs:
+                  sw = pd.concat(all_dfs, ignore_index=True)
+                  sw.drop_duplicates(subset=["id"], keep="first", inplace=True)
+                  os.makedirs("cache", exist_ok=True)
+                  sw.to_parquet("cache/i.parquet", index=False)
+                  with open("cache/i.parquet","rb") as fi, gzip.open("cache/i.gz","wb",6) as fo:
+                      shutil.copyfileobj(fi, fo)
+                  r2k = f"{prefix}/cache/traffic-inventory.parquet.gz"
+                  s3.upload_file("cache/i.gz", os.environ["R2_BUCKET"], r2k)
+                  mb = os.path.getsize("cache/i.gz") / 1048576
+                  print(f"  R2 counties: {r2c}, Statewide: {len(sw):,} ({mb:.1f}MB)")
+                  print(f"  Uploaded: {r2k}")
+                  with open(os.environ["GITHUB_OUTPUT"],"a") as o:
+                      o.write(f"features={len(sw)}\nstatus=completed\n")
+              else:
+                  print("  No data")
+                  with open(os.environ["GITHUB_OUTPUT"],"a") as o:
+                      o.write("features=0\nstatus=partial\n")
+          except Exception as e:
+              print(f"  Consolidation error: {e}")
+
+          # Clean cache for next state
+          for f in os.listdir("cache"):
+              try: os.remove(os.path.join("cache", f))
+              except: pass
+
+          print(f"\n  {state.upper()}: {completed}/{total}, {len(failed)} failed, "
+                f"{(time.time()-t0)/60:.1f}m")
+          PYEOF
+
+      - name: Summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## ${{ matrix.state }}: ${{ steps.download.outputs.status || '?' }} (${{ steps.download.outputs.features || '0' }} features)
+          EOF
+
+  # ════════════════════════════════════════════════════════════════
+  #  RETRY
+  # ════════════════════════════════════════════════════════════════
+  retry:
+    name: "Retry"
+    needs: [preflight, download]
+    if: always() && needs.preflight.outputs.total != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pandas pyarrow requests boto3
+      - name: Download us_counties.json
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          aws s3 cp "s3://${R2_BUCKET}/_national/us_counties.json" us_counties.json \
+            --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --only-show-errors
+
+      - name: Retry incomplete
+        env:
+          MAPILLARY_TOKEN: ${{ secrets.MAPILLARY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET: crash-lens-data
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          SCOPE="${{ github.event.inputs.scope || 'nationwide' }}"
+          SINGLE="${{ github.event.inputs.state || '' }}"
+
+          SMALL="dc ri de ct nj nh vt ma md hi me wv"
+          MEDIUM="sc nc ky ar ms al la ia ok ks ne nd sd wy nm id nv ut az co va ga wi mn mo"
+          LARGE="oh pa il mi fl ny wa or tn tx ca ak in mt"
+
+          if [ "$SCOPE" = "single_state" ] && [ -n "$SINGLE" ]; then ALL="$SINGLE"
+          elif [ "$SCOPE" = "small_states" ]; then ALL="$SMALL"
+          elif [ "$SCOPE" = "medium_states" ]; then ALL="$MEDIUM"
+          elif [ "$SCOPE" = "large_states" ]; then ALL="$LARGE"
+          else ALL="$SMALL $MEDIUM $LARGE"
+          fi
+
+          # Get prefixes from script
+          python3 -c "
+          from mapillary_county_download import STATES
+          for a in STATES: print(f'{a}={STATES[a][2]}')
+          " > /tmp/p.txt
+          declare -A PFX
+          while IFS='=' read -r k v; do PFX[$k]=$v; done < /tmp/p.txt
+
+          FAILED=""
+          for S in $ALL; do
+            P="${PFX[$S]:-$S}"
+            if ! aws s3 ls "s3://${R2_BUCKET}/${P}/cache/traffic-inventory.parquet.gz" \
+                --endpoint-url "$R2" 2>/dev/null | grep -q traffic-inventory; then
+              FAILED="$FAILED $S"
+            fi
+          done
+          FAILED=$(echo $FAILED | xargs)
+
+          if [ -z "$FAILED" ]; then
+            echo "All states complete"
+            exit 0
+          fi
+
+          echo "Retrying: $FAILED"
+          mkdir -p cache
+          for S in $FAILED; do
+            echo "═══ RETRY: $S ═══"
+            python mapillary_county_download.py \
+              --state "$S" --parallel 1 --cache-dir cache --resume || {
+              echo "::warning::$S incomplete"
+            }
+            rm -f cache/*.parquet cache/*.parquet.gz
+          done
+
+  # ════════════════════════════════════════════════════════════════
+  #  COVERAGE
+  # ════════════════════════════════════════════════════════════════
+  summary:
+    name: "Coverage"
+    needs: [preflight, download, retry]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Report
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          R2="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          python3 -c "
+          from mapillary_county_download import STATES
+          for a in STATES: print(f'{a}={STATES[a][2]}')
+          " > /tmp/p.txt
+          declare -A PFX
+          while IFS='=' read -r k v; do PFX[$k]=$v; done < /tmp/p.txt
+
+          ALL="al ak az ar ca co ct dc de fl ga hi id il in ia ks ky la me md ma mi mn ms mo mt ne nv nh nj nm ny nc nd oh ok or pa ri sc sd tn tx ut vt va wa wv wi wy"
+          DONE=0
+          MISSING=""
+          for S in $ALL; do
+            P="${PFX[$S]:-$S}"
+            if aws s3 ls "s3://${R2_BUCKET}/${P}/cache/traffic-inventory.parquet.gz" \
+                --endpoint-url "$R2" 2>/dev/null | grep -q traffic-inventory; then
+              DONE=$((DONE + 1))
+            else
+              MISSING="$MISSING $S"
+            fi
+          done
+          MISSING=$(echo $MISSING | xargs)
+
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Mapillary Coverage
+          | Complete | ${DONE} / 51 |
+          | Missing | ${MISSING:-none} |
+          | Action | Re-run to process remaining |
+          EOF
