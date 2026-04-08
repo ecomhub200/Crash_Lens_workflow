@@ -226,12 +226,22 @@ def get_db_connection():
     pw = os.environ.get("SUPABASE_DB_PASSWORD")
     if not pw:
         print("  ❌ SUPABASE_DB_PASSWORD required"); sys.exit(1)
-    return psycopg2.connect(
+    conn = psycopg2.connect(
         host=os.environ.get("SUPABASE_DB_HOST", "localhost"),
         port=int(os.environ.get("SUPABASE_DB_PORT", "5432")),
         dbname=os.environ.get("SUPABASE_DB_NAME", "postgres"),
         user=os.environ.get("SUPABASE_DB_USER", "postgres"),
-        password=pw)
+        password=pw,
+        connect_timeout=10,
+        options='-c search_path=public',
+    )
+    # Connection test
+    with conn.cursor() as cur:
+        cur.execute("SELECT current_database(), current_user, version();")
+        db, user, ver = cur.fetchone()
+        print(f"  Connected: {db} as {user}")
+        print(f"  PostgreSQL: {ver[:60]}...")
+    return conn
 
 
 def log_run(conn, state, stage, status, rows=None, dur=None, err=None, meta=None):
@@ -356,6 +366,13 @@ def build_sync_df(df, abbr, state_name):
               "persons_injured","pedestrians_killed","pedestrians_injured","vehicle_count"]:
         out[c] = pd.to_numeric(out[c], errors="coerce").fillna(0).astype(int)
 
+    # ── Parse crash_date to DATE for temporal queries ──
+    out["crash_date_parsed"] = pd.to_datetime(
+        out["crash_date"], format="mixed", dayfirst=False, errors="coerce"
+    ).dt.date
+    parsed_count = out["crash_date_parsed"].notna().sum()
+    print(f"  crash_date_parsed: {parsed_count:,}/{len(out):,} parsed")
+
     # ── JSONB columns ─────────────────────────────────────────
     print(f"  Building road_data JSONB ({len(cl['road_data'])} keys)...")
     t_json = time.time()
@@ -443,6 +460,18 @@ def sync(conn, df, state_name, abbr, fips, display, dry_run=False):
         inserted = bulk_insert(conn, sync_df, state_name); conn.commit()
         print(f"  ✅ {inserted:,} rows in {time.time()-ti:.1f}s")
 
+        # Populate PostGIS geometry from x/y coordinates
+        print(f"  Populating geom column (PostGIS)...")
+        ti2 = time.time()
+        cur.execute(f"""
+            UPDATE crashes_{state_name}
+            SET geom = ST_SetSRID(ST_Point(x, y), 4326)
+            WHERE x IS NOT NULL AND y IS NOT NULL AND geom IS NULL
+        """)
+        geom_count = cur.rowcount
+        conn.commit()
+        print(f"  ✅ geom: {geom_count:,} points in {time.time()-ti2:.1f}s")
+
         # Update states
         cur.execute("""INSERT INTO states (abbr,name,fips,display_name,pipeline_status,total_crashes,year_range,last_sync_at)
             VALUES (%s,%s,%s,%s,'active',%s,int4range(%s,%s,'[)'),NOW())
@@ -460,6 +489,21 @@ def sync(conn, df, state_name, abbr, fips, display, dry_run=False):
                 cur.execute("REFRESH MATERIALIZED VIEW federal_summary"); conn.commit()
             except Exception as e:
                 print(f"  ⚠️  {e}"); conn.rollback()
+
+        # Refresh baselines matview
+        print(f"  Refreshing jurisdiction_baselines...")
+        try:
+            cur.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY jurisdiction_baselines")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            cur = conn.cursor()
+            try:
+                cur.execute("REFRESH MATERIALIZED VIEW jurisdiction_baselines")
+                conn.commit()
+            except Exception as e:
+                print(f"  ⚠️ baselines: {e}")
+                conn.rollback()
 
         # Verify
         cur = conn.cursor()
