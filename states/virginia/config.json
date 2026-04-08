@@ -65,7 +65,7 @@
     "FACILITY_TYPE": "Facility Type",
     "ROAD_SYSTEM": "SYSTEM",
     "OWNERSHIP": "Ownership",
-    "NODE_OFFSET": "Node Offset",
+    "NODE_OFFSET": "Node Offset (ft)",
     "DRUG": "Drug Related?",
     "GUARDRAIL": "Guardrail Related?",
     "LGTRUCK": "Lgtruck?",
