@@ -583,7 +583,7 @@ jobs:
           echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
           ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:6543 \
+          ssh -f -N -L 5432:localhost:5433 \
             -i ~/.ssh/supabase_tunnel \
             root@srv1503081.hstgr.cloud \
             -o StrictHostKeyChecking=no \
