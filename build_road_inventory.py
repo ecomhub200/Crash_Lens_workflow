@@ -1290,6 +1290,8 @@ def main():
         roads['intersection_name'] = ''
         print("    Skipped — roads cache missing name/u_node/v_node columns")
 
+    roads.rename(columns={'intersection_name': 'Intersection Name'}, inplace=True)
+
     enrich_ramps(roads)
 
     # Build STRtree on road linestrings (once — used by all asset enrichment)
@@ -1694,7 +1696,7 @@ def main():
         "Max Speed Diff", "Through_Lanes", "AADT",
         "Traffic Control Type", "Intersection Type", "School Zone",
         "Roadway Condition", "Roadway Alignment", "Roadway Description",
-        "VMT_Annual", "AADT_source", "intersection_name",
+        "VMT_Annual", "AADT_source", "Intersection Name",
     ]
     frontend = [c for c in frontend if c in roads.columns]
 
