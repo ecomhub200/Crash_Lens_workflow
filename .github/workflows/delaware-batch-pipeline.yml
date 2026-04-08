@@ -457,7 +457,13 @@ jobs:
             aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$PREFIX/" --recursive \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
           done
+          # Clean current .parquet files (will be re-uploaded)
           for FILE in all_roads.parquet dot_roads.parquet non_dot_roads.parquet primary_roads.parquet; do
+            aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/_state/$FILE" \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
+          done
+          # Clean legacy .parquet.gz files (superseded by .parquet format)
+          for FILE in all_roads.parquet.gz dot_roads.parquet.gz non_dot_roads.parquet.gz primary_roads.parquet.gz; do
             aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/_state/$FILE" \
               --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null || true
           done
@@ -577,7 +583,7 @@ jobs:
           echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
           ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:5432 \
+          ssh -f -N -L 5432:localhost:6543 \
             -i ~/.ssh/supabase_tunnel \
             root@srv1503081.hstgr.cloud \
             -o StrictHostKeyChecking=no \
