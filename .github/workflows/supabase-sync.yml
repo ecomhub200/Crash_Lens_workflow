@@ -66,7 +66,7 @@ jobs:
           ssh-keyscan -H ${{ env.SUPABASE_VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
           
           # Start SSH tunnel: forward local 5432 → VPS Supabase PostgreSQL
-          ssh -f -N -L 5432:localhost:6543 \
+          ssh -f -N -L 5432:localhost:5433 \
             -i ~/.ssh/supabase_tunnel \
             root@${{ env.SUPABASE_VPS_HOST }} \
             -o StrictHostKeyChecking=no \
