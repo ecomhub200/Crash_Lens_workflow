@@ -1239,6 +1239,57 @@ def main():
     # ── Enrichment pipeline ──
     enrich_geography(roads, abbr, state_fips, cache_dir, s3, bucket)
     enrich_intersections(roads, data["intersections"])
+
+    # ── Derive intersection_name from road names at nodes ──
+    print("  Deriving intersection names from road names at nodes...")
+
+    # Build node → road names mapping from roads cache
+    node_road_names = {}
+    if 'name' in roads.columns and 'u_node' in roads.columns and 'v_node' in roads.columns:
+        for _, row in roads[roads['name'].fillna('').str.strip() != ''].iterrows():
+            road_name = str(row['name']).strip()
+            if not road_name:
+                continue
+            for node_col in ['u_node', 'v_node']:
+                node_id = row.get(node_col)
+                if pd.notna(node_id):
+                    node_id = int(node_id)
+                    if node_id not in node_road_names:
+                        node_road_names[node_id] = set()
+                    node_road_names[node_id].add(road_name)
+
+        print(f"    Built name lookup for {len(node_road_names):,} nodes")
+
+        # Assign intersection_name to road segments at intersections
+        roads['intersection_name'] = ''
+        int_named = 0
+        for idx in roads.index:
+            if roads.at[idx, 'is_intersection'] != 'Yes':
+                continue
+
+            # Try both u_node and v_node, pick the one with more connecting roads
+            best_names = set()
+            for node_col in ['u_node', 'v_node']:
+                nid = roads.at[idx, node_col]
+                if pd.notna(nid):
+                    names = node_road_names.get(int(nid), set())
+                    if len(names) > len(best_names):
+                        best_names = names
+
+            if len(best_names) >= 2:
+                sorted_names = sorted(best_names)
+                # Use first two names alphabetically
+                roads.at[idx, 'intersection_name'] = f"{sorted_names[0]} & {sorted_names[1]}"
+                int_named += 1
+            elif len(best_names) == 1:
+                roads.at[idx, 'intersection_name'] = list(best_names)[0]
+                int_named += 1
+
+        print(f"    Intersection Name: {int_named:,} segments named")
+    else:
+        roads['intersection_name'] = ''
+        print("    Skipped — roads cache missing name/u_node/v_node columns")
+
     enrich_ramps(roads)
 
     # Build STRtree on road linestrings (once — used by all asset enrichment)
