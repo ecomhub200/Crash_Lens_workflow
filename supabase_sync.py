@@ -666,6 +666,10 @@ def batch_sync(conn, filepath, state_name, abbr, fips, display,
             rows=inserted, dur=dur,
             meta={"batch": batch_num, "start": start_row, "end": end_row})
 
+    # Brief pause to let VPS sshd clean up before next batch connects
+    print(f"  Batch {batch_num} complete. Pausing 5s for connection cleanup...")
+    time.sleep(5)
+
 
 def finalize_sync(conn, state_name, abbr, fips, display):
     """Post-batch: geom, crash_date_parsed, matviews, states table."""

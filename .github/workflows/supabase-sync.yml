@@ -71,6 +71,7 @@ jobs:
       batch_matrix: ${{ steps.plan.outputs.batch_matrix }}
       total_rows: ${{ steps.plan.outputs.total_rows }}
       total_batches: ${{ steps.plan.outputs.total_batches }}
+      batch_size: ${{ steps.plan.outputs.batch_size }}
       state_name: ${{ steps.plan.outputs.state_name }}
       r2_key: ${{ steps.plan.outputs.r2_key }}
     steps:
@@ -142,6 +143,7 @@ jobs:
               f.write(f"batch_matrix={matrix}\n")
               f.write(f"total_rows={total_rows}\n")
               f.write(f"total_batches={n_batches}\n")
+              f.write(f"batch_size={batch_size}\n")
               f.write(f"state_name={state_name}\n")
               f.write(f"r2_key={r2_key}\n")
 
@@ -162,17 +164,63 @@ jobs:
           print(STATES['${STATE}'][1])
           ")
 
-          # SSH tunnel
+          # SSH tunnel with retry
           mkdir -p ~/.ssh
           echo "$SUPABASE_SSH_KEY" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
           ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:5433 \
-            -i ~/.ssh/supabase_tunnel \
-            root@srv1503081.hstgr.cloud \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60
-          sleep 3
+
+          for attempt in 1 2 3 4 5; do
+            echo "SSH tunnel attempt $attempt/5..."
+
+            # Kill any stale tunnel from previous attempt
+            pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+            sleep 2
+
+            if ssh -f -N -L 5432:localhost:5433 \
+              -i ~/.ssh/supabase_tunnel \
+              root@srv1503081.hstgr.cloud \
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=5 \
+              -o ConnectTimeout=30 \
+              -o TCPKeepAlive=yes \
+              -o ExitOnForwardFailure=yes; then
+
+              sleep 3
+
+              # Verify tunnel is alive by testing port
+              if python3 -c "
+          import socket, sys
+          s = socket.socket()
+          s.settimeout(10)
+          try:
+              s.connect(('localhost', 5432))
+              s.close()
+              print('Port 5432 reachable')
+          except Exception as e:
+              print(f'Port 5432 NOT reachable: {e}')
+              sys.exit(1)
+          "; then
+                echo "✅ SSH tunnel verified on attempt $attempt"
+                break
+              else
+                echo "⚠️ Tunnel process started but port unreachable"
+                pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+              fi
+            else
+              echo "⚠️ SSH connection failed on attempt $attempt"
+            fi
+
+            if [ $attempt -eq 5 ]; then
+              echo "❌ SSH tunnel failed after 5 attempts"
+              exit 1
+            fi
+
+            WAIT=$((attempt * 10))
+            echo "Waiting ${WAIT}s before retry..."
+            sleep $WAIT
+          done
 
           # Create partition
           pip install psycopg2-binary > /dev/null 2>&1
@@ -247,22 +295,67 @@ jobs:
           echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
           ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:5433 \
-            -i ~/.ssh/supabase_tunnel \
-            root@srv1503081.hstgr.cloud \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=3
-          sleep 3
-          echo "SSH tunnel established"
+
+          for attempt in 1 2 3 4 5; do
+            echo "SSH tunnel attempt $attempt/5..."
+
+            # Kill any stale tunnel from previous attempt
+            pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+            sleep 2
+
+            if ssh -f -N -L 5432:localhost:5433 \
+              -i ~/.ssh/supabase_tunnel \
+              root@srv1503081.hstgr.cloud \
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=5 \
+              -o ConnectTimeout=30 \
+              -o TCPKeepAlive=yes \
+              -o ExitOnForwardFailure=yes; then
+
+              sleep 3
+
+              # Verify tunnel is alive by testing port
+              if python3 -c "
+          import socket, sys
+          s = socket.socket()
+          s.settimeout(10)
+          try:
+              s.connect(('localhost', 5432))
+              s.close()
+              print('Port 5432 reachable')
+          except Exception as e:
+              print(f'Port 5432 NOT reachable: {e}')
+              sys.exit(1)
+          "; then
+                echo "✅ SSH tunnel verified on attempt $attempt"
+                break
+              else
+                echo "⚠️ Tunnel process started but port unreachable"
+                pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+              fi
+            else
+              echo "⚠️ SSH connection failed on attempt $attempt"
+            fi
+
+            if [ $attempt -eq 5 ]; then
+              echo "❌ SSH tunnel failed after 5 attempts"
+              exit 1
+            fi
+
+            WAIT=$((attempt * 10))
+            echo "Waiting ${WAIT}s before retry..."
+            sleep $WAIT
+          done
 
       - name: "Sync batch ${{ matrix.batch }}"
+        timeout-minutes: 60
         env:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
           STATE="${{ inputs.state }}"
           BATCH="${{ matrix.batch }}"
-          BATCH_SIZE="${{ inputs.batch_size || '25000' }}"
+          BATCH_SIZE="${{ needs.plan.outputs.batch_size || inputs.batch_size || '25000' }}"
           TOTAL="${{ needs.plan.outputs.total_rows }}"
           RESUME="${{ inputs.resume || 'false' }}"
 
@@ -281,7 +374,7 @@ jobs:
 
       - name: Cleanup SSH tunnel
         if: always()
-        run: pkill -f "ssh.*supabase_tunnel" || true
+        run: pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
 
   # ════════════════════════════════════════════════════════════
   #  FINALIZE — geom, matviews, states table
@@ -291,7 +384,7 @@ jobs:
     needs: [plan, sync]
     if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -305,13 +398,58 @@ jobs:
           echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
           ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:5433 \
-            -i ~/.ssh/supabase_tunnel \
-            root@srv1503081.hstgr.cloud \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=3
-          sleep 3
+
+          for attempt in 1 2 3 4 5; do
+            echo "SSH tunnel attempt $attempt/5..."
+
+            # Kill any stale tunnel from previous attempt
+            pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+            sleep 2
+
+            if ssh -f -N -L 5432:localhost:5433 \
+              -i ~/.ssh/supabase_tunnel \
+              root@srv1503081.hstgr.cloud \
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=5 \
+              -o ConnectTimeout=30 \
+              -o TCPKeepAlive=yes \
+              -o ExitOnForwardFailure=yes; then
+
+              sleep 3
+
+              # Verify tunnel is alive by testing port
+              if python3 -c "
+          import socket, sys
+          s = socket.socket()
+          s.settimeout(10)
+          try:
+              s.connect(('localhost', 5432))
+              s.close()
+              print('Port 5432 reachable')
+          except Exception as e:
+              print(f'Port 5432 NOT reachable: {e}')
+              sys.exit(1)
+          "; then
+                echo "✅ SSH tunnel verified on attempt $attempt"
+                break
+              else
+                echo "⚠️ Tunnel process started but port unreachable"
+                pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
+              fi
+            else
+              echo "⚠️ SSH connection failed on attempt $attempt"
+            fi
+
+            if [ $attempt -eq 5 ]; then
+              echo "❌ SSH tunnel failed after 5 attempts"
+              exit 1
+            fi
+
+            WAIT=$((attempt * 10))
+            echo "Waiting ${WAIT}s before retry..."
+            sleep $WAIT
+          done
 
       - name: Finalize
         env:
@@ -323,4 +461,4 @@ jobs:
 
       - name: Cleanup SSH tunnel
         if: always()
-        run: pkill -f "ssh.*supabase_tunnel" || true
+        run: pkill -f "ssh.*supabase_tunnel" 2>/dev/null || true
