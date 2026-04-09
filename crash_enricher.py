@@ -916,6 +916,29 @@ class CrashEnricher:
                 print(f"\n  ⚠️  Road inventory not found: {ri_path}")
                 print(f"    Build with: python build_road_inventory.py --state {self.state_abbr.lower()}")
 
+        # ── Derive Node from OSM intersection node IDs ──
+        if "osm_u_node" in df.columns and "Node" in df.columns:
+            # Only fill Node for crashes at intersections with empty Node
+            mask = (
+                (df["Node"].fillna("").astype(str).str.strip() == "") &
+                (df.get("is_intersection", pd.Series(dtype=str)).fillna("") == "Yes") &
+                (df["osm_u_node"].notna())
+            )
+            df.loc[mask, "Node"] = df.loc[mask, "osm_u_node"].astype(str)
+            node_filled = mask.sum()
+            print(f"    Node derived from OSM: {node_filled:,} crashes")
+
+        # Also fill Node for non-intersection crashes using road segment node
+        if "osm_u_node" in df.columns and "Node" in df.columns:
+            mask2 = (
+                (df["Node"].fillna("").astype(str).str.strip() == "") &
+                (df["osm_u_node"].notna())
+            )
+            df.loc[mask2, "Node"] = df.loc[mask2, "osm_u_node"].astype(str)
+            node_filled2 = mask2.sum()
+            if node_filled2 > 0:
+                print(f"    Node derived from OSM (segments): {node_filled2:,} crashes")
+
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)
 

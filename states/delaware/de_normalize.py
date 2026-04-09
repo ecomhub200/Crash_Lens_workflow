@@ -576,6 +576,38 @@ def apply_value_transforms(df: pd.DataFrame) -> pd.DataFrame:
         }
         df["Night?"] = df["Light Condition"].isin(night_values).map({True: "Yes", False: "No"})
 
+    # ── Unrestrained? from Belted/Unbelted ──
+    if "Unrestrained?" in df.columns:
+        df["Unrestrained?"] = df["Unrestrained?"].fillna("").astype(str).str.strip().map({
+            "Unbelted": "Yes",
+            "Belted": "No",
+            "N": "No",
+            "Y": "Yes",
+        }).fillna("No")
+
+    # ── School Zone normalization ──
+    if "School Zone" in df.columns:
+        sz = df["School Zone"].fillna("").astype(str).str.strip()
+        df["School Zone"] = sz.apply(
+            lambda v: "Yes" if "yes" in v.lower() else "No"
+        )
+
+    # ── Weather Condition normalization to VDOT standard ──
+    if "Weather Condition" in df.columns:
+        weather_map = {
+            "1. No Adverse Condition (Clear/Cloudy)": "1. Clear",
+            "Not Applicable": "Unknown",
+            "5. Rain": "2. Rain",
+            "6. Snow": "3. Snow",
+            "7. Sleet/Hail": "4. Sleet/Hail",
+            "3. Fog": "5. Fog",
+            "10. Blowing Sand, Soil, Dirt, or Snow": "8. Blowing Sand/Snow",
+            "9. Other": "9. Other",
+            "8. Severe Crosswinds": "7. Severe Crosswind",
+            "4. Smog/Smoke": "6. Smog/Smoke",
+        }
+        df["Weather Condition"] = df["Weather Condition"].map(weather_map).fillna(df["Weather Condition"])
+
     return df
 
 
