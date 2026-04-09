@@ -595,14 +595,12 @@ def batch_sync(conn, filepath, state_name, abbr, fips, display,
     print(f"  State: {display} | Target: crashes_{state_name}")
     print(f"  {'='*65}")
 
-    # ── Batch 1 special: DROP + CREATE partition ──
-    if batch_num == 1 and not resume:
-        print(f"  DROP TABLE IF EXISTS crashes_{state_name}")
-        cur.execute(f"DROP TABLE IF EXISTS crashes_{state_name}")
-        conn.commit()
-        print(f"  CREATE TABLE crashes_{state_name} PARTITION OF crashes")
-        cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')")
-        conn.commit()
+    # Partition created by plan job (before matrix batches start).
+    # Verify it exists — fail fast if something went wrong.
+    cur.execute(f"SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'crashes_{state_name}')")
+    if not cur.fetchone()[0]:
+        raise RuntimeError(f"crashes_{state_name} partition does not exist. "
+                           f"Plan job should have created it. Check plan job logs.")
 
     # ── Load ONLY this batch's rows using pyarrow slicing ──
     print(f"  Loading rows {start_row:,}-{end_row-1:,} from parquet...")

@@ -148,6 +148,69 @@ jobs:
           os.remove(local)
           PYEOF
 
+      - name: Prepare partition
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_SSH_KEY: ${{ secrets.SUPABASE_SSH_KEY }}
+        run: |
+          STATE="${{ inputs.state }}"
+          RESUME="${{ inputs.resume || 'false' }}"
+
+          # Get state_name from registry
+          STATE_NAME=$(python3 -c "
+          from supabase_sync import STATES
+          print(STATES['${STATE}'][1])
+          ")
+
+          # SSH tunnel
+          mkdir -p ~/.ssh
+          echo "$SUPABASE_SSH_KEY" > ~/.ssh/supabase_tunnel
+          chmod 600 ~/.ssh/supabase_tunnel
+          ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -f -N -L 5432:localhost:5433 \
+            -i ~/.ssh/supabase_tunnel \
+            root@srv1503081.hstgr.cloud \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60
+          sleep 3
+
+          # Create partition
+          pip install psycopg2-binary > /dev/null 2>&1
+          python3 << PYEOF
+          import psycopg2, os
+          conn = psycopg2.connect(
+              host="localhost", port=5432,
+              dbname="postgres", user="postgres",
+              password=os.environ["SUPABASE_DB_PASSWORD"])
+          cur = conn.cursor()
+
+          state_name = "$STATE_NAME"
+          resume = "$RESUME"
+
+          if resume != "true":
+              print(f"DROP TABLE IF EXISTS crashes_{state_name}")
+              cur.execute(f"DROP TABLE IF EXISTS crashes_{state_name}")
+              conn.commit()
+              print(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')")
+              cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')")
+              conn.commit()
+              print(f"Partition crashes_{state_name} created")
+          else:
+              cur.execute(f"SELECT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'crashes_{state_name}')")
+              exists = cur.fetchone()[0]
+              if exists:
+                  print(f"Partition crashes_{state_name} exists (resume mode)")
+              else:
+                  print(f"Partition missing -- creating for resume")
+                  cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')")
+                  conn.commit()
+
+          conn.close()
+          PYEOF
+
+          # Cleanup tunnel
+          pkill -f "ssh.*supabase_tunnel" || true
+
   # ════════════════════════════════════════════════════════════
   #  SYNC BATCHES — Each batch = 25K rows, own job, 360 min
   # ════════════════════════════════════════════════════════════
