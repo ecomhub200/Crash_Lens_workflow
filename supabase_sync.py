@@ -310,7 +310,9 @@ def load_input(filepath):
         sys.exit(1)
     # Normalize all to string
     for c in df.columns:
-        df[c] = df[c].astype(str).replace({"nan": "", "None": "", "NaT": ""})
+        df[c] = (df[c].astype(str)
+                 .replace({"nan": "", "NaN": "", "None": "", "NaT": "", "inf": "", "-inf": ""})
+                 .str.strip())
     print(f"  Loaded: {len(df):,} rows × {len(df.columns)} cols")
     return df
 
@@ -336,9 +338,19 @@ def classify_columns(df, abbr):
 
 
 def _row_to_json(row):
-    """Convert a row to compact JSON, dropping empty values."""
-    return json.dumps({k: v for k, v in row.items() if v and v != "" and v != "nan"},
-                      ensure_ascii=False)
+    """Convert a row to compact JSON, dropping empty/NaN values."""
+    import math
+    clean = {}
+    for k, v in row.items():
+        if v is None:
+            continue
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            continue
+        sv = str(v)
+        if sv in ("", "nan", "NaN", "None", "NaT", "inf", "-inf"):
+            continue
+        clean[k] = sv
+    return json.dumps(clean, ensure_ascii=False)
 
 
 def build_sync_df(df, abbr, state_name):
@@ -614,7 +626,9 @@ def batch_sync(conn, filepath, state_name, abbr, fips, display,
 
     # Convert all to string (matches load_input behavior)
     for c in df_batch.columns:
-        df_batch[c] = df_batch[c].astype(str).replace({"nan": "", "None": "", "NaT": ""})
+        df_batch[c] = (df_batch[c].astype(str)
+                       .replace({"nan": "", "NaN": "", "None": "", "NaT": "", "inf": "", "-inf": ""})
+                       .str.strip())
 
     print(f"  Loaded: {len(df_batch):,} rows x {len(df_batch.columns)} cols")
 
