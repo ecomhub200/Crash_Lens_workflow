@@ -1,148 +1,263 @@
-name: Supabase Sync
-# Syncs crash data from R2 → self-hosted Supabase PostgreSQL
-# Runs monthly or on-demand for any state
+# ==============================================================================
+# Supabase: Sync State Data (Batched Matrix Strategy)
+# ==============================================================================
+# Plan → Matrix batch jobs → Finalize
+# Each batch processes 25K rows in its own job (peak ~1.8 GB).
+# Same pattern as generate-mapillary-cache.yml.
+# ==============================================================================
+
+name: "Supabase: Sync State Data"
 
 on:
-  schedule:
-    - cron: '0 6 1 * *'  # 1st of every month at 6 AM UTC
   workflow_dispatch:
     inputs:
       state:
-        description: 'State abbreviation (de, va, co) or "all" for all active states'
+        description: 'State abbreviation'
         required: true
-        default: 'de'
-      dry_run:
-        description: 'Dry run (validate without inserting)'
+        type: choice
+        options:
+          - de
+          - va
+          - co
+          - md
+          - ct
+          - pa
+          - nj
+      batch_size:
+        description: 'Rows per batch'
         required: false
-        default: 'false'
+        type: choice
+        default: '25000'
+        options:
+          - '10000'
+          - '25000'
+          - '50000'
+      resume:
+        description: 'Resume (skip existing objectids)'
+        required: false
         type: boolean
+        default: false
+
+  workflow_call:
+    inputs:
+      state:
+        required: true
+        type: string
+      batch_size:
+        required: false
+        type: string
+        default: '25000'
+      resume:
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 env:
-  # R2 credentials (already in repo secrets)
-  CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-  CF_R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
-  CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
-  # Supabase credentials (add these to repo secrets)
-  SUPABASE_DB_HOST: localhost
-  SUPABASE_DB_PORT: '5432'
-  SUPABASE_DB_NAME: postgres
-  SUPABASE_DB_USER: postgres
-  SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-  # SSH tunnel
-  SUPABASE_VPS_HOST: srv1503081.hstgr.cloud
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_BUCKET: crash-lens-data
 
 jobs:
-  sync:
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    strategy:
-      matrix:
-        # For scheduled runs, sync all active states
-        # For manual runs, use the input state
-        include:
-          - state: ${{ github.event.inputs.state || 'de' }}
-      fail-fast: false
-
+  # ════════════════════════════════════════════════════════════
+  #  PLAN — Count rows, create batch matrix
+  # ════════════════════════════════════════════════════════════
+  plan:
+    name: "Plan (${{ inputs.state }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      batch_matrix: ${{ steps.plan.outputs.batch_matrix }}
+      total_rows: ${{ steps.plan.outputs.total_rows }}
+      total_batches: ${{ steps.plan.outputs.total_batches }}
+      state_name: ${{ steps.plan.outputs.state_name }}
+      r2_key: ${{ steps.plan.outputs.r2_key }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
+      - run: pip install pandas pyarrow boto3
 
-      - name: Install dependencies
+      - name: Plan batches
+        id: plan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
-          pip install pandas pyarrow psycopg2-binary boto3
+          STATE="${{ inputs.state }}"
+          BATCH_SIZE="${{ inputs.batch_size || '25000' }}"
 
-      - name: Set up SSH tunnel
+          python3 << 'PYEOF'
+          import json, os, sys
+          import boto3
+          import pyarrow.parquet as pq
+
+          state_abbr = os.environ.get("STATE", "${{ inputs.state }}")
+          batch_size = int(os.environ.get("BATCH_SIZE", "${{ inputs.batch_size || '25000' }}"))
+
+          # Get state name from registry
+          from states_registry import STATES
+          if state_abbr not in STATES:
+              print(f"Unknown state: {state_abbr}")
+              sys.exit(1)
+          display, state_name, fips = STATES[state_abbr]
+
+          # Find statewide parquet in R2
+          endpoint = "${{ env.R2_ENDPOINT }}"
+          s3 = boto3.client("s3",
+              endpoint_url=endpoint,
+              aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+              aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+              region_name="auto")
+
+          r2_key = f"{state_name}/_statewide/statewide_all_roads.parquet.gz"
+          local = "statewide.parquet.gz"
+
+          print(f"Downloading {r2_key}...")
+          s3.download_file("crash-lens-data", r2_key, local)
+
+          # Count rows without loading into memory
+          pf = pq.ParquetFile(local)
+          total_rows = pf.metadata.num_rows
+          print(f"Total rows: {total_rows:,}")
+
+          # Calculate batches
+          n_batches = (total_rows + batch_size - 1) // batch_size
+          # GitHub Actions matrix limit is 256
+          if n_batches > 256:
+              batch_size = (total_rows + 255) // 256
+              n_batches = (total_rows + batch_size - 1) // batch_size
+              print(f"Adjusted batch_size to {batch_size:,} (256 job limit)")
+
+          batches = list(range(1, n_batches + 1))
+          matrix = json.dumps({"batch": batches})
+
+          print(f"Batches: {n_batches} x {batch_size:,} rows")
+          print(f"Matrix: {matrix[:100]}...")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"batch_matrix={matrix}\n")
+              f.write(f"total_rows={total_rows}\n")
+              f.write(f"total_batches={n_batches}\n")
+              f.write(f"state_name={state_name}\n")
+              f.write(f"r2_key={r2_key}\n")
+
+          os.remove(local)
+          PYEOF
+
+  # ════════════════════════════════════════════════════════════
+  #  SYNC BATCHES — Each batch = 25K rows, own job, 360 min
+  # ════════════════════════════════════════════════════════════
+  sync:
+    name: "Batch ${{ matrix.batch }}/${{ needs.plan.outputs.total_batches }}"
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      matrix: ${{ fromJson(needs.plan.outputs.batch_matrix) }}
+      max-parallel: 1
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install pandas pyarrow psycopg2-binary boto3
+
+      - name: Download statewide parquet
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          R2_KEY="${{ needs.plan.outputs.r2_key }}"
+          aws s3 cp "s3://${{ env.R2_BUCKET }}/$R2_KEY" statewide.parquet.gz \
+            --endpoint-url "${{ env.R2_ENDPOINT }}" --only-show-errors
+          echo "Downloaded: $(ls -lh statewide.parquet.gz | awk '{print $5}')"
+
+      - name: Setup SSH tunnel
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
           chmod 600 ~/.ssh/supabase_tunnel
-          
-          # Add VPS to known hosts
-          ssh-keyscan -H ${{ env.SUPABASE_VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-          
-          # Start SSH tunnel: forward local 5432 → VPS Supabase PostgreSQL
+          ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
           ssh -f -N -L 5432:localhost:5433 \
             -i ~/.ssh/supabase_tunnel \
-            root@${{ env.SUPABASE_VPS_HOST }} \
+            root@srv1503081.hstgr.cloud \
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=60 \
             -o ServerAliveCountMax=3
-          
-          # Wait for tunnel to be ready
           sleep 3
           echo "SSH tunnel established"
 
-      - name: Verify tunnel
+      - name: "Sync batch ${{ matrix.batch }}"
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # Test PostgreSQL connection through tunnel
-          PGPASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} psql \
-            -h localhost -p 5432 -U postgres -d postgres \
-            -c "SELECT COUNT(*) FROM states;" || {
-            echo "❌ Cannot reach Supabase through SSH tunnel"
-            exit 1
-          }
-          echo "✅ Supabase connection verified"
+          STATE="${{ inputs.state }}"
+          BATCH="${{ matrix.batch }}"
+          BATCH_SIZE="${{ inputs.batch_size || '25000' }}"
+          TOTAL="${{ needs.plan.outputs.total_rows }}"
+          RESUME="${{ inputs.resume || 'false' }}"
 
-      - name: Determine states to sync
-        id: states
-        run: |
-          STATE_INPUT="${{ matrix.state }}"
-          if [ "$STATE_INPUT" = "all" ]; then
-            # Sync all states that have data in R2
-            echo "states=de va co" >> $GITHUB_OUTPUT
-          else
-            echo "states=$STATE_INPUT" >> $GITHUB_OUTPUT
+          RESUME_FLAG=""
+          if [ "$RESUME" = "true" ]; then
+            RESUME_FLAG="--resume"
           fi
 
-      - name: Sync states
-        run: |
-          DRY_RUN=""
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            DRY_RUN="--dry-run"
-          fi
-          
-          for STATE in ${{ steps.states.outputs.states }}; do
-            echo ""
-            echo "═══════════════════════════════════════════════"
-            echo "  Syncing: $STATE"
-            echo "═══════════════════════════════════════════════"
-            python supabase_sync.py --state "$STATE" --from-r2 $DRY_RUN
-            
-            if [ $? -ne 0 ]; then
-              echo "❌ Sync failed for $STATE"
-              # Continue with other states even if one fails
-            fi
-          done
-
-      - name: Verify sync results
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          for STATE in ${{ steps.states.outputs.states }}; do
-            echo ""
-            echo "Verifying: $STATE"
-            
-            # Get state name from abbreviation
-            STATE_NAME=$(python -c "
-          STATES = {'de':'delaware','va':'virginia','co':'colorado','md':'maryland','oh':'ohio','tx':'texas','fl':'florida','pa':'pennsylvania','il':'illinois','ny':'new_york','nc':'north_carolina','ga':'georgia','mi':'michigan','nj':'new_jersey','wa':'washington','ma':'massachusetts','az':'arizona','tn':'tennessee','in':'indiana','mo':'missouri','wi':'wisconsin','mn':'minnesota','sc':'south_carolina','al':'alabama','la':'louisiana','ky':'kentucky','or':'oregon','ok':'oklahoma','ct':'connecticut','ia':'iowa','ms':'mississippi','ar':'arkansas','ut':'utah','nv':'nevada','ks':'kansas','ne':'nebraska','nm':'new_mexico','wv':'west_virginia','id':'idaho','hi':'hawaii','me':'maine','nh':'new_hampshire','ri':'rhode_island','mt':'montana','sd':'south_dakota','nd':'north_dakota','ak':'alaska','vt':'vermont','wy':'wyoming','dc':'district_of_columbia'}
-          print(STATES.get('$STATE',''))
-            ")
-            
-            PGPASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} psql \
-              -h localhost -p 5432 -U postgres -d postgres \
-              -c "SELECT '$STATE' AS state, COUNT(*) AS rows FROM crashes_${STATE_NAME};"
-            
-            PGPASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }} psql \
-              -h localhost -p 5432 -U postgres -d postgres \
-              -c "SELECT abbr, pipeline_status, total_crashes, year_range, last_sync_at FROM states WHERE abbr = '$STATE';"
-          done
+          python supabase_sync.py \
+            --state "$STATE" \
+            --input statewide.parquet.gz \
+            --batch "$BATCH" \
+            --batch-size "$BATCH_SIZE" \
+            --total-rows "$TOTAL" \
+            $RESUME_FLAG
 
       - name: Cleanup SSH tunnel
         if: always()
+        run: pkill -f "ssh.*supabase_tunnel" || true
+
+  # ════════════════════════════════════════════════════════════
+  #  FINALIZE — geom, matviews, states table
+  # ════════════════════════════════════════════════════════════
+  finalize:
+    name: "Finalize (${{ inputs.state }})"
+    needs: [plan, sync]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - run: pip install pandas psycopg2-binary
+
+      - name: Setup SSH tunnel
         run: |
-          # Kill SSH tunnel
-          pkill -f "ssh.*supabase_tunnel" || true
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
+          chmod 600 ~/.ssh/supabase_tunnel
+          ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -f -N -L 5432:localhost:5433 \
+            -i ~/.ssh/supabase_tunnel \
+            root@srv1503081.hstgr.cloud \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=3
+          sleep 3
+
+      - name: Finalize
+        env:
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          python supabase_sync.py \
+            --state "${{ inputs.state }}" \
+            --finalize
+
+      - name: Cleanup SSH tunnel
+        if: always()
+        run: pkill -f "ssh.*supabase_tunnel" || true
