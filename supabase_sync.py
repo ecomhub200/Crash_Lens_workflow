@@ -416,7 +416,7 @@ def bulk_insert(conn, df, state_name):
 #  SYNC
 # ═══════════════════════════════════════════════════════════════
 
-def sync(conn, df, state_name, abbr, fips, display, dry_run=False):
+def sync(conn, df, state_name, abbr, fips, display, dry_run=False, resume=False):
     t0 = time.time()
     sync_df, cl = build_sync_df(df, abbr, state_name)
     n = len(sync_df)
@@ -448,11 +448,34 @@ def sync(conn, df, state_name, abbr, fips, display, dry_run=False):
     print(f"  Pipeline run #{rid}")
 
     try:
-        # DROP + CREATE partition
-        print(f"  DROP TABLE IF EXISTS crashes_{state_name}")
-        cur.execute(f"DROP TABLE IF EXISTS crashes_{state_name}"); conn.commit()
-        print(f"  CREATE TABLE crashes_{state_name} PARTITION OF crashes")
-        cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')"); conn.commit()
+        if not resume:
+            # Full reload: DROP + CREATE partition
+            print(f"  DROP TABLE IF EXISTS crashes_{state_name}")
+            cur.execute(f"DROP TABLE IF EXISTS crashes_{state_name}"); conn.commit()
+            print(f"  CREATE TABLE crashes_{state_name} PARTITION OF crashes")
+            cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')"); conn.commit()
+        else:
+            # Resume mode: keep existing data, find what's missing
+            cur.execute(f"SELECT COUNT(*) FROM crashes_{state_name}")
+            existing = cur.fetchone()[0]
+            print(f"  RESUME MODE: {existing:,} rows already in crashes_{state_name}")
+
+            # Get existing objectids to skip
+            cur.execute(f"SELECT objectid FROM crashes_{state_name}")
+            existing_ids = {r[0] for r in cur.fetchall()}
+            print(f"  Found {len(existing_ids):,} existing objectids")
+
+            # Filter sync_df to only new rows
+            before = len(sync_df)
+            sync_df = sync_df[~sync_df["objectid"].isin(existing_ids)]
+            n = len(sync_df)
+            print(f"  Filtered: {before:,} total → {n:,} new rows to insert")
+
+            if n == 0:
+                print(f"  ✅ All rows already present — nothing to insert")
+                dur = round(time.time()-t0, 1)
+                update_run(conn, rid, "success", rows=existing, dur=dur)
+                return
 
         # COPY bulk insert
         print(f"  COPY {n:,} rows...")
@@ -460,17 +483,30 @@ def sync(conn, df, state_name, abbr, fips, display, dry_run=False):
         inserted = bulk_insert(conn, sync_df, state_name); conn.commit()
         print(f"  ✅ {inserted:,} rows in {time.time()-ti:.1f}s")
 
-        # Populate PostGIS geometry from x/y coordinates
-        print(f"  Populating geom column (PostGIS)...")
+        # Populate PostGIS geometry in batches (avoids timeout on large states)
+        print(f"  Populating geom column (batched)...")
         ti2 = time.time()
-        cur.execute(f"""
-            UPDATE crashes_{state_name}
-            SET geom = ST_SetSRID(ST_Point(x, y), 4326)
-            WHERE x IS NOT NULL AND y IS NOT NULL AND geom IS NULL
-        """)
-        geom_count = cur.rowcount
-        conn.commit()
-        print(f"  ✅ geom: {geom_count:,} points in {time.time()-ti2:.1f}s")
+        batch_size = 50000
+        total_geom = 0
+        while True:
+            cur.execute(f"""
+                UPDATE crashes_{state_name}
+                SET geom = ST_SetSRID(ST_Point(x, y), 4326)
+                WHERE x IS NOT NULL AND y IS NOT NULL AND geom IS NULL
+                AND id IN (
+                    SELECT id FROM crashes_{state_name}
+                    WHERE geom IS NULL AND x IS NOT NULL
+                    LIMIT {batch_size}
+                )
+            """)
+            batch_count = cur.rowcount
+            conn.commit()
+            total_geom += batch_count
+            if batch_count > 0:
+                print(f"    geom batch: +{batch_count:,} ({total_geom:,} total)")
+            if batch_count < batch_size:
+                break
+        print(f"  ✅ geom: {total_geom:,} points in {time.time()-ti2:.1f}s")
 
         # Update states
         cur.execute("""INSERT INTO states (abbr,name,fips,display_name,pipeline_status,total_crashes,year_range,last_sync_at)
@@ -546,6 +582,8 @@ def main():
     p.add_argument("--input", help="CSV or parquet.gz file")
     p.add_argument("--from-r2", action="store_true", help="Download from R2")
     p.add_argument("--dry-run", action="store_true", help="Validate only")
+    p.add_argument("--resume", action="store_true",
+                   help="Resume: skip DROP, only insert missing rows (by objectid)")
     args = p.parse_args()
 
     abbr = args.state.lower()
@@ -576,7 +614,7 @@ def main():
         conn = get_db_connection()
         print(f"  ✅ Connected to Supabase")
         try:
-            sync(conn, df, state_name, abbr, fips, display)
+            sync(conn, df, state_name, abbr, fips, display, resume=args.resume)
         finally:
             conn.close()
 

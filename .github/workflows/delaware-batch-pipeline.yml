@@ -66,6 +66,12 @@ on:
         default: 'false'
         type: string
 
+      resume_supabase:
+        description: 'Resume Supabase sync (skip DROP, insert missing rows only)'
+        required: false
+        default: 'false'
+        type: string
+
 permissions:
   contents: write
 
@@ -246,7 +252,7 @@ jobs:
     name: "Process (Delaware)"
     needs: prepare
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 360
 
     steps:
       - uses: actions/checkout@v5
@@ -609,12 +615,17 @@ jobs:
           echo "  Target: crashes_${STATE}"
           echo "=========================================="
 
+          RESUME_FLAG=""
+          if [ "${{ github.event.inputs.resume_supabase }}" = "true" ]; then
+            RESUME_FLAG="--resume"
+          fi
+
           # Use the statewide parquet already on disk
           if [ -f "$INPUT_PQ" ]; then
-            python supabase_sync.py --state "$STATE_ABBR" --input "$INPUT_PQ"
+            python supabase_sync.py --state "$STATE_ABBR" --input "$INPUT_PQ" $RESUME_FLAG
           else
             echo "⚠️ Statewide parquet not found — trying R2 download"
-            python supabase_sync.py --state "$STATE_ABBR" --from-r2
+            python supabase_sync.py --state "$STATE_ABBR" --from-r2 $RESUME_FLAG
           fi
 
           echo "✅ Supabase sync complete"
