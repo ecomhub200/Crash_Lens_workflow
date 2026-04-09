@@ -573,6 +573,174 @@ def sync(conn, df, state_name, abbr, fips, display, dry_run=False, resume=False)
 
 
 # ═══════════════════════════════════════════════════════════════
+#  BATCH SYNC (GitHub Actions matrix — 25K rows per job)
+# ═══════════════════════════════════════════════════════════════
+
+def batch_sync(conn, filepath, state_name, abbr, fips, display,
+               batch_num, batch_size, total_rows, resume=False):
+    """Process a single batch of rows. Memory-safe for GitHub Actions."""
+    import gc
+    import pyarrow.parquet as pq
+
+    t0 = time.time()
+    cur = conn.cursor()
+
+    # Calculate row range
+    start_row = (batch_num - 1) * batch_size
+    end_row = min(start_row + batch_size, total_rows)
+    n_rows = end_row - start_row
+
+    print(f"\n  {'='*65}")
+    print(f"  BATCH {batch_num}: rows {start_row:,}-{end_row-1:,} ({n_rows:,} rows)")
+    print(f"  State: {display} | Target: crashes_{state_name}")
+    print(f"  {'='*65}")
+
+    # ── Batch 1 special: DROP + CREATE partition ──
+    if batch_num == 1 and not resume:
+        print(f"  DROP TABLE IF EXISTS crashes_{state_name}")
+        cur.execute(f"DROP TABLE IF EXISTS crashes_{state_name}")
+        conn.commit()
+        print(f"  CREATE TABLE crashes_{state_name} PARTITION OF crashes")
+        cur.execute(f"CREATE TABLE crashes_{state_name} PARTITION OF crashes FOR VALUES IN ('{state_name}')")
+        conn.commit()
+
+    # ── Load ONLY this batch's rows using pyarrow slicing ──
+    print(f"  Loading rows {start_row:,}-{end_row-1:,} from parquet...")
+    pf = pq.ParquetFile(filepath)
+    table = pf.read()
+    df_batch = table.slice(start_row, n_rows).to_pandas()
+    del table
+    gc.collect()
+
+    # Convert all to string (matches load_input behavior)
+    for c in df_batch.columns:
+        df_batch[c] = df_batch[c].astype(str).replace({"nan": "", "None": "", "NaT": ""})
+
+    print(f"  Loaded: {len(df_batch):,} rows x {len(df_batch.columns)} cols")
+
+    # ── Resume: check for existing objectids ──
+    if resume:
+        if "OBJECTID" in df_batch.columns:
+            batch_ids = df_batch["OBJECTID"].tolist()
+            placeholders = ",".join(["%s"] * len(batch_ids))
+            cur.execute(f"SELECT objectid FROM crashes_{state_name} WHERE objectid IN ({placeholders})", batch_ids)
+            existing = {r[0] for r in cur.fetchall()}
+            before = len(df_batch)
+            df_batch = df_batch[~df_batch["OBJECTID"].isin(existing)]
+            print(f"  Resume: {before:,} -> {len(df_batch):,} new rows ({len(existing):,} already exist)")
+            if len(df_batch) == 0:
+                print(f"  Batch {batch_num} already complete -- skipping")
+                return
+
+    # ── Build sync_df for this batch ──
+    sync_df, cl = build_sync_df(df_batch, abbr, state_name)
+    del df_batch
+    gc.collect()
+
+    # ── COPY insert ──
+    print(f"  COPY {len(sync_df):,} rows...")
+    ti = time.time()
+    inserted = bulk_insert(conn, sync_df, state_name)
+    conn.commit()
+    del sync_df
+    gc.collect()
+
+    dur = round(time.time() - t0, 1)
+    print(f"  Batch {batch_num}: {inserted:,} rows in {dur}s")
+
+    log_run(conn, state_name, f"batch_{batch_num}", "success",
+            rows=inserted, dur=dur,
+            meta={"batch": batch_num, "start": start_row, "end": end_row})
+
+
+def finalize_sync(conn, state_name, abbr, fips, display):
+    """Post-batch: geom, crash_date_parsed, matviews, states table."""
+    import gc
+    t0 = time.time()
+    cur = conn.cursor()
+
+    print(f"\n  {'='*65}")
+    print(f"  FINALIZE: {display}")
+    print(f"  {'='*65}")
+
+    # Count rows
+    cur.execute(f"SELECT COUNT(*) FROM crashes_{state_name}")
+    total = cur.fetchone()[0]
+    print(f"  Total rows: {total:,}")
+
+    # Year range
+    cur.execute(f"SELECT MIN(crash_year), MAX(crash_year) FROM crashes_{state_name} WHERE crash_year IS NOT NULL")
+    yr_min, yr_max = cur.fetchone()
+    yr_min = yr_min or 0
+    yr_max = yr_max or 0
+    print(f"  Year range: [{yr_min}, {yr_max}]")
+
+    # Populate geom in batches
+    print(f"  Populating geom column (batched)...")
+    ti = time.time()
+    geom_batch = 50000
+    total_geom = 0
+    while True:
+        cur.execute(f"""
+            UPDATE crashes_{state_name}
+            SET geom = ST_SetSRID(ST_Point(x, y), 4326)
+            WHERE x IS NOT NULL AND y IS NOT NULL AND geom IS NULL
+            AND id IN (
+                SELECT id FROM crashes_{state_name}
+                WHERE geom IS NULL AND x IS NOT NULL
+                LIMIT {geom_batch}
+            )
+        """)
+        batch_count = cur.rowcount
+        conn.commit()
+        total_geom += batch_count
+        if batch_count > 0:
+            print(f"    geom batch: +{batch_count:,} ({total_geom:,} total)")
+        if batch_count < geom_batch:
+            break
+    print(f"  geom: {total_geom:,} points in {time.time()-ti:.1f}s")
+
+    # Update states table
+    cur.execute("""INSERT INTO states (abbr,name,fips,display_name,pipeline_status,total_crashes,year_range,last_sync_at)
+        VALUES (%s,%s,%s,%s,'active',%s,int4range(%s,%s,'[)'),NOW())
+        ON CONFLICT (abbr) DO UPDATE SET pipeline_status='active',total_crashes=EXCLUDED.total_crashes,
+        year_range=EXCLUDED.year_range,last_sync_at=NOW()""",
+        (abbr, state_name, fips, display, total, yr_min, int(yr_max)+1))
+    conn.commit()
+
+    # Refresh matviews
+    for mv in ["federal_summary", "jurisdiction_baselines"]:
+        print(f"  Refreshing {mv}...")
+        try:
+            cur.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {mv}")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            cur = conn.cursor()
+            try:
+                cur.execute(f"REFRESH MATERIALIZED VIEW {mv}")
+                conn.commit()
+            except Exception as e:
+                print(f"  WARNING {mv}: {e}")
+                conn.rollback()
+                cur = conn.cursor()
+
+    # Verify
+    cur.execute(f"SELECT COUNT(*), COUNT(geom) FROM crashes_{state_name}")
+    total_final, geom_count = cur.fetchone()
+
+    dur = round(time.time() - t0, 1)
+    print(f"\n  {'='*65}")
+    print(f"  FINALIZE COMPLETE: {display}")
+    print(f"  Rows: {total_final:,} | Geom: {geom_count:,} | Duration: {dur}s")
+    print(f"  {'='*65}")
+
+    log_run(conn, state_name, "finalize", "success",
+            rows=total_final, dur=dur,
+            meta={"geom": geom_count, "years": f"{yr_min}-{yr_max}"})
+
+
+# ═══════════════════════════════════════════════════════════════
 #  MAIN
 # ═══════════════════════════════════════════════════════════════
 
@@ -584,6 +752,14 @@ def main():
     p.add_argument("--dry-run", action="store_true", help="Validate only")
     p.add_argument("--resume", action="store_true",
                    help="Resume: skip DROP, only insert missing rows (by objectid)")
+    p.add_argument("--batch", type=int, default=0,
+                   help="Batch number (1-indexed). 0=full sync (legacy)")
+    p.add_argument("--batch-size", type=int, default=25000,
+                   help="Rows per batch (default 25000)")
+    p.add_argument("--total-rows", type=int, default=0,
+                   help="Total rows (from plan job)")
+    p.add_argument("--finalize", action="store_true",
+                   help="Run finalize only (geom, matviews, states)")
     args = p.parse_args()
 
     abbr = args.state.lower()
@@ -597,22 +773,48 @@ def main():
     print(f"  3-Tier: 111 explicit + road_data JSONB + state_extras JSONB")
     print(f"{'='*65}\n")
 
+    # ── Finalize mode (no input file needed) ──
+    if args.finalize:
+        conn = get_db_connection()
+        print(f"  Connected to Supabase")
+        try:
+            finalize_sync(conn, state_name, abbr, fips, display)
+        finally:
+            conn.close()
+        return
+
+    # ── Resolve input file ──
     if args.from_r2:
         path = download_from_r2(state_name, abbr)
     elif args.input:
         path = args.input
         if not Path(path).exists():
-            print(f"  ❌ Not found: {path}"); sys.exit(1)
+            print(f"  Not found: {path}"); sys.exit(1)
     else:
-        print("  ❌ --input or --from-r2 required"); sys.exit(1)
+        print("  --input or --from-r2 required"); sys.exit(1)
 
+    # ── Batch mode: process one chunk ──
+    if args.batch > 0:
+        conn = get_db_connection()
+        print(f"  Connected to Supabase")
+        try:
+            batch_sync(conn, path, state_name, abbr, fips, display,
+                       batch_num=args.batch, batch_size=args.batch_size,
+                       total_rows=args.total_rows, resume=args.resume)
+        finally:
+            conn.close()
+        if args.from_r2 and Path(path).exists():
+            Path(path).unlink(missing_ok=True)
+        return
+
+    # ── Legacy full sync ──
     df = load_input(path)
 
     if args.dry_run:
         sync(None, df, state_name, abbr, fips, display, dry_run=True)
     else:
         conn = get_db_connection()
-        print(f"  ✅ Connected to Supabase")
+        print(f"  Connected to Supabase")
         try:
             sync(conn, df, state_name, abbr, fips, display, resume=args.resume)
         finally:

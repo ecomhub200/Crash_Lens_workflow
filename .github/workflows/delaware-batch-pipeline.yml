@@ -1,6 +1,7 @@
 # ==============================================================================
-# Delaware — Batch Pipeline (Statewide Processing)  v2.8
+# Delaware — Batch Pipeline (Statewide Processing)  v2.9
 # ==============================================================================
+# v2.9: Stage 4.5 moved to batched workflow_call (supabase-sync.yml matrix strategy)
 # v2.8: Added Stage 4.5 — Supabase Sync (R2 parquet → PostgreSQL)
 # v2.7: _statewide/ path (not statewide/), parquet.gz format, road inventory join
 #
@@ -575,65 +576,8 @@ jobs:
               sys.exit(1)
           "
 
-      # ══════════════════════════════════════════════════════════
-      # ── Stage 4.5: Supabase Sync (NEW in v2.8) ──────────────
-      # Syncs the statewide all_roads parquet to Supabase PostgreSQL.
-      # Uses SSH tunnel to reach self-hosted Supabase on VPS.
-      # The parquet is already on disk from the download step —
-      # no R2 re-download needed.
-      # ══════════════════════════════════════════════════════════
-      - name: "Stage 4.5: Set up SSH tunnel for Supabase"
-        if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SUPABASE_SSH_KEY }}" > ~/.ssh/supabase_tunnel
-          chmod 600 ~/.ssh/supabase_tunnel
-          ssh-keyscan -H srv1503081.hstgr.cloud >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -f -N -L 5432:localhost:5433 \
-            -i ~/.ssh/supabase_tunnel \
-            root@srv1503081.hstgr.cloud \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            -o ServerAliveCountMax=3
-          sleep 3
-          echo "✅ SSH tunnel established"
-
-      - name: "Stage 4.5: Sync to Supabase"
-        if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
-        env:
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-        run: |
-          STATE="${{ needs.prepare.outputs.state }}"
-          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
-          INPUT_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
-          STATE_ABBR=$(python3 -c "from states_registry import STATES; print([k for k,v in STATES.items() if v[1]=='$STATE'][0])")
-
-          echo "=========================================="
-          echo "Stage 4.5: Supabase Sync"
-          echo "  Input:  $INPUT_PQ"
-          echo "  State:  $STATE ($STATE_ABBR)"
-          echo "  Target: crashes_${STATE}"
-          echo "=========================================="
-
-          RESUME_FLAG=""
-          if [ "${{ github.event.inputs.resume_supabase }}" = "true" ]; then
-            RESUME_FLAG="--resume"
-          fi
-
-          # Use the statewide parquet already on disk
-          if [ -f "$INPUT_PQ" ]; then
-            python supabase_sync.py --state "$STATE_ABBR" --input "$INPUT_PQ" $RESUME_FLAG
-          else
-            echo "⚠️ Statewide parquet not found — trying R2 download"
-            python supabase_sync.py --state "$STATE_ABBR" --from-r2 $RESUME_FLAG
-          fi
-
-          echo "✅ Supabase sync complete"
-
-      - name: "Stage 4.5: Cleanup SSH tunnel"
-        if: always() && github.event.inputs.skip_supabase != 'true'
-        run: |
-          pkill -f "ssh.*supabase_tunnel" || true
+      # ── Stage 4.5: Supabase Sync — moved to separate workflow_call job ──
+      # See supabase_sync job below (uses supabase-sync.yml batched matrix)
 
       # ── Stage 5: Predict (Forecasts) ──
       - name: "Stage 5: Generate forecasts"
@@ -805,6 +749,20 @@ jobs:
           echo "| Scope | $SCOPE ($SELECTION) |" >> $GITHUB_STEP_SUMMARY
           echo "| Jurisdictions | ${{ needs.prepare.outputs.jurisdiction_count }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Data Source | R2: ${{ github.event.inputs.r2_data_key }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Supabase Sync | ${{ github.event.inputs.skip_supabase != 'true' && 'Yes' || 'Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Supabase Sync | Separate batched job (supabase-sync.yml) |" >> $GITHUB_STEP_SUMMARY
           echo "| Dry Run | ${{ github.event.inputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Stages | R2 → Cache → Split → Upload → **Supabase** → Predict → Manifest |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stages | R2 → Cache → Split → Upload → Predict → Manifest (Supabase runs in parallel) |" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================
+  # JOB 3: Supabase Sync (batched matrix — runs after process)
+  # ============================================================
+  supabase_sync:
+    name: "Stage 4.5: Supabase Sync"
+    needs: process
+    if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
+    uses: ./.github/workflows/supabase-sync.yml
+    with:
+      state: "de"
+      batch_size: "25000"
+      resume: ${{ github.event.inputs.resume_supabase == 'true' }}
+    secrets: inherit
