@@ -35,7 +35,6 @@ ENVIRONMENT:
 """
 
 import argparse
-import csv
 import json
 import os
 import sys
@@ -417,11 +416,10 @@ def bulk_insert(conn, df, state_name):
     cur = conn.cursor()
     cols = [c for c in df.columns if c not in AUTO_COLUMNS]
     buf = StringIO()
-    df[cols].to_csv(buf, index=False, header=False, sep="\t", na_rep="\\N",
-                    quoting=csv.QUOTE_NONE, escapechar=None)
+    df[cols].to_csv(buf, index=False, header=False, sep="\t", na_rep="\\N")
     buf.seek(0)
     cur.copy_expert(
-        f"COPY crashes_{state_name} ({','.join(cols)}) FROM STDIN WITH (FORMAT text, DELIMITER E'\\t', NULL '\\N')",
+        f"COPY crashes_{state_name} ({','.join(cols)}) FROM STDIN WITH (FORMAT csv, DELIMITER E'\\t', NULL '\\N')",
         buf)
     return len(df)
 
