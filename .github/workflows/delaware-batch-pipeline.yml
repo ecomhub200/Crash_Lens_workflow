@@ -400,6 +400,32 @@ jobs:
             echo "Enrichment failed — split will use normalized data"
           fi
 
+      - name: "Stage 0.5b: Upload enriched statewide to R2"
+        if: github.event.inputs.smart_fill != 'false' && github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="${{ needs.prepare.outputs.state }}"
+          DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          INPUT_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
+          R2_KEY="${R2_PREFIX}/_statewide/statewide_all_roads.parquet.gz"
+
+          if [ -f "$INPUT_PQ" ]; then
+            COLS=$(python3 -c "import pyarrow.parquet as pq; print(pq.ParquetFile('$INPUT_PQ').metadata.num_columns)")
+            echo "Uploading enriched statewide ($COLS columns) to R2..."
+            aws s3 cp "$INPUT_PQ" "s3://$R2_BUCKET/$R2_KEY" \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors
+            echo "✅ Enriched statewide uploaded: $R2_KEY ($COLS columns)"
+          else
+            echo "⚠️ No enriched statewide file found — skipping upload"
+          fi
+
       # ── Stages 1-3: Split ──
       - name: "Stages 1-3: Split by jurisdiction, road type & aggregate"
         run: |
