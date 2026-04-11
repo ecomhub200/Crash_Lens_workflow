@@ -1263,6 +1263,12 @@ class CrashEnricher:
             Fix 8  — Persons Injured = A_People + B_People + C_People (exact)
             Fix 9  — Pedestrians Killed/Injured from ped flag + severity (min estimate)
             Fix 10 — Relation To Roadway from is_ramp only (no defaulting)
+            Fix 11 — Traffic Control Type from multi-source road inventory evidence
+            Fix 12 — Guardrail Related? "No" when road has no guardrails (conservative)
+            Fix 13 — First Harmful Event from definitive MV collision types
+            Fix 14 — Speed limit conflict detection (log only, no mutation)
+            Fix 15 — Area Type refinement Urban/Rural → Urban/Suburban/Rural
+            Fix 16 — Lighting conflict detection (log only, no mutation)
         """
         n = len(df)
         if n == 0:
@@ -1392,6 +1398,219 @@ class CrashEnricher:
                     df.loc[ramp_mask, "Relation To Roadway"] = "10. On/Off Ramp"
                     still_empty = (df["Relation To Roadway"].fillna("").astype(str).str.strip() == "").sum()
                     print(f"    Relation To Roadway: +{ramp_mask.sum():,} ramps, {still_empty:,} left unknown")
+
+        # ── Fix 11: Traffic Control Type from multi-source road inventory evidence ──
+        # Uses xval_signal_sources / xval_stop_sign_sources (raw counts of
+        # independent sources confirming signal/stop sign), cross-validated
+        # against map_* and Near_Poi* columns. Only fills where ≥2 sources
+        # agree OR the resolved column already says Yes.
+        if "Traffic Control Type" in df.columns:
+            tc = df["Traffic Control Type"].fillna("").astype(str).str.strip()
+            empty_tc = tc == ""
+            tc_before = (~empty_tc).sum()
+            if empty_tc.any():
+                yes_vals = {"Yes", "True", "1", "yes", "true"}
+
+                def _yes_series(col_name):
+                    if col_name in df.columns:
+                        return df[col_name].fillna("").astype(str).str.strip().isin(yes_vals)
+                    return pd.Series(False, index=df.index)
+
+                def _num_series(col_name):
+                    if col_name in df.columns:
+                        return pd.to_numeric(df[col_name], errors="coerce").fillna(0)
+                    return pd.Series(0, index=df.index)
+
+                # ── Signal evidence ──
+                resolved_sig = _yes_series("resolved_has_signal")
+                map_signal = _yes_series("map_signal_present")
+                poi_signal = _yes_series("Near_PoiSignal_100ft")
+                xval_signal = _num_series("xval_signal_sources")
+                hpms_sig_type = _num_series("hpms_signal_type")
+
+                signal_evidence = (
+                    resolved_sig
+                    | (xval_signal >= 2)
+                    | (map_signal & poi_signal)
+                    | (map_signal & (hpms_sig_type > 0))
+                    | (poi_signal & (hpms_sig_type > 0))
+                )
+                fill_signal = empty_tc & signal_evidence
+                if fill_signal.any():
+                    df.loc[fill_signal, "Traffic Control Type"] = "3. Traffic Signal"
+
+                # ── Stop sign evidence (only for rows not assigned signal) ──
+                still_empty = df["Traffic Control Type"].fillna("").astype(str).str.strip() == ""
+                map_stop = _yes_series("map_stop_sign")
+                poi_stop = _yes_series("Near_PoiStopSign_100ft")
+                xval_stop = _num_series("xval_stop_sign_sources")
+                hpms_stop_int = _num_series("hpms_num_stop_int")
+
+                stop_evidence = (
+                    (xval_stop >= 2)
+                    | (map_stop & poi_stop)
+                    | (map_stop & (hpms_stop_int > 0))
+                    | (poi_stop & (hpms_stop_int > 0))
+                )
+                fill_stop = still_empty & stop_evidence
+                if fill_stop.any():
+                    df.loc[fill_stop, "Traffic Control Type"] = "4. Stop Sign"
+
+                tc_after = (df["Traffic Control Type"].fillna("").astype(str).str.strip() != "").sum()
+                print(f"    Traffic Control Type: {tc_before:,} → {tc_after:,} "
+                      f"(+{fill_signal.sum():,} signals, +{fill_stop.sum():,} stops)")
+
+        # ── Fix 12: Guardrail Related? → "No" where no guardrails exist ──
+        # Conservative: we can only fill "No" when the road provably has no
+        # guardrails on either side AND no Mapillary detection. We cannot
+        # fill "Yes" — guardrails existing ≠ the crash hit one.
+        if "Guardrail Related?" in df.columns:
+            gr = df["Guardrail Related?"].fillna("").astype(str).str.strip()
+            empty_gr = gr == ""
+            if empty_gr.any():
+                gr_before = (~empty_gr).sum()
+                absent_vals = {"", "0", "None", "nan", "NaN", "N", "no", "No", "false", "False"}
+
+                def _absent(col_name):
+                    if col_name in df.columns:
+                        return df[col_name].fillna("").astype(str).str.strip().isin(absent_vals)
+                    return pd.Series(True, index=df.index)  # missing column = "no guardrail info"
+
+                no_left = _absent("dot_lguardrail")
+                no_right = _absent("dot_rguardrail")
+
+                if "map_guard_rail" in df.columns:
+                    map_gr_yes = df["map_guard_rail"].fillna("").astype(str).str.strip().isin(
+                        {"Yes", "True", "1", "yes", "true"}
+                    )
+                    no_map = ~map_gr_yes
+                else:
+                    no_map = pd.Series(True, index=df.index)
+
+                # Only fill "No" if we actually have at least one of the
+                # guardrail inventory sources present — otherwise all-True
+                # defaults would unconditionally stamp "No".
+                have_any_source = (
+                    ("dot_lguardrail" in df.columns)
+                    or ("dot_rguardrail" in df.columns)
+                    or ("map_guard_rail" in df.columns)
+                )
+                if have_any_source:
+                    no_guardrail_exists = no_left & no_right & no_map
+                    fill_no = empty_gr & no_guardrail_exists
+                    if fill_no.any():
+                        df.loc[fill_no, "Guardrail Related?"] = "No"
+                        gr_after = (df["Guardrail Related?"].fillna("").astype(str).str.strip() != "").sum()
+                        still_empty = (df["Guardrail Related?"].fillna("").astype(str).str.strip() == "").sum()
+                        print(f"    Guardrail Related?: {gr_before:,} → {gr_after:,} "
+                              f"(+{fill_no.sum():,} 'No' where road has no guardrails, "
+                              f"{still_empty:,} left unknown)")
+                else:
+                    print(f"    Guardrail Related?: skipped — no guardrail inventory columns")
+
+        # ── Fix 13: First Harmful Event from collision type (definitive MV only) ──
+        # Maps only the DEFINITIVE multi-vehicle collision types to MMUCC
+        # "Motor Vehicle In-Transport". Ambiguous types (non-collision,
+        # unknown, etc.) stay empty.
+        if "First Harmful Event" in df.columns and "Collision Type" in df.columns:
+            fhe = df["First Harmful Event"].fillna("").astype(str).str.strip()
+            empty_fhe = fhe == ""
+            mv_fill_mask = None
+            if empty_fhe.any():
+                ct = df["Collision Type"].fillna("").astype(str).str.strip()
+                COLLISION_TO_EVENT = {
+                    "1. Rear End":                       "Motor Vehicle In-Transport",
+                    "2. Angle":                          "Motor Vehicle In-Transport",
+                    "3. Head On":                        "Motor Vehicle In-Transport",
+                    "4. Sideswipe - Same Direction":     "Motor Vehicle In-Transport",
+                    "5. Sideswipe - Opposite Direction": "Motor Vehicle In-Transport",
+                }
+                mapped = ct.map(COLLISION_TO_EVENT)
+                mv_fill_mask = empty_fhe & mapped.notna()
+                if mv_fill_mask.any():
+                    df.loc[mv_fill_mask, "First Harmful Event"] = mapped[mv_fill_mask]
+                    print(f"    First Harmful Event: +{mv_fill_mask.sum():,} from collision type "
+                          f"(definitive MV-in-transport)")
+
+            # Fill First Harmful Event Loc ONLY for the MV rows we just filled.
+            # Pre-existing FHE values (e.g. "Animal", "Overturn") may not be
+            # on-roadway, so we must NOT blanket-fill those.
+            if "First Harmful Event Loc" in df.columns and mv_fill_mask is not None and mv_fill_mask.any():
+                fhe_loc = df["First Harmful Event Loc"].fillna("").astype(str).str.strip()
+                empty_loc = fhe_loc == ""
+                fill_loc = empty_loc & mv_fill_mask
+                if fill_loc.any():
+                    df.loc[fill_loc, "First Harmful Event Loc"] = "On Roadway"
+                    print(f"    First Harmful Event Loc: +{fill_loc.sum():,} (On Roadway for MV events)")
+
+        # ── Fix 14: Speed limit cross-validation (LOG ONLY, no mutation) ──
+        if "map_speed_limit_value" in df.columns and "resolved_speed_limit" in df.columns:
+            map_speed = pd.to_numeric(df["map_speed_limit_value"], errors="coerce")
+            resolved_speed = pd.to_numeric(df["resolved_speed_limit"], errors="coerce")
+            both_valid = (
+                map_speed.notna() & resolved_speed.notna()
+                & (map_speed > 0) & (resolved_speed > 0)
+            )
+            if both_valid.any():
+                diff = (map_speed - resolved_speed).abs()
+                conflict = both_valid & (diff > 10)
+                n_conflict = int(conflict.sum())
+                if n_conflict > 0:
+                    print(f"    ⚠️  Speed limit conflicts: {n_conflict:,} rows where "
+                          f"Mapillary sign ≠ resolved speed by >10mph")
+                    sample_idx = conflict[conflict].head(5).index
+                    for idx in sample_idx:
+                        ms = map_speed.loc[idx]
+                        rs = resolved_speed.loc[idx]
+                        rte = df.at[idx, "RTE Name"] if "RTE Name" in df.columns else "?"
+                        print(f"      {rte}: Mapillary={ms}mph, Resolved={rs}mph")
+
+        # ── Fix 15: Area Type refinement (Urban/Rural → Urban/Suburban/Rural) ──
+        # Only refines where road inventory has a more granular geo_area_type.
+        if "Area Type" in df.columns and "geo_area_type" in df.columns:
+            geo_area = df["geo_area_type"].fillna("").astype(str).str.strip()
+            current = df["Area Type"].fillna("").astype(str).str.strip()
+            AREA_MAP = {
+                "Urban": "Urban", "urban": "Urban", "URBAN": "Urban",
+                "Suburban": "Suburban", "suburban": "Suburban", "SUBURBAN": "Suburban",
+                "Rural": "Rural", "rural": "Rural", "RURAL": "Rural",
+            }
+            mapped = geo_area.map(AREA_MAP)
+            refinable = (
+                mapped.notna()
+                & current.isin(["Urban", "Rural"])
+            )
+            changed = refinable & (mapped != current)
+            if changed.any():
+                df.loc[changed, "Area Type"] = mapped[changed]
+                print(f"    Area Type: {changed.sum():,} refined "
+                      f"(Urban/Rural → Suburban from geo_area_type)")
+
+        # ── Fix 16: Lighting cross-validation (LOG ONLY, no mutation) ──
+        if "Light Condition" in df.columns:
+            light = df["Light Condition"].fillna("").astype(str).str.strip()
+            resolved_lit = df.get("resolved_has_lighting", pd.Series("", index=df.index)) \
+                .fillna("").astype(str).str.strip()
+            map_lights = pd.to_numeric(
+                df.get("map_street_light_count", pd.Series(0, index=df.index)),
+                errors="coerce"
+            ).fillna(0)
+
+            has_lit_source = ("resolved_has_lighting" in df.columns) or ("map_street_light_count" in df.columns)
+            if has_lit_source:
+                says_lighted = light == "4. Darkness - Road Lighted"
+                no_lights = resolved_lit.isin(["No", "False", "0", "no", "false"]) & (map_lights == 0)
+                conflict_lit = says_lighted & no_lights
+                if conflict_lit.sum() > 0:
+                    print(f"    ⚠️  Lighting conflicts: {int(conflict_lit.sum()):,} crashes where "
+                          f"officer says 'Road Lighted' but road inventory shows no lighting")
+
+                says_not_lighted = light == "5. Darkness - Road Not Lighted"
+                has_lights = resolved_lit.isin(["Yes", "True", "1", "yes", "true"]) | (map_lights > 0)
+                conflict_unlit = says_not_lighted & has_lights
+                if conflict_unlit.sum() > 0:
+                    print(f"    ⚠️  Lighting conflicts: {int(conflict_unlit.sum()):,} crashes where "
+                          f"officer says 'Not Lighted' but road inventory shows lighting present")
 
         return df
 
