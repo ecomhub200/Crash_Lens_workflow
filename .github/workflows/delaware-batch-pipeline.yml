@@ -68,7 +68,7 @@ on:
         type: string
 
       resume_supabase:
-        description: 'Resume Supabase sync (skip DROP, insert missing rows only)'
+        description: '[DEPRECATED] Resume Supabase sync — webhook path runs full sync; only used by manual supabase-sync.yml fallback'
         required: false
         default: 'false'
         type: string
@@ -602,8 +602,36 @@ jobs:
               sys.exit(1)
           "
 
-      # ── Stage 4.5: Supabase Sync — moved to separate workflow_call job ──
-      # See supabase_sync job below (uses supabase-sync.yml batched matrix)
+      # ── Stage 4.5: Trigger Supabase Sync (webhook on VPS) ──
+      - name: "Stage 4.5: Trigger Supabase Sync (webhook)"
+        if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
+        run: |
+          STATE_ABBR="de"
+          echo "Triggering Supabase sync via webhook..."
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://srv1503081.hstgr.cloud/api/sync" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_WEBHOOK_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --connect-timeout 10 \
+            --max-time 30 \
+            -d "{\"state\": \"${STATE_ABBR}\", \"batch_size\": 25000}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Response: $BODY (HTTP $HTTP_CODE)"
+
+          if [ "$HTTP_CODE" = "202" ]; then
+            echo "✅ Sync triggered — VPS will process in background"
+            echo "   Check status: curl https://srv1503081.hstgr.cloud/api/sync/status?state=de"
+          elif [ "$HTTP_CODE" = "409" ]; then
+            echo "⚠️ Another sync already running: $BODY"
+          else
+            echo "❌ Webhook failed (HTTP $HTTP_CODE): $BODY"
+            echo "   Pipeline continues — Supabase sync can be triggered manually"
+          fi
+          # Don't exit 1 — webhook failure shouldn't block the rest of the pipeline
 
       # ── Stage 5: Predict (Forecasts) ──
       - name: "Stage 5: Generate forecasts"
@@ -775,20 +803,6 @@ jobs:
           echo "| Scope | $SCOPE ($SELECTION) |" >> $GITHUB_STEP_SUMMARY
           echo "| Jurisdictions | ${{ needs.prepare.outputs.jurisdiction_count }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Data Source | R2: ${{ github.event.inputs.r2_data_key }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Supabase Sync | Separate batched job (supabase-sync.yml) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Supabase Sync | Triggered via VPS webhook (Stage 4.5) |" >> $GITHUB_STEP_SUMMARY
           echo "| Dry Run | ${{ github.event.inputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Stages | R2 → Cache → Split → Upload → Predict → Manifest (Supabase runs in parallel) |" >> $GITHUB_STEP_SUMMARY
-
-  # ============================================================
-  # JOB 3: Supabase Sync (batched matrix — runs after process)
-  # ============================================================
-  supabase_sync:
-    name: "Stage 4.5: Supabase Sync"
-    needs: process
-    if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
-    uses: ./.github/workflows/supabase-sync.yml
-    with:
-      state: "de"
-      batch_size: "25000"
-      resume: ${{ github.event.inputs.resume_supabase == 'true' }}
-    secrets: inherit
+          echo "| Stages | R2 → Cache → Split → Upload → Supabase webhook → Predict → Manifest |" >> $GITHUB_STEP_SUMMARY
