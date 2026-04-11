@@ -1131,7 +1131,7 @@ FACILITY_LABELS = {
 SURFACE_LABELS = {
     1: "1. Concrete",                     # Portland Cement Concrete (Rigid)
     2: "2. Blacktop, Asphalt, Bituminous",# Asphalt Concrete (Flexible)
-    3: "3. Brick or Block",               # Semi-Rigid / Composite
+    3: "2. Blacktop, Asphalt, Bituminous",# Composite (asphalt over concrete) — NOT brick
     4: "4. Slag, Gravel, Stone",          # Gravel/Stone
     5: "5. Dirt",                          # Dirt/Earth
     6: "6. Other",                         # Other

@@ -885,6 +885,44 @@ class CrashEnricher:
         self.circumstance_col = circumstance_col
         self.private_property_col = private_property_col
         self.stats = {}
+        self.not_tracked_flags = self._load_not_tracked_flags()
+
+    def _load_not_tracked_flags(self):
+        """Load the {ABBR}_NOT_TRACKED_FLAGS set from the state normalize module.
+
+        Flags listed there are ones the source state does NOT track. They must
+        stay NULL (empty string) in output rather than being force-defaulted to
+        "No" — a "No" for an untracked field is a lie.
+        """
+        abbr = (self.state_abbr or "").lower()
+        if not abbr:
+            return set()
+
+        repo_root = Path(__file__).resolve().parent
+        state_dir_name = (self.state_name or "").lower().replace(" ", "_")
+        candidates = [
+            repo_root / "states" / state_dir_name / f"{abbr}_normalize.py",
+            repo_root / f"{abbr}_normalize.py",
+        ]
+
+        for mod_file in candidates:
+            if not mod_file.exists():
+                continue
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(f"{abbr}_normalize", mod_file)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                attr = f"{abbr.upper()}_NOT_TRACKED_FLAGS"
+                if hasattr(mod, attr):
+                    flags = set(getattr(mod, attr))
+                    if flags:
+                        print(f"    Not-tracked flags for {abbr}: {sorted(flags)}")
+                    return flags
+            except Exception as e:
+                print(f"    ⚠️  Could not load not-tracked flags from {mod_file.name}: {e}")
+            break
+        return set()
 
     def enrich_all(self, df, skip_tier2=False):
         """Run enrichment: Tier1 (self) → Road Inventory (single spatial join).
@@ -941,6 +979,9 @@ class CrashEnricher:
 
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)
+
+        # ── Post-enrichment canonicalization & honest derivations ──
+        df = self._canonicalize_post_enrichment(df)
 
         elapsed = time.time() - t0
         print(f"\n  Enrichment complete in {elapsed:.1f}s")
@@ -1001,6 +1042,13 @@ class CrashEnricher:
         derived_count = 0
 
         for flag, keywords in CIRCUMSTANCE_TO_FLAGS.items():
+            # Honor state-specific NULL policy: leave untracked flags empty,
+            # never lie with a default "No".
+            if flag in self.not_tracked_flags:
+                if flag in df.columns:
+                    df[flag] = ""
+                continue
+
             if flag in df.columns and df[flag].fillna("").str.strip().ne("").any():
                 existing_yes = (df[flag] == "Yes").sum()
                 if existing_yes > 0:
@@ -1198,6 +1246,152 @@ class CrashEnricher:
             not_ct = (df["Intersection Analysis"] == "Not Intersection").sum()
             print(f"\n  [Intersection Analysis] {ia_filled:,} rows derived:")
             print(f"    DOT Intersection: {dot_ct:,}, Urban Intersection: {urb_ct:,}, Not Intersection: {not_ct:,}")
+
+        return df
+
+    def _canonicalize_post_enrichment(self, df):
+        """State-agnostic post-enrichment canonicalization & honest derivations.
+
+        Runs after road-inventory enrichment and intersection analysis. Only
+        fills from definitive, already-computed signals. Where truth isn't
+        knowable, leaves NULL rather than guessing.
+
+        Covers:
+            Fix 2  — RTE Name fallback from road-inventory route columns
+            Fix 4  — School Zone from resolved_school_zone / Near_School_1500ft
+            Fix 7  — RoadDeparture Type from definitive indicators only
+            Fix 8  — Persons Injured = A_People + B_People + C_People (exact)
+            Fix 9  — Pedestrians Killed/Injured from ped flag + severity (min estimate)
+            Fix 10 — Relation To Roadway from is_ramp only (no defaulting)
+        """
+        n = len(df)
+        if n == 0:
+            return df
+
+        print(f"\n  [Post-Enrichment Canonicalization]")
+
+        # ── Fix 2: RTE Name fallback from road-inventory route columns ──
+        if "RTE Name" in df.columns:
+            rte = df["RTE Name"].fillna("").astype(str).str.strip()
+            rte_before = (rte != "").sum()
+            empty = rte == ""
+            fallback_cols = [
+                "hpms_route_name", "ri_route_name", "route_name",
+                "map_road_name", "osm_name", "road_name", "dot_road_name",
+            ]
+            for col in fallback_cols:
+                if col in df.columns and empty.any():
+                    fb = df[col].fillna("").astype(str).str.strip()
+                    m = empty & (fb != "")
+                    filled = m.sum()
+                    if filled > 0:
+                        df.loc[m, "RTE Name"] = fb[m]
+                        print(f"    RTE Name: +{filled:,} from {col}")
+                        empty = df["RTE Name"].fillna("").astype(str).str.strip() == ""
+            rte_after = (df["RTE Name"].fillna("").astype(str).str.strip() != "").sum()
+            print(f"    RTE Name: {rte_before:,} → {rte_after:,} ({rte_after/n*100:.0f}%)")
+
+        # ── Fix 4: School Zone from location signals (NOT school bus) ──
+        # Only overwrite if at least one location-based signal column is
+        # present. Without any signals we'd unconditionally stamp every row
+        # "No" and silently erase state-correct School Zone values.
+        school_signal_cols = [
+            c for c in ("resolved_school_zone", "Near_School_1500ft", "map_school_zone")
+            if c in df.columns
+        ]
+        if "School Zone" in df.columns and school_signal_cols:
+            yes_values = {"Yes", "True", "1", "yes", "true"}
+            is_school_zone = pd.Series(False, index=df.index)
+            for col in school_signal_cols:
+                col_vals = df[col].fillna("").astype(str).str.strip()
+                is_school_zone = is_school_zone | col_vals.isin(yes_values)
+
+            before_yes = (df["School Zone"] == "Yes").sum()
+            df["School Zone"] = is_school_zone.map({True: "Yes", False: "No"})
+            after_yes = (df["School Zone"] == "Yes").sum()
+            print(f"    School Zone: {before_yes:,} → {after_yes:,} "
+                  f"(location-based from {', '.join(school_signal_cols)})")
+        elif "School Zone" in df.columns:
+            print(f"    School Zone: skipped — no location signal columns available "
+                  f"(resolved_school_zone / Near_School_1500ft / map_school_zone)")
+
+        # ── Fix 7: RoadDeparture Type from definitive indicators only ──
+        if "RoadDeparture Type" in df.columns:
+            rd = df["RoadDeparture Type"].fillna("").astype(str).str.strip()
+            empty = rd == ""
+            if empty.any():
+                ct = df.get("Collision Type", pd.Series("", index=df.index)) \
+                    .fillna("").astype(str).str.lower()
+                rel = df.get("Relation To Roadway", pd.Series("", index=df.index)) \
+                    .fillna("").astype(str).str.lower()
+                definitive = empty & (
+                    ct.str.contains("ran off", na=False)
+                    | ct.str.contains("overturn", na=False)
+                    | rel.str.contains("off roadway", na=False)
+                )
+                align = df.get("Roadway Alignment", pd.Series("", index=df.index)) \
+                    .fillna("").astype(str).str.lower()
+                on_curve = align.str.contains("curve", na=False)
+
+                curve_dep = definitive & on_curve
+                straight_dep = definitive & ~on_curve
+                df.loc[curve_dep, "RoadDeparture Type"] = "Curve Departure"
+                df.loc[straight_dep, "RoadDeparture Type"] = "Straight Departure"
+                dep_count = definitive.sum()
+                if dep_count > 0:
+                    print(f"    RoadDeparture Type: {dep_count:,} definitive departures "
+                          f"(curve={curve_dep.sum():,}, straight={straight_dep.sum():,})")
+
+        # ── Fix 8: Persons Injured = A + B + C (exact math) ──
+        # Only runs if Persons Injured is wholly empty AND at least one of
+        # A/B/C_People exists. Using pd.Series(0, index=df.index) as default
+        # keeps arithmetic vectorized even when some KABCO columns are missing.
+        if "Persons Injured" in df.columns:
+            pi = pd.to_numeric(df["Persons Injured"], errors="coerce").fillna(0)
+            kabco_cols_present = [c for c in ("A_People", "B_People", "C_People") if c in df.columns]
+            if pi.sum() == 0 and kabco_cols_present:
+                zero = pd.Series(0, index=df.index)
+                a = pd.to_numeric(df["A_People"], errors="coerce").fillna(0) if "A_People" in df.columns else zero
+                b = pd.to_numeric(df["B_People"], errors="coerce").fillna(0) if "B_People" in df.columns else zero
+                c = pd.to_numeric(df["C_People"], errors="coerce").fillna(0) if "C_People" in df.columns else zero
+                total = (a + b + c).astype(int)
+                has_injury = total > 0
+                if has_injury.any():
+                    df.loc[has_injury, "Persons Injured"] = total[has_injury].astype(str)
+                    print(f"    Persons Injured: {has_injury.sum():,} from "
+                          f"{'+'.join(kabco_cols_present)} (exact)")
+
+        # ── Fix 9: Pedestrians Killed/Injured (documented minimum estimates) ──
+        if "Pedestrian?" in df.columns and "Crash Severity" in df.columns:
+            ped = df["Pedestrian?"].fillna("").astype(str).str.strip() == "Yes"
+
+            if "Pedestrians Killed" in df.columns and ped.any():
+                pk = pd.to_numeric(df["Pedestrians Killed"], errors="coerce").fillna(0)
+                if pk.sum() == 0:
+                    fatal_ped = ped & (df["Crash Severity"] == "K")
+                    if fatal_ped.any():
+                        df.loc[fatal_ped, "Pedestrians Killed"] = "1"
+                        print(f"    Pedestrians Killed: {fatal_ped.sum():,} derived (ped+K, minimum estimate)")
+
+            if "Pedestrians Injured" in df.columns and ped.any():
+                pi_ped = pd.to_numeric(df["Pedestrians Injured"], errors="coerce").fillna(0)
+                if pi_ped.sum() == 0:
+                    inj_ped = ped & df["Crash Severity"].isin(["A", "B", "C"])
+                    if inj_ped.any():
+                        df.loc[inj_ped, "Pedestrians Injured"] = "1"
+                        print(f"    Pedestrians Injured: {inj_ped.sum():,} derived (ped+A/B/C, minimum estimate)")
+
+        # ── Fix 10: Relation To Roadway from road inventory ramps only ──
+        if "Relation To Roadway" in df.columns:
+            rel = df["Relation To Roadway"].fillna("").astype(str).str.strip()
+            empty = rel == ""
+            if empty.any() and "is_ramp" in df.columns:
+                is_ramp = df["is_ramp"].fillna("").astype(str).str.strip()
+                ramp_mask = empty & (is_ramp == "Yes")
+                if ramp_mask.any():
+                    df.loc[ramp_mask, "Relation To Roadway"] = "10. On/Off Ramp"
+                    still_empty = (df["Relation To Roadway"].fillna("").astype(str).str.strip() == "").sum()
+                    print(f"    Relation To Roadway: +{ramp_mask.sum():,} ramps, {still_empty:,} left unknown")
 
         return df
 
