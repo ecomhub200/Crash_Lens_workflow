@@ -1,7 +1,7 @@
 {
   "state": "delaware",
-  "generated_at": "2026-04-10T16:54:21.970848+00:00",
-  "elapsed_s": 153.2,
+  "generated_at": "2026-04-11T08:44:22.268672+00:00",
+  "elapsed_s": 153.3,
   "total_input_rows": 569829,
   "dry_run": false,
   "strategies": {
@@ -37,29 +37,29 @@
       }
     },
     "mpos": {
+      "delaware_valley_regional_planning_commission": {
+        "all_roads": 58,
+        "county_roads": 0,
+        "city_roads": 2,
+        "no_interstate": 44
+      },
       "dover_kent_county_mpo": {
-        "all_roads": 107923,
+        "all_roads": 107941,
         "county_roads": 5302,
-        "city_roads": 14049,
-        "no_interstate": 101365
+        "city_roads": 14048,
+        "no_interstate": 101383
       },
       "salisbury_wicomico_mpo": {
-        "all_roads": 125899,
+        "all_roads": 125881,
         "county_roads": 7557,
-        "city_roads": 15008,
-        "no_interstate": 124736
-      },
-      "wilmapco": {
-        "all_roads": 25030,
-        "county_roads": 415,
-        "city_roads": 1145,
-        "no_interstate": 20959
+        "city_roads": 15009,
+        "no_interstate": 124718
       },
       "wilmington_area_planning_council": {
-        "all_roads": 310977,
-        "county_roads": 10299,
-        "city_roads": 47229,
-        "no_interstate": 264466
+        "all_roads": 335949,
+        "county_roads": 10714,
+        "city_roads": 48372,
+        "no_interstate": 285381
       }
     },
     "planning_districts": {
