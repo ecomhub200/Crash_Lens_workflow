@@ -50,6 +50,31 @@ Output: `_statewide/statewide_all_roads.parquet.gz` (167 cols, no road inventory
 - Finalize: geom, crash_date_parsed, matviews, states table
 - 3-tier column strategy: 111 explicit + road_data JSONB + state_extras JSONB + ranking_data JSONB
 
+**Why batched:** VPS has 8GB RAM. Full sync loads 570K × 521 cols at once → OOM killed. Each batch subprocess loads 25K rows (~1.8GB peak), exits, memory freed before next batch.
+
+**Infrastructure:**
+- `webhook.py` (Flask) on `localhost:8765`
+- Caddy reverse proxy: `/api/sync*` → `172.18.0.1:8765`
+- systemd: `crashlens-webhook.service`
+- GitHub secret: `SYNC_WEBHOOK_TOKEN`
+- Lock file: `/tmp/crashlens_sync.lock` (prevents concurrent syncs)
+- Logs: `/root/crashlens-webhook/logs/{state}_{timestamp}.log`
+- Status: `GET /api/sync/status?state=de`
+
+**Monitoring:**
+```bash
+# Check if sync is running
+curl https://srv1503081.hstgr.cloud/api/sync/status?state=de
+
+# Watch live logs
+tail -f /root/crashlens-webhook/logs/de_*.log
+
+# Manual trigger
+curl -X POST https://srv1503081.hstgr.cloud/api/sync \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"state": "de"}'
+```
+
 ## New State Checklist (13 steps)
 1. Add to `states_registry.py` (abbr, name, FIPS)
 2. Create `states/{state}/hierarchy.json`

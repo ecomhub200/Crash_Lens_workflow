@@ -1,7 +1,7 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-05
+updated: 2026-04-11
 ---
 
 # Crash Lens Wiki — Log
@@ -856,3 +856,26 @@ Then re-run pipeline to sync full 566,762 rows.
 - [[schema-truth-document]] — Canonical schema reference entity page
 - [[webhook-sync]] — Webhook infrastructure entity page
 
+
+
+## [2026-04-11] docs | State data dictionary + webhook batched sync confirmed
+
+- Created [[state-data-dictionary-template]] — reusable template for documenting each state's data characteristics, column mappings, value transforms, not-tracked fields, state extras, fill rates, known issues
+- Created [[delaware-data-dictionary]] — reference implementation with all 18 state extras, value mappings, fill rates, known issues, Supabase sync details
+- Webhook batched sync deployed and verified:
+  - webhook.py updated to use batched subprocess mode (23 x 25K rows) instead of full --from-r2 (OOM on 8GB VPS)
+  - Each batch runs as separate subprocess — memory freed between batches
+  - Lock file in finally block, stale PID detection, pyarrow count with pandas fallback
+  - GitHub Actions PR #73 merged: "Implement batched sync with memory-efficient subprocess pooling"
+  - End-to-end test: POST /api/sync → HTTP 202 → batches run → finalize (geom + matviews) → success
+- VPS setup: 4GB swap file at /swapfile as OOM safety net
+- R2 download paths confirmed: primary=_state/all_roads.parquet, fallback=_statewide/statewide_all_roads.parquet.gz
+- Wiki sync: Obsidian vault mirrored to Crash_Lens_workflow/wiki/ in GitHub repo for Claude Code web access
+- CLAUDE.md updated with wiki-first + auto-wiki rules (Karpathy LLM Wiki pattern)
+- Memory rule: Claude updates wiki directly via Obsidian MCP, not via Claude Code prompts
+
+## [2026-04-11] docs | Architecture diagrams updated + state data dictionary expanded
+
+- Expanded Phase 4 in [[pipeline-architecture-v29]] to reflect webhook sync — added Why batched rationale, Infrastructure (Flask + Caddy + systemd + lock file + logs), and Monitoring commands (status check, live logs, manual trigger)
+- Expanded [[state-data-dictionary-template]] — added extra rows/sections so the template fully captures: source characteristics, column mappings with transforms, value transforms, not-tracked fields, state extras, fill rates (incl. Through Lanes, Traffic Control Type), known issues, and pipeline Special handling notes
+- [[delaware-data-dictionary]] verified as reference implementation (all 18 state extras, value mappings, fill rates, known issues, Supabase sync details already complete)
