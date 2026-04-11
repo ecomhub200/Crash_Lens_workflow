@@ -24,6 +24,32 @@ Usage:
     python de_normalize.py --input all_roads.csv --epdo vdot2024
     python de_normalize.py --input all_roads.csv --skip-if-normalized
     python de_normalize.py --input all_roads.csv --skip-enrichment
+
+─────────────────────────────────────────────────────────────
+DATA ACCURACY NOTES — Delaware
+─────────────────────────────────────────────────────────────
+INTENTIONALLY EMPTY (source limitation):
+  first_harmful_event      — no MMUCC event in DelDOT Socrata
+  first_harmful_event_loc  — no MMUCC event location
+  roadway_defect           — requires officer observation
+  traffic_control_status   — not tracked by DE
+  b_people / c_people      — DE maps all injury to A (KAO only)
+  vehicle_count            — no vehicle count in Socrata
+  node_offset_ft           — requires longitudinal road distance
+
+INTENTIONALLY NULL (not "No"):  see DE_NOT_TRACKED_FLAGS
+  Drowsy?, Senior?, Young?, Hitrun?, Lgtruck?
+
+DERIVED COLUMNS (documented estimates):
+  Persons Injured    = A_People + B_People + C_People (exact math)
+  Pedestrians Killed = ped flag + K severity (minimum estimate, 1/crash)
+  Pedestrians Injured= ped flag + A/B/C severity (minimum estimate, 1/crash)
+  School Zone        = resolved_school_zone / Near_School_1500ft (location)
+                       NOT school bus (preserved as de_School_Bus_Involved_*)
+
+SEVERITY: DE maps ALL injuries to A-severity (no B/C granularity).
+Cross-state comparisons must account for KAO vs KABCO.
+─────────────────────────────────────────────────────────────
 """
 
 import argparse
@@ -192,10 +218,14 @@ MANDATORY_COLUMNS = {"Physical Juris Name", "x", "y", "Crash Severity", "FIPS"}
 # ─────────────────────────────────────────────────────────────────────────────
 
 DE_COUNTIES = {
-    "Kent":        {"fips": "001", "geoid": "10001", "district": "Central District", "mpo": "Dover/Kent County MPO",         "area_type": "Urban",  "centlat": 39.097088, "centlon": -75.502982},
-    "New Castle":  {"fips": "003", "geoid": "10003", "district": "North District",   "mpo": "WILMAPCO",                      "area_type": "Urban",  "centlat": 39.575915, "centlon": -75.644132},
-    "Sussex":      {"fips": "005", "geoid": "10005", "district": "South District",   "mpo": "Salisbury-Wicomico MPO",        "area_type": "Rural",  "centlat": 38.673227, "centlon": -75.337024},
+    "Kent":        {"fips": "001", "geoid": "10001", "district": "Central District", "mpo": "Dover/Kent County MPO",            "area_type": "Urban",  "centlat": 39.097088, "centlon": -75.502982},
+    "New Castle":  {"fips": "003", "geoid": "10003", "district": "North District",   "mpo": "Wilmington Area Planning Council", "area_type": "Urban",  "centlat": 39.575915, "centlon": -75.644132},
+    "Sussex":      {"fips": "005", "geoid": "10005", "district": "South District",   "mpo": "Salisbury-Wicomico MPO",           "area_type": "Rural",  "centlat": 38.673227, "centlon": -75.337024},
 }
+
+# Flags that Delaware's source does NOT track. We must leave them NULL rather
+# than lie with a default "No". See DATA ACCURACY NOTES at the top of the file.
+DE_NOT_TRACKED_FLAGS = {"Drowsy?", "Senior?", "Young?", "Hitrun?", "Lgtruck?"}
 
 DE_COUNTY_CODE_MAP = {"K": "Kent", "N": "New Castle", "S": "Sussex"}
 
@@ -284,12 +314,6 @@ MAP_WORK_ZONE_TYPE = {
     "other":                      "5. Other",
 }
 
-MAP_SCHOOL_BUS_TO_ZONE = {
-    "no":                       "3. No",
-    "yes, directly involved":   "2. Yes - With School Activity",
-    "yes, indirectly involved": "1. Yes",
-}
-
 YN_COLUMNS = [
     ("PEDESTRIAN INVOLVED",  "Pedestrian?"),
     ("ALCOHOL INVOLVED",     "Alcohol?"),
@@ -330,7 +354,11 @@ COLUMN_RENAMES = {
     "LIGHTING CONDITION DESCRIPTION":    "Light Condition",
     "ROAD SURFACE DESCRIPTION":          "Roadway Surface Condition",
     "MANNER OF IMPACT DESCRIPTION":      "Collision Type",
-    "SCHOOL BUS INVOLVED DESCRIPTION":   "School Zone",
+    # NOTE: "SCHOOL BUS INVOLVED DESCRIPTION" is intentionally NOT mapped to
+    # "School Zone". School bus involvement ≠ school zone. The original
+    # school-bus field is preserved as an extra column (de_School_Bus_*)
+    # and School Zone is filled post-enrichment from Near_School_1500ft /
+    # resolved_school_zone (see _canonicalize_post_enrichment in crash_enricher.py).
     "WORK ZONE":                         "Work Zone Related",
     "WORK ZONE LOCATION DESCRIPTION":    "Work Zone Location",
     "WORK ZONE TYPE DESCRIPTION":        "Work Zone Type",
@@ -346,7 +374,7 @@ EXTRA_COLUMNS = [
     "ROAD SURFACE CODE", "LIGHTING CONDITION CODE",
     "WEATHER 1 CODE", "WEATHER 2 CODE", "WEATHER 2 DESCRIPTION",
     "MOTORCYCLE HELMET USED", "BICYCLE HELMET USED",
-    "SCHOOL BUS INVOLVED CODE",
+    "SCHOOL BUS INVOLVED CODE", "SCHOOL BUS INVOLVED DESCRIPTION",
     "WORK ZONE LOCATION CODE", "WORK ZONE TYPE CODE", "WORKERS PRESENT",
     "PRIMARY CONTRIBUTING CIRCUMSTANCE CODE",
     "PRIMARY CONTRIBUTING CIRCUMSTANCE DESCRIPTION",
@@ -559,12 +587,7 @@ def apply_value_transforms(df: pd.DataFrame) -> pd.DataFrame:
             .map(MAP_WORK_ZONE_TYPE).fillna("")
         )
 
-    # ── School Zone ──
-    if "School Zone" in df.columns:
-        df["School Zone"] = (
-            df["School Zone"].fillna("").str.strip().str.lower()
-            .map(MAP_SCHOOL_BUS_TO_ZONE).fillna("3. No")
-        )
+    # ── School Zone: intentionally NOT populated here. See _canonicalize_post_enrichment ──
 
     # ── Night? from MAPPED Light Condition ──
     if "Light Condition" in df.columns:
@@ -585,13 +608,6 @@ def apply_value_transforms(df: pd.DataFrame) -> pd.DataFrame:
             "Y": "Yes",
         }).fillna("No")
 
-    # ── School Zone normalization ──
-    if "School Zone" in df.columns:
-        sz = df["School Zone"].fillna("").astype(str).str.strip()
-        df["School Zone"] = sz.apply(
-            lambda v: "Yes" if "yes" in v.lower() else "No"
-        )
-
     # ── Weather Condition normalization to VDOT standard ──
     if "Weather Condition" in df.columns:
         weather_map = {
@@ -607,6 +623,11 @@ def apply_value_transforms(df: pd.DataFrame) -> pd.DataFrame:
             "4. Smog/Smoke": "6. Smog/Smoke",
         }
         df["Weather Condition"] = df["Weather Condition"].map(weather_map).fillna(df["Weather Condition"])
+
+    # ── Clear flags Delaware does not track (leave NULL, never default to "No") ──
+    for flag in DE_NOT_TRACKED_FLAGS:
+        if flag in df.columns:
+            df[flag] = ""
 
     return df
 
@@ -676,8 +697,34 @@ def validate_gps_jurisdiction(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
         from boundary_resolver import BoundaryResolver
         resolver = BoundaryResolver(cache_dir=str(_CACHE_DIR / "boundaries"))
         if resolver.counties is not None:
-            return resolver.validate_jurisdiction(
+            df, stats = resolver.validate_jurisdiction(
                 df, state_fips=STATE_FIPS, county_dict=DE_COUNTIES)
+
+            # ── Fix 3: Place FIPS from Census place polygons (exact PIP) ──
+            try:
+                if resolver.places is not None:
+                    df = resolver.resolve_places(df, state_fips=STATE_FIPS)
+                    resolved_place = df["resolved_place_fips"].fillna("").astype(str).str.strip()
+                    place_mask = resolved_place != ""
+                    if place_mask.any():
+                        df.loc[place_mask, "Place FIPS"] = resolved_place[place_mask]
+                        print(f"        Place FIPS: {place_mask.sum():,} resolved from Census place polygons")
+            except Exception as e:
+                print(f"        ⚠️  Place FIPS polygon PIP skipped: {e}")
+
+            # ── Fix 1: MPO Name from federal MPO polygons (canonical) ──
+            try:
+                if resolver.mpos is not None:
+                    df = resolver.resolve_mpos(df)
+                    resolved_mpo = df["resolved_mpo"].fillna("").astype(str).str.strip()
+                    mpo_mask = resolved_mpo != ""
+                    if mpo_mask.any():
+                        df.loc[mpo_mask, "MPO Name"] = resolved_mpo[mpo_mask]
+                        print(f"        MPO Name: {mpo_mask.sum():,} resolved from federal MPO polygons")
+            except Exception as e:
+                print(f"        ⚠️  MPO polygon PIP skipped: {e}")
+
+            return df, stats
         else:
             print("        Boundary polygons not cached — using centroid fallback")
     except ImportError:
