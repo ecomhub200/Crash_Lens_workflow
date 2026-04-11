@@ -1292,25 +1292,28 @@ class CrashEnricher:
             print(f"    RTE Name: {rte_before:,} → {rte_after:,} ({rte_after/n*100:.0f}%)")
 
         # ── Fix 4: School Zone from location signals (NOT school bus) ──
-        if "School Zone" in df.columns:
-            resolved_sz = df.get("resolved_school_zone", pd.Series("", index=df.index)) \
-                .fillna("").astype(str).str.strip()
-            near_school = df.get("Near_School_1500ft", pd.Series("", index=df.index)) \
-                .fillna("").astype(str).str.strip()
-            map_sz = df.get("map_school_zone", pd.Series("", index=df.index)) \
-                .fillna("").astype(str).str.strip()
-
+        # Only overwrite if at least one location-based signal column is
+        # present. Without any signals we'd unconditionally stamp every row
+        # "No" and silently erase state-correct School Zone values.
+        school_signal_cols = [
+            c for c in ("resolved_school_zone", "Near_School_1500ft", "map_school_zone")
+            if c in df.columns
+        ]
+        if "School Zone" in df.columns and school_signal_cols:
             yes_values = {"Yes", "True", "1", "yes", "true"}
-            is_school_zone = (
-                resolved_sz.isin(yes_values)
-                | map_sz.isin(yes_values)
-                | near_school.isin(yes_values)
-            )
+            is_school_zone = pd.Series(False, index=df.index)
+            for col in school_signal_cols:
+                col_vals = df[col].fillna("").astype(str).str.strip()
+                is_school_zone = is_school_zone | col_vals.isin(yes_values)
 
             before_yes = (df["School Zone"] == "Yes").sum()
             df["School Zone"] = is_school_zone.map({True: "Yes", False: "No"})
             after_yes = (df["School Zone"] == "Yes").sum()
-            print(f"    School Zone: {before_yes:,} → {after_yes:,} (location-based, primary: Near_School_1500ft)")
+            print(f"    School Zone: {before_yes:,} → {after_yes:,} "
+                  f"(location-based from {', '.join(school_signal_cols)})")
+        elif "School Zone" in df.columns:
+            print(f"    School Zone: skipped — no location signal columns available "
+                  f"(resolved_school_zone / Near_School_1500ft / map_school_zone)")
 
         # ── Fix 7: RoadDeparture Type from definitive indicators only ──
         if "RoadDeparture Type" in df.columns:
@@ -1340,17 +1343,23 @@ class CrashEnricher:
                           f"(curve={curve_dep.sum():,}, straight={straight_dep.sum():,})")
 
         # ── Fix 8: Persons Injured = A + B + C (exact math) ──
+        # Only runs if Persons Injured is wholly empty AND at least one of
+        # A/B/C_People exists. Using pd.Series(0, index=df.index) as default
+        # keeps arithmetic vectorized even when some KABCO columns are missing.
         if "Persons Injured" in df.columns:
             pi = pd.to_numeric(df["Persons Injured"], errors="coerce").fillna(0)
-            if pi.sum() == 0:
-                a = pd.to_numeric(df.get("A_People", 0), errors="coerce").fillna(0)
-                b = pd.to_numeric(df.get("B_People", 0), errors="coerce").fillna(0)
-                c = pd.to_numeric(df.get("C_People", 0), errors="coerce").fillna(0)
+            kabco_cols_present = [c for c in ("A_People", "B_People", "C_People") if c in df.columns]
+            if pi.sum() == 0 and kabco_cols_present:
+                zero = pd.Series(0, index=df.index)
+                a = pd.to_numeric(df["A_People"], errors="coerce").fillna(0) if "A_People" in df.columns else zero
+                b = pd.to_numeric(df["B_People"], errors="coerce").fillna(0) if "B_People" in df.columns else zero
+                c = pd.to_numeric(df["C_People"], errors="coerce").fillna(0) if "C_People" in df.columns else zero
                 total = (a + b + c).astype(int)
                 has_injury = total > 0
                 if has_injury.any():
                     df.loc[has_injury, "Persons Injured"] = total[has_injury].astype(str)
-                    print(f"    Persons Injured: {has_injury.sum():,} from A+B+C people counts (exact)")
+                    print(f"    Persons Injured: {has_injury.sum():,} from "
+                          f"{'+'.join(kabco_cols_present)} (exact)")
 
         # ── Fix 9: Pedestrians Killed/Injured (documented minimum estimates) ──
         if "Pedestrian?" in df.columns and "Crash Severity" in df.columns:
