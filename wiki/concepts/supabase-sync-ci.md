@@ -312,4 +312,104 @@ GitHub Actions (normalize → enrich → split → R2 upload)
 ### SSH Tunnel Batching [DEPRECATED]
 The SSH tunnel approach (`supabase-sync.yml` matrix, 23 parallel jobs) is kept as fallback but replaced by webhook for automated runs. Use only if webhook is unavailable.
 
+
+## Geom / Date Trigger (2026-04-12 — permanent fix)
+
+### Problem
+`finalize_sync()` historically ran a single massive `UPDATE crashes_{state} SET geom = ST_SetSRID(ST_Point(x, y), 4326)` on 570K+ rows inside one transaction. On the 8GB VPS this caused WAL explosion → table lock → multi-hour hang → Supabase Studio unresponsive. The incident recurred 3+ times, each costing 2–4h of recovery.
+
+### Fix — three layers, fully state-agnostic
+
+**Layer 1: PostgreSQL BEFORE INSERT trigger `trg_compute_geom`**
+
+Installed on the `crashes` parent partitioned table — auto-propagates to all 51 state partitions (existing + future; `DROP TABLE … PARTITION OF crashes` recreations inherit automatically).
+
+```sql
+CREATE OR REPLACE FUNCTION compute_geom_on_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.x IS NOT NULL AND NEW.y IS NOT NULL
+       AND NEW.x BETWEEN -180 AND 180
+       AND NEW.y BETWEEN -90 AND 90 THEN
+        NEW.geom := ST_SetSRID(ST_Point(NEW.x, NEW.y), 4326);
+    END IF;
+
+    IF NEW.crash_date IS NOT NULL
+       AND NEW.crash_date != ''
+       AND NEW.crash_date_parsed IS NULL THEN
+        BEGIN
+            NEW.crash_date_parsed := TO_DATE(NEW.crash_date, 'MM/DD/YYYY');
+        EXCEPTION WHEN OTHERS THEN
+            NEW.crash_date_parsed := NULL;
+        END;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_compute_geom ON crashes;
+CREATE TRIGGER trg_compute_geom
+    BEFORE INSERT ON crashes
+    FOR EACH ROW
+    EXECUTE FUNCTION compute_geom_on_insert();
+```
+
+Idempotent (`CREATE OR REPLACE FUNCTION` + `DROP TRIGGER IF EXISTS`). Skips NaN / Infinity / out-of-range coordinates instead of crashing the COPY batch. Bad dates become NULL via `EXCEPTION WHEN OTHERS`.
+
+**Layer 2: `supabase_sync.py` changes**
+
+- New constant `TRIGGER_MANAGED_COLUMNS = {"geom", "crash_date_parsed"}` next to `AUTO_COLUMNS`.
+- `bulk_insert()` filters these out of the COPY column list so empty strings never hit GEOMETRY/DATE types.
+- `sync()` no longer runs an inline batched geom UPDATE loop — replaced with a verify-only read that flags any rows the trigger missed.
+- `finalize_sync()` rewritten:
+  - **Kill guard** — `pg_cancel_backend()` on any stuck `ST_Point` / `crash_date_parsed` queries older than 5 minutes, scoped to `crashes_{state_name}` so parallel state finalizes don't interfere.
+  - **Advisory lock** — `pg_try_advisory_lock(42)` prevents concurrent finalize races; skips with a warning if another finalize is already running. Always released in `finally`.
+  - **Safety-net backfill** — small 10K `ctid`-keyed batches with commit between. Should be 0 rows with the trigger active; bounded so it can never hang.
+  - **Matview refresh** — `REFRESH MATERIALIZED VIEW CONCURRENTLY` for `federal_summary` + `jurisdiction_baselines`, with a fall-back to blocking refresh when the CONCURRENTLY path fails.
+  - **States upsert + `log_run()`** — payload preserved byte-for-byte so telemetry doesn't break.
+
+**Layer 3: `webhook/webhook.py`**
+
+No code changes. Step 5 subprocess comment updated to reflect that finalize now runs in ~30s (trigger-driven) instead of 30 min. The 1800s timeout stays as a conservative ceiling.
+
+### Execution flow before vs after
+
+```
+BEFORE (hangs):
+  Batch 1..23: INSERT 25K rows (geom NULL) → commit
+  Finalize: UPDATE 569K rows SET geom = ST_Point(x,y)   ← HANG (single lock, 30-60m)
+
+AFTER (no hang):
+  Batch 1..23: INSERT 25K rows → trigger sets geom per-row → commit (geom done!)
+  Finalize: safety check (0 rows) → REFRESH matviews → upsert states   (~30s total)
+```
+
+### Verification
+
+```sql
+-- 1. Trigger exists on the parent table
+SELECT tgname, tgrelid::regclass
+FROM pg_trigger WHERE tgname = 'trg_compute_geom';
+
+-- 2. After a pipeline run, no missing geom
+SELECT COUNT(*) FILTER (WHERE geom IS NULL AND x IS NOT NULL AND y IS NOT NULL
+                             AND x BETWEEN -180 AND 180 AND y BETWEEN -90 AND 90) AS missing_geom,
+       COUNT(geom) AS with_geom, COUNT(*) AS total
+FROM crashes_delaware;
+-- Expect: missing_geom = 0
+
+-- 3. No stuck advisory locks after finalize
+SELECT * FROM pg_locks WHERE locktype = 'advisory' AND objid = 42;
+-- Expect: empty
+```
+
+Success log line: `✅ geom: all rows already populated (trigger working)`.
+
+### Rollback
+```sql
+DROP TRIGGER IF EXISTS trg_compute_geom ON crashes;
+```
+Then revert the Python changes. The safety-net backfill in `finalize_sync()` will repopulate geom on the next run (slower, but functional).
+
 See [[webhook-sync]] for full management guide.

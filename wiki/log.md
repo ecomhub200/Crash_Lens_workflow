@@ -10,6 +10,32 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-12] fix | Permanent geom/date fix — BEFORE INSERT trigger + finalize rewrite
+
+Eliminates the recurring 2–4h VPS hang caused by `finalize_sync()` running one massive `UPDATE crashes_{state} SET geom = ST_Point(x,y)` on 570K+ rows in a single transaction (WAL explosion → table lock → Studio unresponsive).
+
+**Three layers, fully state-agnostic:**
+
+1. **VPS one-time (Step 1 — done):** Installed `BEFORE INSERT` trigger `trg_compute_geom` on the `crashes` parent partitioned table. Auto-computes `geom = ST_SetSRID(ST_Point(x, y), 4326)` and `crash_date_parsed = TO_DATE(crash_date, 'MM/DD/YYYY')` per-row during every COPY. Skips NaN/Infinity/out-of-range coords. Auto-propagates to all 51 state partitions (existing + future, including `DROP TABLE … PARTITION OF crashes` recreations). Bad dates become NULL via `EXCEPTION WHEN OTHERS`.
+2. **supabase_sync.py — Step 2 (this change):**
+   - Added `TRIGGER_MANAGED_COLUMNS = {"geom", "crash_date_parsed"}` (supabase_sync.py:208).
+   - `bulk_insert()` now excludes trigger-managed columns from the COPY column list so empty strings never hit GEOMETRY / DATE types (supabase_sync.py:417–434).
+   - `sync()` no longer runs the inline batched geom UPDATE loop — replaced with a verify-only read that flags any rows the trigger missed (supabase_sync.py:510–526).
+   - `finalize_sync()` fully rewritten (supabase_sync.py:677–856):
+     - Kills stuck prior-run queries scoped to `crashes_{state_name}` partition only (doesn't affect parallel finalizes for other states).
+     - `pg_try_advisory_lock(42)` prevents concurrent finalize races on matview refresh.
+     - Safety-net geom + date backfills use 10K `ctid`-keyed batches with commit between — can never hang, should always be 0 rows with the trigger active.
+     - Matview refresh pattern (`CONCURRENTLY` with blocking fallback) preserved.
+     - `states` upsert payload and `log_run()` telemetry preserved byte-for-byte.
+     - Advisory lock always released in `finally`.
+3. **webhook/webhook.py:** Comment-only update at line 294/304 — webhook remains a pure orchestrator and needs zero code changes. Finalize is now ~30s instead of 30min; 1800s timeout kept as conservative ceiling.
+
+**Expected new-pipeline behavior:** Zero `UPDATE … SET geom` calls, zero table locks, zero hangs. Log should show `✅ geom: all rows already populated (trigger working)`. Rollback path: `DROP TRIGGER IF EXISTS trg_compute_geom ON crashes` — the safety-net backfill in `finalize_sync()` will then repopulate on the next run (slower but functional).
+
+Files changed: `supabase_sync.py`, `webhook/webhook.py`, `wiki/concepts/supabase-sync-ci.md`, `wiki/entities/webhook-sync.md`, `wiki/log.md`. Files explicitly unchanged: `build_road_inventory.py`, `crash_enricher.py`, `split.py`, `TIER1_MAP`, `build_sync_df()`, `batch_sync()`.
+
+---
+
 ## [2026-04-12] fix | Speed authority docstring + confidence scoring (StateDOT)
 
 Aligned `resolve_speed_limit()`'s local docstring with the module-level authority chart — it now declares `StateDOT > HPMS > Mapillary > OSM`, matching the resolution logic already in place at lines 85-93 and the module header at line 20. Added a StateDOT source check to `compute_confidence_scores()` so a crash whose only speed signal comes from `sdot_Max Speed Diff` now scores `conf_speed_limit = 50` instead of `0`. No resolution-order change and no schema change.
