@@ -10,6 +10,15 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-12] fix | State DOT authority + source tracking
+
+Fixed FC/Ownership/SYSTEM priority so HPMS wins over StateDOT (FHWA validates federally). Added missing `resolved_fc_source`, `resolved_ownership_source`, `resolved_facility_source` columns. Added StateDOT column to source contribution matrix. Added DOT counts to Lanes/Surface/FC print statements. Swapped pipeline order (HPMS before DOT). Freed state_dot/hpms memory after enrichment.
+
+- **road_data_authority.py**: FC/Ownership priority: OSM → StateDOT → HPMS (HPMS wins). Added resolved source columns for FC, Ownership, Facility Type.
+- **build_road_inventory.py**: Pipeline order: HPMS → State DOT. Source matrix includes StateDOT column. Memory freed after enrichment.
+
+---
+
 ## [2026-04-12] fix | Data Quality — Intersection, Curvature, Speed
 
 Three data quality fixes for Delaware Safety Focus tab (Kent County, no_interstate, 34,678 records):

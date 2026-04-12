@@ -390,7 +390,9 @@ def enrich_state_dot(roads, sdot, threshold_m=100):
     TIER A BEHAVIOR:
       - OVERWRITES any existing value for all matched columns
       - Only applies where State DOT has a non-empty value
-      - Runs BEFORE enrich_hpms() so HPMS only fills what DOT didn't cover
+      - Runs AFTER enrich_hpms() — DOT overwrites HPMS for measured attrs
+        (speed, lanes, widths, sidewalks). For FC/Ownership/SYSTEM, final
+        resolution happens in merge_frontend_columns() where HPMS wins.
 
     If {abbr}_state_dot.parquet.gz doesn't exist, this function skips silently
     and Tier B (HPMS) becomes the highest authority automatically.
@@ -1299,13 +1301,15 @@ def main():
     if not strtree_ok:
         print("    Using KDTree midpoint fallback for all enrichment")
 
-    # ── Tier A: State DOT Inventory (highest authority, optional) ──
-    # If {abbr}_state_dot.parquet.gz exists → Tier A overwrites all columns.
-    # If missing → silently skipped, Tier B (HPMS) becomes highest authority.
-    enrich_state_dot(roads, data.get("state_dot"), args.hpms_threshold)
-
-    # ── Tier B: HPMS Federal Data (highest authority when Tier A unavailable) ──
+    # ── HPMS Federal Data (sets hpms_* columns — base layer) ──
     enrich_hpms(roads, data["hpms"], args.hpms_threshold)
+
+    # ── State DOT Inventory (optional, overwrites measured attributes) ──
+    # Runs AFTER HPMS. For measured attrs (speed, lanes, widths, sidewalks),
+    # DOT field survey data overwrites HPMS. For FC/Ownership/SYSTEM,
+    # HPMS wins — resolved in merge_frontend_columns().
+    enrich_state_dot(roads, data.get("state_dot"), args.hpms_threshold)
+    data["state_dot"] = None; data["hpms"] = None; gc.collect()
 
     # Derive area type: Census UA/UC boundaries → HPMS urban_code → AADT fallback
     _area_type_resolved = False
@@ -1961,29 +1965,30 @@ def main():
 
     # ── Source coverage matrix ──
     print(f"\n  Source contribution matrix:")
-    print(f"    {'Attribute':25s} {'HPMS':>8s} {'Mapillary':>10s} {'OSM':>8s} {'Federal':>8s} {'Total':>8s}")
-    print(f"    {'-'*25} {'-'*8} {'-'*10} {'-'*8} {'-'*8} {'-'*8}")
+    print(f"    {'Attribute':25s} {'StateDOT':>9s} {'HPMS':>8s} {'Mapillary':>10s} {'OSM':>8s} {'Federal':>8s} {'Total':>8s}")
+    print(f"    {'-'*25} {'-'*9} {'-'*8} {'-'*10} {'-'*8} {'-'*8} {'-'*8}")
     matrix = {
-        "Speed limit":     ("resolved_speed_source",   ["HPMS","Mapillary","OSM",""]),
-        "Lanes":           ("resolved_lanes_source",    ["HPMS","","OSM",""]),
-        "Surface":         ("resolved_surface_source",  ["HPMS","","OSM",""]),
-        "Signal":          ("resolved_signal_source",   ["HPMS","Mapillary","","POI"]),
-        "Lighting":        ("resolved_lighting_source", ["","Mapillary","OSM",""]),
-        "On bridge":       ("resolved_bridge_source",   ["","","OSM","Federal"]),
-        "School zone":     ("resolved_school_source",   ["","Mapillary","","Federal"]),
-        "Func Class":      ("resolved_fc_source",       ["HPMS","","OSM",""]),
-        "Ownership":       ("resolved_ownership_source",["HPMS","","OSM",""]),
-        "Facility Type":   ("resolved_facility_source", ["HPMS","","OSM",""]),
+        "Speed limit":     ("resolved_speed_source",   ["StateDOT","HPMS","Mapillary","OSM",""]),
+        "Lanes":           ("resolved_lanes_source",    ["StateDOT","HPMS","","OSM",""]),
+        "Surface":         ("resolved_surface_source",  ["StateDOT","HPMS","","OSM",""]),
+        "Signal":          ("resolved_signal_source",   ["","HPMS","Mapillary","","POI"]),
+        "Lighting":        ("resolved_lighting_source", ["","","Mapillary","OSM",""]),
+        "On bridge":       ("resolved_bridge_source",   ["","","","OSM","Federal"]),
+        "School zone":     ("resolved_school_source",   ["","","Mapillary","","Federal"]),
+        "Func Class":      ("resolved_fc_source",       ["StateDOT","HPMS","","OSM",""]),
+        "Ownership":       ("resolved_ownership_source",["StateDOT","HPMS","","OSM",""]),
+        "Facility Type":   ("resolved_facility_source", ["","HPMS","","",""]),
     }
     for label, (col, tier_vals) in matrix.items():
         if col in roads.columns:
             counts = roads[col].value_counts()
-            h = counts.get(tier_vals[0], 0) if tier_vals[0] else 0
-            m = counts.get(tier_vals[1], 0) if tier_vals[1] else 0
-            o = counts.get(tier_vals[2], 0) if tier_vals[2] else 0
-            f = counts.get(tier_vals[3], 0) if tier_vals[3] else 0
-            t = h + m + o + f
-            print(f"    {label:25s} {h:>8,} {m:>10,} {o:>8,} {f:>8,} {t:>8,}")
+            sd = counts.get(tier_vals[0], 0) if tier_vals[0] else 0
+            h  = counts.get(tier_vals[1], 0) if tier_vals[1] else 0
+            m  = counts.get(tier_vals[2], 0) if tier_vals[2] else 0
+            o  = counts.get(tier_vals[3], 0) if tier_vals[3] else 0
+            f  = counts.get(tier_vals[4], 0) if tier_vals[4] else 0
+            t  = sd + h + m + o + f
+            print(f"    {label:25s} {sd:>9,} {h:>8,} {m:>10,} {o:>8,} {f:>8,} {t:>8,}")
 
     print(f"\n{'='*65}")
 
