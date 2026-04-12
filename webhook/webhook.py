@@ -291,8 +291,8 @@ def _run_batched_sync(
                 log.write(f"[sync] WARNING: Batch {i} timed out\n")
             log.flush()
 
-        # ── Step 5: finalize (geom, states, matviews — can take minutes) ──
-        log.write("[sync] Step 5/6: Finalizing (geom, matviews, states)...\n")
+        # ── Step 5: finalize (matviews + states upsert; geom handled by trigger) ──
+        log.write("[sync] Step 5/6: Finalizing (matviews, states; geom already set by trigger)...\n")
         log.flush()
         try:
             fr = subprocess.run(
@@ -301,7 +301,7 @@ def _run_batched_sync(
                 cwd=WORK_DIR,
                 stdout=log,
                 stderr=subprocess.STDOUT,
-                timeout=1800,  # 30 min for large states (geom UPDATE is slow)
+                timeout=1800,  # conservative ceiling; trigger-driven finalize ~30s in practice
             )
             if fr.returncode != 0:
                 log.write(
