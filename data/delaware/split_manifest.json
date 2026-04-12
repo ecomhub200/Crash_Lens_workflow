@@ -1,7 +1,7 @@
 {
   "state": "delaware",
-  "generated_at": "2026-04-12T16:58:55.719560+00:00",
-  "elapsed_s": 157.2,
+  "generated_at": "2026-04-12T20:22:02.225424+00:00",
+  "elapsed_s": 150.6,
   "total_input_rows": 569829,
   "dry_run": false,
   "strategies": {
