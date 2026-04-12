@@ -10,6 +10,16 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-12] fix | OSM curvature fallback threshold 1.10 → 1.15
+
+Raised `derive_roadway_alignment()` OSM fallback threshold from `1.10` to `1.15` in `crash_enricher.py` (lines 483–487). Roads are now classified as curves only when their road length is ≥15% longer than the straight-line distance (previously ≥10%). More conservative — reduces false positives on gentle bends drivers don't perceive as curves.
+
+Scope: OSM fallback only (~5% of crashes). HPMS `curve_class` authority logic (A/B=Straight, C=Curve, D/E=Sharp) and the `1.40` sharp-curve upper threshold are unchanged. Calibrated to FHWA benchmark that 25–30% of crashes occur on curves nationwide.
+
+Files changed: `crash_enricher.py`, `wiki/log.md`.
+
+---
+
 ## [2026-04-12] fix | Permanent geom/date fix — BEFORE INSERT trigger + finalize rewrite
 
 Eliminates the recurring 2–4h VPS hang caused by `finalize_sync()` running one massive `UPDATE crashes_{state} SET geom = ST_Point(x,y)` on 570K+ rows in a single transaction (WAL explosion → table lock → Studio unresponsive).

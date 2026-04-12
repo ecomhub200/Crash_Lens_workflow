@@ -473,6 +473,9 @@ OSM_SURFACE_MAP = {
 
 # Curvature → Roadway Alignment (golden column)
 # curvature = road_length / straight_line_distance (1.0 = straight)
+# OSM curvature ratio threshold: 1.15 = road is 15% longer than straight-line
+# Fallback only — used when HPMS curve_class unavailable (~5% of crashes)
+# Calibrated to FHWA benchmark: 25-30% of crashes occur on curves nationwide
 def derive_roadway_alignment(curvature):
     """Derive CrashLens Roadway Alignment from OSM curvature ratio.
 
@@ -480,11 +483,11 @@ def derive_roadway_alignment(curvature):
     curvature = road_length / straight_line_distance (1.0 = perfectly straight).
 
     Threshold calibrated against HPMS curve_class cross-reference:
-    - Ratio <= 1.10: HPMS A/B (tangent/slight) — STRAIGHT
-    - Ratio 1.10-1.40: HPMS C (moderate) — CURVE
+    - Ratio <= 1.15: HPMS A/B (tangent/slight) — STRAIGHT
+    - Ratio 1.15-1.40: HPMS C (moderate) — CURVE
     - Ratio > 1.40: HPMS D/E (sharp/very sharp) — SHARP CURVE
     """
-    if curvature <= 1.10:
+    if curvature <= 1.15:
         return "1. Straight - Level"
     elif curvature <= 1.40:
         return "2. Curve - Level"
