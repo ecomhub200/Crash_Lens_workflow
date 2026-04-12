@@ -474,18 +474,22 @@ OSM_SURFACE_MAP = {
 # Curvature → Roadway Alignment (golden column)
 # curvature = road_length / straight_line_distance (1.0 = straight)
 def derive_roadway_alignment(curvature):
-    """Derive CrashLens Roadway Alignment from computed curvature ratio.
-    Note: curvature only captures horizontal curves, not vertical grade.
-    Grade info comes from HPMS terrain_type (Tier 3, runs first).
+    """Derive CrashLens Roadway Alignment from OSM curvature ratio.
+
+    FALLBACK ONLY — used when HPMS curve_class is not available.
+    curvature = road_length / straight_line_distance (1.0 = perfectly straight).
+
+    Threshold calibrated against HPMS curve_class cross-reference:
+    - Ratio <= 1.10: HPMS A/B (tangent/slight) — STRAIGHT
+    - Ratio 1.10-1.40: HPMS C (moderate) — CURVE
+    - Ratio > 1.40: HPMS D/E (sharp/very sharp) — SHARP CURVE
     """
-    if curvature <= 1.05:
+    if curvature <= 1.10:
         return "1. Straight - Level"
-    elif curvature <= 1.15:
-        return "2. Curve - Level"       # slight curve, no grade info
     elif curvature <= 1.40:
-        return "2. Curve - Level"       # moderate curve
+        return "2. Curve - Level"
     else:
-        return "2. Curve - Level"       # sharp curve (no grade from OSM)
+        return "4. Grade - Curve"
 
 def parse_maxspeed_mph(maxspeed_str):
     """Extract numeric speed in mph from OSM maxspeed tag."""
@@ -977,11 +981,28 @@ class CrashEnricher:
             if node_filled2 > 0:
                 print(f"    Node derived from OSM (segments): {node_filled2:,} crashes")
 
+        # ── Default remaining empty Intersection Type ──
+        if "Intersection Type" in df.columns:
+            empty_int = df["Intersection Type"].fillna("").astype(str).str.strip().isin(
+                ["", "Not Applicable", "nan", "None"])
+            if empty_int.any():
+                df.loc[empty_int, "Intersection Type"] = "1. Not at Intersection"
+                print(f"    Intersection Type: {empty_int.sum():,} defaulted to Not at Intersection")
+
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)
 
         # ── Post-enrichment canonicalization & honest derivations ──
         df = self._canonicalize_post_enrichment(df)
+
+        # ── Curvature diagnostic — Roadway Alignment distribution ──
+        if "Roadway Alignment" in df.columns:
+            ra_dist = df["Roadway Alignment"].fillna("").value_counts()
+            total = len(df)
+            print(f"\n    Roadway Alignment distribution ({total:,} total):")
+            for val, cnt in ra_dist.items():
+                if val:
+                    print(f"      {cnt:>7,} ({cnt/total*100:5.1f}%): {val}")
 
         elapsed = time.time() - t0
         print(f"\n  Enrichment complete in {elapsed:.1f}s")
@@ -1064,6 +1085,26 @@ class CrashEnricher:
                 derived_count += yes_count
                 print(f"    {flag}: {yes_count} 'Yes' derived from contributing circumstance")
 
+        # ── Speed investigation logging (diagnostic) ──
+        if "Speed?" in df.columns and self.state_abbr.lower() == "de":
+            speed_yes = (df["Speed?"] == "Yes").sum()
+            speed_total = len(df)
+            print(f"    Speed? diagnostic: {speed_yes:,}/{speed_total:,} "
+                  f"({speed_yes/speed_total*100:.1f}%)")
+            if actual_col:
+                speed_kw = "speed|fast|aggressive|exceeding|racing"
+                speed_mask = circ_lower.str.contains(speed_kw, na=False)
+                if speed_mask.any():
+                    print(f"    Speed-matching circumstances ({speed_mask.sum():,} rows):")
+                    speed_vals = df.loc[speed_mask, actual_col].value_counts().head(10)
+                    for val, cnt in speed_vals.items():
+                        print(f"      {cnt:>6,}: {val}")
+
+                all_circs = df[actual_col].value_counts().head(20)
+                print(f"    Top 20 contributing circumstances:")
+                for val, cnt in all_circs.items():
+                    print(f"      {cnt:>6,}: {val}")
+
         # Handle combined Distraction+Fatigue fields (e.g., Delaware)
         # Conservative: combined field → Distracted?=Yes only
         # Drowsy? only from strong standalone fatigue indicators
@@ -1132,42 +1173,13 @@ class CrashEnricher:
         return df
 
     def _detect_intersections_from_clusters(self, df):
-        """Use GPS clustering to detect intersection-proximity crashes."""
-        if "x" not in df.columns or "y" not in df.columns:
-            return df
+        """DEPRECATED: GPS clustering removed — replaced by road inventory
+        intersection node proximity in road_inventory_enricher.py.
 
-        try:
-            lons = pd.to_numeric(df["x"], errors="coerce")
-            lats = pd.to_numeric(df["y"], errors="coerce")
-            valid = lats.notna() & lons.notna() & (lats != 0) & (lons != 0)
-
-            if valid.sum() < 10:
-                return df
-
-            valid_lats = lats[valid].tolist()
-            valid_lons = lons[valid].tolist()
-            valid_indices = df.index[valid].tolist()
-
-            clusters = detect_crash_clusters(valid_lats, valid_lons, radius_m=30, min_crashes=3)
-
-            # Mark crashes near cluster centers as "at intersection"
-            cluster_count = 0
-            for clat, clon, count, member_indices in clusters:
-                for mi in member_indices:
-                    actual_idx = valid_indices[mi]
-                    # Only fill if Intersection Type is currently blank
-                    if df.at[actual_idx, "Intersection Type"] in ("", "Not Applicable", None):
-                        df.at[actual_idx, "Intersection Type"] = "4. Four Approaches"  # conservative default
-                        cluster_count += 1
-
-            if cluster_count:
-                print(f"    GPS clustering: {len(clusters)} potential intersections detected, "
-                      f"{cluster_count} crashes tagged")
-            self.stats["tier1_intersection_clusters"] = len(clusters)
-
-        except Exception as e:
-            print(f"    GPS clustering error: {e}")
-
+        Old approach tagged 85.7%+ of crashes as intersection (wrong).
+        New approach uses actual OSM intersection nodes (intersection_degree >= 3,
+        within 30m of crash) from the road inventory.
+        """
         return df
 
     def _estimate_kabco_people(self, df):
@@ -1269,6 +1281,46 @@ class CrashEnricher:
             return df
 
         print(f"\n  [Post-Enrichment Canonicalization]")
+
+        # ── Roadway Alignment from curve_class (FHWA authority — OVERWRITE) ──
+        if "curve_class" in df.columns:
+            cc = pd.to_numeric(df["curve_class"], errors="coerce").fillna(0).astype(int)
+            has_cc = cc > 0
+            if has_cc.any():
+                if "Roadway Alignment" not in df.columns:
+                    df["Roadway Alignment"] = ""
+                # Preserve ramp designations
+                is_ramp = df["Roadway Alignment"].fillna("").astype(str).str.contains(
+                    "Ramp", na=False)
+                overwrite = has_cc & ~is_ramp
+
+                # FHWA: 1-2 = Straight/Slight (base condition), 3 = Moderate, 4-5 = Sharp+
+                cc_straight = overwrite & (cc <= 2)
+                cc_curve = overwrite & (cc == 3)
+                cc_sharp = overwrite & (cc >= 4)
+
+                before_curve = df["Roadway Alignment"].fillna("").str.contains(
+                    "Curve", case=False, na=False).sum()
+
+                df.loc[cc_straight, "Roadway Alignment"] = "1. Straight - Level"
+                df.loc[cc_curve, "Roadway Alignment"] = "2. Curve - Level"
+                df.loc[cc_sharp, "Roadway Alignment"] = "4. Grade - Curve"
+
+                after_curve = df["Roadway Alignment"].fillna("").str.contains(
+                    "Curve", case=False, na=False).sum()
+                print(f"    Roadway Alignment (curve_class): {overwrite.sum():,} set "
+                      f"(curve: {before_curve:,} -> {after_curve:,})")
+
+            # Terrain fallback where curve_class unavailable
+            if "hpms_terrain_type" in df.columns:
+                tt = pd.to_numeric(df["hpms_terrain_type"], errors="coerce").fillna(0).astype(int)
+                ra_empty = df["Roadway Alignment"].fillna("").astype(str).str.strip().isin(
+                    ["", "nan", "None"])
+                terrain_fill = ra_empty & (tt > 0)
+                if terrain_fill.any():
+                    for t_val, align_val in HPMS_TERRAIN_TO_ALIGNMENT.items():
+                        df.loc[terrain_fill & (tt == t_val), "Roadway Alignment"] = align_val
+                    print(f"    Roadway Alignment (terrain fallback): {terrain_fill.sum():,}")
 
         # ── Fix 2: RTE Name fallback from road-inventory route columns ──
         if "RTE Name" in df.columns:

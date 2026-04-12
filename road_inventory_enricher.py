@@ -268,6 +268,68 @@ class RoadInventorySession:
                 if fill_mask.any():
                     df.loc[matched_ci[fill_mask], col] = ri_vals[fill_mask]
 
+        # ── Intersection Type from road inventory node proximity ──
+        # (replaces GPS clustering — uses actual OSM intersection nodes)
+        if "intersection_degree" in self.ri.columns:
+            seg_int_deg = pd.to_numeric(
+                self.ri.iloc[matched_ri]["intersection_degree"], errors="coerce"
+            ).fillna(0).astype(int).values
+            seg_u_lat = self.ri.iloc[matched_ri]["u_lat"].values.astype(float)
+            seg_u_lon = self.ri.iloc[matched_ri]["u_lon"].values.astype(float)
+            seg_v_lat = self.ri.iloc[matched_ri]["v_lat"].values.astype(float)
+            seg_v_lon = self.ri.iloc[matched_ri]["v_lon"].values.astype(float)
+
+            c_lat = lats[matched_ci]
+            c_lon = lons[matched_ci]
+
+            # Longitude scale factor for approximate distance
+            valid_lats = c_lat[c_lat != 0]
+            mean_lat = np.nanmean(valid_lats) if len(valid_lats) > 0 else 39.0
+            lon_scale = np.cos(np.radians(mean_lat))
+
+            # Squared distance to u-node and v-node (in meters)
+            d_u_sq = ((c_lat - seg_u_lat) * 111000)**2 + \
+                     ((c_lon - seg_u_lon) * 111000 * lon_scale)**2
+            d_v_sq = ((c_lat - seg_v_lat) * 111000)**2 + \
+                     ((c_lon - seg_v_lon) * 111000 * lon_scale)**2
+            min_dist_sq = np.minimum(d_u_sq, d_v_sq)
+
+            # At intersection = high-degree node (>= 3) within 30m
+            at_intersection = (seg_int_deg >= 3) & (min_dist_sq <= 900)
+
+            # Only fill empty Intersection Type
+            if "Intersection Type" not in df.columns:
+                df["Intersection Type"] = ""
+            crash_it = df.loc[matched_ci, "Intersection Type"] \
+                .fillna("").astype(str).str.strip()
+            needs_fill = crash_it.isin(["", "nan", "None", "Not Applicable"]).values
+
+            # Map degree -> Intersection Type string
+            int_type_arr = np.where(
+                seg_int_deg == 3, "3. Three Approaches",
+                np.where(seg_int_deg == 4, "4. Four Approaches",
+                np.where(seg_int_deg >= 5, "5. Five-Point, or More",
+                         "2. Two Approaches")))
+
+            fill_as_int = needs_fill & at_intersection
+            fill_as_not = needs_fill & ~at_intersection
+
+            if fill_as_int.any():
+                df.loc[matched_ci[fill_as_int], "Intersection Type"] = \
+                    int_type_arr[fill_as_int]
+            if fill_as_not.any():
+                df.loc[matched_ci[fill_as_not], "Intersection Type"] = \
+                    "1. Not at Intersection"
+
+            int_count = fill_as_int.sum()
+            not_count = fill_as_not.sum()
+            total_matched = len(matched_ci)
+            if int_count or not_count:
+                print(f"    Intersection Type (node proximity): "
+                      f"{int_count:,} at intersection "
+                      f"({int_count/total_matched*100:.1f}%), "
+                      f"{not_count:,} not at intersection")
+
         # NEW columns (bulk assign)
         new_cols = [c for c in self.transfer_cols
                     if c not in OVERWRITE_COLUMNS and c not in FILL_COLUMNS]

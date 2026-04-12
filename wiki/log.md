@@ -10,6 +10,16 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-12] fix | Data Quality — Intersection, Curvature, Speed
+
+Three data quality fixes for Delaware Safety Focus tab (Kent County, no_interstate, 34,678 records):
+
+- **Intersection Type**: Replaced GPS clustering (97.7% intersection rate — wrong) with road inventory node proximity detection. Uses `intersection_degree >= 3` + 30m distance to segment endpoints from OSM road graph. Neutered `_detect_intersections_from_clusters()` in `crash_enricher.py`; added vectorized proximity check in `road_inventory_enricher.py`.
+- **Curvature / Roadway Alignment**: Fixed FHWA threshold — `curve_class <= 2` (Straight + Slight) now classified as straight per FHWA HSM base condition (was `<= 1`). Added curve_class OVERWRITE in `_canonicalize_post_enrichment()`. Updated OSM fallback `derive_roadway_alignment()` threshold from 1.05 to 1.10.
+- **Speed diagnostic**: Added DE-specific logging in `_derive_flags_from_circumstance()` to investigate 1.4% speed rate vs 10-15% national average. Prints top 20 contributing circumstances and speed-keyword matches.
+
+Files changed: `crash_enricher.py`, `road_inventory_enricher.py`, `build_road_inventory.py`.
+
 ## [2026-04-12] feat | Incremental Pipeline v1
 
 Content-hash diff engine for crash data pipeline. Reduces enrichment from ~10 min to ~5 sec on typical daily runs (~500 new crashes out of 569K).

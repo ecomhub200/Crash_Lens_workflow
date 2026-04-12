@@ -1430,7 +1430,9 @@ def main():
             # Roadway Alignment depends on curve_class (created above)
             if "curve_class" in roads.columns and "Roadway Alignment" not in roads.columns:
                 cc = pd.to_numeric(roads["curve_class"], errors="coerce").fillna(1).astype(int)
-                roads["Roadway Alignment"] = np.where(cc <= 1, "1. Straight - Level",
+                # FHWA: curve_class 1=Straight, 2=Slight -> both straight per HSM base condition
+                # Only class 3+ (Moderate/Sharp/Extreme) are safety-significant curves
+                roads["Roadway Alignment"] = np.where(cc <= 2, "1. Straight - Level",
                     np.where(cc <= 3, "2. Curve - Level", "4. Grade - Curve"))
                 _ra = (roads["Roadway Alignment"] != "").sum()
                 print(f"      Roadway Alignment: {_ra:>7,}/{len(roads):,}")
