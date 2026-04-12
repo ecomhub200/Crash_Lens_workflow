@@ -235,7 +235,7 @@ jobs:
           fi
           pip install awscli
           # Required for spatial join + parquet I/O
-          pip install pyarrow scipy duckdb geopandas
+          pip install pyarrow scipy duckdb geopandas boto3
 
           if [ "${{ steps.registry.outputs.requires_playwright }}" = "true" ]; then
             pip install playwright
