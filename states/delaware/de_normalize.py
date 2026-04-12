@@ -1539,6 +1539,7 @@ def normalize(
     skip_enrichment: bool = False,
     rerank_only: bool = False,
     report_path: str | None = None,
+    keep_objectids: bool = False,
 ) -> str:
     t0 = time.time()
     src = Path(input_path)
@@ -1582,9 +1583,21 @@ def normalize(
         print("  ⚡ RERANK-ONLY mode — skipping normalization phases")
         print(f"     Input is already normalized ({total_rows:,} rows)")
 
-        # Regenerate OBJECTIDs (sequential order changes after merge)
-        print("     Regenerating OBJECTIDs...")
-        df["OBJECTID"] = [f"{STATE_ABBREVIATION}-{i+1:07d}" for i in range(len(df))]
+        if not keep_objectids:
+            # Regenerate OBJECTIDs (sequential order changes after merge)
+            print("     Regenerating OBJECTIDs...")
+            df["OBJECTID"] = [f"{STATE_ABBREVIATION}-{i+1:07d}" for i in range(len(df))]
+        else:
+            print("     Keeping existing OBJECTIDs (--keep-objectids)")
+            missing_mask = df["OBJECTID"].fillna("").astype(str).str.strip().isin(["", "nan", "None"])
+            if missing_mask.any():
+                existing_nums = df.loc[~missing_mask, "OBJECTID"].str.extract(r'(\d+)$')[0].dropna().astype(int)
+                max_id = int(existing_nums.max()) if len(existing_nums) > 0 else 0
+                new_ids = [f"{STATE_ABBREVIATION}-{max_id + i + 1:07d}" for i in range(missing_mask.sum())]
+                df.loc[missing_mask, "OBJECTID"] = new_ids
+                print(f"     Assigned {len(new_ids)} new OBJECTIDs (starting from {max_id + 1})")
+            else:
+                print("     All rows have OBJECTIDs — none assigned")
 
         # Recompute EPDO
         weights = EPDO_PRESETS.get(epdo_preset, EPDO_PRESETS[DEFAULT_EPDO_PRESET])
@@ -1731,6 +1744,10 @@ if __name__ == "__main__":
         "--rerank-only", action="store_true",
         help="Skip normalization — only recompute EPDO + rankings + OBJECTIDs on an already-normalized CSV"
     )
+    parser.add_argument(
+        "--keep-objectids", action="store_true",
+        help="Preserve existing OBJECTIDs during --rerank-only (incremental pipeline)"
+    )
     args = parser.parse_args()
 
     try:
@@ -1742,6 +1759,7 @@ if __name__ == "__main__":
             skip_enrichment=args.skip_enrichment,
             rerank_only=args.rerank_only,
             report_path=args.report,
+            keep_objectids=args.keep_objectids,
         )
     except Exception as exc:
         print(f"\n  ❌ Error: {exc}", file=sys.stderr)

@@ -70,6 +70,12 @@ on:
         type: boolean
         default: false
 
+      force_full:
+        description: 'Force full pipeline (skip incremental diff)'
+        required: false
+        type: boolean
+        default: false
+
 permissions:
   contents: write
   actions: write
@@ -98,6 +104,8 @@ jobs:
       total_records: ${{ steps.finalize.outputs.total_records }}
       r2_data_key: ${{ steps.r2_upload.outputs.r2_data_key }}
       data_changed: ${{ steps.r2_upload.outputs.data_changed }}
+      mode: ${{ steps.diff.outputs.mode }}
+      new_count: ${{ steps.diff.outputs.new_count }}
 
     steps:
       - uses: actions/checkout@v5
@@ -375,6 +383,63 @@ jobs:
           echo "Checksum: $MD5"
 
       # ══════════════════════════════════════════════════════════════
+      # INCREMENTAL DIFF: Compare fresh vs existing R2 data
+      # ══════════════════════════════════════════════════════════════
+      - name: "Step 7.7: Incremental diff"
+        id: diff
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: |
+          STATE="delaware"
+          NORMALIZED="${{ steps.finalize.outputs.pq_path }}"
+          FORCE="${{ github.event.inputs.force_full }}"
+
+          if [ -z "$NORMALIZED" ] || [ ! -f "$NORMALIZED" ]; then
+            echo "No normalized file — defaulting to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Resolve state abbreviation from hierarchy.json
+          ABBR=$(python3 -c "
+          import json
+          try:
+              with open('states/$STATE/hierarchy.json') as f:
+                  h = json.load(f)
+              print((h.get('state',{}).get('abbreviation') or h.get('state',{}).get('abbr') or '').lower())
+          except: print('')
+          ")
+
+          if [ -z "$ABBR" ]; then
+            echo "Could not resolve abbreviation — defaulting to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          DIFF_ARGS="--state $ABBR --fresh $NORMALIZED --output diff_result"
+          if [ "$FORCE" = "true" ]; then
+            DIFF_ARGS="$DIFF_ARGS --force-full"
+          fi
+
+          python incremental_diff.py $DIFF_ARGS 2>&1 || {
+            echo "::warning::Diff failed — falling back to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          MODE=$(python3 -c "import json; print(json.load(open('diff_result/diff_report.json'))['mode'])")
+          NEW_COUNT=$(python3 -c "import json; print(json.load(open('diff_result/diff_report.json'))['new_count'])")
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+          echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
+          echo "Diff result: mode=$MODE, new_count=$NEW_COUNT"
+
+      # ══════════════════════════════════════════════════════════════
       # UPLOAD to R2: _statewide/ folder (NOT statewide/)
       # Format: parquet.gz (compressed, faster frontend loading)
       # ══════════════════════════════════════════════════════════════
@@ -473,6 +538,15 @@ jobs:
 
           echo "r2_data_key=$PQ_KEY" >> $GITHUB_OUTPUT
           echo "data_changed=$DATA_CHANGED" >> $GITHUB_OUTPUT
+
+          # Upload new_rows for incremental enrichment
+          DIFF_MODE="${{ steps.diff.outputs.mode || 'full' }}"
+          if [ "$DIFF_MODE" = "incremental" ] && [ -f "diff_result/new_rows.parquet.gz" ]; then
+            aws s3 cp "diff_result/new_rows.parquet.gz" \
+              "s3://$R2_BUCKET/$R2_PREFIX/_statewide/new_rows.parquet.gz" \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors
+            echo "Uploaded new_rows.parquet.gz for incremental enrichment"
+          fi
 
       # ── Progress manifest ──
       - name: "Update progress manifest"
@@ -592,6 +666,11 @@ jobs:
             console.log(`  R2 key: ${r2DataKey}`);
             console.log(`  Smart-fill: ${smartFill}`);
 
+            const mode = '${{ needs.download-and-normalize.outputs.mode || "full" }}';
+            const newCount = '${{ needs.download-and-normalize.outputs.new_count || "0" }}';
+
+            console.log(`  Mode: ${mode}, New count: ${newCount}`);
+
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -604,7 +683,9 @@ jobs:
                 r2_data_key: r2DataKey,
                 skip_forecasts: skipForecasts || 'false',
                 smart_fill: smartFill || 'true',
-                dry_run: 'false'
+                dry_run: 'false',
+                mode: mode,
+                new_count: newCount
               }
             });
 
