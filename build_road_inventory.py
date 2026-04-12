@@ -255,11 +255,24 @@ def enrich_intersections(roads, ints):
     u_in = roads["u_node"].isin(int_set)
     v_in = roads["v_node"].isin(int_set)
     at_int = u_in | v_in
+    # is_intersection is kept permissive (any graph junction node) — downstream
+    # classification uses the intersection_degree / streets_per_node value to
+    # decide whether it is a real intersection or a mere continuation/bend.
     roads["is_intersection"] = np.where(at_int, "Yes", "No")
 
     u_deg = roads["u_node"].map(deg_map).fillna(0).astype(int)
     v_deg = roads["v_node"].map(deg_map).fillna(0).astype(int)
     roads["intersection_degree"] = np.maximum(u_deg, v_deg)
+
+    # Forward-compatible: transfer undirected streets_per_node (MIRE-correct
+    # physical approach count) from intersection nodes to road segments when
+    # the cache provides it. Harmless when absent — downstream code gates on
+    # "streets_per_node" in columns.
+    if "streets_per_node" in ints.columns:
+        spn_map = dict(zip(ints["node_id"], ints["streets_per_node"]))
+        u_spn = roads["u_node"].map(spn_map).fillna(0).astype(int)
+        v_spn = roads["v_node"].map(spn_map).fillna(0).astype(int)
+        roads["streets_per_node"] = np.maximum(u_spn, v_spn)
 
     n = at_int.sum()
     print(f"{n:,} segments ({n/len(roads)*100:.1f}%)")
