@@ -271,7 +271,9 @@ def download_from_r2(state_name, abbr):
         print("  ❌ R2 creds required: CF_ACCOUNT_ID, CF_R2_ACCESS_KEY_ID, CF_R2_SECRET_ACCESS_KEY"); sys.exit(1)
     s3 = boto3.client("s3", endpoint_url=f"https://{acct}.r2.cloudflarestorage.com",
         aws_access_key_id=akey, aws_secret_access_key=skey, region_name="auto")
-    for key in [f"{state_name}/_state/all_roads.parquet.gz",
+    for key in [f"{state_name}/_state/all_roads.parquet",
+                f"{state_name}/_state/all_roads.parquet.gz",
+                f"{state_name}/_statewide/statewide_all_roads.parquet.gz",
                 f"{state_name}/statewide/{state_name}_statewide_all_roads.csv"]:
         try:
             fname = key.split("/")[-1]

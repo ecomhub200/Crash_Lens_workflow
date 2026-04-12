@@ -160,7 +160,7 @@ def _count_rows(input_file: str, env: dict, log) -> int | None:
 
 
 def _run_batched_sync(
-    abbr: str, batch_size: int, log_path: Path
+    abbr: str, batch_size: int, log_path: Path, mode: str = "full"
 ) -> tuple[str, int, list[int]]:
     """Download → count → truncate → batch loop → finalize → cleanup.
 
@@ -172,6 +172,7 @@ def _run_batched_sync(
     input_file: str | None = None
 
     with open(log_path, "a") as log:
+        log.write(f"[sync] Mode: {mode} (Phase 1: full reload for both modes)\n")
         # ── Step 0: clean up leftover files from any previous failed run ──
         _cleanup_stale_inputs(log)
 
@@ -329,7 +330,7 @@ def _run_batched_sync(
         return status, total_rows, failed_batches
 
 
-def _sync_thread(abbr: str, batch_size: int) -> None:
+def _sync_thread(abbr: str, batch_size: int, mode: str = "full") -> None:
     """Thread wrapper: owns the lock file and writes the status JSON.
 
     The lock file is ALWAYS removed in `finally` so a crash mid-sync doesn't
@@ -343,7 +344,7 @@ def _sync_thread(abbr: str, batch_size: int) -> None:
     with open(log_path, "w") as log:
         log.write(
             f"[webhook] started={started_dt.isoformat()} "
-            f"state={abbr} batch_size={batch_size}\n"
+            f"state={abbr} batch_size={batch_size} mode={mode}\n"
         )
 
     status: str = "failed"
@@ -359,7 +360,7 @@ def _sync_thread(abbr: str, batch_size: int) -> None:
                 }
             )
         )
-        status, total_rows, failed = _run_batched_sync(abbr, batch_size, log_path)
+        status, total_rows, failed = _run_batched_sync(abbr, batch_size, log_path, mode)
     except Exception as exc:  # noqa: BLE001
         try:
             with open(log_path, "a") as log:
@@ -379,6 +380,7 @@ def _sync_thread(abbr: str, batch_size: int) -> None:
     status_data = {
         "state": abbr,
         "status": status,
+        "mode": mode,
         "total_rows": total_rows,
         "num_batches": num_batches,
         "failed_batches": failed,
@@ -438,6 +440,10 @@ def trigger_sync():
             400,
         )
 
+    mode = str(body.get("mode", "full")).lower().strip()
+    if mode not in ("incremental", "full"):
+        mode = "full"
+
     lock = _read_lock()
     if lock is not None:
         lock_pid = lock.get("pid")
@@ -454,9 +460,9 @@ def trigger_sync():
             )
 
     threading.Thread(
-        target=_sync_thread, args=(state, batch_size), daemon=True
+        target=_sync_thread, args=(state, batch_size, mode), daemon=True
     ).start()
-    return jsonify({"status": "accepted", "state": state}), 202
+    return jsonify({"status": "accepted", "state": state, "mode": mode}), 202
 
 
 @app.get("/api/sync/status")

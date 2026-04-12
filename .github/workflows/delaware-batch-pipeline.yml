@@ -73,6 +73,18 @@ on:
         default: 'false'
         type: string
 
+      mode:
+        description: 'Pipeline mode: incremental, full, or skip'
+        required: false
+        default: 'full'
+        type: string
+
+      new_count:
+        description: 'Number of new crashes (for incremental logging)'
+        required: false
+        default: '0'
+        type: string
+
 permissions:
   contents: write
 
@@ -329,6 +341,20 @@ jobs:
           echo "=========================================="
           python scripts/init_cache.py --state "$STATE"
 
+      # ── Pipeline mode detection (incremental / full / skip) ──
+      - name: "Detect pipeline mode"
+        id: mode_detect
+        run: |
+          MODE="${{ github.event.inputs.mode || 'full' }}"
+          echo "Pipeline mode: $MODE"
+          if [ "$MODE" = "skip" ]; then
+            echo "No new crashes — skipping pipeline"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+
       # ── Stage 0.5: Download road inventory + enrich crashes ──
       - name: "Stage 0.5: Download road inventory from R2"
         if: github.event.inputs.smart_fill != 'false'
@@ -356,48 +382,109 @@ jobs:
           fi
 
       - name: "Stage 0.5: Enrich crashes (crash_enricher + road inventory)"
-        if: github.event.inputs.smart_fill != 'false'
+        if: github.event.inputs.smart_fill != 'false' && steps.mode_detect.outputs.skip != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
         run: |
+          MODE="${{ steps.mode_detect.outputs.mode }}"
           STATE="${{ needs.prepare.outputs.state }}"
           DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
           INPUT_PQ="$DATA_DIR/${STATE}_statewide_all_roads.parquet.gz"
           ENRICHED_PQ="$DATA_DIR/${STATE}_statewide_enriched.parquet.gz"
+          STATEWIDE_FILE="$INPUT_PQ"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+          R2_PREFIX="${{ needs.prepare.outputs.r2_prefix }}"
 
           ABBR=$(python3 -c "from states_registry import STATES; print([k for k,v in STATES.items() if v[1]=='$STATE'][0])")
           FIPS=$(python3 -c "from states_registry import STATES; print([v[2] for k,v in STATES.items() if v[1]=='$STATE'][0])")
 
-          echo "=========================================="
-          echo "  ENRICHMENT: Tier 1 + Road Inventory"
-          echo "  Input:  $INPUT_PQ"
-          echo "  State:  $STATE ($ABBR / FIPS $FIPS)"
-          echo "=========================================="
+          if [ "$MODE" = "incremental" ]; then
+            echo "══════════════════════════════════════"
+            echo "  INCREMENTAL ENRICHMENT"
+            echo "  New crashes: ${{ github.event.inputs.new_count }}"
+            echo "══════════════════════════════════════"
 
-          if [ -f "$INPUT_PQ" ]; then
-            INPUT_FILE="$INPUT_PQ"
-          elif [ -f "${INPUT_PQ%.parquet.gz}.csv" ]; then
-            INPUT_FILE="${INPUT_PQ%.parquet.gz}.csv"
-          else
-            echo "::error::No normalized data found"
-            exit 1
-          fi
+            # Download new_rows (only new crashes) from R2
+            aws s3 cp "s3://$R2_BUCKET/$R2_PREFIX/_statewide/new_rows.parquet.gz" \
+              "new_rows.parquet.gz" --endpoint-url "$R2_ENDPOINT" --only-show-errors
 
-          python crash_enricher.py \
-            --input "$INPUT_FILE" \
-            --output "$ENRICHED_PQ" \
-            --state-fips "$FIPS" \
-            --state-abbr "$ABBR" \
-            --state-name "$STATE" \
-            --cache-dir cache
+            # Download existing enriched statewide from R2
+            aws s3 cp "s3://$R2_BUCKET/$R2_PREFIX/_state/all_roads.parquet" \
+              "existing_enriched.parquet" --endpoint-url "$R2_ENDPOINT" --only-show-errors \
+            || aws s3 cp "s3://$R2_BUCKET/$R2_PREFIX/_state/all_roads.parquet.gz" \
+              "existing_enriched.parquet" --endpoint-url "$R2_ENDPOINT" --only-show-errors \
+            || aws s3 cp "s3://$R2_BUCKET/$R2_PREFIX/_statewide/statewide_all_roads.parquet.gz" \
+              "existing_enriched.parquet" --endpoint-url "$R2_ENDPOINT" --only-show-errors
 
-          if [ -f "$ENRICHED_PQ" ]; then
+            # Enrich ONLY new rows (5 seconds instead of 10 minutes)
+            python crash_enricher.py \
+              --input new_rows.parquet.gz \
+              --output new_rows_enriched.parquet.gz \
+              --state-fips "$FIPS" \
+              --state-abbr "$ABBR" \
+              --state-name "$STATE" \
+              --cache-dir cache
+
+            # Merge: existing enriched + newly enriched
             python3 -c "
+          import pandas as pd
+          existing = pd.read_parquet('existing_enriched.parquet')
+          new_rows = pd.read_parquet('new_rows_enriched.parquet.gz')
+          merged = pd.concat([existing, new_rows], ignore_index=True)
+          print(f'Merged: {len(existing):,} + {len(new_rows):,} = {len(merged):,}')
+          merged.to_parquet('statewide_merged.parquet.gz', engine='pyarrow', compression='snappy', index=False)
+          del existing, new_rows, merged
+          "
+
+            # Re-rank full dataset (keep existing OBJECTIDs)
+            python "states/$STATE/${ABBR}_normalize.py" \
+              --input statewide_merged.parquet.gz \
+              --output "$STATEWIDE_FILE" \
+              --rerank-only --keep-objectids
+
+            # Cleanup temp files
+            rm -f new_rows.parquet.gz existing_enriched.parquet \
+                  new_rows_enriched.parquet.gz statewide_merged.parquet.gz
+
+            echo "Incremental enrichment complete"
+
+          else
+            echo "=========================================="
+            echo "  ENRICHMENT: Tier 1 + Road Inventory"
+            echo "  Input:  $INPUT_PQ"
+            echo "  State:  $STATE ($ABBR / FIPS $FIPS)"
+            echo "=========================================="
+
+            if [ -f "$INPUT_PQ" ]; then
+              INPUT_FILE="$INPUT_PQ"
+            elif [ -f "${INPUT_PQ%.parquet.gz}.csv" ]; then
+              INPUT_FILE="${INPUT_PQ%.parquet.gz}.csv"
+            else
+              echo "::error::No normalized data found"
+              exit 1
+            fi
+
+            python crash_enricher.py \
+              --input "$INPUT_FILE" \
+              --output "$ENRICHED_PQ" \
+              --state-fips "$FIPS" \
+              --state-abbr "$ABBR" \
+              --state-name "$STATE" \
+              --cache-dir cache
+
+            if [ -f "$ENRICHED_PQ" ]; then
+              python3 -c "
           import pandas as pd
           df = pd.read_parquet('$ENRICHED_PQ')
           print(f'Enriched: {len(df):,} rows x {len(df.columns)} columns')
           "
-            cp "$ENRICHED_PQ" "$INPUT_PQ"
-          else
-            echo "Enrichment failed — split will use normalized data"
+              cp "$ENRICHED_PQ" "$INPUT_PQ"
+            else
+              echo "Enrichment failed — split will use normalized data"
+            fi
           fi
 
       - name: "Stage 0.5b: Upload enriched statewide to R2"

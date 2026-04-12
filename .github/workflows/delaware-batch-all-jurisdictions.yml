@@ -235,7 +235,7 @@ jobs:
           fi
           pip install awscli
           # Required for spatial join + parquet I/O
-          pip install pyarrow scipy duckdb geopandas
+          pip install pyarrow scipy duckdb geopandas boto3
 
           if [ "${{ steps.registry.outputs.requires_playwright }}" = "true" ]; then
             pip install playwright
@@ -666,8 +666,8 @@ jobs:
             console.log(`  R2 key: ${r2DataKey}`);
             console.log(`  Smart-fill: ${smartFill}`);
 
-            const mode = "${{ needs.download-and-normalize.outputs.mode || 'full' }}";
-            const newCount = "${{ needs.download-and-normalize.outputs.new_count || '0' }}";
+            const mode = '${{ needs.download-and-normalize.outputs.mode }}' || 'full';
+            const newCount = '${{ needs.download-and-normalize.outputs.new_count }}' || '0';
 
             console.log(`  Mode: ${mode}, New count: ${newCount}`);
 

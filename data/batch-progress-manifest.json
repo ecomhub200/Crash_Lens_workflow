@@ -89,30 +89,6 @@
     "delaware": {
       "runs": [
         {
-          "timestamp": "2026-03-25T19:12:27.721024+00:00",
-          "scope": "statewide",
-          "selection": "all",
-          "total_records": 566762,
-          "jurisdiction_count": 3,
-          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
-          "data_changed": true,
-          "workflow_run": "23558466198",
-          "pipeline": "delaware-batch-all-jurisdictions",
-          "normalized": true
-        },
-        {
-          "timestamp": "2026-03-31T04:01:44.102037+00:00",
-          "scope": "statewide",
-          "selection": "all",
-          "total_records": 566762,
-          "jurisdiction_count": 3,
-          "r2_key": "delaware/statewide/delaware_statewide_all_roads.csv",
-          "data_changed": true,
-          "workflow_run": "23779365783",
-          "pipeline": "delaware-batch-all-jurisdictions",
-          "normalized": true
-        },
-        {
           "timestamp": "2026-03-31T15:43:03.143050+00:00",
           "scope": "statewide",
           "selection": "all",
@@ -327,9 +303,33 @@
           "pipeline": "delaware-batch-all-jurisdictions",
           "normalized": true,
           "road_joined": true
+        },
+        {
+          "timestamp": "2026-04-12T03:41:31.568490+00:00",
+          "scope": "statewide",
+          "total_records": 569829,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/_statewide/statewide_all_roads.parquet.gz",
+          "data_changed": true,
+          "workflow_run": "24297911289",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true,
+          "road_joined": true
+        },
+        {
+          "timestamp": "2026-04-12T03:48:17.158319+00:00",
+          "scope": "statewide",
+          "total_records": 569829,
+          "jurisdiction_count": 3,
+          "r2_key": "delaware/_statewide/statewide_all_roads.parquet.gz",
+          "data_changed": true,
+          "workflow_run": "24298012884",
+          "pipeline": "delaware-batch-all-jurisdictions",
+          "normalized": true,
+          "road_joined": true
         }
       ],
-      "last_updated": "2026-04-11T08:26:51.091570+00:00"
+      "last_updated": "2026-04-12T03:48:17.158309+00:00"
     }
   }
 }
