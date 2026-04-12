@@ -357,7 +357,7 @@ jobs:
 
       # ── Stage 0.5: Download road inventory + enrich crashes ──
       - name: "Stage 0.5: Download road inventory from R2"
-        if: github.event.inputs.smart_fill != 'false'
+        if: github.event.inputs.smart_fill != 'false' && steps.mode_detect.outputs.skip != 'true'
         continue-on-error: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
@@ -488,7 +488,7 @@ jobs:
           fi
 
       - name: "Stage 0.5b: Upload enriched statewide to R2"
-        if: github.event.inputs.smart_fill != 'false' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.smart_fill != 'false' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
@@ -515,6 +515,7 @@ jobs:
 
       # ── Stages 1-3: Split ──
       - name: "Stages 1-3: Split by jurisdiction, road type & aggregate"
+        if: steps.mode_detect.outputs.skip != 'true'
         run: |
           STATE="${{ needs.prepare.outputs.state }}"
           DATA_DIR="${{ needs.prepare.outputs.data_dir }}"
@@ -562,7 +563,7 @@ jobs:
 
       # ── Pre-upload: Clean stale R2 split data ──
       - name: "Pre-upload: Clean stale R2 split data"
-        if: github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
@@ -593,7 +594,7 @@ jobs:
 
       # ── Stage 4: Upload to R2 ──
       - name: "Stage 4: Upload to R2"
-        if: github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
@@ -691,7 +692,7 @@ jobs:
 
       # ── Stage 4.5: Trigger Supabase Sync (webhook on VPS) ──
       - name: "Stage 4.5: Trigger Supabase Sync (webhook)"
-        if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.skip_supabase != 'true' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         run: |
           STATE_ABBR="de"
           echo "Triggering Supabase sync via webhook..."
@@ -722,7 +723,7 @@ jobs:
 
       # ── Stage 5: Predict (Forecasts) ──
       - name: "Stage 5: Generate forecasts"
-        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         timeout-minutes: 60
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -760,7 +761,7 @@ jobs:
 
       # ── Stage 5b-5d: Upload forecasts (unchanged) ──
       - name: "Stage 5b: Upload forecast JSONs to R2"
-        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
@@ -817,7 +818,7 @@ jobs:
           "
 
       - name: "Stage 5c: Aggregate forecasts (region + MPO)"
-        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         run: |
           STATE="${{ needs.prepare.outputs.state }}"
           SPLIT_DIR="data/$STATE"
@@ -828,7 +829,7 @@ jobs:
           }
 
       - name: "Stage 5d: Upload region/MPO forecast JSONs to R2"
-        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.skip_forecasts != 'true' && github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
@@ -849,7 +850,7 @@ jobs:
 
       # ── Stage 6: Commit ──
       - name: "Stage 6: Commit manifest and metadata"
-        if: github.event.inputs.dry_run != 'true'
+        if: github.event.inputs.dry_run != 'true' && steps.mode_detect.outputs.skip != 'true'
         run: |
           STATE="${{ needs.prepare.outputs.state }}"
           SCOPE="${{ needs.prepare.outputs.scope }}"
