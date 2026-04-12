@@ -36,6 +36,16 @@ Files changed: `supabase_sync.py`, `webhook/webhook.py`, `wiki/concepts/supabase
 
 ---
 
+## [2026-04-12] fix | Speed authority docstring + confidence scoring (StateDOT)
+
+Aligned `resolve_speed_limit()`'s local docstring with the module-level authority chart — it now declares `StateDOT > HPMS > Mapillary > OSM`, matching the resolution logic already in place at lines 85-93 and the module header at line 20. Added a StateDOT source check to `compute_confidence_scores()` so a crash whose only speed signal comes from `sdot_Max Speed Diff` now scores `conf_speed_limit = 50` instead of `0`. No resolution-order change and no schema change.
+
+- **road_data_authority.py**: Docstring for `resolve_speed_limit()` updated to list StateDOT as the top tier. Speed-limit confidence scoring in `compute_confidence_scores()` now counts `sdot_Max Speed Diff` as a valid independent source (with the same `5 ≤ spd ≤ 85` validation used by HPMS).
+
+Note: speed resolution still intentionally keeps StateDOT > HPMS (state-maintained posted speeds are closest to ground truth), which is the inverse of the FC/Ownership fix below that lets HPMS override StateDOT.
+
+---
+
 ## [2026-04-12] fix | State DOT authority + source tracking
 
 Fixed FC/Ownership/SYSTEM priority so HPMS wins over StateDOT (FHWA validates federally). Added missing `resolved_fc_source`, `resolved_ownership_source`, `resolved_facility_source` columns. Added StateDOT column to source contribution matrix. Added DOT counts to Lanes/Surface/FC print statements. Swapped pipeline order (HPMS before DOT). Freed state_dot/hpms memory after enrichment.
