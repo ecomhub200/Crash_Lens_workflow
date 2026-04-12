@@ -1,0 +1,726 @@
+# ==============================================================================
+# Delaware — Download + Normalize (State-Specific)
+# ==============================================================================
+# v2.8: Simplified — normalize only (Phases 1-7 + Tier 1 flags).
+#       Enrichment (road inventory spatial join) moved to pipeline YAML.
+#       This keeps state-specific code separate from universal enrichment.
+#
+# Flow: Download → Normalize (--skip-enrichment) → Upload _statewide/ → Trigger Pipeline
+#
+# The pipeline YAML (delaware-batch-pipeline.yml) handles:
+#   - crash_enricher.py (Tier 1 + road_inventory_enricher spatial join)
+#   - split.py (jurisdiction + road type splitter)
+#   - R2 upload of split files
+# ==============================================================================
+
+name: "Delaware: Batch All Jurisdictions"
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Processing scope (statewide = all counties, region/mpo = subset)'
+        required: true
+        type: choice
+        default: 'statewide'
+        options:
+          - statewide
+          - region
+          - mpo
+
+      selection:
+        description: 'Region or MPO ID (required for region/mpo scope, blank for statewide)'
+        required: false
+        default: ''
+        type: string
+
+      force_download:
+        description: 'Force re-download (skip cache)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_pipeline:
+        description: 'Skip batch pipeline (download + normalize + R2 upload only)'
+        required: false
+        type: boolean
+        default: false
+
+      skip_forecasts:
+        description: 'Skip forecast generation in batch pipeline'
+        required: false
+        type: boolean
+        default: false
+
+      incremental:
+        description: 'Incremental mode — skip batch pipeline if R2 data unchanged (checksum match)'
+        required: false
+        type: boolean
+        default: false
+
+      smart_fill:
+        description: 'Smart-fill: enrich crashes from road inventory (FC, Ownership, Speed, Lanes, AADT)'
+        required: false
+        type: boolean
+        default: true
+
+      dry_run:
+        description: 'Dry run (no uploads, no pipeline trigger)'
+        required: false
+        type: boolean
+        default: false
+
+      force_full:
+        description: 'Force full pipeline (skip incremental diff)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  NOTIFICATION_EMAIL: ecomhub200@gmail.com
+  STATE: delaware
+
+jobs:
+  # ============================================================
+  # JOB 1: Download + Normalize + Join + Upload
+  # ============================================================
+  download-and-normalize:
+    name: "Download & Normalize (Delaware / ${{ github.event.inputs.scope }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+
+    outputs:
+      state: delaware
+      scope: ${{ steps.resolve.outputs.scope }}
+      selection: ${{ steps.resolve.outputs.selection }}
+      display_name: Delaware
+      r2_prefix: delaware
+      jurisdiction_count: ${{ steps.resolve.outputs.jurisdiction_count }}
+      csv_path: ${{ steps.finalize.outputs.csv_path }}
+      total_records: ${{ steps.finalize.outputs.total_records }}
+      r2_data_key: ${{ steps.r2_upload.outputs.r2_data_key }}
+      data_changed: ${{ steps.r2_upload.outputs.data_changed }}
+      mode: ${{ steps.diff.outputs.mode }}
+      new_count: ${{ steps.diff.outputs.new_count }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # ── Step 1: Resolve from download registry ──
+      - name: Resolve from download registry
+        id: registry
+        run: |
+          STATE="delaware"
+          FORCE="${{ github.event.inputs.force_download }}"
+          REGISTRY="states/download-registry.json"
+
+          if [ ! -f "$REGISTRY" ]; then
+            echo "::error::Registry file not found: $REGISTRY"
+            exit 1
+          fi
+
+          python3 -c "
+          import json, sys
+
+          with open('$REGISTRY') as f:
+              reg = json.load(f)
+
+          state = '$STATE'
+          if state not in reg:
+              print(f'::error::State {state} not found in registry.', file=sys.stderr)
+              sys.exit(1)
+
+          e = reg[state]
+          dot_dir = e.get('dotDir', '')
+          script = e.get('script', '')
+          script_args = e.get('scriptArgs', f'--data-dir {dot_dir}')
+          default_j = e.get('defaultJurisdiction', 'statewide')
+          script_args = script_args.replace('{defaultJurisdiction}', default_j)
+          statewide_flags = e.get('statewideFlagArgs', '--gzip')
+          force_flag = ''
+          if '$FORCE' == 'true':
+              force_flag = e.get('forceFlag', '--force')
+
+          full_cmd = f'python {script} {script_args} {statewide_flags}'
+          if force_flag:
+              full_cmd += f' {force_flag}'
+
+          csv_pattern = e.get('statewideOutputPattern', f'{dot_dir}/{state}_statewide_all_roads.csv')
+          csv_pattern = csv_pattern.replace('{dotDir}', dot_dir).replace('{state}', state)
+          gz_pattern = e.get('statewideOutputGzPattern', f'{csv_pattern}.gz')
+          gz_pattern = gz_pattern.replace('{dotDir}', dot_dir).replace('{state}', state)
+
+          outputs = {
+              'display_name': e.get('displayName', 'Delaware'),
+              'dot_dir': dot_dir,
+              'script': script,
+              'r2_prefix': e.get('r2Prefix', state),
+              'tier': str(e.get('tier', 3)),
+              'requires_playwright': str(e.get('requiresPlaywright', False)).lower(),
+              'default_jurisdiction': default_j,
+              'default_region': e.get('defaultRegion', ''),
+              'default_mpo': e.get('defaultMpo', ''),
+              'download_cmd': full_cmd.strip(),
+              'csv_pattern': csv_pattern,
+              'gz_pattern': gz_pattern,
+              'needs_standardization': str(e.get('needsStandardization', True)).lower(),
+              'needs_merge': str(e.get('needsMerge', True)).lower(),
+          }
+
+          for k, v in outputs.items():
+              print(f'{k}={v}')
+          " >> $GITHUB_OUTPUT
+
+          echo "Registry resolved for Delaware"
+
+      # ── Step 2: Resolve scope from hierarchy.json ──
+      - name: Resolve scope
+        id: resolve
+        run: |
+          STATE="delaware"
+          SCOPE="${{ github.event.inputs.scope }}"
+          SELECTION="${{ github.event.inputs.selection }}"
+
+          DEFAULT_R="${{ steps.registry.outputs.default_region }}"
+          DEFAULT_M="${{ steps.registry.outputs.default_mpo }}"
+
+          if [ "$SCOPE" = "statewide" ]; then
+            SELECTION=""
+          elif [ -z "$SELECTION" ]; then
+            if [ "$SCOPE" = "region" ] && [ -n "$DEFAULT_R" ]; then
+              SELECTION="$DEFAULT_R"
+            elif [ "$SCOPE" = "mpo" ] && [ -n "$DEFAULT_M" ]; then
+              SELECTION="$DEFAULT_M"
+            else
+              echo "::error::Selection required for scope=$SCOPE."
+              exit 1
+            fi
+          fi
+
+          echo "scope=$SCOPE" >> $GITHUB_OUTPUT
+          echo "selection=$SELECTION" >> $GITHUB_OUTPUT
+
+          HIERARCHY="states/delaware/hierarchy.json"
+          if [ ! -f "$HIERARCHY" ]; then
+            echo "::error::No hierarchy.json for Delaware at $HIERARCHY"
+            exit 1
+          fi
+
+          RESOLVED=$(python scripts/resolve_scope.py \
+            --state "$STATE" --scope "$SCOPE" --selection "$SELECTION" --json)
+
+          JCOUNT=$(echo "$RESOLVED" | python3 -c "import json,sys; print(json.load(sys.stdin)['jurisdiction_count'])")
+          echo "jurisdiction_count=$JCOUNT" >> $GITHUB_OUTPUT
+
+          echo "Scope: $SCOPE ${SELECTION:+($SELECTION)} — $JCOUNT jurisdictions"
+
+      # ── Step 3: Install dependencies ──
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas requests openpyxl
+          fi
+          pip install awscli
+          # Required for spatial join + parquet I/O
+          pip install pyarrow scipy duckdb geopandas
+
+          if [ "${{ steps.registry.outputs.requires_playwright }}" = "true" ]; then
+            pip install playwright
+            playwright install chromium
+          fi
+
+      # ── Step 4: Download statewide data ──
+      - name: "Download statewide data"
+        id: download
+        timeout-minutes: 60
+        run: |
+          STATE="delaware"
+          DOT_DIR="${{ steps.registry.outputs.dot_dir }}"
+          DOWNLOAD_CMD="${{ steps.registry.outputs.download_cmd }}"
+          CSV_PATTERN="${{ steps.registry.outputs.csv_pattern }}"
+          GZ_PATTERN="${{ steps.registry.outputs.gz_pattern }}"
+
+          echo "=========================================="
+          echo "Downloading statewide data for Delaware"
+          echo "  Command: $DOWNLOAD_CMD"
+          echo "=========================================="
+
+          mkdir -p "$DOT_DIR"
+          eval $DOWNLOAD_CMD 2>&1 || {
+            echo "::warning::Download script returned non-zero, checking for output..."
+          }
+
+          STATEWIDE=""
+          if [ -f "$CSV_PATTERN" ]; then
+            STATEWIDE="$CSV_PATTERN"
+          elif [ -f "$GZ_PATTERN" ]; then
+            gunzip -k "$GZ_PATTERN"
+            STATEWIDE="${GZ_PATTERN%.gz}"
+          else
+            for f in "$DOT_DIR"/${STATE}_statewide*.csv "$DOT_DIR"/*statewide*.csv; do
+              if [ -f "$f" ]; then STATEWIDE="$f"; break; fi
+            done
+            if [ -z "$STATEWIDE" ]; then
+              GZ=$(find "$DOT_DIR" -maxdepth 1 \( -name "*statewide*.csv.gz" -o -name "*.csv.gz" \) -type f 2>/dev/null | head -1)
+              if [ -n "$GZ" ]; then
+                gunzip -k "$GZ"
+                STATEWIDE="${GZ%.gz}"
+              fi
+            fi
+          fi
+
+          if [ -z "$STATEWIDE" ] || [ ! -f "$STATEWIDE" ]; then
+            echo "::error::Statewide CSV not found"
+            exit 1
+          fi
+
+          TOTAL=$(wc -l < "$STATEWIDE" | tr -d ' ')
+          SIZE=$(ls -lh "$STATEWIDE" | awk '{print $5}')
+          echo "Found: $STATEWIDE ($((TOTAL - 1)) records, $SIZE)"
+
+          MIN_RECORDS=1000
+          if [ "$((TOTAL - 1))" -lt "$MIN_RECORDS" ]; then
+            echo "::error::Too few records: $((TOTAL - 1)) (min: $MIN_RECORDS)"
+            exit 1
+          fi
+          echo "statewide_path=$STATEWIDE" >> $GITHUB_OUTPUT
+          echo "data_dir=$DOT_DIR" >> $GITHUB_OUTPUT
+
+      # ── Restore boundary polygons from R2 (for Phase 3.5 GPS validation) ──
+      - name: Restore boundary polygons from R2
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          BUCKET="crash-lens-data"
+
+          mkdir -p cache/boundaries
+          RESTORED=0
+          for FILE in us_county_boundaries.parquet.gz us_place_boundaries.parquet.gz us_mpo_boundaries.parquet.gz us_urban_area_boundaries.parquet.gz; do
+            if aws s3 cp "s3://$BUCKET/_national/boundaries/$FILE" "cache/boundaries/$FILE" \
+                --endpoint-url "$R2_ENDPOINT" --only-show-errors 2>/dev/null; then
+              RESTORED=$((RESTORED + 1))
+            fi
+          done
+          echo "Restored $RESTORED/4 boundary files"
+
+      # ══════════════════════════════════════════════════════════════
+      # NORMALIZE: Transform raw Socrata data → 69-column standard
+      # ══════════════════════════════════════════════════════════════
+      - name: "🔄 Normalize Delaware data"
+        id: normalize
+        run: |
+          RAW_CSV="${{ steps.download.outputs.statewide_path }}"
+          DATA_DIR="${{ steps.download.outputs.data_dir }}"
+          NORMALIZED_PQ="$DATA_DIR/delaware_statewide_normalized.parquet.gz"
+
+          echo "=========================================="
+          echo "  DELAWARE NORMALIZATION (Phases 1-7)"
+          echo "  Input:  $RAW_CSV"
+          echo "  Output: $NORMALIZED_PQ"
+          echo "=========================================="
+
+          if [ -f "states/delaware/de_normalize.py" ]; then
+            python states/delaware/de_normalize.py --input "$RAW_CSV" --output "$NORMALIZED_PQ" --skip-enrichment
+          else
+            echo "::error::states/delaware/de_normalize.py not found"
+            exit 1
+          fi
+
+          if [ ! -f "$NORMALIZED_PQ" ]; then
+            echo "::error::Normalization failed — output file not created"
+            exit 1
+          fi
+
+          # Validate parquet output
+          python3 -c "
+          import pandas as pd
+          df = pd.read_parquet('$NORMALIZED_PQ')
+          print(f'Normalized: $NORMALIZED_PQ ({len(df):,} records, {len(df.columns)} cols)')
+          for col in ['Document Nbr','Crash Severity','Physical Juris Name','Crash Date','Crash Military Time']:
+              assert col in df.columns, f'Missing: {col}'
+          print('All critical columns verified')
+          "
+
+          echo "All critical columns verified ✓"
+          echo "normalized_path=$NORMALIZED_PQ" >> $GITHUB_OUTPUT
+
+      # ── Finalize: verify normalized output ──
+      - name: "Finalize"
+        id: finalize
+        run: |
+          PQ_PATH="${{ steps.normalize.outputs.normalized_path }}"
+
+          if [ -z "$PQ_PATH" ] || [ ! -f "$PQ_PATH" ]; then
+            echo "::error::No parquet available"
+            exit 1
+          fi
+
+          SIZE=$(ls -lh "$PQ_PATH" | awk '{print $5}')
+          TOTAL=$(python3 -c "import pandas as pd; print(len(pd.read_parquet('$PQ_PATH')))")
+          echo "Final: $PQ_PATH ($TOTAL records, $SIZE)"
+          echo "pq_path=$PQ_PATH" >> $GITHUB_OUTPUT
+          echo "total_records=$TOTAL" >> $GITHUB_OUTPUT
+
+          MD5=$(md5sum "$PQ_PATH" | awk '{print $1}')
+          echo "local_md5=$MD5" >> $GITHUB_OUTPUT
+          echo "Checksum: $MD5"
+
+      # ══════════════════════════════════════════════════════════════
+      # INCREMENTAL DIFF: Compare fresh vs existing R2 data
+      # ══════════════════════════════════════════════════════════════
+      - name: "Step 7.7: Incremental diff"
+        id: diff
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+        run: |
+          STATE="delaware"
+          NORMALIZED="${{ steps.finalize.outputs.pq_path }}"
+          FORCE="${{ github.event.inputs.force_full }}"
+
+          if [ -z "$NORMALIZED" ] || [ ! -f "$NORMALIZED" ]; then
+            echo "No normalized file — defaulting to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Resolve state abbreviation from hierarchy.json
+          ABBR=$(python3 -c "
+          import json
+          try:
+              with open('states/$STATE/hierarchy.json') as f:
+                  h = json.load(f)
+              print((h.get('state',{}).get('abbreviation') or h.get('state',{}).get('abbr') or '').lower())
+          except: print('')
+          ")
+
+          if [ -z "$ABBR" ]; then
+            echo "Could not resolve abbreviation — defaulting to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          DIFF_ARGS="--state $ABBR --fresh $NORMALIZED --output diff_result"
+          if [ "$FORCE" = "true" ]; then
+            DIFF_ARGS="$DIFF_ARGS --force-full"
+          fi
+
+          python incremental_diff.py $DIFF_ARGS 2>&1 || {
+            echo "::warning::Diff failed — falling back to full mode"
+            echo "mode=full" >> $GITHUB_OUTPUT
+            echo "new_count=0" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          MODE=$(python3 -c "import json; print(json.load(open('diff_result/diff_report.json'))['mode'])")
+          NEW_COUNT=$(python3 -c "import json; print(json.load(open('diff_result/diff_report.json'))['new_count'])")
+          echo "mode=$MODE" >> $GITHUB_OUTPUT
+          echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
+          echo "Diff result: mode=$MODE, new_count=$NEW_COUNT"
+
+      # ══════════════════════════════════════════════════════════════
+      # UPLOAD to R2: _statewide/ folder (NOT statewide/)
+      # Format: parquet.gz (compressed, faster frontend loading)
+      # ══════════════════════════════════════════════════════════════
+      - name: "Upload to R2 (_statewide/)"
+        id: r2_upload
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          STATE="delaware"
+          R2_PREFIX="delaware"
+          PQ_PATH="${{ steps.finalize.outputs.pq_path }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          LOCAL_MD5="${{ steps.finalize.outputs.local_md5 }}"
+          INCREMENTAL="${{ github.event.inputs.incremental }}"
+          R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+          R2_BUCKET="crash-lens-data"
+
+          # ═══ PATH FIX v2.7: _statewide/ not statewide/ ═══
+          PQ_KEY="${R2_PREFIX}/_statewide/statewide_all_roads.parquet.gz"
+
+          # Legacy keys to clean up
+          OLD_CSV_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
+          OLD_GZ_KEY="${R2_PREFIX}/_state/statewide_all_roads.csv.gz"
+          OLD_PQ_KEY="${R2_PREFIX}/_state/statewide_all_roads.parquet.gz"
+
+          echo "=========================================="
+          echo "Uploading to R2"
+          echo "  Local:  $PQ_PATH"
+          echo "  R2 key: s3://$R2_BUCKET/$PQ_KEY"
+          echo "  Records: $TOTAL"
+          echo "=========================================="
+
+          if [ -z "$PQ_PATH" ] || [ ! -f "$PQ_PATH" ]; then
+            echo "::error::No parquet to upload"
+            exit 1
+          fi
+
+          DATA_CHANGED="true"
+
+          if [ "$INCREMENTAL" = "true" ]; then
+            echo "Incremental mode — checking R2 metadata..."
+            R2_META_MD5=$(aws s3api head-object \
+              --bucket "$R2_BUCKET" --key "$PQ_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --query 'Metadata.raw_md5' --output text 2>/dev/null || echo "none")
+            if [ "$R2_META_MD5" = "$LOCAL_MD5" ]; then
+              echo "Data unchanged — skipping upload"
+              DATA_CHANGED="false"
+              echo "r2_data_key=$PQ_KEY" >> $GITHUB_OUTPUT
+              echo "data_changed=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          fi
+
+          PQ_SIZE=$(stat -c%s "$PQ_PATH" 2>/dev/null || stat -f%z "$PQ_PATH")
+          echo "  Parquet size: ${PQ_SIZE} bytes ($(( PQ_SIZE / 1048576 ))MB)"
+
+          # Upload parquet.gz directly (no CSV→parquet conversion needed)
+          for i in 1 2 3 4; do
+            if aws s3 cp "$PQ_PATH" "s3://$R2_BUCKET/$PQ_KEY" \
+              --endpoint-url "$R2_ENDPOINT" \
+              --content-type "application/octet-stream" \
+              --metadata "raw_md5=$LOCAL_MD5" \
+              --only-show-errors; then
+              echo "Upload succeeded → $PQ_KEY"
+              break
+            fi
+            DELAY=$((2 ** i))
+            echo "Upload failed (attempt $i/4), retrying in ${DELAY}s..."
+            sleep $DELAY
+          done
+
+          # Verify upload
+          SIZE=$(aws s3api head-object \
+            --bucket "$R2_BUCKET" --key "$PQ_KEY" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --query 'ContentLength' --output text 2>/dev/null || echo "0")
+
+          if [ "$SIZE" = "0" ]; then
+            echo "::error::R2 upload verification failed"
+            exit 1
+          fi
+
+          SIZE_MB=$((SIZE / 1048576))
+          echo "Verified: $PQ_KEY (${SIZE_MB}MB on R2)"
+
+          # Clean up legacy keys
+          for OLD_KEY in "$OLD_CSV_KEY" "$OLD_GZ_KEY" "$OLD_PQ_KEY"; do
+            echo "Removing old key: $OLD_KEY"
+            aws s3 rm "s3://$R2_BUCKET/$OLD_KEY" \
+              --endpoint-url "$R2_ENDPOINT" 2>/dev/null || true
+          done
+
+          echo "r2_data_key=$PQ_KEY" >> $GITHUB_OUTPUT
+          echo "data_changed=$DATA_CHANGED" >> $GITHUB_OUTPUT
+
+          # Upload new_rows for incremental enrichment
+          DIFF_MODE="${{ steps.diff.outputs.mode || 'full' }}"
+          if [ "$DIFF_MODE" = "incremental" ] && [ -f "diff_result/new_rows.parquet.gz" ]; then
+            aws s3 cp "diff_result/new_rows.parquet.gz" \
+              "s3://$R2_BUCKET/$R2_PREFIX/_statewide/new_rows.parquet.gz" \
+              --endpoint-url "$R2_ENDPOINT" --only-show-errors
+            echo "Uploaded new_rows.parquet.gz for incremental enrichment"
+          fi
+
+      # ── Progress manifest ──
+      - name: "Update progress manifest"
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          STATE="delaware"
+          SCOPE="${{ steps.resolve.outputs.scope }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          R2_KEY="${{ steps.r2_upload.outputs.r2_data_key }}"
+          DATA_CHANGED="${{ steps.r2_upload.outputs.data_changed }}"
+          JCOUNT="${{ steps.resolve.outputs.jurisdiction_count }}"
+
+          python3 -c "
+          import json, os
+          from datetime import datetime, timezone
+
+          manifest_path = 'data/batch-progress-manifest.json'
+          if os.path.exists(manifest_path):
+              with open(manifest_path) as f:
+                  manifest = json.load(f)
+          else:
+              manifest = {'_comment': 'Batch processing progress tracker', 'states': {}}
+
+          state = '$STATE'
+          if state not in manifest['states']:
+              manifest['states'][state] = {'runs': [], 'last_updated': None}
+
+          manifest['states'][state]['last_updated'] = datetime.now(timezone.utc).isoformat()
+          manifest['states'][state]['runs'].append({
+              'timestamp': datetime.now(timezone.utc).isoformat(),
+              'scope': '$SCOPE',
+              'total_records': int('$TOTAL' or 0),
+              'jurisdiction_count': int('$JCOUNT' or 0),
+              'r2_key': '$R2_KEY',
+              'data_changed': '$DATA_CHANGED' == 'true',
+              'workflow_run': '${{ github.run_id }}',
+              'pipeline': 'delaware-batch-all-jurisdictions',
+              'normalized': True,
+              'road_joined': True
+          })
+
+          manifest['states'][state]['runs'] = manifest['states'][state]['runs'][-20:]
+
+          os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
+          with open(manifest_path, 'w') as f:
+              json.dump(manifest, f, indent=2)
+          "
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/batch-progress-manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "batch: update progress manifest for delaware ($SCOPE) [road-joined]"
+            git push origin main || {
+              git fetch origin main
+              git rebase origin/main
+              git push origin main
+            }
+          fi
+
+      # ── Job summary ──
+      - name: Job summary
+        if: always()
+        run: |
+          SCOPE="${{ steps.resolve.outputs.scope }}"
+          SELECTION="${{ steps.resolve.outputs.selection }}"
+          JCOUNT="${{ steps.resolve.outputs.jurisdiction_count }}"
+          TOTAL="${{ steps.finalize.outputs.total_records }}"
+          R2_KEY="${{ steps.r2_upload.outputs.r2_data_key }}"
+          DATA_CHANGED="${{ steps.r2_upload.outputs.data_changed }}"
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Delaware — Batch Download & Normalize ($SCOPE)
+
+          | Metric | Value |
+          |--------|-------|
+          | State | Delaware |
+          | Scope | ${SCOPE} ${SELECTION:+($SELECTION)} |
+          | Jurisdictions | ${JCOUNT:-N/A} |
+          | Records | ${TOTAL:-N/A} |
+          | R2 Key | ${R2_KEY:-'(dry run)'} |
+          | Data Changed | ${DATA_CHANGED:-N/A} |
+          | Normalized | ✅ Yes (de_normalize.py) |
+          | Enrichment | Pipeline YAML (crash_enricher.py) |
+          | Upload Path | _statewide/ (parquet.gz) |
+          | Dry Run | ${{ github.event.inputs.dry_run }} |
+
+          **Pipeline:** Download → **Normalize** → **Normalize** → Upload _statewide/ → Trigger Pipeline
+          EOF
+
+  # ============================================================
+  # JOB 2: Trigger Delaware batch pipeline
+  # ============================================================
+  trigger-pipeline:
+    name: "Trigger Delaware batch pipeline (${{ github.event.inputs.scope }})"
+    needs: download-and-normalize
+    if: >-
+      github.event.inputs.skip_pipeline != 'true' &&
+      github.event.inputs.dry_run != 'true' &&
+      needs.download-and-normalize.outputs.data_changed != 'false'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const state = 'delaware';
+            const scope = '${{ needs.download-and-normalize.outputs.scope }}';
+            const selection = '${{ needs.download-and-normalize.outputs.selection }}';
+            const r2DataKey = '${{ needs.download-and-normalize.outputs.r2_data_key }}';
+            const skipForecasts = '${{ github.event.inputs.skip_forecasts }}';
+            const smartFill = '${{ github.event.inputs.smart_fill }}';
+
+            console.log('Triggering delaware-batch-pipeline.yml');
+            console.log(`  State: ${state}, Scope: ${scope}`);
+            console.log(`  R2 key: ${r2DataKey}`);
+            console.log(`  Smart-fill: ${smartFill}`);
+
+<<<<<<< HEAD
+            const mode = "${{ needs.download-and-normalize.outputs.mode || 'full' }}";
+            const newCount = "${{ needs.download-and-normalize.outputs.new_count || '0' }}";
+=======
+            const mode = '${{ needs.download-and-normalize.outputs.mode || "full" }}';
+            const newCount = '${{ needs.download-and-normalize.outputs.new_count || "0" }}';
+>>>>>>> 844f51cefb2b7917a34fe8500ff99b667192cfe2
+
+            console.log(`  Mode: ${mode}, New count: ${newCount}`);
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'delaware-batch-pipeline.yml',
+              ref: 'main',
+              inputs: {
+                state: state,
+                scope: scope,
+                selection: selection || '',
+                r2_data_key: r2DataKey,
+                skip_forecasts: skipForecasts || 'false',
+                smart_fill: smartFill || 'true',
+                dry_run: 'false',
+                mode: mode,
+                new_count: newCount
+              }
+            });
+
+            console.log('Pipeline dispatched successfully');
+
+  # ============================================================
+  # JOB 3: Notify if skipped (data unchanged)
+  # ============================================================
+  notify-skipped:
+    name: "Notify — data unchanged"
+    needs: download-and-normalize
+    if: >-
+      github.event.inputs.skip_pipeline != 'true' &&
+      github.event.inputs.dry_run != 'true' &&
+      needs.download-and-normalize.outputs.data_changed == 'false'
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Summary
+        run: |
+          TOTAL="${{ needs.download-and-normalize.outputs.total_records }}"
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Pipeline Skipped — Data Unchanged
+
+          Statewide data for **Delaware** has not changed (checksum match).
+          Run again with **Incremental = false** to force reprocessing.
+
+          | Metric | Value |
+          |--------|-------|
+          | State | Delaware |
+          | Records | ${TOTAL} |
+          | Action | Skipped (incremental) |
+          EOF
