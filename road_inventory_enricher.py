@@ -270,14 +270,30 @@ class RoadInventorySession:
 
         # ── Intersection Type from road inventory node proximity ──
         # (replaces GPS clustering — uses actual OSM intersection nodes)
+        #
+        # OSM intersection_degree counts DIRECTED edges from a MultiDiGraph.
+        # Each two-way road contributes 2 edges per node, so a 3-road
+        # T-intersection has degree 6, not 3. The MIRE-correct metric is
+        # streets_per_node (undirected physical street count): spn>=3 is a
+        # real intersection. When streets_per_node is present on the road
+        # inventory slice (Phase 2), prefer it; otherwise fall back to the
+        # directed-degree mapping (deg>=6 ≈ T-intersection).
         if "intersection_degree" in self.ri.columns:
+            ri_slice = self.ri.iloc[matched_ri]
             seg_int_deg = pd.to_numeric(
-                self.ri.iloc[matched_ri]["intersection_degree"], errors="coerce"
+                ri_slice["intersection_degree"], errors="coerce"
             ).fillna(0).astype(int).values
-            seg_u_lat = self.ri.iloc[matched_ri]["u_lat"].values.astype(float)
-            seg_u_lon = self.ri.iloc[matched_ri]["u_lon"].values.astype(float)
-            seg_v_lat = self.ri.iloc[matched_ri]["v_lat"].values.astype(float)
-            seg_v_lon = self.ri.iloc[matched_ri]["v_lon"].values.astype(float)
+            has_spn = "streets_per_node" in ri_slice.columns
+            if has_spn:
+                seg_spn = pd.to_numeric(
+                    ri_slice["streets_per_node"], errors="coerce"
+                ).fillna(0).astype(int).values
+            else:
+                seg_spn = None
+            seg_u_lat = ri_slice["u_lat"].values.astype(float)
+            seg_u_lon = ri_slice["u_lon"].values.astype(float)
+            seg_v_lat = ri_slice["v_lat"].values.astype(float)
+            seg_v_lon = ri_slice["v_lon"].values.astype(float)
 
             c_lat = lats[matched_ci]
             c_lon = lons[matched_ci]
@@ -294,8 +310,13 @@ class RoadInventorySession:
                      ((c_lon - seg_v_lon) * 111000 * lon_scale)**2
             min_dist_sq = np.minimum(d_u_sq, d_v_sq)
 
-            # At intersection = high-degree node (>= 3) within 30m
-            at_intersection = (seg_int_deg >= 3) & (min_dist_sq <= 900)
+            # At intersection = real intersection node within 30m.
+            # streets_per_node >= 3 (preferred) or directed degree >= 6 (fallback).
+            if has_spn:
+                node_is_real = seg_spn >= 3
+            else:
+                node_is_real = seg_int_deg >= 6
+            at_intersection = node_is_real & (min_dist_sq <= 900)
 
             # Only fill empty Intersection Type
             if "Intersection Type" not in df.columns:
@@ -304,12 +325,21 @@ class RoadInventorySession:
                 .fillna("").astype(str).str.strip()
             needs_fill = crash_it.isin(["", "nan", "None", "Not Applicable"]).values
 
-            # Map degree -> Intersection Type string
-            int_type_arr = np.where(
-                seg_int_deg == 3, "3. Three Approaches",
-                np.where(seg_int_deg == 4, "4. Four Approaches",
-                np.where(seg_int_deg >= 5, "5. Five-Point, or More",
-                         "2. Two Approaches")))
+            # Map degree/spn → Intersection Type string. Prefer spn (direct
+            # physical street count) when available; otherwise use directed
+            # degree with ~2:1 ratio for two-way streets.
+            if has_spn:
+                int_type_arr = np.where(
+                    seg_spn >= 5, "5. Five-Point, or More",
+                    np.where(seg_spn >= 4, "4. Four Approaches",
+                    np.where(seg_spn >= 3, "3. Three Approaches",
+                             "1. Not at Intersection")))
+            else:
+                int_type_arr = np.where(
+                    seg_int_deg >= 10, "5. Five-Point, or More",
+                    np.where(seg_int_deg >= 8, "4. Four Approaches",
+                    np.where(seg_int_deg >= 6, "3. Three Approaches",
+                             "1. Not at Intersection")))
 
             fill_as_int = needs_fill & at_intersection
             fill_as_not = needs_fill & ~at_intersection

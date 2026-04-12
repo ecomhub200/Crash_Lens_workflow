@@ -79,33 +79,36 @@ VALID_OWNERSHIP_VALUES = {
 }
 
 
-# --- FIX_INT: OSM degree → CrashLens Intersection Type ---
-# OSM degree = directed edges. 2 edges per road approach.
-# degree 0  = HPMS mid-segment (not at intersection)
-# degree 2  = dead end
-# degree 3  = one-way road meets two-way (effectively 2 approaches)
-# degree 4  = through road (2 approaches) — NOT 4-way unless confirmed
-# degree 5  = one-way road at 3-approach node
-# degree 6  = 3 approaches (T-intersection)
-# degree 7  = 3-4 approaches (mixed one-way)
-# degree 8  = 4 approaches (four-way)
-# degree 9-10 = 4-5 approaches
-# degree 12+ = 5+ approaches
+# --- FIX_INT: OSM directed-graph degree → CrashLens Intersection Type ---
+# OSM intersection_degree comes from a MultiDiGraph: each two-way road
+# contributes 2 directed edges per node, so a 3-road T-intersection has
+# degree 6 (not 3). One-way roads contribute 1. The mapping below follows
+# the FHWA MIRE Element 121 definition (physical approaches) applied to
+# directed degree with the standard ~2:1 two-way ratio.
+#
+# degree 0-5  = 0-2 physical approaches → NOT at intersection (dead end,
+#               continuation, bend, or one-way merge — not a real intersection)
+# degree 6-7  = 3 approaches (T-intersection; 7 = T with one one-way)
+# degree 8-9  = 4 approaches (4-way crossroads; 9 = 4-way with one one-way)
+# degree 10+  = 5+ approaches (complex intersection, 5 physical × 2 = 10)
+#
+# Preferred metric: streets_per_node (undirected physical street count from
+# osmnx). When present, fix_intersection_type() uses it directly without the
+# /2 ratio. See Phase 2 in generate_osm_data.py.
 DEGREE_TO_INTERSECTION = {
     0:  "1. Not at Intersection",
     1:  "1. Not at Intersection",
     2:  "1. Not at Intersection",
-    3:  "2. Two Approaches",
-    4:  "2. Two Approaches",
-    5:  "3. T-Intersection",
-    6:  "3. T-Intersection",
-    7:  "3. T-Intersection",
+    3:  "1. Not at Intersection",
+    4:  "1. Not at Intersection",
+    5:  "1. Not at Intersection",
+    6:  "3. Three Approaches",
+    7:  "3. Three Approaches",
     8:  "4. Four Approaches",
     9:  "4. Four Approaches",
-    10: "4. Four Approaches",
-    # 11+ → Five-Point
+    # 10+ → Five-Point, or More
 }
-DEGREE_FIVE_PLUS_THRESHOLD = 11
+DEGREE_FIVE_PLUS_THRESHOLD = 10
 
 
 # --- FIX_SCH: School Zone value map ---
@@ -386,10 +389,13 @@ def fix_intersection_type(ri, report):
     FIX 4 — Intersection Type: Correct degree→approach mapping.
 
     OSM intersection_degree counts DIRECTED edges. A 3-road T-intersection
-    has degree 6 (each road = 2 directed edges). Current code treated degree
-    literally: degree 6 → "Five-Point or More" which is wrong.
+    has degree 6 (each two-way road = 2 directed edges). Previous versions
+    treated degree literally: degree 3 → "Three Approaches" which is wrong.
 
-    Correct mapping: degree / 2 ≈ number of approaches.
+    Preferred source: streets_per_node (undirected physical street count
+    from osmnx). Direct 1:1 mapping — spn==3 is a real T-intersection.
+    Fallback source: directed degree, with the ~2:1 two-way ratio encoded
+    in DEGREE_TO_INTERSECTION.
 
     State-agnostic: OSM node degree semantics are universal.
     """
@@ -400,19 +406,28 @@ def fix_intersection_type(ri, report):
 
     degree = _n(ri, "intersection_degree").astype(int)
     is_int = _s(ri, "is_intersection") == "Yes"
+    has_spn = "streets_per_node" in ri.columns
+    spn = _n(ri, "streets_per_node").astype(int) if has_spn else None
 
     old_int = _s(ri, "Intersection Type")
 
-    # Build new mapping
+    # Build new mapping, default = not at intersection
     new_int = pd.Series("1. Not at Intersection", index=ri.index, dtype=str)
 
-    for deg_val, int_type in DEGREE_TO_INTERSECTION.items():
-        mask = is_int & (degree == deg_val)
-        new_int[mask] = int_type
-
-    # Degree >= threshold → Five-Point
-    five_plus = is_int & (degree >= DEGREE_FIVE_PLUS_THRESHOLD)
-    new_int[five_plus] = "5. Five-Point or More"
+    if has_spn:
+        # Preferred: undirected streets_per_node (MIRE physical approaches)
+        new_int[is_int & (spn >= 5)] = "5. Five-Point, or More"
+        new_int[is_int & (spn == 4)] = "4. Four Approaches"
+        new_int[is_int & (spn == 3)] = "3. Three Approaches"
+        # spn <= 2 stays "1. Not at Intersection"
+    else:
+        # Fallback: directed degree with ~2:1 two-way ratio
+        for deg_val, int_type in DEGREE_TO_INTERSECTION.items():
+            mask = is_int & (degree == deg_val)
+            new_int[mask] = int_type
+        # Degree >= threshold → Five-Point, or More
+        five_plus = is_int & (degree >= DEGREE_FIVE_PLUS_THRESHOLD)
+        new_int[five_plus] = "5. Five-Point, or More"
 
     # Not at intersection always wins
     new_int[~is_int] = "1. Not at Intersection"

@@ -1322,15 +1322,26 @@ def merge_frontend_columns(df):
         if cnt > 0:
             print(f"      Traffic Control:    {cnt:>7,} {val}")
 
-    # ── Intersection Type (with degree from OSM) ──
+    # ── Intersection Type (with degree/streets_per_node from OSM) ──
+    # OSM intersection_degree comes from a directed MultiDiGraph — a 3-road
+    # T-intersection has degree 6, not 3. Prefer streets_per_node (undirected
+    # physical street count, Phase 2) when present; otherwise use the
+    # directed-degree fallback with the ~2:1 two-way ratio. Note this write
+    # is later overridden by road_inventory_postprocess.fix_intersection_type,
+    # but we keep it correct for defense in depth.
     df["Intersection Type"] = "1. Not at Intersection"
     if "is_intersection" in df.columns and "intersection_degree" in df.columns:
         is_int = df["is_intersection"].values == "Yes"
-        deg = pd.to_numeric(df["intersection_degree"], errors="coerce").fillna(0).astype(int).values
-        df.loc[is_int & (deg == 3), "Intersection Type"] = "3. T-Intersection"
-        df.loc[is_int & (deg == 4), "Intersection Type"] = "4. Four-Way Intersection"
-        df.loc[is_int & (deg >= 5), "Intersection Type"] = "5. Five-Point or More"
-        df.loc[is_int & (deg < 3) & (deg > 0), "Intersection Type"] = "2. Y-Intersection"
+        if "streets_per_node" in df.columns:
+            spn = pd.to_numeric(df["streets_per_node"], errors="coerce").fillna(0).astype(int).values
+            df.loc[is_int & (spn >= 5), "Intersection Type"] = "5. Five-Point, or More"
+            df.loc[is_int & (spn == 4), "Intersection Type"] = "4. Four Approaches"
+            df.loc[is_int & (spn == 3), "Intersection Type"] = "3. Three Approaches"
+        else:
+            deg = pd.to_numeric(df["intersection_degree"], errors="coerce").fillna(0).astype(int).values
+            df.loc[is_int & (deg >= 10), "Intersection Type"] = "5. Five-Point, or More"
+            df.loc[is_int & (deg >= 8) & (deg < 10), "Intersection Type"] = "4. Four Approaches"
+            df.loc[is_int & (deg >= 6) & (deg < 8), "Intersection Type"] = "3. Three Approaches"
 
     # ── School Zone ──
     if "resolved_school_zone" in df.columns:

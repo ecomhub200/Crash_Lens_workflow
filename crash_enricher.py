@@ -685,17 +685,35 @@ def _load_or_download_road_network(state_name, state_abbr, cache_dir="cache"):
 
         road_df = pd.DataFrame(road_data)
 
-        # Also extract intersection nodes (degree ≥ 3)
+        # Also extract intersection nodes. Keep both directed degree (legacy)
+        # and undirected streets_per_node (MIRE-correct physical approach
+        # count). Filter is permissive (deg>=3 or spn>=3) for backward compat.
         node_degrees = dict(G.degree())
+        try:
+            spn_dict = ox.stats.streets_per_node(G)
+        except Exception:
+            spn_dict = {}
+            for _n_id in G.nodes():
+                nbrs = set()
+                for _u, _v, _k in G.out_edges(_n_id, keys=True):
+                    if _v != _n_id:
+                        nbrs.add(_v)
+                for _u, _v, _k in G.in_edges(_n_id, keys=True):
+                    if _u != _n_id:
+                        nbrs.add(_u)
+                spn_dict[_n_id] = len(nbrs)
+
         intersections = []
         for node_id, degree in node_degrees.items():
-            if degree >= 3:
+            spn = int(spn_dict.get(node_id, 0) or 0)
+            if degree >= 3 or spn >= 3:
                 n = nodes_gdf.loc[node_id]
                 intersections.append({
                     "node_id": node_id,
                     "lat": n.y,
                     "lon": n.x,
                     "degree": degree,
+                    "streets_per_node": spn,
                 })
         intersection_df = pd.DataFrame(intersections) if intersections else pd.DataFrame()
 
@@ -832,21 +850,35 @@ def _match_crashes_to_intersections(crash_lats, crash_lons, state_abbr, cache_di
         del int_points, crash_points
 
         matches = {}
+        has_spn = "streets_per_node" in int_df.columns
         for i, (dist, idx) in enumerate(zip(distances, indices)):
             node = int_df.iloc[idx]
             degree = int(node["degree"])
+            spn = int(node["streets_per_node"]) if has_spn else None
 
-            # Derive Intersection Type from node degree
+            # Derive Intersection Type from streets_per_node (preferred) or
+            # directed graph degree (fallback). A 3-road T-intersection has
+            # directed degree 6 (each two-way road = 2 edges), so thresholds
+            # are doubled relative to physical approach counts.
             if dist > 50:  # More than 50m from intersection
                 int_type = "1. Not at Intersection"
-            elif degree == 3:
-                int_type = "3. Three Approaches"
-            elif degree == 4:
-                int_type = "4. Four Approaches"
-            elif degree >= 5:
+            elif spn is not None:
+                if spn >= 5:
+                    int_type = "5. Five-Point, or More"
+                elif spn == 4:
+                    int_type = "4. Four Approaches"
+                elif spn == 3:
+                    int_type = "3. Three Approaches"
+                else:
+                    int_type = "1. Not at Intersection"
+            elif degree >= 10:
                 int_type = "5. Five-Point, or More"
+            elif degree >= 8:
+                int_type = "4. Four Approaches"
+            elif degree >= 6:
+                int_type = "3. Three Approaches"
             else:
-                int_type = "2. Two Approaches"
+                int_type = "1. Not at Intersection"
 
             matches[i] = {
                 "node_id":          int(node["node_id"]),
@@ -988,6 +1020,18 @@ class CrashEnricher:
             if empty_int.any():
                 df.loc[empty_int, "Intersection Type"] = "1. Not at Intersection"
                 print(f"    Intersection Type: {empty_int.sum():,} defaulted to Not at Intersection")
+
+        # ── Intersection Type distribution (diagnostic) ──
+        # After the degree→approach classification fix, ~35% of crashes
+        # should be "Not at Intersection" (was ~2.6% under the buggy >=3
+        # threshold). Phase 2 (streets_per_node) should push this to ~45–50%.
+        if "Intersection Type" in df.columns:
+            int_dist = df["Intersection Type"].value_counts()
+            total = len(df)
+            if total > 0:
+                print(f"\n    Intersection Type distribution ({total:,} total):")
+                for val, cnt in int_dist.head(10).items():
+                    print(f"      {cnt:>7,} ({cnt/total*100:5.1f}%): {val}")
 
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)

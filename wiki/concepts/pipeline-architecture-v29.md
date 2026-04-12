@@ -28,6 +28,49 @@ Simplified (state-agnostic):
 4-tier authority: HPMS > State > OSM > Federal.
 Output: `{abbr}_road_inventory.parquet.gz` (~22MB for DE, 151K segments × 394 cols)
 
+## Intersection Classification (MIRE Element 121)
+
+The pipeline uses two metrics for intersection classification on road segments:
+
+- **`intersection_degree`**: Directed MultiDiGraph degree from osmnx. **Each two-way road contributes 2 directed edges** per node, so a 3-road T-intersection has degree 6 (not 3). Present in all historical caches.
+- **`streets_per_node`** (Phase 2, added 2026-04-12): Undirected physical street count from `osmnx.stats.streets_per_node(G)`. **FHWA MIRE-correct** — one physical road counts as 1 regardless of directionality. Present only in caches regenerated on or after 2026-04-12.
+
+### `Intersection Type` mapping
+
+Downstream classifiers prefer `streets_per_node` when present; otherwise fall back to directed-degree thresholds.
+
+```
+streets_per_node (preferred)       | directed degree (fallback)
+  spn >= 5  → "5. Five-Point, or More"    deg >= 10
+  spn == 4  → "4. Four Approaches"        deg >= 8  (and < 10)
+  spn == 3  → "3. Three Approaches"       deg >= 6  (and < 8)
+  spn <= 2  → "1. Not at Intersection"    deg <  6
+```
+
+Degree 3–5 represents ramp merges / continuations / bends — not real intersections.
+
+### Classification locations
+
+Four places in the codebase assign `Intersection Type`. All use the same mapping above:
+
+1. **`road_data_authority.merge_frontend_columns()`** (`road_data_authority.py:1325`) — first-pass on road segments during `build_road_inventory.py`. Overridden by step 2.
+2. **`road_inventory_postprocess.fix_intersection_type()`** (`road_inventory_postprocess.py:384`, FIX 4) — final authoritative value for road segments. `DEGREE_TO_INTERSECTION` constant at `road_inventory_postprocess.py:82`. `DEGREE_FIVE_PLUS_THRESHOLD = 10`.
+3. **`RoadInventorySession.enrich()`** (`road_inventory_enricher.py:271`) — per-crash assignment. Requires matched segment's node within 30m (squared distance ≤ 900).
+4. **`crash_enricher.py` fallback default** (line 989) — any remaining empty values → "1. Not at Intersection".
+
+`crash_enricher.py` prints an `Intersection Type distribution` table after enrichment for diagnostic monitoring. Expected for Delaware: ~35% "Not at Intersection" under Phase 1, ~45–50% under Phase 2.
+
+### `is_intersection` flag
+
+The `is_intersection == "Yes"` flag in `build_road_inventory.enrich_intersections()` is **kept permissive** (any graph junction node with endpoint in `int_set`). It is intentionally NOT tightened to `deg >= 6` because downstream consumers rely on the permissive semantics:
+- `crash_enricher.py:966` (Node derivation)
+- `build_road_inventory.py:1269` (intersection-name lookup)
+- `road_inventory_validator.py:349`
+- `road_inventory_postprocess.fix_intersection_type()` (gate)
+- Supabase `is_intersection` column
+
+The `Intersection Type` classification is the single source of truth for whether a segment/crash is at a real intersection.
+
 ### Phase 2: Download + Normalize (batch-all-jurisdictions.yml)
 State-specific normalizer (`{abbr}_normalize.py`):
 - Phase 1: Column rename to 69 golden
