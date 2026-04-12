@@ -394,14 +394,14 @@ def apply_authority_layer(df):
     df["resolved_lanes_source"] = srcs
     filled = (vals > 0).sum()
     print(f"      Lanes:        {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(srcs=='HPMS').sum():,} OSM:{(srcs=='OSM').sum():,}")
+          f" — DOT:{(srcs=='StateDOT').sum():,} HPMS:{(srcs=='HPMS').sum():,} OSM:{(srcs=='OSM').sum():,}")
 
     vals, srcs = resolve_surface(df)
     df["resolved_surface_type"] = vals
     df["resolved_surface_source"] = srcs
     filled = (vals != "").sum()
     print(f"      Surface:      {filled:>7,} resolved ({filled/len(df)*100:.1f}%)"
-          f" — HPMS:{(srcs=='HPMS').sum():,} OSM:{(srcs=='OSM').sum():,}")
+          f" — DOT:{(srcs=='StateDOT').sum():,} HPMS:{(srcs=='HPMS').sum():,} OSM:{(srcs=='OSM').sum():,}")
 
     vals, srcs = resolve_signals(df)
     df["resolved_has_signal"] = vals
@@ -1159,24 +1159,18 @@ def merge_frontend_columns(df):
     print("    Frontend column merge (VDOT architecture)...")
     n = len(df)
 
-    # ── Functional Class (HPMS > OSM) ──
+    # ── Functional Class (HPMS > StateDOT > OSM — FHWA validates federally) ──
     fc_codes = np.zeros(n, dtype=int)
     fc_source = np.full(n, "", dtype=object)
-    
+
     if "highway" in df.columns:
         for i, hw in enumerate(df["highway"].values):
             fc = OSM_TO_FC.get(str(hw).strip(), 0)
             if fc > 0:
                 fc_codes[i] = fc
                 fc_source[i] = "OSM"
-    
-    if "hpms_f_system" in df.columns:
-        hpms_fc = pd.to_numeric(df["hpms_f_system"], errors="coerce").fillna(0).astype(int).values
-        mask = hpms_fc > 0
-        fc_codes[mask] = hpms_fc[mask]
-        fc_source[mask] = "HPMS"
 
-    # Tier A: State DOT FC (HIGHEST — overwrites HPMS when available)
+    # State DOT FC (fills gaps in OSM, but HPMS overwrites below)
     if "sdot_Functional Class" in df.columns:
         sdot_fc_map = {"1-Interstate": 1, "2-Freeway/Expressway": 2,
                        "3-Principal Arterial": 3, "4-Minor Arterial": 4,
@@ -1186,26 +1180,32 @@ def merge_frontend_columns(df):
             if fc > 0:
                 fc_codes[i] = fc
                 fc_source[i] = "StateDOT"
-    
+
+    # HPMS FC (HIGHEST — FHWA-validated, overwrites StateDOT/OSM)
+    if "hpms_f_system" in df.columns:
+        hpms_fc = pd.to_numeric(df["hpms_f_system"], errors="coerce").fillna(0).astype(int).values
+        mask = hpms_fc > 0
+        fc_codes[mask] = hpms_fc[mask]
+        fc_source[mask] = "HPMS"
+
     df["Functional Class"] = [FC_LABELS.get(fc, "") for fc in fc_codes]
+    df["resolved_fc_source"] = fc_source
     fc_filled = (fc_codes > 0).sum()
-    print(f"      Functional Class:   {fc_filled:>7,} — HPMS:{(fc_source=='HPMS').sum():,} OSM:{(fc_source=='OSM').sum():,}")
+    print(f"      Functional Class:   {fc_filled:>7,} — HPMS:{(fc_source=='HPMS').sum():,} DOT:{(fc_source=='StateDOT').sum():,} OSM:{(fc_source=='OSM').sum():,}")
 
     # ── SYSTEM (derived from FC) ──
     df["SYSTEM"] = [FC_TO_SYSTEM.get(fc, "") for fc in fc_codes]
 
-    # ── Ownership (HPMS > derived from FC) ──
+    # ── Ownership (HPMS > StateDOT > FC-derived — FHWA validates federally) ──
     own = np.full(n, "", dtype=object)
+    own_source = np.full(n, "", dtype=object)
     for i, fc in enumerate(fc_codes):
-        own[i] = FC_TO_OWNERSHIP.get(fc, "")
-    if "hpms_ownership" in df.columns:
-        hpms_own = pd.to_numeric(df["hpms_ownership"], errors="coerce").fillna(0).astype(int).values
-        for i, code in enumerate(hpms_own):
-            label = OWNERSHIP_LABELS.get(code, "")
-            if label:
-                own[i] = label
+        label = FC_TO_OWNERSHIP.get(fc, "")
+        if label:
+            own[i] = label
+            own_source[i] = fc_source[i]  # inherits from FC source
 
-    # Tier A: State DOT Ownership (HIGHEST — overwrites HPMS)
+    # State DOT Ownership (fills gaps, but HPMS overwrites below)
     if "sdot_Ownership" in df.columns:
         valid_own = {"1. State Hwy Agency", "2. County Hwy Agency",
                      "3. City or Town Hwy Agency", "4. Federal Roads",
@@ -1214,13 +1214,27 @@ def merge_frontend_columns(df):
             s = str(v).strip()
             if s in valid_own:
                 own[i] = s
+                own_source[i] = "StateDOT"
+
+    # HPMS Ownership (HIGHEST — FHWA-validated, overwrites StateDOT)
+    if "hpms_ownership" in df.columns:
+        hpms_own = pd.to_numeric(df["hpms_ownership"], errors="coerce").fillna(0).astype(int).values
+        for i, code in enumerate(hpms_own):
+            label = OWNERSHIP_LABELS.get(code, "")
+            if label:
+                own[i] = label
+                own_source[i] = "HPMS"
     df["Ownership"] = own
+    df["resolved_ownership_source"] = own_source
 
     # ── Facility Type (HPMS) ──
+    fac_source = np.full(n, "", dtype=object)
     df["Facility Type"] = ""
     if "hpms_facility_type" in df.columns:
         ft = pd.to_numeric(df["hpms_facility_type"], errors="coerce").fillna(0).astype(int).values
         df["Facility Type"] = [FACILITY_LABELS.get(f, "") for f in ft]
+        fac_source[ft > 0] = "HPMS"
+    df["resolved_facility_source"] = fac_source
 
     # ── Roadway Surface Type (HPMS > OSM) ──
     df["Roadway Surface Type"] = ""
