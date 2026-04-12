@@ -1,7 +1,7 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-11
+updated: 2026-04-12
 ---
 
 # Crash Lens Wiki — Log
@@ -9,6 +9,19 @@ updated: 2026-04-11
 Chronological record of wiki activity.
 
 ---
+
+## [2026-04-12] feat | Incremental Pipeline v1
+
+Content-hash diff engine for crash data pipeline. Reduces enrichment from ~10 min to ~5 sec on typical daily runs (~500 new crashes out of 569K).
+
+- **New file**: `incremental_diff.py` — 5-field MD5 content hash diff (Crash Date, Military Time, x, y, Collision Type). Modes: incremental (<10% new), full (>=10% or forced), skip (0 new).
+- **de_normalize.py**: Added `--keep-objectids` flag for stable OBJECTID assignment during incremental merge (new rows get max+1).
+- **supabase_sync.py**: Fixed R2 download paths — added `.parquet` (no .gz) as primary, plus `_statewide/` path.
+- **webhook.py**: Added `mode` parameter (backward compatible, defaults to "full"). Phase 1: both modes do TRUNCATE+COPY.
+- **delaware-batch-all-jurisdictions.yml**: Added Step 7.7 incremental diff, `force_full` input, mode/new_count outputs to pipeline trigger.
+- **delaware-batch-pipeline.yml**: Mode-aware Stage 0.5 enrichment — incremental path enriches only new rows, merges with existing, re-ranks with `--keep-objectids`.
+
+Addresses 12 pre-identified bugs (unstable Document Nbr hash, OBJECTID reassignment, R2 path mismatch, first-load handling, pipeline version detection, etc.).
 
 ## [2026-04-05] init | Wiki Created
 Set up LLM Wiki structure following Karpathy's pattern. Created directory layout, CLAUDE.md schema, and initial wiki pages from two raw source repos.
