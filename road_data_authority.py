@@ -41,7 +41,7 @@ import pandas as pd
 
 
 def resolve_speed_limit(df):
-    """HPMS > Mapillary > OSM. Returns (value_array, source_array)."""
+    """StateDOT > HPMS > Mapillary > OSM. Returns (value_array, source_array)."""
     n = len(df)
     values = np.full(n, 0, dtype=int)
     sources = np.full(n, "", dtype=object)
@@ -553,6 +553,11 @@ def compute_confidence_scores(df):
 
     # ── SPEED LIMIT confidence ──
     speed_sources = np.zeros(n, dtype=int)
+    if "sdot_Max Speed Diff" in df.columns:
+        try:
+            has = pd.to_numeric(df["sdot_Max Speed Diff"], errors="coerce").fillna(0)
+            speed_sources += ((has >= 5) & (has <= 85)).astype(int)
+        except: pass
     if "hpms_speed_limit" in df.columns:
         try:
             has = pd.to_numeric(df["hpms_speed_limit"], errors="coerce").fillna(0)
