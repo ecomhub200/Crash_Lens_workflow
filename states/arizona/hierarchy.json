@@ -484,20 +484,6 @@
       ],
       "zoom": 10,
       "_autoAssigned": true
-    },
-    "bullhead_city_metropolitan_planning_organization": {
-      "name": "Bullhead City Metropolitan Planning Organization",
-      "shortName": "Bullhead City",
-      "type": "mpo",
-      "btsMpoId": "04202300",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -114.589401,
-        35.056471
-      ],
-      "zoom": 10
     }
   },
   "allCounties": {

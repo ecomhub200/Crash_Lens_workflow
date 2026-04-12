@@ -10,6 +10,17 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-12] fix | Remove BTS MPO Stubs with Empty Counties
+
+- Added cleanup pass in `generate_all_hierarchies.py` after MPO loop: removes TPR entries where `counties == []` and `source == "BTS/USDOT NTAD"`, preventing future stubs
+- Carries forward `source` field from external MPO data into generated TPR entries
+- Created `scripts/cleanup_bts_stubs.py` one-time script with two removal rules: BTS source match + fuzzy name duplicate match
+- Removed 14 empty-county BTS stubs across 4 states (CO:5, VA:7, AZ:1, HI:1)
+- 139 BTS-sourced TPRs with assigned counties preserved
+- Validated: `validate_hierarchy.py --all` shows 0 empty_mpo warnings
+
+---
+
 ## [2026-04-12] feat | Incremental Pipeline v1
 
 Content-hash diff engine for crash data pipeline. Reduces enrichment from ~10 min to ~5 sec on typical daily runs (~500 new crashes out of 569K).

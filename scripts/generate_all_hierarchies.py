@@ -376,6 +376,10 @@ def build_hierarchy(state_abbr, state_data, county_lookup):
         if bts_acronym:
             mpo_entry["btsAcronym"] = bts_acronym
 
+        # Carry forward source field from external data (e.g. BTS/USDOT NTAD)
+        if mpo.get('source'):
+            mpo_entry["source"] = mpo['source']
+
         # Add mapBounds if available
         bounds = mpo.get('mapBounds')
         if bounds:
@@ -385,6 +389,16 @@ def build_hierarchy(state_abbr, state_data, county_lookup):
             }
 
         hierarchy["tprs"][mpo_key] = mpo_entry
+
+    # ─── Cleanup: remove BTS stubs with empty counties ───
+    stubs_to_remove = [
+        k for k, v in hierarchy["tprs"].items()
+        if not v.get("counties") and v.get("source") == "BTS/USDOT NTAD"
+    ]
+    for k in stubs_to_remove:
+        del hierarchy["tprs"][k]
+    if stubs_to_remove:
+        print(f"  Removed {len(stubs_to_remove)} BTS stub(s) with empty counties: {stubs_to_remove}")
 
     # Build allCounties map (FIPS → name)
     hierarchy["allCounties"] = dict(sorted(all_counties_map.items()))

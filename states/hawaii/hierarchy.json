@@ -181,20 +181,6 @@
           -156.15
         ]
       }
-    },
-    "oahu_mpo": {
-      "name": "Oahu MPO",
-      "shortName": "Oahu",
-      "type": "mpo",
-      "btsMpoId": "15197500",
-      "source": "BTS/USDOT NTAD",
-      "counties": [],
-      "countyNames": {},
-      "center": [
-        -160.683514,
-        22.381796
-      ],
-      "zoom": 10
     }
   },
   "allCounties": {
