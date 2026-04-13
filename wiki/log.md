@@ -1,12 +1,45 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-12
+updated: 2026-04-13
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-13] feat | FARS pipeline added — generate_fars_data.py downloads from NHTSA API
+
+Added a new Phase 0 cache generator for the **NHTSA Fatality Analysis Reporting System (FARS)** — the federal census of all ~40K fatal motor-vehicle crashes per year across all 50 states + DC, with 170+ standardized data elements. Fills a gap in the pipeline: there was no federal, nationally-standardized source of fatal crashes. FARS enables cross-state benchmarking, grant-ranking, and ground-truth validation of per-state crash feeds (Socrata, state APIs).
+
+**New files:**
+- `generate_fars_data.py` — self-contained downloader following the `generate_hpms_data.py` / `generate_osm_data.py` pattern. Downloads Accident + Person + Vehicle datasets via NHTSA CrashAPI, joins into crash-level parquet (~44 columns), uploads per-state files to R2 and a nationwide rollup to `_nationwide/fars_nationwide.parquet.gz`.
+- `.github/workflows/generate-fars-cache.yml` — single-job workflow (no batch fan-out; FARS is tiny at ~550K records nationwide). Scheduled Jun 15 annually (matches NHTSA's annual publication cadence) + `workflow_dispatch` with `scope={nationwide,single-state}`, `single_state`, `force_regenerate` inputs.
+
+**API:** `https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData` — public, no auth. Year range hard-capped at 5 years per request, so downloads split into 3 chunks (2010-2014, 2015-2019, 2020-2023). Response is double-nested at `Results[0]`. FARS stores longitude as `LONGITUD` (not LONGITUDE) and uses GPS sentinels (77.7777, 88.8888, 777.7777, 888.8888) which are masked to NaN during post-processing.
+
+**Output schema (~44 cols per crash, gzipped parquet):**
+- Identification: `case_id`, `state_fips`, `state_name`, `county_fips`, `county_name`, `city_fips`, `city_name`
+- When: `crash_year`, `crash_month`, `crash_day`, `crash_hour`, `crash_minute`
+- Where: `latitude`, `longitude`, `route_name_1`, `route_name_2`
+- Road context: `functional_class`, `road_ownership`, `route_type`, `rural_urban`, `lighting`, `weather`, `manner_of_collision`, `first_harmful_event`, `relation_to_road`, `intersection_type`
+- Severity: `fatalities`, `drunk_drivers`, `total_vehicles`, `total_persons`
+- Person-aggregated flags: `any_drunk` (ALC_RES 8-94 or DRINKING=1), `any_unrestrained` (REST_USE not in {3,7}), `ped_involved`, `bike_involved`, `ped_fatals`, `bike_fatals`, `total_fatalities`, `youngest_driver_age`, `oldest_driver_age`
+- Vehicle-aggregated flags: `any_speeding` (SPEEDREL in 1-5), `any_large_truck` (BODY_TYP 60-79), `any_motorcycle` (BODY_TYP 80-89), `any_distracted`, `hit_and_run`
+
+**R2 layout:**
+- Per-state: `{state_prefix}/cache/{abbr}_fars.parquet.gz` (e.g. `delaware/cache/de_fars.parquet.gz`, ~150-200 KB, ~1,100-1,400 rows for Delaware)
+- Nationwide: `_nationwide/fars_nationwide.parquet.gz` (~550K rows, built only on `--all` runs)
+
+**Env vars** (read directly in Python, no `R2_*` remapping): `CF_ACCOUNT_ID`, `CF_R2_ACCESS_KEY_ID`, `CF_R2_SECRET_ACCESS_KEY`. Bucket `crash-lens-data` hardcoded. This diverges from `generate_hpms_data.py`'s `R2_*` convention — future refactor opportunity if we want a shared R2 helper module.
+
+**State registry:** Loaded dynamically from `states/geography/us_states.json` (52 records → 51 after filtering Puerto Rico, which FARS does not cover). `GEOID`→fips, `USPS`→abbreviation (lowercased), `NAME`→name, `r2_prefix` derived as `NAME.lower().replace(" ", "_")`. First generator to load state identity from the JSON file rather than hardcoding — HPMS and OSM still use inline lists.
+
+**CLI:** `--state` (nargs='+'), `--all`, `--local-only`, `--force`, `--cache-dir`, `--from-year` (default 2010), `--to-year` (default 2023). Matches HPMS shape plus the two year flags. Upload is the default; `--local-only` skips R2.
+
+Files changed: `generate_fars_data.py` (new), `.github/workflows/generate-fars-cache.yml` (new), `wiki/log.md`, `wiki/concepts/pipeline-architecture-v29.md`.
 
 ---
 

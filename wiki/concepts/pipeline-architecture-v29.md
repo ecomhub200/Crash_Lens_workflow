@@ -15,13 +15,14 @@ Simplified (state-agnostic):
 ## Phases
 
 ### Phase 0: Cache Generation (run once per state, monthly refresh)
-6 generators, all output to R2 `{state_prefix}/cache/`:
+7 generators, all output to R2 `{state_prefix}/cache/` (plus a nationwide FARS rollup at `_nationwide/`):
 - `generate_osm_data.py` → roads, intersections, POIs (13 categories)
 - `generate_hpms_data.py` → HPMS federal road data (46 cols, 75K segments for DE)
 - `generate_state_dot_data.py` → State DOT shapefiles (speed, lanes, surface)
 - `generate_federal_data.py` → Bridges (NBI), rail crossings (FRA), schools, transit
 - `generate_boundaries.py` → Census TIGER 2020 (Urban/Suburban/Rural)
 - `mapillary_county_download.py` → Traffic signs/signals (Mapillary API v4)
+- `generate_fars_data.py` → NHTSA FARS fatal crash census (~44 cols, 2010-2023; per-state `{abbr}_fars.parquet.gz` + `_nationwide/fars_nationwide.parquet.gz`)
 
 ### Phase 1: Build Road Inventory
 `build_road_inventory.py` merges all caches into single spatial join.
