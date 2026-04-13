@@ -1,0 +1,73 @@
+name: "Generate FARS Cache"
+
+# ═══════════════════════════════════════════════════════════════
+#  CrashLens — FARS Fatal Crash Data for all 50 states + DC
+#
+#  Downloads NHTSA's Fatality Analysis Reporting System (FARS)
+#  census of all fatal motor-vehicle crashes 2010-2023, joins
+#  Accident + Person + Vehicle tables into crash-level parquet.
+#
+#  SCHEDULE: Annually on Jun 15 — NHTSA publishes the prior-year
+#  FARS file each June.
+#  MANUAL: Select scope and run from the Actions tab.
+#
+#  Source: NHTSA CrashAPI (crashviewer.nhtsa.dot.gov)
+#  Single job — FARS is tiny (~550K records nationwide).
+# ═══════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    - cron: '0 6 15 6 *'    # Jun 15 06:00 UTC (annual FARS refresh)
+
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'What to generate'
+        required: true
+        type: choice
+        default: 'single-state'
+        options:
+          - nationwide
+          - single-state
+      single_state:
+        description: 'State abbreviation (only for single-state)'
+        required: false
+        default: 'de'
+      force_regenerate:
+        description: 'Force regenerate (overwrite existing R2 cache)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+  CF_R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+
+jobs:
+  download-fars:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests pandas pyarrow boto3
+
+      - name: Download FARS data
+        run: |
+          FORCE=""
+          if [ "${{ github.event.inputs.force_regenerate }}" = "true" ]; then
+            FORCE="--force"
+          fi
+
+          if [ "${{ github.event.inputs.scope }}" = "single-state" ]; then
+            python generate_fars_data.py --state ${{ github.event.inputs.single_state }} $FORCE
+          else
+            # nationwide (workflow_dispatch) or scheduled run
+            python generate_fars_data.py --all $FORCE
+          fi
