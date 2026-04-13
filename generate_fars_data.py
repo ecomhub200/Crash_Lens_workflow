@@ -31,9 +31,13 @@ USAGE:
     python generate_fars_data.py --all --force              # Regenerate all
 
 OUTPUT:
-    cache/{abbr}_fars.parquet.gz           → R2: {prefix}/cache/{abbr}_fars.parquet.gz
-    cache/fars_nationwide.parquet.gz       → R2: _nationwide/fars_nationwide.parquet.gz
+    cache/{abbr}_fars.parquet              → R2: {prefix}/cache/{abbr}_fars.parquet
+    cache/fars_nationwide.parquet          → R2: _national/fars_nationwide.parquet
                                              (only on --all)
+
+    Parquet files are Snappy-compressed (pyarrow default), **not** gzip-
+    wrapped. The frontend hyparquet browser parser cannot decode gzip-
+    internal column compression, so we ship plain `.parquet` everywhere.
 
     Per-crash parquet columns (44):
       Identification: case_id, state_fips, state_name, county_fips, county_name,
@@ -53,11 +57,9 @@ OUTPUT:
 
 import argparse
 import gc
-import gzip
 import io
 import json
 import os
-import shutil
 import sys
 import time
 import zipfile
@@ -187,30 +189,6 @@ ABBR_LOOKUP = {s["abbreviation"]: s for s in ALL_STATES}
 #  HELPERS
 # ═══════════════════════════════════════════════════════════════
 
-def gzip_file(src, dst):
-    with open(src, 'rb') as fi, gzip.open(dst, 'wb', compresslevel=6) as fo:
-        shutil.copyfileobj(fi, fo)
-    raw = os.path.getsize(src) / 1048576
-    gz = os.path.getsize(dst) / 1048576
-    return raw, gz
-
-
-def read_gz_parquet(path_or_bytes):
-    """Read a gzip-wrapped parquet file (our `.parquet.gz` convention).
-
-    Our `gzip_file()` helper wraps a raw parquet file in a gzip container,
-    so `pd.read_parquet()` can't read it directly — it would try to parse
-    the gzip header as parquet magic bytes and fail. This helper decompresses
-    the outer gzip layer first, then hands the inner parquet bytes to pandas.
-    """
-    if isinstance(path_or_bytes, (bytes, bytearray)):
-        src = io.BytesIO(path_or_bytes)
-    else:
-        src = path_or_bytes  # pathlib.Path or str
-    with gzip.open(src, "rb") as f:
-        return pd.read_parquet(io.BytesIO(f.read()))
-
-
 def get_r2_client():
     """Build a boto3 S3 client for Cloudflare R2 using CF_* env vars."""
     acct = os.environ.get("CF_ACCOUNT_ID", "")
@@ -251,13 +229,31 @@ def r2_upload(s3, local_path, bucket, key):
 
 
 def r2_download_to_df(s3, bucket, key):
-    """Download an existing parquet.gz from R2 into a DataFrame (for nationwide rollup)."""
+    """Download an existing plain parquet file from R2 into a DataFrame.
+
+    Used by the nationwide rollup path when a per-state file is skipped
+    (already in R2) but we still need its rows to build the nationwide
+    parquet. Reads Snappy-compressed parquet directly — no gzip wrapper.
+    """
     try:
         obj = s3.get_object(Bucket=bucket, Key=key)
-        return read_gz_parquet(obj["Body"].read())
+        return pd.read_parquet(io.BytesIO(obj["Body"].read()))
     except Exception as e:
         print(f"      WARN: could not fetch existing R2 file {key}: {e}")
         return None
+
+
+def r2_delete_if_exists(s3, bucket, key):
+    """Delete an R2 object if it exists. Used to clean up legacy
+    .parquet.gz files after a successful .parquet upload migrated them.
+    Silent on failure — cleanup is best-effort.
+    """
+    if not s3:
+        return
+    try:
+        s3.delete_object(Bucket=bucket, Key=key)
+    except Exception:
+        pass
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -631,8 +627,9 @@ def process_state(state_info, cache_dir, s3, bucket, from_year, to_year,
     fips = state_info["fips"]
     prefix = state_info["r2_prefix"]
 
-    fars_gz = cache_dir / f"{abbr}_fars.parquet.gz"
-    r2_key = f"{prefix}/cache/{abbr}_fars.parquet.gz"
+    fars_pq = cache_dir / f"{abbr}_fars.parquet"
+    r2_key = f"{prefix}/cache/{abbr}_fars.parquet"
+    legacy_r2_gz_key = f"{prefix}/cache/{abbr}_fars.parquet.gz"
 
     # ── Skip logic ──
     if not force:
@@ -640,10 +637,10 @@ def process_state(state_info, cache_dir, s3, bucket, from_year, to_year,
             print(f"  [skip] {name} ({abbr}) — FARS already in R2")
             df = r2_download_to_df(s3, bucket, r2_key)
             return ("skipped", df)
-        if local_only and fars_gz.exists():
+        if local_only and fars_pq.exists():
             print(f"  [skip] {name} ({abbr}) — FARS already cached locally")
             try:
-                return ("skipped", read_gz_parquet(fars_gz))
+                return ("skipped", pd.read_parquet(fars_pq))
             except Exception:
                 return ("skipped", None)
 
@@ -679,20 +676,22 @@ def process_state(state_info, cache_dir, s3, bucket, from_year, to_year,
         )
 
     # ── Write parquet ──
-    fars_pq = cache_dir / f"{abbr}_fars.parquet"
-    df.to_parquet(fars_pq, index=False)
-    raw, gz = gzip_file(fars_pq, fars_gz)
-    fars_pq.unlink(missing_ok=True)
+    # Snappy-compressed (pyarrow default), not gzip-wrapped: the frontend
+    # hyparquet parser cannot decode gzip-internal column compression.
+    df.to_parquet(fars_pq, compression="snappy", index=False)
 
     elapsed = time.time() - t0
-    size_kb = os.path.getsize(fars_gz) / 1024
-    print(f"      Output: {abbr}_fars.parquet.gz ({len(df):,} rows × {len(df.columns)} columns, {size_kb:.0f} KB)")
+    size_kb = os.path.getsize(fars_pq) / 1024
+    print(f"      Output: {abbr}_fars.parquet ({len(df):,} rows × {len(df.columns)} columns, {size_kb:.0f} KB)")
     print(f"      Elapsed: {elapsed:.0f}s")
 
     # ── Upload ──
     if not local_only and s3:
-        if r2_upload(s3, fars_gz, bucket, r2_key):
+        if r2_upload(s3, fars_pq, bucket, r2_key):
             print(f"      -> uploaded to R2: {r2_key}")
+        # Best-effort cleanup of any legacy .parquet.gz from previous runs
+        # so the bucket doesn't accumulate stale dual copies.
+        r2_delete_if_exists(s3, bucket, legacy_r2_gz_key)
 
     gc.collect()
     return ("completed", df)
@@ -703,7 +702,14 @@ def process_state(state_info, cache_dir, s3, bucket, from_year, to_year,
 # ═══════════════════════════════════════════════════════════════
 
 def build_nationwide(state_dfs, cache_dir, s3, bucket, local_only):
-    """Concat all per-state DataFrames → write + upload nationwide parquet."""
+    """Concat all per-state DataFrames → write + upload nationwide parquet.
+
+    Writes Snappy-compressed ``fars_nationwide.parquet`` and uploads it to
+    ``_national/fars_nationwide.parquet`` in R2 (the existing CrashLens
+    convention for nationwide reference files — see the ``_national/``
+    directory in the ``crash-lens-data`` bucket alongside ``us_states.json``,
+    ``us_counties.json``, etc.).
+    """
     non_empty = [df for df in state_dfs if df is not None and not df.empty]
     if len(non_empty) < 2:
         print("\n  [nationwide] not enough state data to build nationwide rollup")
@@ -713,17 +719,16 @@ def build_nationwide(state_dfs, cache_dir, s3, bucket, local_only):
     print(f"  [nationwide] total: {len(nationwide):,} rows × {len(nationwide.columns)} columns")
 
     nw_pq = cache_dir / "fars_nationwide.parquet"
-    nw_gz = cache_dir / "fars_nationwide.parquet.gz"
-    nationwide.to_parquet(nw_pq, index=False)
-    gzip_file(nw_pq, nw_gz)
-    nw_pq.unlink(missing_ok=True)
-    size_mb = os.path.getsize(nw_gz) / 1048576
-    print(f"  [nationwide] wrote {nw_gz} ({size_mb:.1f} MB gz)")
+    nationwide.to_parquet(nw_pq, compression="snappy", index=False)
+    size_mb = os.path.getsize(nw_pq) / 1048576
+    print(f"  [nationwide] wrote {nw_pq} ({size_mb:.1f} MB)")
 
     if not local_only and s3:
-        key = "_nationwide/fars_nationwide.parquet.gz"
-        if r2_upload(s3, nw_gz, bucket, key):
+        key = "_national/fars_nationwide.parquet"
+        if r2_upload(s3, nw_pq, bucket, key):
             print(f"  [nationwide] -> uploaded to R2: {key}")
+        # Best-effort cleanup of legacy path from before the .parquet.gz migration.
+        r2_delete_if_exists(s3, bucket, "_nationwide/fars_nationwide.parquet.gz")
 
 
 # ═══════════════════════════════════════════════════════════════
