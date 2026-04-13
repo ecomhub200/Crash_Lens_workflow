@@ -66,6 +66,16 @@ FARS_BASE = "https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData"
 FARS_DATASETS = ("Accident", "Person", "Vehicle")
 FARS_MAX_SPAN = 5  # API hard-caps single requests at 5 calendar years
 
+# NHTSA CrashAPI returns 403 Forbidden for requests without a User-Agent
+# when called from datacenter IPs (e.g. GitHub Actions' Azure runners).
+# Identifying ourselves with a descriptive UA + explicit Accept header
+# makes the request look like a normal research client and bypasses the
+# anti-abuse filter. See PR #84 follow-up fix.
+FARS_HEADERS = {
+    "User-Agent": "CrashLens/1.0 (https://crashlens.com; traffic safety research)",
+    "Accept": "application/json",
+}
+
 R2_BUCKET = "crash-lens-data"
 
 # Rename FARS columns → CrashLens-friendly names in the final parquet.
@@ -246,7 +256,7 @@ def fetch_fars_dataset(dataset, fips, from_year, to_year):
     }
     for attempt in range(3):
         try:
-            r = requests.get(FARS_BASE, params=params, timeout=120)
+            r = requests.get(FARS_BASE, params=params, headers=FARS_HEADERS, timeout=120)
             r.raise_for_status()
             payload = r.json()
             results = payload.get("Results") or []

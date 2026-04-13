@@ -613,3 +613,36 @@ def test_cli_rejects_invalid_year_range():
         capture_output=True, text=True, timeout=30,
     )
     assert result.returncode != 0
+
+
+# ═══════════════════════════════════════════════════════════════
+#  HTTP headers (regression test for 403 Forbidden fix)
+# ═══════════════════════════════════════════════════════════════
+
+def test_fetch_fars_dataset_sends_user_agent():
+    """NHTSA blocks datacenter IPs (GitHub Actions Azure runners) without a
+    descriptive User-Agent. The request MUST include FARS_HEADERS or we get
+    a 403 Forbidden from every Actions run.
+    """
+    captured = {}
+
+    class FakeResponse:
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return {"Results": [[]]}
+
+    def fake_get(url, params=None, headers=None, timeout=None):
+        captured["url"] = url
+        captured["params"] = params
+        captured["headers"] = headers
+        return FakeResponse()
+
+    with patch.object(gfd.requests, "get", side_effect=fake_get):
+        gfd.fetch_fars_dataset("Accident", 10, 2020, 2020)
+
+    assert captured["headers"] is not None, "no headers sent"
+    ua = captured["headers"].get("User-Agent", "")
+    assert ua, "User-Agent header is empty"
+    assert "CrashLens" in ua, f"User-Agent should identify CrashLens, got: {ua!r}"
+    assert captured["headers"].get("Accept") == "application/json"
