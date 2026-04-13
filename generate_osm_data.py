@@ -229,20 +229,47 @@ def convert_to_enricher_format(G):
     road_df = pd.DataFrame(road_data)
 
     # ── Intersections (flat format) ──
+    # Two metrics:
+    #   - degree: directed MultiDiGraph degree (kept for backward compat).
+    #             Each two-way road contributes 2 edges, so degree 6 ≈ T.
+    #   - streets_per_node: undirected physical street count. This is the
+    #             FHWA MIRE Element 121 definition — spn=3 is a real
+    #             T-intersection regardless of one-way/two-way mix.
+    #
+    # Filter: keep any node with deg>=3 OR spn>=3 for backward compatibility
+    # during the monthly cache regeneration. Existing code that only reads
+    # degree still sees the same node set; new code can prefer spn.
     degrees = dict(G.degree())
+    try:
+        spn_dict = ox.stats.streets_per_node(G)
+    except Exception:
+        # Fallback: compute undirected unique-neighbor count manually
+        spn_dict = {}
+        for _n_id in G.nodes():
+            nbrs = set()
+            for _u, _v, _k in G.out_edges(_n_id, keys=True):
+                if _v != _n_id:
+                    nbrs.add(_v)
+            for _u, _v, _k in G.in_edges(_n_id, keys=True):
+                if _u != _n_id:
+                    nbrs.add(_u)
+            spn_dict[_n_id] = len(nbrs)
+
     int_data = []
     for node_id, deg in degrees.items():
-        if deg >= 3:
+        spn = int(spn_dict.get(node_id, 0) or 0)
+        if deg >= 3 or spn >= 3:
             n = nodes_gdf.loc[node_id]
             int_data.append({
                 'node_id': node_id,
                 'lat': n.geometry.y,
                 'lon': n.geometry.x,
                 'degree': deg,
+                'streets_per_node': spn,
             })
 
     int_df = pd.DataFrame(int_data) if int_data else pd.DataFrame(
-        columns=['node_id', 'lat', 'lon', 'degree']
+        columns=['node_id', 'lat', 'lon', 'degree', 'streets_per_node']
     )
 
     return road_df, int_df

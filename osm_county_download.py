@@ -253,14 +253,36 @@ def graph_to_dataframes(G):
 
     road_df = pd.DataFrame(road_data)
 
+    # ── Intersections (flat format) ──
+    # See generate_osm_data.py for the full explanation. Two metrics kept:
+    #   degree: directed MultiDiGraph edges (legacy, ~2 per two-way road)
+    #   streets_per_node: undirected physical street count (MIRE-correct)
+    # Filter is permissive (deg>=3 OR spn>=3) for backward compatibility
+    # during monthly cache regeneration.
     degrees = dict(G.degree())
+    try:
+        spn_dict = ox.stats.streets_per_node(G)
+    except Exception:
+        spn_dict = {}
+        for _n_id in G.nodes():
+            nbrs = set()
+            for _u, _v, _k in G.out_edges(_n_id, keys=True):
+                if _v != _n_id:
+                    nbrs.add(_v)
+            for _u, _v, _k in G.in_edges(_n_id, keys=True):
+                if _u != _n_id:
+                    nbrs.add(_u)
+            spn_dict[_n_id] = len(nbrs)
+
     int_data = [
         {"node_id": nid, "lat": nodes_gdf.loc[nid].geometry.y,
-         "lon": nodes_gdf.loc[nid].geometry.x, "degree": deg}
-        for nid, deg in degrees.items() if deg >= 3
+         "lon": nodes_gdf.loc[nid].geometry.x, "degree": deg,
+         "streets_per_node": int(spn_dict.get(nid, 0) or 0)}
+        for nid, deg in degrees.items()
+        if deg >= 3 or int(spn_dict.get(nid, 0) or 0) >= 3
     ]
     int_df = pd.DataFrame(int_data) if int_data else pd.DataFrame(
-        columns=["node_id", "lat", "lon", "degree"])
+        columns=["node_id", "lat", "lon", "degree", "streets_per_node"])
 
     return road_df, int_df
 

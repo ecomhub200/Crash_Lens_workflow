@@ -20,6 +20,36 @@ Files changed: `crash_enricher.py`, `wiki/log.md`.
 
 ---
 
+## [2026-04-12] fix | Intersection degree — directed-graph ≥6 + streets_per_node (MIRE-correct)
+
+Fixed a classification bug that was tagging ~97% of Delaware crashes as "at intersection". Root cause: `intersection_degree` comes from osmnx's MultiDiGraph, so every two-way road contributes 2 directed edges per node. The pipeline used `degree >= 3` as the intersection threshold — but a 3-road T-intersection actually has directed degree 6 (3 roads × 2 edges). Degrees 3–5 are ramp merges / continuations / bends, not intersections.
+
+**Two-phase fix:**
+
+**Phase 1 — threshold + mapping (no cache regeneration needed):**
+- **road_inventory_enricher.py:271–338**: Crash-level `Intersection Type` assignment now uses `deg >= 6` (fallback) or `streets_per_node >= 3` (preferred when column present). New mapping: `deg>=10 → 5-point`, `>=8 → 4 approaches`, `>=6 → 3 approaches`, else `1. Not at Intersection`.
+- **road_inventory_postprocess.py:82–110, 384–437 (`fix_intersection_type`)**: Replaced `DEGREE_TO_INTERSECTION` dict. Old mapping had `3-4 → Two Approaches, 5-7 → T-Intersection, 8-10 → Four Approaches, 11+ → Five-Point`. New mapping treats `0-5 → Not at Intersection, 6-7 → Three Approaches, 8-9 → Four Approaches, 10+ → Five-Point, or More`. `DEGREE_FIVE_PLUS_THRESHOLD` lowered from 11 to 10. Function now prefers `streets_per_node` (direct 1:1 physical count) when the column exists.
+- **road_data_authority.py:1325–1344** (in `merge_frontend_columns`): Same mapping fix for defense in depth (overridden by postprocess but kept correct). Y-Intersection branch retired.
+- **build_road_inventory.py:246–277** (`enrich_intersections`): Now forward-compatibly transfers `streets_per_node` from intersection cache to road segments when the column is present. `is_intersection` gate kept permissive (any graph junction) to avoid cascading changes in `crash_enricher.py:966`, `build_road_inventory.py:1269`, `road_inventory_validator.py:349`, and Supabase schema.
+- **crash_enricher.py**: Added diagnostic `Intersection Type` value-counts logging after enrichment (expect ~35% "Not at Intersection" vs. the old 2.6%). Dead-code paths (`_match_crashes_to_intersections`, `_load_or_download_road_network`) updated for consistency.
+
+**Phase 2 — streets_per_node in cache generation (takes effect on next monthly cache refresh):**
+- **generate_osm_data.py:229–278** (`convert_to_enricher_format`): Computes `ox.stats.streets_per_node(G)` with manual undirected-neighbor fallback. Adds `streets_per_node` column to intersection parquet. Filter changed from `deg >= 3` to `deg >= 3 or spn >= 3` (backward compatible).
+- **osm_county_download.py:254–287** (`graph_to_dataframes`): Same change for county-by-county OSM downloads used by the nationwide cache workflow.
+- **crash_enricher.py:688–717** (`_load_or_download_road_network`): Same change for the legacy OSM fallback path.
+
+**Labels**: Use task-spec text exactly: `"3. Three Approaches"` (not "T-Intersection"), `"5. Five-Point, or More"` (with comma). Labels flow verbatim through `supabase_sync.py:108` to the `intersection_type` Supabase column — historical rows keep old labels until backfilled.
+
+**Files NOT modified**: `osm_road_enricher.py` (legacy; no active Python imports it — verified via grep), `states/*` normalizers (carry columns through only), `road_inventory_validator.py` (reads `is_intersection` flag but not label strings).
+
+**Expected result after Phase 1 (Delaware)**:
+- "Not at Intersection": 2.6% → ~35%
+- Phase 2 pushes to ~45–50% (matches FHWA national average; one-way grid cities like Richmond/Denver/Baltimore benefit most)
+
+Files changed: `road_inventory_enricher.py`, `road_inventory_postprocess.py`, `road_data_authority.py`, `build_road_inventory.py`, `crash_enricher.py`, `generate_osm_data.py`, `osm_county_download.py`, `wiki/log.md`, `wiki/concepts/pipeline-architecture-v29.md`.
+
+---
+
 ## [2026-04-12] fix | Permanent geom/date fix — BEFORE INSERT trigger + finalize rewrite
 
 Eliminates the recurring 2–4h VPS hang caused by `finalize_sync()` running one massive `UPDATE crashes_{state} SET geom = ST_Point(x,y)` on 570K+ rows in a single transaction (WAL explosion → table lock → Studio unresponsive).
