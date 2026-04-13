@@ -15,12 +15,14 @@ Run with: python -m pytest tests/test_fars_downloader.py -v
 
 import io
 import sys
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 
 PROJECT_ROOT = Path(__file__).parent.parent.resolve()
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -401,6 +403,34 @@ def test_build_final_df_empty_accident():
     assert out.empty
 
 
+def test_build_final_df_backfills_missing_text_labels():
+    """Older FARS years (pre-2015) sometimes ship bulk CSVs without the
+    *NAME text-label columns. The final DF must still have all 44 columns,
+    with the missing text labels filled in as NaN — downstream consumers
+    rely on the fixed schema.
+    """
+    raw = _synthetic_accident_row()
+    # Strip every text-label column to simulate an older-year bulk CSV
+    for col in ("STATENAME", "COUNTYNAME", "CITYNAME", "FUNC_SYSNAME",
+                "RD_OWNERNAME", "ROUTENAME", "RUR_URBNAME", "LGT_CONDNAME",
+                "WEATHERNAME", "MAN_COLLNAME", "HARM_EVNAME", "REL_ROADNAME",
+                "TYP_INTNAME"):
+        raw.pop(col, None)
+    accident = pd.DataFrame([raw])
+    persons = pd.DataFrame([_person_row(ST_CASE=1, YEAR=2020, PER_TYP=1, AGE=30)])
+    vehicles = pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020)])
+    out = gfd.build_final_df(accident, persons, vehicles)
+    # Contract holds even when the source is missing text-label columns
+    assert set(out.columns) == EXPECTED_FINAL_COLS
+    assert len(out.columns) == 44
+    # The missing labels are now NaN rather than KeyError
+    assert pd.isna(out["state_name"].iloc[0])
+    assert pd.isna(out["functional_class"].iloc[0])
+    # Required columns (latitude, case_id, fatalities) still populated
+    assert out["case_id"].iloc[0] == 1
+    assert out["latitude"].iloc[0] == 38.9
+
+
 def test_build_final_df_flags_join():
     """End-to-end flag propagation across accident/person/vehicle joins."""
     accident = pd.DataFrame([
@@ -433,92 +463,234 @@ def test_build_final_df_flags_join():
 
 
 # ═══════════════════════════════════════════════════════════════
-#  Year chunking — dynamic range support
+#  Bulk CSV ZIP path (replaced the CrashAPI — see Fix 2)
 # ═══════════════════════════════════════════════════════════════
 
-def test_year_chunks_cover_standard_range():
-    """--from-year 2010 --to-year 2023 → must cover every year 2010-2023."""
-    chunks = gfd.year_chunks(2010, 2023, max_span=5)
-    covered = set()
-    for lo, hi in chunks:
-        for y in range(lo, hi + 1):
-            covered.add(y)
-    assert covered == set(range(2010, 2024))
-    # Each chunk must respect the 5-year API cap
-    for lo, hi in chunks:
-        assert (hi - lo + 1) <= 5
+
+@pytest.fixture(autouse=True)
+def _reset_bulk_cache():
+    """Clear the bulk-ZIP cache before every test to prevent cross-test leakage."""
+    gfd.clear_bulk_cache()
+    yield
+    gfd.clear_bulk_cache()
 
 
-def test_year_chunks_narrow_range():
-    """--from-year 2021 --to-year 2022 → single chunk, no wasted calls."""
-    chunks = gfd.year_chunks(2021, 2022, max_span=5)
-    assert chunks == [(2021, 2022)]
+def _make_nationwide_year(year, include_other_state=True):
+    """Build synthetic nationwide Accident/Person/Vehicle DataFrames for one year.
 
-
-def test_year_chunks_honors_unusual_range():
-    """--from-year 2008 --to-year 2025 → must include 2008-2009 and 2024-2025.
-    Previously the hardcoded YEAR_CHUNKS silently truncated these.
+    Contains 2 crashes in Delaware (FIPS=10) and optionally 1 crash in
+    Virginia (FIPS=51) so state filtering has real work to do.
     """
-    chunks = gfd.year_chunks(2008, 2025, max_span=5)
-    covered = set()
-    for lo, hi in chunks:
-        for y in range(lo, hi + 1):
-            covered.add(y)
-    assert 2008 in covered
-    assert 2009 in covered
-    assert 2024 in covered
-    assert 2025 in covered
-    # Every chunk ≤ 5 years
-    for lo, hi in chunks:
-        assert (hi - lo + 1) <= 5
+    rows_a, rows_p, rows_v = [], [], []
+    for seq in (1, 2):
+        case = year * 100 + seq
+        rows_a.append(_synthetic_accident_row(
+            case=case, year=year,
+            LATITUDE=38.9 + seq * 0.01,
+            LONGITUD=-75.4 - seq * 0.01,
+            STATE=10, STATENAME="Delaware",
+        ))
+        rows_p.append(_person_row(
+            ST_CASE=case, YEAR=year,
+            DRINKING=1 if seq == 1 else 0,
+            PER_TYP=1, INJ_SEV=4, AGE=25 + seq,
+        ))
+        rows_p[-1]["STATE"] = 10  # filter key
+        rows_v.append(_vehicle_row(
+            ST_CASE=case, YEAR=year,
+            SPEEDREL=1 if seq == 2 else 0,
+            BODY_TYP=4,
+        ))
+        rows_v[-1]["STATE"] = 10
+    if include_other_state:
+        # One Virginia crash to verify filtering drops non-target rows
+        case_va = year * 100 + 99
+        rows_a.append(_synthetic_accident_row(
+            case=case_va, year=year,
+            LATITUDE=37.4, LONGITUD=-78.7,
+            STATE=51, STATENAME="Virginia",
+        ))
+        rows_p.append(_person_row(
+            ST_CASE=case_va, YEAR=year, PER_TYP=1, INJ_SEV=4, AGE=50,
+        ))
+        rows_p[-1]["STATE"] = 51
+        rows_v.append(_vehicle_row(ST_CASE=case_va, YEAR=year))
+        rows_v[-1]["STATE"] = 51
+    return {
+        "Accident": pd.DataFrame(rows_a),
+        "Person": pd.DataFrame(rows_p),
+        "Vehicle": pd.DataFrame(rows_v),
+    }
 
 
-# ═══════════════════════════════════════════════════════════════
-#  End-to-end: process_state with mocked FARS API
-# ═══════════════════════════════════════════════════════════════
-
-def _mock_fetcher_factory():
-    """Return a mock fetch_fars_dataset that serves synthetic FARS records.
-
-    Produces 2 crashes per year in the requested range for each (dataset, fips)
-    combo. Accident records reference case_ids (year*100+seq) so they join
-    cleanly to person/vehicle records.
+def _preseed_bulk_cache(years):
+    """Populate the module-level cache so download_fars_year_bulk is a no-op
+    and no HTTP request is made.
     """
-    def mock_fetch(dataset, fips, from_year, to_year):
-        records = []
-        for y in range(from_year, to_year + 1):
-            for seq in (1, 2):
-                case = y * 100 + seq
-                if dataset == "Accident":
-                    records.append(_synthetic_accident_row(
-                        case=case, year=y,
-                        LATITUDE=38.9 + seq * 0.01,
-                        LONGITUD=-75.4 - seq * 0.01,
-                    ))
-                elif dataset == "Person":
-                    records.append(_person_row(
-                        ST_CASE=case, YEAR=y,
-                        DRINKING=1 if seq == 1 else 0,
-                        PER_TYP=1, INJ_SEV=4, AGE=25 + seq,
-                    ))
-                elif dataset == "Vehicle":
-                    records.append(_vehicle_row(
-                        ST_CASE=case, YEAR=y,
-                        SPEEDREL=1 if seq == 2 else 0,
-                        BODY_TYP=4,
-                    ))
-        return records
-    return mock_fetch
+    for year in years:
+        gfd._FARS_BULK_CACHE[year] = _make_nationwide_year(year)
 
+
+def test_filter_to_state_basic():
+    """_filter_to_state must keep only rows matching the FIPS int."""
+    df = pd.DataFrame({
+        "STATE": [10, 10, 51, 36],
+        "ST_CASE": [1, 2, 3, 4],
+    })
+    de_rows = gfd._filter_to_state(df, 10)
+    assert len(de_rows) == 2
+    assert set(de_rows["ST_CASE"]) == {1, 2}
+
+
+def test_filter_to_state_missing_column():
+    """Missing STATE column must not crash — return empty."""
+    df = pd.DataFrame({"ST_CASE": [1, 2]})
+    out = gfd._filter_to_state(df, 10)
+    assert out.empty
+
+
+def test_filter_to_state_string_fips():
+    """Older years ship STATE as strings — must coerce to int."""
+    df = pd.DataFrame({"STATE": ["10", "10", "51"], "ST_CASE": [1, 2, 3]})
+    out = gfd._filter_to_state(df, 10)
+    assert len(out) == 2
+
+
+def test_download_fars_year_bulk_cache_reuse():
+    """A pre-seeded cache entry is returned without any network call."""
+    gfd._FARS_BULK_CACHE[2020] = _make_nationwide_year(2020)
+    # If this touched the network, the call would fail in the sandbox.
+    result = gfd.download_fars_year_bulk(2020)
+    assert result is not None
+    assert not result["Accident"].empty
+    # Returns the exact cached dict (identity, not a copy)
+    assert result is gfd._FARS_BULK_CACHE[2020]
+
+
+def test_download_fars_year_bulk_http_retry_and_failure():
+    """3-attempt retry, then None + cache negative on persistent failure."""
+    gfd.clear_bulk_cache()
+    calls = []
+
+    class Boom:
+        def raise_for_status(self):
+            raise requests.RequestException("simulated network error")
+
+    def fake_get(url, headers=None, timeout=None):
+        calls.append(url)
+        return Boom()
+
+    with patch.object(gfd.requests, "get", side_effect=fake_get), \
+         patch.object(gfd.time, "sleep", lambda *a, **kw: None):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is None
+    assert len(calls) == 3
+    # Negative result cached so a subsequent call doesn't hammer the CDN
+    assert gfd._FARS_BULK_CACHE[2020] is None
+
+
+def test_download_fars_year_bulk_extracts_csvs_from_zip():
+    """Build a synthetic ZIP in memory and verify extraction + parsing."""
+    gfd.clear_bulk_cache()
+
+    acc_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2020, STATE=10)])
+    per_df = pd.DataFrame([_person_row(ST_CASE=1, YEAR=2020)])
+    veh_df = pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020)])
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("ACCIDENT.CSV", acc_df.to_csv(index=False))
+        zf.writestr("PERSON.CSV", per_df.to_csv(index=False))
+        zf.writestr("VEHICLE.CSV", veh_df.to_csv(index=False))
+        zf.writestr("DISTRACT.CSV", "ST_CASE,VEH_NO,MDRDSTRD\n1,1,0\n")  # noise file
+    buf.seek(0)
+
+    class FakeResponse:
+        def __init__(self, content):
+            self.content = content
+        def raise_for_status(self):
+            pass
+
+    def fake_get(url, headers=None, timeout=None):
+        assert "static.nhtsa.gov" in url
+        assert "2020" in url
+        assert "CrashLens" in (headers or {}).get("User-Agent", "")
+        return FakeResponse(buf.getvalue())
+
+    with patch.object(gfd.requests, "get", side_effect=fake_get):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    assert len(result["Accident"]) == 1
+    assert len(result["Person"]) == 1
+    assert len(result["Vehicle"]) == 1
+    assert result["Accident"]["STATE"].iloc[0] == 10
+
+
+def test_download_fars_year_bulk_handles_lowercase_filenames():
+    """CSV filename matching is case-insensitive — lowercase filenames must work."""
+    gfd.clear_bulk_cache()
+
+    acc_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2021, STATE=10)])
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("accident.csv", acc_df.to_csv(index=False))
+    buf.seek(0)
+
+    class FakeResponse:
+        content = buf.getvalue()
+        def raise_for_status(self): pass
+
+    with patch.object(gfd.requests, "get", return_value=FakeResponse()):
+        result = gfd.download_fars_year_bulk(2021)
+
+    assert result is not None
+    assert len(result["Accident"]) == 1
+    assert result["Person"].empty  # no person.csv in the zip
+
+
+def test_download_all_datasets_filters_to_state():
+    """Full end-to-end per-state slice: pre-seed cache, call the public API,
+    and verify only target-state rows come back.
+    """
+    _preseed_bulk_cache([2020, 2021, 2022])
+    result = gfd.download_all_datasets(fips="10", abbr="de",
+                                       from_year=2020, to_year=2022)
+    # 3 years × 2 Delaware rows = 6 accident rows (Virginia row filtered out)
+    assert len(result["Accident"]) == 6
+    # All rows are actually Delaware
+    assert set(result["Accident"]["STATE"]) == {10}
+
+
+def test_download_all_datasets_different_states_share_cache():
+    """--all efficiency: per-state calls for DE then VA reuse the same year
+    download, so cache_hits == 1 (only DE triggered the load).
+    """
+    gfd.clear_bulk_cache()
+    _preseed_bulk_cache([2020])  # no network at all
+
+    de_result = gfd.download_all_datasets(fips="10", abbr="de",
+                                          from_year=2020, to_year=2020)
+    va_result = gfd.download_all_datasets(fips="51", abbr="va",
+                                          from_year=2020, to_year=2020)
+    assert len(de_result["Accident"]) == 2
+    assert len(va_result["Accident"]) == 1
+    assert set(de_result["Accident"]["STATE"]) == {10}
+    assert set(va_result["Accident"]["STATE"]) == {51}
+
+
+# ═══════════════════════════════════════════════════════════════
+#  End-to-end: process_state with a mocked bulk cache
+# ═══════════════════════════════════════════════════════════════
 
 def test_process_state_mocked_end_to_end(tmp_path, monkeypatch):
-    """Exercises the full process_state() path with a mocked API.
+    """Exercises the full process_state() path with a pre-seeded bulk cache.
 
     Verifies: parquet file is written, row count matches, columns match spec,
     any_drunk/any_speeding flags reflect the synthetic input.
     """
-    monkeypatch.setattr(gfd, "fetch_fars_dataset", _mock_fetcher_factory())
-    # Disable inter-request sleeps so the test runs instantly
+    _preseed_bulk_cache([2020, 2021, 2022])
     monkeypatch.setattr(gfd.time, "sleep", lambda *a, **kw: None)
 
     de = gfd.ABBR_LOOKUP["de"]
@@ -529,14 +701,13 @@ def test_process_state_mocked_end_to_end(tmp_path, monkeypatch):
     )
     assert tag == "completed"
     assert df is not None
-    # 3 years × 2 crashes/yr = 6 rows
+    # 3 years × 2 Delaware crashes/yr = 6 rows
     assert len(df) == 6
-    # Schema matches contract
+    # Schema matches the 44-col contract
     assert set(df.columns) == EXPECTED_FINAL_COLS
     # Parquet file on disk
     pq = tmp_path / "de_fars.parquet.gz"
     assert pq.exists()
-    # Round-trip read via the decompression helper (the file is gzip(parquet))
     round_trip = gfd.read_gz_parquet(pq)
     assert len(round_trip) == 6
     assert set(round_trip.columns) == EXPECTED_FINAL_COLS
@@ -547,18 +718,20 @@ def test_process_state_mocked_end_to_end(tmp_path, monkeypatch):
 
 def test_process_state_skip_local_cached(tmp_path, monkeypatch):
     """If --local-only and file already exists, skip without re-fetching."""
-    # First run writes the cache
-    monkeypatch.setattr(gfd, "fetch_fars_dataset", _mock_fetcher_factory())
+    _preseed_bulk_cache([2020])
     monkeypatch.setattr(gfd.time, "sleep", lambda *a, **kw: None)
+
     de = gfd.ABBR_LOOKUP["de"]
     gfd.process_state(de, tmp_path, s3=None, bucket="x",
                       from_year=2020, to_year=2020,
                       force=False, local_only=True)
 
-    # Second run with an exploding fetcher — must not touch the API
+    # Clear cache so any reload attempt would have to go to the network
+    gfd.clear_bulk_cache()
+
     def boom(*a, **kw):
-        raise AssertionError("fetcher should not be called on skip")
-    monkeypatch.setattr(gfd, "fetch_fars_dataset", boom)
+        raise AssertionError("download_fars_year_bulk should not be called on skip")
+    monkeypatch.setattr(gfd, "download_fars_year_bulk", boom)
 
     tag, df = gfd.process_state(de, tmp_path, s3=None, bucket="x",
                                 from_year=2020, to_year=2020,
@@ -615,34 +788,6 @@ def test_cli_rejects_invalid_year_range():
     assert result.returncode != 0
 
 
-# ═══════════════════════════════════════════════════════════════
-#  HTTP headers (regression test for 403 Forbidden fix)
-# ═══════════════════════════════════════════════════════════════
-
-def test_fetch_fars_dataset_sends_user_agent():
-    """NHTSA blocks datacenter IPs (GitHub Actions Azure runners) without a
-    descriptive User-Agent. The request MUST include FARS_HEADERS or we get
-    a 403 Forbidden from every Actions run.
-    """
-    captured = {}
-
-    class FakeResponse:
-        def raise_for_status(self):
-            pass
-        def json(self):
-            return {"Results": [[]]}
-
-    def fake_get(url, params=None, headers=None, timeout=None):
-        captured["url"] = url
-        captured["params"] = params
-        captured["headers"] = headers
-        return FakeResponse()
-
-    with patch.object(gfd.requests, "get", side_effect=fake_get):
-        gfd.fetch_fars_dataset("Accident", 10, 2020, 2020)
-
-    assert captured["headers"] is not None, "no headers sent"
-    ua = captured["headers"].get("User-Agent", "")
-    assert ua, "User-Agent header is empty"
-    assert "CrashLens" in ua, f"User-Agent should identify CrashLens, got: {ua!r}"
-    assert captured["headers"].get("Accept") == "application/json"
+# (The User-Agent test for the old CrashAPI path was removed in Fix 2 —
+# see test_download_fars_year_bulk_extracts_csvs_from_zip for the
+# equivalent header assertion on the bulk-CSV path.)

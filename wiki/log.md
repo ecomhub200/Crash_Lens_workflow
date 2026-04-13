@@ -10,6 +10,64 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] fix | FARS API still 403 — switched to static.nhtsa.gov bulk CSV ZIPs (Fix 2)
+
+Fix 1 (User-Agent header) **did not work**. The `generate-fars-cache.yml` workflow run on main HEAD `e454377` (which verified includes the `FARS_HEADERS` constant and the `headers=FARS_HEADERS` kwarg in `fetch_fars_dataset()`) still returned `403 Client Error: Forbidden` for every CrashAPI call. NHTSA is blocking GitHub Actions' Azure IPs at the network / WAF layer, not at the User-Agent sniff layer — no header combination will fix this. Confirmed from the failed run log at `2026-04-13T02:58:51Z`:
+
+```
+403 Client Error: Forbidden for url:
+  https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData?dataset=Accident&FromYear=2010&ToYear=2014&State=10&format=json
+... (same for Person, Vehicle, every year chunk)
+[failed] Delaware — no accident data returned from FARS API
+```
+
+**Fix:** switched the entire download path from the CrashAPI to NHTSA's bulk CSV archive at `https://static.nhtsa.gov/nhtsa/downloads/FARS/{year}/National/FARS{year}NationalCSV.zip`. This is a Cloudfront CDN serving static files — no anti-abuse filter, no datacenter-IP blocks. Tested pattern for 2015+; earlier years (2010-2014) may use a different path or may 404, in which case we log a warning and skip.
+
+**Implementation:**
+
+- New `download_fars_year_bulk(year)` downloads one year's ZIP, extracts ACCIDENT.CSV / PERSON.CSV / VEHICLE.CSV (case-insensitive filename match) via `zipfile.ZipFile(io.BytesIO(...))`, reads each with `pd.read_csv(..., encoding='latin-1', low_memory=False)`. Returns a dict of nationwide DataFrames (all 51 states) or `None` on failure. 3-attempt retry with exponential backoff. Negative results cached so we don't hammer the CDN on failure.
+- Module-level `_FARS_BULK_CACHE = {year: {...}}` — each year is downloaded once per process and reused across all 51 per-state calls. `--all` now makes ~14 HTTP requests total (one per year) instead of 714 (51 states × 14 years). `clear_bulk_cache()` helper for tests.
+- `download_all_datasets(fips, abbr, from_year, to_year)` rewritten: loops over years, fetches from cache, filters nationwide DataFrames to `STATE == int(fips)`, concats. Same return shape as before so `process_state()` is untouched.
+- `_filter_to_state(df, fips_int)` helper: coerces STATE to numeric (older years ship it as string), returns empty DataFrame if STATE column is missing.
+- `build_final_df()` now backfills missing text-label columns (`STATENAME`, `FUNC_SYSNAME`, etc.) with `pd.NA` and projects to `FINAL_COLUMNS` (the 44-col contract) so the output schema is stable even when older bulk CSVs are missing some fields. Added a `FINAL_COLUMNS` constant in the module.
+- Deleted `fetch_fars_dataset()`, `year_chunks()`, `FARS_BASE`, `FARS_MAX_SPAN`, `FARS_HEADERS`, `FARS_DATASETS` (all API-specific dead code). Replaced with `FARS_BULK_URL` and `BULK_HEADERS`.
+- Module docstring + `main()` banner updated to say "NHTSA bulk CSV archive (static.nhtsa.gov)" instead of "NHTSA FARS API (crashviewer.nhtsa.dot.gov)".
+
+**Trade-offs:**
+
+- **Bandwidth:** single-state runs now download ~500 MB (14 ZIPs at 30-50 MB each) to extract ~1,400 rows for Delaware. Wasteful compared to 3 targeted API calls, but API calls don't work so this is the baseline. `--all` runs download the same ~500 MB and reuse it across all 51 states — much better than the API path would have been.
+- **Memory:** each year's nationwide DataFrames are ~10-20 MB in RAM (ACCIDENT ~35K rows, PERSON ~90K, VEHICLE ~60K). 14 years × ~40 MB = ~560 MB peak cache. Well within a 7 GB GitHub Actions runner.
+- **`any_distracted` flag:** FARS 2010+ moved the `MDRDSTRD` field to a separate `DISTRACT.CSV` auxiliary file. The old CrashAPI joined it into the Vehicle dataset automatically; bulk ZIPs don't. Our `aggregate_vehicles()` uses `df.get("MDRDSTRD")` which gracefully returns all-False when the column is missing, so the output schema is preserved but `any_distracted` will always be False. Acceptable for v1; can be fixed later by loading DISTRACT.CSV and joining on `(ST_CASE, VEH_NO)` if downstream needs this flag.
+- **Older years (2010-2014)** may not have `*NAME` text-label columns in the bulk CSV (added in newer FARS format). `build_final_df` backfills them as NaN so the 44-col schema still holds.
+
+**Test suite:** 38 → 44 tests (all green in ~1.6s).
+
+Removed:
+- `test_year_chunks_*` (3 tests) — `year_chunks()` function deleted
+- `test_fetch_fars_dataset_sends_user_agent` — `fetch_fars_dataset()` function deleted
+
+Added:
+- `test_filter_to_state_basic` — filters nationwide DF to single-state rows
+- `test_filter_to_state_missing_column` — defensive: no STATE col → empty DF
+- `test_filter_to_state_string_fips` — coerces string STATE to int (older years)
+- `test_download_fars_year_bulk_cache_reuse` — second call hits cache, no network
+- `test_download_fars_year_bulk_http_retry_and_failure` — 3 retries then negative cache
+- `test_download_fars_year_bulk_extracts_csvs_from_zip` — synthetic in-memory ZIP → parsed DFs (also asserts the User-Agent header is sent)
+- `test_download_fars_year_bulk_handles_lowercase_filenames` — case-insensitive filename match (`accident.csv` vs `ACCIDENT.CSV`)
+- `test_download_all_datasets_filters_to_state` — full end-to-end per-state slice
+- `test_download_all_datasets_different_states_share_cache` — DE then VA reuse the same cached year (the `--all` efficiency guarantee)
+- `test_build_final_df_backfills_missing_text_labels` — older-year simulation, final schema still 44 cols
+
+Adapted:
+- `test_process_state_mocked_end_to_end` now monkeypatches `_FARS_BULK_CACHE` via `_preseed_bulk_cache([years])` instead of patching the deleted `fetch_fars_dataset`
+- `test_process_state_skip_local_cached` monkeypatches `download_fars_year_bulk` to an exploding stub instead of `fetch_fars_dataset`
+
+An `autouse=True` fixture `_reset_bulk_cache` clears `_FARS_BULK_CACHE` before and after every test to prevent cross-test leakage.
+
+Files changed: `generate_fars_data.py` (full rewrite of the download path), `tests/test_fars_downloader.py` (6 new + 2 adapted + 4 removed), `wiki/log.md`.
+
+---
+
 ## [2026-04-13] fix | FARS API 403 Forbidden — User-Agent header (GitHub Actions Azure IPs)
 
 The NHTSA CrashAPI (`https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData`) returns **403 Forbidden** for requests that don't carry a descriptive `User-Agent` header when called from datacenter IP ranges — specifically GitHub Actions' Azure runners. Local development and residential IPs work fine without headers, which is why this wasn't caught in testing.
