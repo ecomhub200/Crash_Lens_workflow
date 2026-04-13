@@ -64,37 +64,20 @@ import requests
 
 FARS_BASE = "https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData"
 FARS_DATASETS = ("Accident", "Person", "Vehicle")
-YEAR_CHUNKS = [(2010, 2014), (2015, 2019), (2020, 2023)]  # API caps at 5-yr ranges
+FARS_MAX_SPAN = 5  # API hard-caps single requests at 5 calendar years
 
 R2_BUCKET = "crash-lens-data"
 
-# Accident-table columns to keep (name in FARS API response)
-ACCIDENT_COLS = [
-    "ST_CASE", "STATE", "STATENAME", "COUNTY", "COUNTYNAME",
-    "CITY", "CITYNAME", "YEAR", "MONTH", "DAY", "HOUR", "MINUTE",
-    "LATITUDE", "LONGITUD",            # FARS uses LONGITUD not LONGITUDE
-    "FATALS", "DRUNK_DR", "TOTALVEHICLES", "PERSONS",
-    "FUNC_SYS", "FUNC_SYSNAME",
-    "RD_OWNER", "RD_OWNERNAME",
-    "ROUTE", "ROUTENAME",
-    "RUR_URB", "RUR_URBNAME",
-    "LGT_COND", "LGT_CONDNAME",
-    "WEATHER", "WEATHERNAME",
-    "MAN_COLL", "MAN_COLLNAME",
-    "HARM_EV", "HARM_EVNAME",
-    "REL_ROAD", "REL_ROADNAME",
-    "TYP_INT", "TYP_INTNAME",
-    "WRK_ZONE",
-    "SCH_BUS",
-    "NHS",
-    "SP_JUR", "SP_JURNAME",
-    "NOT_HOUR", "NOT_MIN",
-    "ARR_HOUR", "ARR_MIN",
-    "HOSP_HR", "HOSP_MN",
-    "TWAY_ID", "TWAY_ID2",
-]
-
-# Rename FARS columns → CrashLens-friendly names in the final parquet
+# Rename FARS columns → CrashLens-friendly names in the final parquet.
+# RENAME_MAP is the single source of truth for which FARS API fields survive
+# into the output. Everything not in this map is filtered out by build_final_df,
+# which locks the final schema at 30 accident cols + 9 person flags + 5 vehicle
+# flags = 44 total columns (see EXPECTED_FINAL_COLS in the test suite).
+#
+# We keep only the *NAME text-label columns (not the numeric code counterparts
+# like FUNC_SYS/RD_OWNER/TYP_INT) because the documented CrashLens schema uses
+# human-readable labels. If downstream consumers ever need the raw FARS codes
+# they should be re-added here AND to EXPECTED_FINAL_COLS in the test.
 RENAME_MAP = {
     "ST_CASE": "case_id",
     "STATE": "state_fips",
@@ -127,6 +110,13 @@ RENAME_MAP = {
     "TWAY_ID": "route_name_1",
     "TWAY_ID2": "route_name_2",
 }
+
+# Accident-table fields we keep from the FARS API response. Derived from
+# RENAME_MAP so there's only one list to maintain. build_final_df() intersects
+# this with the actual accident DataFrame's columns before joining — extra
+# fields the real API returns (FUNC_SYS code, WRK_ZONE, SCH_BUS, NHS, etc.)
+# are dropped here, NOT carried through to the final parquet.
+ACCIDENT_COLS = list(RENAME_MAP.keys())
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -171,6 +161,22 @@ def gzip_file(src, dst):
     return raw, gz
 
 
+def read_gz_parquet(path_or_bytes):
+    """Read a gzip-wrapped parquet file (our `.parquet.gz` convention).
+
+    Our `gzip_file()` helper wraps a raw parquet file in a gzip container,
+    so `pd.read_parquet()` can't read it directly — it would try to parse
+    the gzip header as parquet magic bytes and fail. This helper decompresses
+    the outer gzip layer first, then hands the inner parquet bytes to pandas.
+    """
+    if isinstance(path_or_bytes, (bytes, bytearray)):
+        src = io.BytesIO(path_or_bytes)
+    else:
+        src = path_or_bytes  # pathlib.Path or str
+    with gzip.open(src, "rb") as f:
+        return pd.read_parquet(io.BytesIO(f.read()))
+
+
 def get_r2_client():
     """Build a boto3 S3 client for Cloudflare R2 using CF_* env vars."""
     acct = os.environ.get("CF_ACCOUNT_ID", "")
@@ -211,10 +217,10 @@ def r2_upload(s3, local_path, bucket, key):
 
 
 def r2_download_to_df(s3, bucket, key):
-    """Download an existing parquet from R2 into a DataFrame (for nationwide rollup)."""
+    """Download an existing parquet.gz from R2 into a DataFrame (for nationwide rollup)."""
     try:
         obj = s3.get_object(Bucket=bucket, Key=key)
-        return pd.read_parquet(io.BytesIO(obj["Body"].read()))
+        return read_gz_parquet(obj["Body"].read())
     except Exception as e:
         print(f"      WARN: could not fetch existing R2 file {key}: {e}")
         return None
@@ -255,17 +261,36 @@ def fetch_fars_dataset(dataset, fips, from_year, to_year):
     return []
 
 
+def year_chunks(from_year, to_year, max_span=FARS_MAX_SPAN):
+    """Split [from_year, to_year] into contiguous chunks of ≤ max_span years.
+
+    The NHTSA CrashAPI caps a single FARS request at 5 calendar years, so the
+    pipeline always splits the requested range into 5-year blocks regardless
+    of what the user passes. This function is dynamic — it honors whatever
+    --from-year / --to-year the user specifies, even if that range extends
+    before 2010 or beyond 2023, unlike a hardcoded chunk list.
+    """
+    chunks = []
+    lo = from_year
+    while lo <= to_year:
+        hi = min(lo + max_span - 1, to_year)
+        chunks.append((lo, hi))
+        lo = hi + 1
+    return chunks
+
+
 def download_all_datasets(fips, abbr, from_year, to_year):
-    """Fetch 3 datasets × 3 year chunks for one state, concatenated per dataset."""
+    """Fetch 3 datasets × N year chunks for one state, concatenated per dataset.
+
+    Year chunks are computed dynamically from the requested range so that
+    unusual --from-year / --to-year arguments (e.g. 2008 or 2025) are honored
+    instead of silently truncated.
+    """
+    chunks_to_fetch = year_chunks(from_year, to_year)
     out = {}
     for dataset in FARS_DATASETS:
         chunks = []
-        for y_lo, y_hi in YEAR_CHUNKS:
-            # Skip chunks entirely outside the requested range
-            if y_hi < from_year or y_lo > to_year:
-                continue
-            lo = max(y_lo, from_year)
-            hi = min(y_hi, to_year)
+        for lo, hi in chunks_to_fetch:
             records = fetch_fars_dataset(dataset, fips, lo, hi)
             print(f"      Downloading {dataset:8s} data ({lo}-{hi})... {len(records):,} records")
             if records:
@@ -368,17 +393,21 @@ def aggregate_vehicles(vehicle_df):
 # ═══════════════════════════════════════════════════════════════
 
 def _sanitize_gps(df):
-    """Mask out FARS sentinel / out-of-range lat/lon values."""
+    """Mask out FARS sentinel / out-of-range lat/lon values.
+
+    Bounds are the CONUS+AK+HI envelope. Lower latitude is 17.0° to include
+    Hawaii (Ka Lae / South Point on the Big Island is at 18.9°N; a tighter
+    bound would silently drop every HI fatal crash). Upper latitude is 72.0°
+    to include Utqiagvik, AK (71.3°N). Longitude bounds span the Aleutians
+    through the East Coast.
+
+    The lat/lon range filter alone catches every documented FARS sentinel
+    (77.7777, 88.8888, 777.7777, 888.8888, 99.9999) because all of them lie
+    outside the valid envelope.
+    """
     lat = pd.to_numeric(df["latitude"], errors="coerce")
     lon = pd.to_numeric(df["longitude"], errors="coerce")
-    valid = (
-        lat.between(24.0, 72.0)
-        & lon.between(-180.0, -65.0)
-        & (lat != 77.7777)
-        & (lat != 88.8888)
-        & (lon != 777.7777)
-        & (lon != 888.8888)
-    )
+    valid = lat.between(17.0, 72.0) & lon.between(-180.0, -65.0)
     df["latitude"] = lat.where(valid)
     df["longitude"] = lon.where(valid)
     return int(valid.sum()), len(df)
@@ -464,7 +493,7 @@ def process_state(state_info, cache_dir, s3, bucket, from_year, to_year,
         if local_only and fars_gz.exists():
             print(f"  [skip] {name} ({abbr}) — FARS already cached locally")
             try:
-                return ("skipped", pd.read_parquet(fars_gz))
+                return ("skipped", read_gz_parquet(fars_gz))
             except Exception:
                 return ("skipped", None)
 
