@@ -279,21 +279,26 @@ class RoadInventorySession:
         # inventory slice (Phase 2), prefer it; otherwise fall back to the
         # directed-degree mapping (deg>=6 ≈ T-intersection).
         if "intersection_degree" in self.ri.columns:
-            ri_slice = self.ri.iloc[matched_ri]
+            # Use a distinct name here — do NOT clobber `ri_slice`, which holds
+            # the string-cast copy from line 237 and must stay intact for the
+            # `new_cols` bulk assign below. Clobbering it caused a pyarrow
+            # `ArrowInvalid` on AADT (mixed int64/str object column) under
+            # pandas 3.0.2 + pyarrow 23.0.1.
+            ri_seg = self.ri.iloc[matched_ri]
             seg_int_deg = pd.to_numeric(
-                ri_slice["intersection_degree"], errors="coerce"
+                ri_seg["intersection_degree"], errors="coerce"
             ).fillna(0).astype(int).values
-            has_spn = "streets_per_node" in ri_slice.columns
+            has_spn = "streets_per_node" in ri_seg.columns
             if has_spn:
                 seg_spn = pd.to_numeric(
-                    ri_slice["streets_per_node"], errors="coerce"
+                    ri_seg["streets_per_node"], errors="coerce"
                 ).fillna(0).astype(int).values
             else:
                 seg_spn = None
-            seg_u_lat = ri_slice["u_lat"].values.astype(float)
-            seg_u_lon = ri_slice["u_lon"].values.astype(float)
-            seg_v_lat = ri_slice["v_lat"].values.astype(float)
-            seg_v_lon = ri_slice["v_lon"].values.astype(float)
+            seg_u_lat = ri_seg["u_lat"].values.astype(float)
+            seg_u_lon = ri_seg["u_lon"].values.astype(float)
+            seg_v_lat = ri_seg["v_lat"].values.astype(float)
+            seg_v_lon = ri_seg["v_lon"].values.astype(float)
 
             c_lat = lats[matched_ci]
             c_lon = lons[matched_ci]
@@ -366,11 +371,11 @@ class RoadInventorySession:
         if new_cols:
             for col in new_cols:
                 if col not in df.columns:
-                    # Force object dtype — pandas 3.0+ creates a strict `str`
-                    # column from `df[col] = ""`, which refuses numeric bulk
-                    # assignment from ri_slice (e.g. intersection_degree,
-                    # streets_per_node). Object dtype accepts any value and
-                    # matches prior pandas 2.x behavior.
+                    # Defensive: force object dtype. `ri_slice` is fully
+                    # string-cast at lines 240–242, so the bulk assign below
+                    # should always write strings — but keeping object dtype
+                    # matches pandas 2.x behavior and tolerates any future
+                    # caller that writes non-string values here.
                     df[col] = pd.Series("", index=df.index, dtype=object)
             df.loc[matched_ci, new_cols] = ri_slice[new_cols].values
 

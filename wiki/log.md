@@ -10,6 +10,36 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] fix | road_inventory_enricher ri_slice clobber → pyarrow AADT int64 crash
+
+Delaware batch pipeline (`Process (Delaware)` job) was failing in Stage 0.5 enrichment with:
+
+```
+pyarrow.lib.ArrowInvalid: ("Could not convert '' with type str: tried to convert to int64",
+                          'Conversion failed for column AADT with type object')
+```
+
+The crash was at the end of `crash_enricher.py:1612` when writing the enriched parquet for the 569,829-row statewide dataframe, after an otherwise-successful 8-minute enrichment. Environment: ubuntu-24.04 runner image `20260406.80.1`, Python 3.11.15, pandas 3.0.2, pyarrow 23.0.1, numpy 2.4.4 — all newer than when the enrichment code was last exercised.
+
+**Root cause** was a variable-clobber bug in `road_inventory_enricher.py` introduced by two unrelated fixes landing in sequence:
+
+1. `ri_slice` is built at line 237 as `self.ri.iloc[matched_ri][self.transfer_cols].copy()`, then at lines 240–242 *every* column is cast to string via `.astype(str).replace({"nan": "", "None": "", "none": "", "<NA>": ""})`. This is the intended invariant: by the time the enricher writes into the crash df, every value in `ri_slice` is a Python `str`.
+2. Commit `6651212` (2026-04-12, "fix: intersection degree>=6") added `ri_slice = self.ri.iloc[matched_ri]` inside the `if "intersection_degree" in self.ri.columns:` block at line 282. This **clobbered** the string-cast `ri_slice` with a raw-dtype slice of `self.ri`, so `intersection_degree` / `streets_per_node` could be read as int64 for the node-proximity computation.
+3. Commit `7fb70274` (2026-04-13, pandas 3.0 compat) hit the downstream symptom: the later `new_cols` bulk assign at line 380 (`df.loc[matched_ci, new_cols] = ri_slice[new_cols].values`) was now writing int64 AADT / Lane_Width_ft / Shoulder_Width_ft / Median_Width_ft values (from the clobbered raw `ri_slice`) into pandas 3.0 strict-str columns. The workaround was to force the fresh df columns to `dtype=object` via `pd.Series("", index=df.index, dtype=object)` so the numeric assign would succeed.
+4. On the next run, the writer step collapsed: the df now had object-dtype columns containing a mix of `int` (matched rows) and `""` (unmatched rows). PyArrow 23 inferred `int64` from the majority-integer values and exploded on `""`. Pandas 2.x + pyarrow ≤22 had silently coerced the mix to string on write, which is why neither commit `6651212` nor `7fb70274` tripped CI before the runner/dependency bump.
+
+**Fix** (`road_inventory_enricher.py`, single targeted rename):
+
+- Renamed the raw-dtype slice inside the intersection block (lines 281–301) from `ri_slice` to `ri_seg`. All 7 references inside that block now use `ri_seg`; the string-cast `ri_slice` from line 237 flows untouched through to the `new_cols` bulk assign at line 380.
+- Updated the comment at line 374 to reflect the new invariant: the `dtype=object` init is now defensive-only (ri_slice is fully string-cast, so the bulk assign always writes strings).
+- No changes to `crash_enricher.py`, no schema changes, no runner/action version changes. The enricher is now dtype-safe under both pandas 2.x and pandas 3.x + pyarrow 23.
+
+**Blast radius**: the rename affects only variable naming inside the `if "intersection_degree"` branch. No behavior change for `intersection_degree` / `streets_per_node` computation, no behavior change for OSM-free states (they never enter the branch). AADT and all other numeric HPMS transfer columns (`Lane_Width_ft`, `Median_Width_ft`, `Shoulder_Width_ft`, `AADT_Trucks`, etc.) will now be written as string values — which is the already-declared type for all 111 Tier 1 columns in `wiki/concepts/supabase-schema-v3.md` (TIER1_MAP), so no downstream schema fallout.
+
+**Verification plan**: re-run the Delaware batch pipeline on this branch. Expected: Stage 0.5 enrichment completes, `delaware_statewide_enriched.parquet.gz` is produced with AADT populated at the usual ~98.3% fill rate, and the downstream Split / Upload / Supabase sync stages run without the ArrowInvalid. Same fix covers every OSM-derived state (Maryland, Virginia, etc. once enabled) because they all route through the same intersection_degree branch.
+
+---
+
 ## [2026-04-13] refactor | FARS output as plain .parquet (Snappy) + `_national/` R2 path
 
 Migrated `generate_fars_data.py` from gzip-wrapped parquet (`.parquet.gz`) to plain Snappy-compressed parquet (`.parquet`), and moved the nationwide rollup to the existing `_national/` R2 directory.
