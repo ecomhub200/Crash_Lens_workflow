@@ -650,6 +650,158 @@ def test_download_fars_year_bulk_handles_lowercase_filenames():
     assert result["Person"].empty  # no person.csv in the zip
 
 
+def test_download_fars_year_bulk_injects_year_when_missing():
+    """Some FARS year CSVs omit the YEAR column. download_fars_year_bulk
+    must inject YEAR = <download year> into every loaded DataFrame so the
+    downstream aggregators don't KeyError.
+    """
+    gfd.clear_bulk_cache()
+
+    # Build a synthetic accident row WITHOUT the YEAR column.
+    acc_row = _synthetic_accident_row(case=1, year=2021, STATE=10)
+    acc_row.pop("YEAR")
+    acc_df = pd.DataFrame([acc_row])
+
+    # Person / vehicle rows without YEAR either.
+    per_row = _person_row(ST_CASE=1, DRINKING=1, PER_TYP=1, INJ_SEV=4)
+    per_row.pop("YEAR")
+    per_df = pd.DataFrame([per_row])
+
+    veh_row = _vehicle_row(ST_CASE=1, SPEEDREL=1)
+    veh_row.pop("YEAR")
+    veh_df = pd.DataFrame([veh_row])
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("ACCIDENT.CSV", acc_df.to_csv(index=False))
+        zf.writestr("PERSON.CSV", per_df.to_csv(index=False))
+        zf.writestr("VEHICLE.CSV", veh_df.to_csv(index=False))
+    buf.seek(0)
+
+    class FakeResponse:
+        content = buf.getvalue()
+        def raise_for_status(self): pass
+
+    with patch.object(gfd.requests, "get", return_value=FakeResponse()):
+        result = gfd.download_fars_year_bulk(2021)
+
+    assert result is not None
+    # YEAR column was missing from all three source CSVs but has been
+    # injected with the download year.
+    assert "YEAR" not in acc_df.columns  # sanity: the source really lacks it
+    assert (result["Accident"]["YEAR"] == 2021).all()
+    assert (result["Person"]["YEAR"] == 2021).all()
+    assert (result["Vehicle"]["YEAR"] == 2021).all()
+
+    # End-to-end: build_final_df must succeed without KeyError now that
+    # YEAR is guaranteed by the loader.
+    final = gfd.build_final_df(
+        result["Accident"], result["Person"], result["Vehicle"],
+    )
+    assert not final.empty
+    assert final["crash_year"].iloc[0] == 2021
+
+
+def test_extract_fars_csv_finds_nested_uppercase():
+    """ZIPs that nest files in a subdirectory (e.g.
+    'FARS2021NationalCSV/ACCIDENT.CSV') must still match.
+    """
+    acc_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2021, STATE=10)])
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("FARS2021NationalCSV/ACCIDENT.CSV", acc_df.to_csv(index=False))
+
+    buf.seek(0)
+    with zipfile.ZipFile(buf) as zf:
+        out = gfd._extract_fars_csv(zf, {"ACCIDENT.CSV"})
+
+    assert out is not None
+    assert len(out) == 1
+    assert out["STATE"].iloc[0] == 10
+
+
+def test_extract_fars_csv_ignores_lookalike():
+    """Exact-basename matching must NOT false-positive on auxiliary files
+    like 'accident_aux.csv' — the old substring matcher would have picked
+    the wrong file, which is the root cause of DE 2021/2022 accident=0.
+    """
+    real_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2021, STATE=10)])
+    aux_df = pd.DataFrame([{"ST_CASE": 999, "NOT_A_REAL_CRASH": True}])
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        # Write the lookalike FIRST to guarantee it would beat ACCIDENT.CSV
+        # under any "first substring match wins" logic.
+        zf.writestr("accident_aux.csv", aux_df.to_csv(index=False))
+        zf.writestr("ACCIDENT.CSV", real_df.to_csv(index=False))
+
+    buf.seek(0)
+    with zipfile.ZipFile(buf) as zf:
+        out = gfd._extract_fars_csv(zf, {"ACCIDENT.CSV"})
+
+    assert out is not None
+    # The returned DF must be from ACCIDENT.CSV, not accident_aux.csv.
+    assert "STATE" in out.columns
+    assert "NOT_A_REAL_CRASH" not in out.columns
+    assert out["ST_CASE"].iloc[0] == 1
+
+
+def test_extract_fars_csv_accepts_veh_alias():
+    """Some FARS years ship vehicle data as VEH.CSV instead of VEHICLE.CSV.
+    _extract_fars_csv must accept any name in the basenames set.
+    """
+    veh_df = pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020, SPEEDREL=1)])
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("VEH.CSV", veh_df.to_csv(index=False))
+
+    buf.seek(0)
+    with zipfile.ZipFile(buf) as zf:
+        out = gfd._extract_fars_csv(
+            zf, {"VEHICLE.CSV", "VEH.CSV", "VEHICLES.CSV"},
+        )
+
+    assert out is not None
+    assert len(out) == 1
+    assert out["SPEEDREL"].iloc[0] == 1
+
+
+def test_small_vehicle_df_logs_warning_without_failing(capsys):
+    """A tiny vehicle_df (<1000 rows nationally) must log a WARNING but
+    still return a non-None result. Vehicle data is optional for crash-
+    level analysis.
+    """
+    gfd.clear_bulk_cache()
+
+    acc_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2020, STATE=10)])
+    per_df = pd.DataFrame([_person_row(ST_CASE=1, YEAR=2020)])
+    veh_df = pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020)])  # 1 row
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("ACCIDENT.CSV", acc_df.to_csv(index=False))
+        zf.writestr("PERSON.CSV", per_df.to_csv(index=False))
+        zf.writestr("VEHICLE.CSV", veh_df.to_csv(index=False))
+    buf.seek(0)
+
+    class FakeResponse:
+        content = buf.getvalue()
+        def raise_for_status(self): pass
+
+    with patch.object(gfd.requests, "get", return_value=FakeResponse()):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    assert len(result["Vehicle"]) == 1
+
+    captured = capsys.readouterr()
+    # Warning present …
+    assert "WARNING" in captured.out
+    assert "VEHICLE has only 1 rows" in captured.out
+    # … but the function did not raise.
+
+
 def test_download_all_datasets_filters_to_state():
     """Full end-to-end per-state slice: pre-seed cache, call the public API,
     and verify only target-state rows come back.

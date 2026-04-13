@@ -276,13 +276,24 @@ def clear_bulk_cache():
     _FARS_BULK_CACHE.clear()
 
 
-def _extract_fars_csv(zf, keyword):
-    """Return the DataFrame for the first CSV in ZF whose filename contains
-    `keyword` (case-insensitive) and ends with .csv. Returns None if missing.
+def _extract_fars_csv(zf, basenames):
+    """Return the DataFrame for the first ZIP entry whose basename
+    (path-stripped, upper-cased) matches any filename in `basenames`.
+
+    `basenames` is an iterable of uppercase filenames, e.g.
+    ``{"ACCIDENT.CSV"}`` or ``{"VEHICLE.CSV", "VEH.CSV", "VEHICLES.CSV"}``.
+
+    Path stripping via ``os.path.basename`` handles ZIPs that nest their
+    files inside a top-level directory (e.g. ``FARS2021NationalCSV/ACCIDENT.CSV``).
+    Exact-basename matching (rather than substring) prevents false-positive
+    matches on auxiliary files like ``accident_aux.csv``.
+
+    Returns None if no entry matches.
     """
+    wanted = {b.upper() for b in basenames}
     for name in zf.namelist():
-        lower = name.lower()
-        if keyword.lower() in lower and lower.endswith(".csv"):
+        base = os.path.basename(name).upper()
+        if base in wanted:
             with zf.open(name) as f:
                 return pd.read_csv(f, encoding="latin-1", low_memory=False)
     return None
@@ -323,9 +334,37 @@ def download_fars_year_bulk(year):
         _FARS_BULK_CACHE[year] = None
         return None
 
-    accident_df = _extract_fars_csv(zf, "accident")
-    person_df = _extract_fars_csv(zf, "person")
-    vehicle_df = _extract_fars_csv(zf, "vehicle")
+    # Debug: show the first 20 basenames so filename drift in future years
+    # (e.g. VEHICLE.CSV → VEH.CSV, or new subdirectory nesting) is obvious
+    # from the log without needing to re-run with extra instrumentation.
+    print(
+        f"      FARS {year} ZIP contents: "
+        f"{[os.path.basename(n) for n in zf.namelist()][:20]}"
+    )
+
+    accident_df = _extract_fars_csv(zf, {"ACCIDENT.CSV"})
+    person_df = _extract_fars_csv(zf, {"PERSON.CSV", "PER.CSV"})
+    vehicle_df = _extract_fars_csv(zf, {"VEHICLE.CSV", "VEH.CSV", "VEHICLES.CSV"})
+
+    # Inject YEAR from the download year into every loaded DF. Some FARS
+    # year CSVs omit the YEAR column (or ship it with non-uppercase casing),
+    # which breaks the crash-level aggregation and merge downstream. The
+    # download year is authoritative for every row in a given national ZIP,
+    # so this is a root-cause fix for the KeyError 'YEAR' bug.
+    for df in (accident_df, person_df, vehicle_df):
+        if df is not None and not df.empty:
+            df["YEAR"] = int(year)
+
+    # Vehicle data is optional for crash-level analysis — if the VEHICLE
+    # file shrinks unexpectedly (e.g. NHTSA splits it across multiple files
+    # for a new year), warn but do not fail. The any_speeding / any_large_truck
+    # / etc. flags will just be sparser than usual for that year.
+    if vehicle_df is not None and len(vehicle_df) < 1000:
+        print(
+            f"    WARNING: FARS {year} VEHICLE has only {len(vehicle_df):,} "
+            f"rows nationally (expected ~40-50k); vehicle flags may be "
+            f"incomplete for this year."
+        )
 
     acc_n = 0 if accident_df is None else len(accident_df)
     per_n = 0 if person_df is None else len(person_df)
@@ -346,13 +385,15 @@ def download_fars_year_bulk(year):
 def _filter_to_state(df, fips_int):
     """Filter a nationwide FARS DataFrame to rows where STATE == fips_int.
 
-    Coerces STATE to numeric defensively — some older years ship it as str.
+    Coerces STATE to numeric defensively — some older years ship it as str,
+    others as int. Explicit ``Int64`` cast after ``to_numeric`` makes the
+    comparison predictable even when the column is a mix of types.
     Returns an empty DataFrame if STATE column is missing.
     """
     if df is None or df.empty or "STATE" not in df.columns:
         return pd.DataFrame()
-    state = pd.to_numeric(df["STATE"], errors="coerce")
-    return df[state == fips_int].copy()
+    state = pd.to_numeric(df["STATE"], errors="coerce").astype("Int64")
+    return df[state == int(fips_int)].copy()
 
 
 def download_all_datasets(fips, abbr, from_year, to_year):
