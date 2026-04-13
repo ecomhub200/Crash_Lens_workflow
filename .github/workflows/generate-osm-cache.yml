@@ -1,12 +1,19 @@
 # .github/workflows/generate-osm-cache.yml
-# Universal: Download OSM road network for ANY state → parquet cache → R2
+# Universal: Download OSM road network for ANY registered state → parquet cache → R2
 # Run manually from Actions tab → "Generate OSM Cache" → pick state(s) → Run
 #
 # Supports:
-#   - Single state:  select from dropdown
-#   - All states:    select "ALL" to generate cache for every registered state
+#   - Single state:  pick from dropdown
+#   - All states:    pick "ALL" to generate cache for every registered state
 #
-# Reusable for any future state — just add it to STATES dict in the resolve step.
+# Thin wrapper over `generate_osm_data.py` — same script used by the
+# "Generate OSM Cache (Delaware)" workflow. The nationwide variant
+# "OSM: Nationwide Download" uses `osm_county_download.py` instead
+# (county-by-county, for large states).
+#
+# All three workflows produce the same output schema including the
+# `streets_per_node` column (added 2026-04-12 for FHWA MIRE-correct
+# intersection classification).
 
 name: Generate OSM Cache
 
@@ -28,6 +35,17 @@ on:
           - california
           - texas
           - ALL
+      force_regenerate:
+        description: '⚠️ Force regenerate (re-downloads ALL files — slow! Leave unchecked for normal use)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  R2_ENDPOINT: "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: "crash-lens-data"
 
 jobs:
   resolve:
@@ -70,110 +88,50 @@ jobs:
   generate:
     needs: resolve
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       matrix: ${{ fromJson(needs.resolve.outputs.matrix) }}
       fail-fast: false
       max-parallel: 2
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install osmnx scipy geopandas pandas pyarrow
+        run: pip install osmnx geopandas pandas pyarrow scipy boto3
 
-      - name: "Download ${{ matrix.name }} OSM road network"
+      - name: "Generate ${{ matrix.name }} roads + intersections + POIs"
         run: |
-          mkdir -p cache
-          python3 << 'PYEOF'
-          import osmnx as ox
-          import geopandas as gpd
-          import os, time
-
-          state = "${{ matrix.name }}"
-          abbr  = "${{ matrix.abbreviation }}"
-
-          print(f"osmnx {ox.__version__}, geopandas {gpd.__version__}")
-          print(f"Downloading {state} road network from OSM...")
-          t0 = time.time()
-
-          G = ox.graph_from_place(f"{state}, United States", network_type="drive", simplify=True)
-          print(f"Graph: {G.number_of_nodes():,} nodes, {G.number_of_edges():,} edges")
-
-          # Save roads
-          edges = ox.graph_to_gdfs(G, nodes=False, edges=True)
-          keep = [c for c in ["geometry","name","ref","highway","maxspeed","lanes","surface","oneway","length"] if c in edges.columns]
-          roads_path = f"cache/{abbr}_roads.parquet"
-          edges[keep].to_parquet(roads_path, index=True)
-          roads_mb = os.path.getsize(roads_path) / 1048576
-          print(f"Roads: {roads_path} ({roads_mb:.1f} MB, {len(edges):,} segments)")
-
-          # Save intersections (degree >= 3)
-          nodes = ox.graph_to_gdfs(G, nodes=True, edges=False)
-          degree = dict(G.degree())
-          nodes["degree"] = nodes.index.map(degree)
-          intersections = nodes[nodes["degree"] >= 3][["geometry","degree"]]
-          int_path = f"cache/{abbr}_intersections.parquet"
-          intersections.to_parquet(int_path, index=True)
-          int_mb = os.path.getsize(int_path) / 1048576
-          print(f"Intersections: {int_path} ({int_mb:.1f} MB, {len(intersections):,} nodes)")
-
-          print(f"Done in {time.time() - t0:.0f}s — Total: {roads_mb + int_mb:.1f} MB")
-          PYEOF
-
-      - name: "Upload ${{ matrix.name }} cache to R2"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-        run: |
-          ABBR="${{ matrix.abbreviation }}"
-          PREFIX="${{ matrix.r2_prefix }}"
-          BUCKET="crash-lens-data"
-
-          pip install -q awscli
-
-          for FILE in cache/${ABBR}_roads.parquet cache/${ABBR}_intersections.parquet; do
-            if [ -f "$FILE" ]; then
-              BASENAME=$(basename "$FILE")
-              SIZE=$(stat -c%s "$FILE" 2>/dev/null || echo "0")
-              SIZE_MB=$((SIZE / 1048576))
-              aws s3 cp "$FILE" "s3://$BUCKET/$PREFIX/cache/$BASENAME" \
-                --endpoint-url "$R2_ENDPOINT" --only-show-errors
-              echo "✅ $PREFIX/cache/$BASENAME (${SIZE_MB} MB)"
-            fi
-          done
-
-      - name: Verify
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-        run: |
-          PREFIX="${{ matrix.r2_prefix }}"
-          echo "R2 cache for ${{ matrix.name }}:"
-          aws s3 ls "s3://crash-lens-data/$PREFIX/cache/" \
-            --endpoint-url "$R2_ENDPOINT" || echo "(empty)"
+          FORCE=""
+          [ "${{ github.event.inputs.force_regenerate }}" = "true" ] && FORCE="--force"
+          # generate_osm_data.py produces:
+          #   cache/{abbr}_roads.parquet.gz
+          #   cache/{abbr}_intersections.parquet.gz  (includes streets_per_node)
+          #   cache/{abbr}_pois.parquet.gz
+          # and self-uploads to R2 using the R2_* env vars above.
+          python generate_osm_data.py --state ${{ matrix.abbreviation }} $FORCE
 
       - name: Summary
+        if: always()
         run: |
           ABBR="${{ matrix.abbreviation }}"
           PREFIX="${{ matrix.r2_prefix }}"
-          ROADS=$(stat -c%s "cache/${ABBR}_roads.parquet" 2>/dev/null || echo "0")
-          INTS=$(stat -c%s "cache/${ABBR}_intersections.parquet" 2>/dev/null || echo "0")
-
           cat >> $GITHUB_STEP_SUMMARY <<EOF
-          ## OSM Cache — ${{ matrix.name }} (${{ matrix.abbreviation }})
+          ## OSM Cache — ${{ matrix.name }} (${ABBR})
 
-          | File | Size | R2 Key |
-          |------|------|--------|
-          | ${ABBR}_roads.parquet | $((ROADS / 1048576)) MB | ${PREFIX}/cache/${ABBR}_roads.parquet |
-          | ${ABBR}_intersections.parquet | $((INTS / 1048576)) MB | ${PREFIX}/cache/${ABBR}_intersections.parquet |
+          Generated by \`generate_osm_data.py --state ${ABBR}\` (same script as
+          the Delaware-specific workflow). Output includes \`streets_per_node\`
+          for MIRE-correct intersection classification.
 
-          Tier 2 will fill: Functional Class, RTE Name, Ownership, SYSTEM, Node, Intersection Name.
+          \`\`\`
+          $(ls -lh cache/${ABBR}_*.gz 2>/dev/null || echo "No files generated")
+          \`\`\`
+
+          Expected R2 keys:
+          - ${PREFIX}/cache/${ABBR}_roads.parquet.gz
+          - ${PREFIX}/cache/${ABBR}_intersections.parquet.gz
+          - ${PREFIX}/cache/${ABBR}_pois.parquet.gz
           EOF
