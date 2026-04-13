@@ -366,7 +366,12 @@ class RoadInventorySession:
         if new_cols:
             for col in new_cols:
                 if col not in df.columns:
-                    df[col] = ""
+                    # Force object dtype — pandas 3.0+ creates a strict `str`
+                    # column from `df[col] = ""`, which refuses numeric bulk
+                    # assignment from ri_slice (e.g. intersection_degree,
+                    # streets_per_node). Object dtype accepts any value and
+                    # matches prior pandas 2.x behavior.
+                    df[col] = pd.Series("", index=df.index, dtype=object)
             df.loc[matched_ci, new_cols] = ri_slice[new_cols].values
 
         # ── Derived columns ──
