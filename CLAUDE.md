@@ -21,6 +21,17 @@ When making code changes, pipeline modifications, or architecture decisions:
 2. Add an entry to `wiki/log.md` with date and summary
 3. Do NOT skip this — the wiki must stay current
 
+### Wiki Log Conflict-Avoidance Rule (IMPORTANT)
+`wiki/log.md` conflicts on nearly every PR because multiple branches append entries to the same top-of-file region in parallel. To minimize merge conflicts:
+
+1. **ALWAYS create a NEW log entry with a fresh heading.** Do this even if the user asks you to update, amend, or reuse a specific existing log entry / date / "log number". Never edit or rewrite an existing entry — it may have been modified on `main` since you branched, which would force a 3-way conflict.
+2. **Use a unique heading per entry.** Format: `## [YYYY-MM-DD] <type> | <short title — unique to this change>`. If an entry for today's date already exists on your branch (or on `main` as of your last fetch), pick a title that doesn't collide with any existing heading on that date — e.g. add the feature name or PR slug so two entries on the same day can't share a heading line.
+3. **Insert new entries at the top of the log** (below the frontmatter and the first `---`), matching the existing append-at-top convention.
+4. **If a conflict does happen on merge**, resolve by **stacking both sides' entries in reverse-chronological order** — never discard an entry from either side. Example fix from PR #84: both `main` and the feature branch added new entries at the top; the resolution kept both, newest-date first. See the merge commit `8668608` for the pattern.
+5. **Update the frontmatter `updated:` date** to the newest entry's date whenever you add an entry. If this line conflicts during merge, always take the later of the two dates.
+
+Rationale: this rule trades a tiny amount of edit flexibility (you never rewrite history) for a large reduction in merge-conflict frequency, since purely-additive, uniquely-keyed entries are the easiest case for git to auto-merge — and when they do conflict, the resolution is mechanical (stack both).
+
 ### Wiki Structure (Karpathy pattern)
 - **concepts/** — How things work (architecture, patterns, schemas)
 - **entities/** — Specific things (states, tools, infrastructure)

@@ -10,6 +10,67 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] fix | FARS API 403 Forbidden — User-Agent header (GitHub Actions Azure IPs)
+
+The NHTSA CrashAPI (`https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData`) returns **403 Forbidden** for requests that don't carry a descriptive `User-Agent` header when called from datacenter IP ranges — specifically GitHub Actions' Azure runners. Local development and residential IPs work fine without headers, which is why this wasn't caught in testing.
+
+**Symptom (from the failed `generate-fars-cache.yml` run on Delaware):**
+```
+403 Client Error: Forbidden for url:
+  https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData?dataset=Accident&FromYear=2010&ToYear=2014&State=10&format=json
+```
+
+**Fix:** Added a module-level `FARS_HEADERS` constant and passed it to the single `requests.get()` call in `fetch_fars_dataset()`:
+```python
+FARS_HEADERS = {
+    "User-Agent": "CrashLens/1.0 (https://crashlens.com; traffic safety research)",
+    "Accept": "application/json",
+}
+# ...
+r = requests.get(FARS_BASE, params=params, headers=FARS_HEADERS, timeout=120)
+```
+
+The descriptive User-Agent identifies us as a legitimate research client (not a generic python-requests scraper) and the explicit Accept header makes the request look like a normal API consumer. This is a standard pattern for government APIs with datacenter-IP anti-abuse filters.
+
+**Regression test:** `tests/test_fars_downloader.py::test_fetch_fars_dataset_sends_user_agent` monkey-patches `requests.get` to capture the outgoing headers and asserts the User-Agent contains `"CrashLens"` and the Accept is `application/json`. The test is intentionally lax on the exact UA string (substring match) so the product name can evolve without breaking the test, but strict enough to catch a regression where someone removes the `headers=` kwarg entirely.
+
+**Fallback plan if this still 403s:** If Azure IPs remain blocked even with headers, switch to the NHTSA bulk CSV ZIP downloads at `https://static.nhtsa.gov/nhtsa/downloads/FARS/{year}/National/FARS{year}NationalCSV.zip`. These are regular static file downloads (not API calls), one ZIP per year containing ACCIDENT.CSV / PERSON.CSV / VEHICLE.CSV with `latin-1` encoding. Total payload ~500MB for 2010-2023. Processing would flip from per-state-per-year (14 chunks × 51 states = 714 API calls) to per-year (14 downloads, filter by FIPS in-memory). Implementation deferred unless Fix 1 fails — leaving it documented here so the follow-up is a straight rewrite of `download_all_datasets()` without re-investigation.
+
+Test count: 37 → 38 (added the User-Agent regression test).
+
+Files changed: `generate_fars_data.py` (FARS_HEADERS constant + headers kwarg in the API call), `tests/test_fars_downloader.py` (regression test), `wiki/log.md`.
+
+---
+
+## [2026-04-13] test+fix | FARS pipeline — tests/test_fars_downloader.py + 4 bug fixes
+
+Added a pytest-based test suite for `generate_fars_data.py` (`tests/test_fars_downloader.py`, 37 tests, green) and fixed four bugs surfaced during testing. The tests cover state registry loading, `_num` helper, person/vehicle aggregation semantics, GPS sanitization, final-schema contract, dynamic year chunking, end-to-end `process_state()` with a mocked FARS API, nationwide rollup, and CLI argument handling.
+
+**Bug fixes:**
+
+1. **Hawaii GPS bounds (data loss bug)** — `_sanitize_gps()` used `lat.between(24.0, 72.0)` which silently masked every Hawaii fatal crash to NaN (HI latitudes 18.9–22.2°N). Fixed the lower bound to 17.0° to cover HI's Ka Lae / South Point while still preserving the Alaska ceiling (71.3°N). Also simplified the filter: the redundant sentinel-equality checks (`!= 77.7777`, etc.) were dropped because the range filter alone catches all documented FARS sentinels (77.7777/88.8888/99.9999/777.7777/888.8888 are all outside 17–72°).
+
+2. **Final schema had 65 columns instead of the documented 44** — `ACCIDENT_COLS` was hand-curated to include 21 extra FARS code/detail columns (FUNC_SYS code, RD_OWNER code, WRK_ZONE, SCH_BUS, NHS, SP_JUR, NOT_HOUR, NOT_MIN, ARR_HOUR, ARR_MIN, HOSP_HR, HOSP_MN, plus 10 *NAME code counterparts). These leaked through into the output parquet. Fix: derive `ACCIDENT_COLS = list(RENAME_MAP.keys())` so RENAME_MAP is the single source of truth. The final parquet now has exactly the 44 columns documented in the script epilog and wiki.
+
+3. **`pd.read_parquet()` can't read `.parquet.gz` files** — the skip path in `process_state()` (`if local_only and fars_gz.exists(): return ("skipped", pd.read_parquet(fars_gz))`) and `r2_download_to_df()` both tried to read gzip-wrapped parquet with raw `pd.read_parquet`, which fails with `ArrowInvalid: Parquet magic bytes not found in footer` because our `gzip_file()` helper wraps the parquet in an outer gzip container. Added a `read_gz_parquet()` helper that decompresses the outer gzip layer before handing the inner bytes to pandas, and wired it into both call sites. Without this fix, `--force` on an already-cached state would work but any code path that tried to reuse an existing R2 file would silently fail.
+
+4. **Year range silently truncated to 2010–2023** — `YEAR_CHUNKS = [(2010, 2014), (2015, 2019), (2020, 2023)]` was a hardcoded constant, so `--from-year 2008` or `--to-year 2025` would skip chunks outside the range instead of actually fetching those years. Replaced with a dynamic `year_chunks(from_year, to_year, max_span=5)` helper that splits any requested range into 5-year blocks. `FARS_MAX_SPAN = 5` is the only remaining constant (reflects the API's documented 5-year cap). For `--from-year 2010 --to-year 2023` the output is identical to the old hardcoded chunks, so this is a transparent generalization.
+
+**Test coverage:**
+- **State registry (4 tests):** count, Delaware/DC mapping, unique FIPS
+- **Helpers (2 tests):** `_num()` on series and scalar None
+- **GPS (5 tests):** Delaware, Alaska, Hawaii (regression test for fix #1), sentinels, mixed
+- **Person aggregation (7 tests):** empty, drunk via BAC, drunk via flag, sober, pedestrian fatal, driver-age masking, restraint
+- **Vehicle aggregation (7 tests):** empty, speeding, large truck, motorcycle, distracted NaN-safe, distracted positive, hit-and-run
+- **Final schema (3 tests):** column-set contract (regression test for fix #2 — synthetic row deliberately includes the 21 extra FARS fields to verify they're dropped), empty accident, end-to-end flag join
+- **Year chunking (3 tests):** 2010-2023, narrow range, unusual range (regression test for fix #4)
+- **End-to-end (4 tests):** full `process_state()` pipeline with mocked `fetch_fars_dataset`, skip-on-local-cache, nationwide rollup, nationwide rollup single-state rejection
+- **CLI (2 tests):** `--help` exit code and output, invalid year range rejection
+
+Files changed: `generate_fars_data.py` (helpers + bug fixes), `tests/test_fars_downloader.py` (new, 37 tests), `wiki/log.md`.
+
+---
+
 ## [2026-04-13] feat | FARS pipeline added — generate_fars_data.py downloads from NHTSA API
 
 Added a new Phase 0 cache generator for the **NHTSA Fatality Analysis Reporting System (FARS)** — the federal census of all ~40K fatal motor-vehicle crashes per year across all 50 states + DC, with 170+ standardized data elements. Fills a gap in the pipeline: there was no federal, nationally-standardized source of fatal crashes. FARS enables cross-state benchmarking, grant-ranking, and ground-truth validation of per-state crash feeds (Socrata, state APIs).
