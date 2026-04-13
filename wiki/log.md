@@ -10,6 +10,27 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] fix | FARS year-column injection + filename matching (bugs 1-4)
+
+Fixed 4 bugs in `generate_fars_data.py` that caused `KeyError 'YEAR'` on some years and silently-empty per-state outputs for DE 2021/2022.
+
+- **Bug 1 (KeyError 'YEAR'):** `download_fars_year_bulk` now injects `df["YEAR"] = int(year)` into every non-empty accident/person/vehicle DataFrame immediately after `pd.read_csv`. Root-cause fix — removes the KeyError in `aggregate_persons` / `aggregate_vehicles` / `build_final_df` for years whose source CSVs omit the YEAR column. Merge keys stay `["ST_CASE","YEAR"]` because `build_final_df` runs *post-concat* across years (dropping YEAR would corrupt multi-year joins — ST_CASE 1234 in 2020 and 2021 are genuinely distinct crashes).
+- **Bug 2 (DE 2021/2022 accident=0):** rewrote `_extract_fars_csv` to match `os.path.basename(name).upper()` against a set of exact filenames (`{"ACCIDENT.CSV"}`, etc.) rather than doing substring matching. Strips subdirectory prefixes (handles nested layouts like `FARS2021NationalCSV/ACCIDENT.CSV`) and eliminates false-positives on auxiliary CSVs. Also added a one-line debug print of the ZIP's basenames so future filename drift is visible in the log.
+- **Bug 3 (VEHICLE 44K→1.5K in 2020+):** vehicle loader now accepts `VEHICLE.CSV` / `VEH.CSV` / `VEHICLES.CSV`. When national vehicle_df has <1000 rows, log a WARNING but do not fail — vehicle flags (`any_speeding`, `any_large_truck`, …) are optional for crash-level analysis, so it's better to ship a partial year than to block the whole state.
+- **Bug 4 (STATE filter):** explicit `Int64` cast in `_filter_to_state` so mixed string/numeric STATE columns coerce predictably before equality comparison.
+
+**Tests added** in `tests/test_fars_downloader.py` (49 tests total, all passing):
+
+- `test_download_fars_year_bulk_injects_year_when_missing` — ZIP whose ACCIDENT/PERSON/VEHICLE CSVs omit YEAR; asserts YEAR is injected and `build_final_df` runs end-to-end without KeyError.
+- `test_extract_fars_csv_finds_nested_uppercase` — `FARS2021NationalCSV/ACCIDENT.CSV` is matched.
+- `test_extract_fars_csv_ignores_lookalike` — regression guard against the substring matcher preferring `accident_aux.csv` over `ACCIDENT.CSV`.
+- `test_extract_fars_csv_accepts_veh_alias` — `VEH.CSV` is accepted when only that alias exists.
+- `test_small_vehicle_df_logs_warning_without_failing` — warning emitted, function still returns a non-None result. (Bug 4's string-STATE case is already covered by the pre-existing `test_filter_to_state_string_fips`.)
+
+No behavioral change for healthy FARS years — all four fixes are additive / defensive. Re-run `generate-fars-cache.yml → single-state → de → force=true` to verify non-zero accident counts for 2021 and 2022.
+
+---
+
 ## [2026-04-13] fix | FARS API still 403 — switched to static.nhtsa.gov bulk CSV ZIPs (Fix 2)
 
 Fix 1 (User-Agent header) **did not work**. The `generate-fars-cache.yml` workflow run on main HEAD `e454377` (which verified includes the `FARS_HEADERS` constant and the `headers=FARS_HEADERS` kwarg in `fetch_fars_dataset()`) still returned `403 Client Error: Forbidden` for every CrashAPI call. NHTSA is blocking GitHub Actions' Azure IPs at the network / WAF layer, not at the User-Agent sniff layer — no header combination will fix this. Confirmed from the failed run log at `2026-04-13T02:58:51Z`:
