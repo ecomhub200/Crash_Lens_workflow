@@ -10,6 +10,41 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] refactor | FARS output as plain .parquet (Snappy) + `_national/` R2 path
+
+Migrated `generate_fars_data.py` from gzip-wrapped parquet (`.parquet.gz`) to plain Snappy-compressed parquet (`.parquet`), and moved the nationwide rollup to the existing `_national/` R2 directory.
+
+**Why:** the frontend uses the hyparquet browser parquet parser, which cannot decode gzip-internal column compression. Shipping plain `.parquet` with Snappy (pyarrow default) makes the files directly readable in the browser without a server-side decompress step.
+
+**Changes in `generate_fars_data.py`:**
+
+- Removed `gzip_file()` and `read_gz_parquet()` helpers, plus the now-unused `gzip` / `shutil` imports.
+- `process_state()` now writes `cache/{abbr}_fars.parquet` with `df.to_parquet(..., compression="snappy")` and uploads to `{state_prefix}/cache/{abbr}_fars.parquet`. Skip-check reads plain parquet via `pd.read_parquet()`. After a successful upload, best-effort delete any legacy `{state_prefix}/cache/{abbr}_fars.parquet.gz` so the bucket doesn't accumulate stale dual copies.
+- `build_nationwide()` writes `cache/fars_nationwide.parquet` (Snappy) and uploads to `_national/fars_nationwide.parquet` — NOT `_nationwide/...`. The `_national/` prefix is the existing CrashLens convention for nationwide reference files (co-located with `us_states.json`, `us_counties.json`, `us_places.json`, etc. in the `crash-lens-data` bucket). Best-effort cleanup of the legacy `_nationwide/fars_nationwide.parquet.gz` key.
+- `r2_download_to_df()` rewritten to read plain parquet via `pd.read_parquet(io.BytesIO(...))`.
+- New helper `r2_delete_if_exists()` for the best-effort cleanup path.
+- Module docstring updated to describe the new output layout.
+
+**Tests updated** in `tests/test_fars_downloader.py`:
+
+- `test_process_state_mocked_end_to_end` now asserts `de_fars.parquet` exists (not `.parquet.gz`), round-trips via `pd.read_parquet()`, and asserts the legacy `.parquet.gz` is NOT left behind.
+- `test_build_nationwide_multi_state` same treatment for `fars_nationwide.parquet`.
+- `test_build_nationwide_not_enough_states` asserts neither `.parquet` nor `.parquet.gz` was written.
+
+All 49 tests pass. Note: the earlier `[2026-04-13] fix | FARS year-column injection + filename matching (bugs 1-4)` entry below already resolved the DE 2021/2022 `accident=0` issue (exact-basename matching with `os.path.basename().upper()` handles the nested `FARS2021NationalCSV/ACCIDENT.CSV` layout), so re-running the workflow on this branch should produce non-zero counts for those years.
+
+Post-merge verification: trigger `generate-fars-cache.yml` with `scope=single-state`, `single_state=de`, `force_regenerate=true`, then `scope=nationwide`, `force_regenerate=true`. Expected R2 layout:
+
+```
+crash-lens-data/
+├── delaware/cache/de_fars.parquet
+├── virginia/cache/va_fars.parquet
+├── ... (51 states)
+└── _national/fars_nationwide.parquet
+```
+
+---
+
 ## [2026-04-13] fix | FARS year-column injection + filename matching (bugs 1-4)
 
 Fixed 4 bugs in `generate_fars_data.py` that caused `KeyError 'YEAR'` on some years and silently-empty per-state outputs for DE 2021/2022.

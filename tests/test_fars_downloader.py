@@ -857,10 +857,13 @@ def test_process_state_mocked_end_to_end(tmp_path, monkeypatch):
     assert len(df) == 6
     # Schema matches the 44-col contract
     assert set(df.columns) == EXPECTED_FINAL_COLS
-    # Parquet file on disk
-    pq = tmp_path / "de_fars.parquet.gz"
+    # Parquet file on disk (Snappy, not gzip — see wiki/log.md
+    # "parquet migration" entry for rationale)
+    pq = tmp_path / "de_fars.parquet"
     assert pq.exists()
-    round_trip = gfd.read_gz_parquet(pq)
+    # Must NOT leave a legacy .parquet.gz behind
+    assert not (tmp_path / "de_fars.parquet.gz").exists()
+    round_trip = pd.read_parquet(pq)
     assert len(round_trip) == 6
     assert set(round_trip.columns) == EXPECTED_FINAL_COLS
     # Flag correctness: half the rows are drunk (seq==1), half speeding (seq==2)
@@ -894,13 +897,17 @@ def test_process_state_skip_local_cached(tmp_path, monkeypatch):
 
 
 def test_build_nationwide_multi_state(tmp_path):
-    """Nationwide rollup concatenates per-state DataFrames and writes a file."""
+    """Nationwide rollup concatenates per-state DataFrames and writes a
+    plain .parquet file (Snappy, not gzip-wrapped).
+    """
     a = pd.DataFrame({"case_id": [1, 2], "crash_year": [2020, 2021]})
     b = pd.DataFrame({"case_id": [3], "crash_year": [2022]})
     gfd.build_nationwide([a, b], tmp_path, s3=None, bucket="x", local_only=True)
-    pq = tmp_path / "fars_nationwide.parquet.gz"
+    pq = tmp_path / "fars_nationwide.parquet"
     assert pq.exists()
-    combined = gfd.read_gz_parquet(pq)
+    # Must NOT leave a legacy .parquet.gz behind
+    assert not (tmp_path / "fars_nationwide.parquet.gz").exists()
+    combined = pd.read_parquet(pq)
     assert len(combined) == 3
     assert set(combined["case_id"]) == {1, 2, 3}
 
@@ -909,6 +916,7 @@ def test_build_nationwide_not_enough_states(tmp_path, capsys):
     """Single-state list → no rollup written (needs ≥2)."""
     a = pd.DataFrame({"case_id": [1]})
     gfd.build_nationwide([a], tmp_path, s3=None, bucket="x", local_only=True)
+    assert not (tmp_path / "fars_nationwide.parquet").exists()
     assert not (tmp_path / "fars_nationwide.parquet.gz").exists()
 
 
