@@ -3,14 +3,22 @@
 generate_fars_data.py — CrashLens FARS Data Downloader
 =============================================================
 Downloads Fatality Analysis Reporting System (FARS) data from NHTSA's public
-Crash API. FARS is the federal census of all ~40K fatal motor-vehicle crashes
-per year across all 50 states + DC, with 170+ standardized data elements.
+bulk CSV archive. FARS is the federal census of all ~40K fatal motor-vehicle
+crashes per year across all 50 states + DC, with 170+ standardized data
+elements.
 
-API:
-    https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData
-    Datasets: Accident, Person, Vehicle
-    Year range: 2010-2023 (split into 3 requests — API caps ranges at 5 yr)
-    Auth: None (public API). No documented rate limits; we sleep 1s between calls.
+SOURCE:
+    https://static.nhtsa.gov/nhtsa/downloads/FARS/{year}/National/FARS{year}NationalCSV.zip
+
+    One ZIP per calendar year. Each ZIP contains ACCIDENT.CSV / PERSON.CSV /
+    VEHICLE.CSV plus auxiliary files. Rows are nationwide — we filter by
+    STATE (FIPS) after download. CSV encoding is latin-1.
+
+    We switched from the CrashAPI (crashviewer.nhtsa.dot.gov) to the static
+    CDN because NHTSA blocks datacenter IPs (GitHub Actions Azure runners)
+    at the network layer with 403 Forbidden regardless of User-Agent.
+    static.nhtsa.gov serves files directly from a CDN, so there's no
+    anti-abuse filter to trip. See wiki/log.md [2026-04-13] Fix 2 entry.
 
 SETUP:
     pip install requests pandas pyarrow boto3
@@ -27,7 +35,7 @@ OUTPUT:
     cache/fars_nationwide.parquet.gz       → R2: _nationwide/fars_nationwide.parquet.gz
                                              (only on --all)
 
-    Per-crash parquet columns (~44):
+    Per-crash parquet columns (44):
       Identification: case_id, state_fips, state_name, county_fips, county_name,
                       city_fips, city_name
       When:           crash_year, crash_month, crash_day, crash_hour, crash_minute
@@ -52,6 +60,7 @@ import os
 import shutil
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -62,27 +71,26 @@ import requests
 #  CONSTANTS
 # ═══════════════════════════════════════════════════════════════
 
-FARS_BASE = "https://crashviewer.nhtsa.dot.gov/CrashAPI/FARSData/GetFARSData"
-FARS_DATASETS = ("Accident", "Person", "Vehicle")
-FARS_MAX_SPAN = 5  # API hard-caps single requests at 5 calendar years
+FARS_BULK_URL = (
+    "https://static.nhtsa.gov/nhtsa/downloads/FARS/"
+    "{year}/National/FARS{year}NationalCSV.zip"
+)
 
-# NHTSA CrashAPI returns 403 Forbidden for requests without a User-Agent
-# when called from datacenter IPs (e.g. GitHub Actions' Azure runners).
-# Identifying ourselves with a descriptive UA + explicit Accept header
-# makes the request look like a normal research client and bypasses the
-# anti-abuse filter. See PR #84 follow-up fix.
-FARS_HEADERS = {
+# Descriptive User-Agent for static.nhtsa.gov (CDN doesn't block datacenter
+# IPs, but it's polite to identify ourselves so NHTSA can see in their logs
+# that researchers are using the bulk distribution).
+BULK_HEADERS = {
     "User-Agent": "CrashLens/1.0 (https://crashlens.com; traffic safety research)",
-    "Accept": "application/json",
 }
 
 R2_BUCKET = "crash-lens-data"
 
 # Rename FARS columns → CrashLens-friendly names in the final parquet.
-# RENAME_MAP is the single source of truth for which FARS API fields survive
-# into the output. Everything not in this map is filtered out by build_final_df,
-# which locks the final schema at 30 accident cols + 9 person flags + 5 vehicle
-# flags = 44 total columns (see EXPECTED_FINAL_COLS in the test suite).
+# RENAME_MAP is the single source of truth for which FARS fields survive
+# into the output. Everything not in this map is filtered out by
+# build_final_df, which locks the final schema at 30 accident cols + 9
+# person flags + 5 vehicle flags = 44 total columns (see EXPECTED_FINAL_COLS
+# in the test suite).
 #
 # We keep only the *NAME text-label columns (not the numeric code counterparts
 # like FUNC_SYS/RD_OWNER/TYP_INT) because the documented CrashLens schema uses
@@ -121,12 +129,28 @@ RENAME_MAP = {
     "TWAY_ID2": "route_name_2",
 }
 
-# Accident-table fields we keep from the FARS API response. Derived from
-# RENAME_MAP so there's only one list to maintain. build_final_df() intersects
-# this with the actual accident DataFrame's columns before joining — extra
-# fields the real API returns (FUNC_SYS code, WRK_ZONE, SCH_BUS, NHS, etc.)
-# are dropped here, NOT carried through to the final parquet.
+# Accident-table fields we keep from the bulk CSVs. Derived from RENAME_MAP
+# so there's only one list to maintain. build_final_df() intersects this
+# with the actual accident DataFrame's columns before joining — extra fields
+# the real bulk CSVs ship (FUNC_SYS code, WRK_ZONE, SCH_BUS, NHS, etc.) are
+# dropped here, NOT carried through to the final parquet.
 ACCIDENT_COLS = list(RENAME_MAP.keys())
+
+# Columns the final parquet is guaranteed to have. If a year's bulk CSV
+# doesn't include a given text-label column (older years sometimes lack
+# STATENAME / FUNC_SYSNAME / etc.), build_final_df backfills it as NaN so
+# the output always matches the 44-col contract.
+_RENAMED_TARGETS = list(RENAME_MAP.values())
+_PERSON_AGG_COLS = [
+    "any_drunk", "any_unrestrained", "ped_involved", "bike_involved",
+    "ped_fatals", "bike_fatals", "total_fatalities",
+    "youngest_driver_age", "oldest_driver_age",
+]
+_VEHICLE_AGG_COLS = [
+    "any_speeding", "any_large_truck", "any_motorcycle",
+    "any_distracted", "hit_and_run",
+]
+FINAL_COLUMNS = _RENAMED_TARGETS + _PERSON_AGG_COLS + _VEHICLE_AGG_COLS
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -237,80 +261,144 @@ def r2_download_to_df(s3, bucket, key):
 
 
 # ═══════════════════════════════════════════════════════════════
-#  FARS API
+#  FARS BULK CSV DOWNLOAD (from static.nhtsa.gov CDN)
 # ═══════════════════════════════════════════════════════════════
 
-def fetch_fars_dataset(dataset, fips, from_year, to_year):
-    """Fetch one FARS dataset for one state + year range.
+# Module-level cache: {year: {"Accident": df, "Person": df, "Vehicle": df}}.
+# Each year's ZIP is downloaded once and reused across all per-state calls
+# in a single run, so `--all` only makes ~14 HTTP requests for 51 states.
+# Tests clear this via `clear_bulk_cache()` to avoid cross-test leakage.
+_FARS_BULK_CACHE = {}
 
-    Returns a list of record dicts (possibly empty).
-    The API response is shaped like {"Results": [[{...}, {...}, ...]]} — note
-    the double nesting. Records are at response["Results"][0].
+
+def clear_bulk_cache():
+    """Reset the in-memory bulk-ZIP cache. For tests."""
+    _FARS_BULK_CACHE.clear()
+
+
+def _extract_fars_csv(zf, keyword):
+    """Return the DataFrame for the first CSV in ZF whose filename contains
+    `keyword` (case-insensitive) and ends with .csv. Returns None if missing.
     """
-    params = {
-        "dataset": dataset,
-        "FromYear": from_year,
-        "ToYear": to_year,
-        "State": int(fips),
-        "format": "json",
-    }
+    for name in zf.namelist():
+        lower = name.lower()
+        if keyword.lower() in lower and lower.endswith(".csv"):
+            with zf.open(name) as f:
+                return pd.read_csv(f, encoding="latin-1", low_memory=False)
+    return None
+
+
+def download_fars_year_bulk(year):
+    """Download + extract the national FARS CSV ZIP for a given year.
+
+    Returns a dict with Accident / Person / Vehicle DataFrames (nationwide,
+    all 51 states) or None on failure. Results are cached per-year so
+    subsequent calls in the same process are free.
+
+    Bulk CSVs come from static.nhtsa.gov (a CDN, not the blocked CrashAPI).
+    Encoding is latin-1. Typical ZIP is 30-50MB → ~100-200MB uncompressed.
+    """
+    if year in _FARS_BULK_CACHE:
+        return _FARS_BULK_CACHE[year]
+
+    url = FARS_BULK_URL.format(year=year)
+    print(f"      Downloading FARS {year} bulk CSV ZIP from {url}...")
+
     for attempt in range(3):
         try:
-            r = requests.get(FARS_BASE, params=params, headers=FARS_HEADERS, timeout=120)
-            r.raise_for_status()
-            payload = r.json()
-            results = payload.get("Results") or []
-            if results and isinstance(results[0], list):
-                return results[0]
-            return results  # fall back if shape ever changes
-        except (requests.RequestException, ValueError) as e:
+            response = requests.get(url, headers=BULK_HEADERS, timeout=300)
+            response.raise_for_status()
+            break
+        except requests.RequestException as e:
             if attempt == 2:
-                print(f"    WARNING: {dataset} {from_year}-{to_year} failed: {e}")
-                return []
+                print(f"    WARNING: FARS {year} download failed after 3 attempts: {e}")
+                _FARS_BULK_CACHE[year] = None
+                return None
             time.sleep(2 ** attempt)
-    return []
+
+    try:
+        zf = zipfile.ZipFile(io.BytesIO(response.content))
+    except zipfile.BadZipFile as e:
+        print(f"    WARNING: FARS {year} content is not a valid ZIP: {e}")
+        _FARS_BULK_CACHE[year] = None
+        return None
+
+    accident_df = _extract_fars_csv(zf, "accident")
+    person_df = _extract_fars_csv(zf, "person")
+    vehicle_df = _extract_fars_csv(zf, "vehicle")
+
+    acc_n = 0 if accident_df is None else len(accident_df)
+    per_n = 0 if person_df is None else len(person_df)
+    veh_n = 0 if vehicle_df is None else len(vehicle_df)
+    print(
+        f"      FARS {year}: ACCIDENT={acc_n:,}  PERSON={per_n:,}  VEHICLE={veh_n:,}"
+    )
+
+    result = {
+        "Accident": accident_df if accident_df is not None else pd.DataFrame(),
+        "Person": person_df if person_df is not None else pd.DataFrame(),
+        "Vehicle": vehicle_df if vehicle_df is not None else pd.DataFrame(),
+    }
+    _FARS_BULK_CACHE[year] = result
+    return result
 
 
-def year_chunks(from_year, to_year, max_span=FARS_MAX_SPAN):
-    """Split [from_year, to_year] into contiguous chunks of ≤ max_span years.
+def _filter_to_state(df, fips_int):
+    """Filter a nationwide FARS DataFrame to rows where STATE == fips_int.
 
-    The NHTSA CrashAPI caps a single FARS request at 5 calendar years, so the
-    pipeline always splits the requested range into 5-year blocks regardless
-    of what the user passes. This function is dynamic — it honors whatever
-    --from-year / --to-year the user specifies, even if that range extends
-    before 2010 or beyond 2023, unlike a hardcoded chunk list.
+    Coerces STATE to numeric defensively — some older years ship it as str.
+    Returns an empty DataFrame if STATE column is missing.
     """
-    chunks = []
-    lo = from_year
-    while lo <= to_year:
-        hi = min(lo + max_span - 1, to_year)
-        chunks.append((lo, hi))
-        lo = hi + 1
-    return chunks
+    if df is None or df.empty or "STATE" not in df.columns:
+        return pd.DataFrame()
+    state = pd.to_numeric(df["STATE"], errors="coerce")
+    return df[state == fips_int].copy()
 
 
 def download_all_datasets(fips, abbr, from_year, to_year):
-    """Fetch 3 datasets × N year chunks for one state, concatenated per dataset.
+    """Assemble per-state Accident/Person/Vehicle DataFrames from bulk ZIPs.
 
-    Year chunks are computed dynamically from the requested range so that
-    unusual --from-year / --to-year arguments (e.g. 2008 or 2025) are honored
-    instead of silently truncated.
+    For each year in [from_year, to_year] we download (or reuse cached) the
+    national CSV ZIP, filter each CSV to the requested state FIPS, and concat
+    the yearly slices. Return shape mirrors the old API version for drop-in
+    compatibility with process_state().
     """
-    chunks_to_fetch = year_chunks(from_year, to_year)
-    out = {}
-    for dataset in FARS_DATASETS:
-        chunks = []
-        for lo, hi in chunks_to_fetch:
-            records = fetch_fars_dataset(dataset, fips, lo, hi)
-            print(f"      Downloading {dataset:8s} data ({lo}-{hi})... {len(records):,} records")
-            if records:
-                chunks.append(pd.DataFrame(records))
-            time.sleep(1)
-        if chunks:
-            out[dataset] = pd.concat(chunks, ignore_index=True)
-        else:
-            out[dataset] = pd.DataFrame()
-    return out
+    fips_int = int(fips)
+    acc_chunks, per_chunks, veh_chunks = [], [], []
+
+    for year in range(from_year, to_year + 1):
+        bulk = download_fars_year_bulk(year)
+        if bulk is None:
+            continue
+
+        acc = _filter_to_state(bulk["Accident"], fips_int)
+        per = _filter_to_state(bulk["Person"], fips_int)
+        veh = _filter_to_state(bulk["Vehicle"], fips_int)
+        print(
+            f"      {abbr.upper()} {year}: "
+            f"accident={len(acc):,}  person={len(per):,}  vehicle={len(veh):,}"
+        )
+        if not acc.empty:
+            acc_chunks.append(acc)
+        if not per.empty:
+            per_chunks.append(per)
+        if not veh.empty:
+            veh_chunks.append(veh)
+
+    return {
+        "Accident": (
+            pd.concat(acc_chunks, ignore_index=True)
+            if acc_chunks else pd.DataFrame()
+        ),
+        "Person": (
+            pd.concat(per_chunks, ignore_index=True)
+            if per_chunks else pd.DataFrame()
+        ),
+        "Vehicle": (
+            pd.concat(veh_chunks, ignore_index=True)
+            if veh_chunks else pd.DataFrame()
+        ),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -461,10 +549,21 @@ def build_final_df(accident_df, person_df, vehicle_df):
     # Rename to final schema
     df = df.rename(columns=RENAME_MAP)
 
+    # Backfill any missing final columns with NaN, so the output always
+    # matches the 44-col contract regardless of which text-label columns
+    # the source bulk CSV happened to ship. Older FARS years (pre-2015)
+    # sometimes drop FUNC_SYSNAME / STATENAME / etc.
+    for col in FINAL_COLUMNS:
+        if col not in df.columns:
+            df[col] = pd.NA
+
     # Sanitize GPS (FARS sentinels + out-of-range)
     if "latitude" in df.columns and "longitude" in df.columns:
         valid, total = _sanitize_gps(df)
         print(f"      Valid GPS: {valid:,}/{total:,} ({(valid / total * 100 if total else 0):.1f}%)")
+
+    # Keep only the 44 contract columns, in a stable order
+    df = df[FINAL_COLUMNS]
 
     # Deterministic sort
     sort_cols = [c for c in ("crash_year", "crash_month", "crash_day", "crash_hour") if c in df.columns]
@@ -669,7 +768,7 @@ FARS COLUMNS (~44 per crash):
     print(f"  CrashLens FARS Data Downloader")
     print(f"  States: {len(states)} | R2: {'yes' if s3 else 'local'}")
     print(f"  Years:  {args.from_year}-{args.to_year}")
-    print(f"  Source: NHTSA FARS API (crashviewer.nhtsa.dot.gov)")
+    print(f"  Source: NHTSA bulk CSV archive (static.nhtsa.gov)")
     print(f"{'=' * 60}")
 
     results = {"completed": 0, "skipped": 0, "failed": 0}
