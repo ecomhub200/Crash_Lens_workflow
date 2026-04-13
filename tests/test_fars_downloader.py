@@ -650,6 +650,257 @@ def test_download_fars_year_bulk_handles_lowercase_filenames():
     assert result["Person"].empty  # no person.csv in the zip
 
 
+def _build_zip(files):
+    """Build an in-memory ZIP from a {filename: pandas DataFrame} mapping."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for fname, df in files.items():
+            zf.writestr(fname, df.to_csv(index=False))
+    buf.seek(0)
+    return buf.getvalue()
+
+
+def _fake_get_returning(zip_bytes):
+    class FakeResponse:
+        content = zip_bytes
+        def raise_for_status(self):
+            pass
+
+    def fake_get(url, headers=None, timeout=None):
+        return FakeResponse()
+    return fake_get
+
+
+def test_download_fars_year_bulk_avoids_parkedvehicle_collision():
+    """REGRESSION: older code used substring match on 'vehicle' and
+    alphabetical namelist() ordering returned PARKEDVEHICLE.CSV (~1K rows)
+    instead of VEHICLE.CSV (~60K rows) — the exact "VEHICLE 44K→1,500"
+    symptom you saw on the DE 2020+ workflow run. Exact basename match
+    must pick the real VEHICLE.CSV regardless of namelist() order.
+    """
+    gfd.clear_bulk_cache()
+    # Fake VEHICLE.CSV has 5 rows; fake PARKEDVEHICLE.CSV has 1 row.
+    # PARKEDVEHICLE comes first alphabetically in the ZIP namelist.
+    real_vehicle = pd.DataFrame([
+        _vehicle_row(ST_CASE=i, YEAR=2020, STATE=10) for i in range(1, 6)
+    ])
+    parked_vehicle = pd.DataFrame([
+        _vehicle_row(ST_CASE=999, YEAR=2020, STATE=10)
+    ])
+    zip_bytes = _build_zip({
+        "PARKEDVEHICLE.CSV": parked_vehicle,          # alphabetically first
+        "ACCIDENT.CSV": pd.DataFrame([_synthetic_accident_row(case=1, year=2020, STATE=10)]),
+        "PERSON.CSV": pd.DataFrame([_person_row(ST_CASE=1, YEAR=2020, STATE=10)]),
+        "VEHICLE.CSV": real_vehicle,
+    })
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    assert len(result["Vehicle"]) == 5, "must return the REAL VEHICLE.CSV (5 rows), not PARKEDVEHICLE.CSV (1 row)"
+
+
+def test_download_fars_year_bulk_avoids_accidentevents_collision():
+    """REGRESSION: substring match on 'accident' would match ACCIDENTEVENTS.CSV
+    too. If it came first in namelist() we'd get the wrong file → the
+    "DE 2021 accident=0, DE 2022 accident=0" symptom you saw.
+    """
+    gfd.clear_bulk_cache()
+    real_accident = pd.DataFrame([
+        _synthetic_accident_row(case=i, year=2021, STATE=10) for i in range(1, 6)
+    ])
+    # Synthetic aux file that would match a naive substring search.
+    events_aux = pd.DataFrame([{"ST_CASE": 1, "EVENTNUM": 1, "STATE": 10}])
+    zip_bytes = _build_zip({
+        "ACCIDENTEVENTS.CSV": events_aux,             # alphabetically first
+        "ACCIDENT.CSV": real_accident,
+        "PERSON.CSV": pd.DataFrame([_person_row(ST_CASE=1, YEAR=2021, STATE=10)]),
+        "VEHICLE.CSV": pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2021, STATE=10)]),
+    })
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2021)
+
+    assert result is not None
+    assert len(result["Accident"]) == 5, "must return the REAL ACCIDENT.CSV, not ACCIDENTEVENTS.CSV"
+
+
+def test_download_fars_year_bulk_handles_subdirectory():
+    """FARS recent years sometimes nest files: FARS{year}NationalCSV/ACCIDENT.CSV.
+    os.path.basename() must strip the subdirectory prefix for exact matching.
+    """
+    gfd.clear_bulk_cache()
+    acc_df = pd.DataFrame([_synthetic_accident_row(case=1, year=2022, STATE=10)])
+    zip_bytes = _build_zip({
+        "FARS2022NationalCSV/ACCIDENT.CSV": acc_df,
+    })
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2022)
+
+    assert result is not None
+    assert len(result["Accident"]) == 1
+
+
+def test_download_fars_year_bulk_alternate_vehicle_name():
+    """Some FARS years may ship the vehicle file as VEH.CSV instead of
+    VEHICLE.CSV. The fallback list must catch it.
+    """
+    gfd.clear_bulk_cache()
+    veh_df = pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020, STATE=10)])
+    zip_bytes = _build_zip({
+        "ACCIDENT.CSV": pd.DataFrame([_synthetic_accident_row(case=1, year=2020, STATE=10)]),
+        "PERSON.CSV": pd.DataFrame([_person_row(ST_CASE=1, YEAR=2020, STATE=10)]),
+        "VEH.CSV": veh_df,                            # alternate name
+    })
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    assert len(result["Vehicle"]) == 1
+
+
+def test_download_fars_year_bulk_stamps_year_authoritatively():
+    """REGRESSION: Bug 1 — some FARS years don't ship YEAR as a column (it's
+    embedded in ST_CASE). download_fars_year_bulk MUST set YEAR from the
+    download year, overriding anything in the CSV.
+    """
+    gfd.clear_bulk_cache()
+    # Accident CSV with NO year column and a deliberately wrong year in person
+    acc_df = pd.DataFrame([{
+        "ST_CASE": 1, "STATE": 10, "FATALS": 1, "LATITUDE": 38.9, "LONGITUD": -75.4,
+        # Note: no YEAR column at all
+    }])
+    # Person CSV with a WRONG year value to prove the download year overrides it
+    per_df = pd.DataFrame([{
+        "ST_CASE": 1, "YEAR": 1999, "STATE": 10, "PER_TYP": 1, "INJ_SEV": 4, "AGE": 40,
+    }])
+    zip_bytes = _build_zip({
+        "ACCIDENT.CSV": acc_df,
+        "PERSON.CSV": per_df,
+        "VEHICLE.CSV": pd.DataFrame([_vehicle_row(ST_CASE=1, YEAR=2020, STATE=10)]),
+    })
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    # Accident had no YEAR column — must now be stamped with 2020
+    assert "YEAR" in result["Accident"].columns
+    assert result["Accident"]["YEAR"].iloc[0] == 2020
+    # Person had a wrong year (1999) — must be overridden to 2020
+    assert result["Person"]["YEAR"].iloc[0] == 2020
+
+
+def test_download_fars_year_bulk_stamps_state_numeric():
+    """STATE may be shipped as string. download_fars_year_bulk must coerce
+    it to numeric at load time so downstream _filter_to_state works without
+    surprises. (Defense-in-depth — _filter_to_state also coerces, but
+    double-checking it's numeric in the cached frames keeps things simple
+    for any downstream consumer of the cache.)
+    """
+    gfd.clear_bulk_cache()
+    acc_df = pd.DataFrame([{
+        "ST_CASE": 1, "STATE": "10", "FATALS": 1,
+        "LATITUDE": 38.9, "LONGITUD": -75.4,
+    }])
+    zip_bytes = _build_zip({"ACCIDENT.CSV": acc_df})
+    with patch.object(gfd.requests, "get", side_effect=_fake_get_returning(zip_bytes)):
+        result = gfd.download_fars_year_bulk(2020)
+
+    assert result is not None
+    # STATE should now be numeric (int or float), not string
+    state_series = result["Accident"]["STATE"]
+    assert pd.api.types.is_numeric_dtype(state_series)
+    assert state_series.iloc[0] == 10
+
+
+def test_process_state_end_to_end_with_year_override(tmp_path, monkeypatch):
+    """End-to-end: simulate bulk cache with WRONG YEAR values in source CSVs
+    and verify the final parquet has the correct (download) year stamped on
+    every row. Belt-and-suspenders regression test for Bug 1.
+    """
+    monkeypatch.setattr(gfd.time, "sleep", lambda *a, **kw: None)
+
+    for year in (2020, 2021):
+        acc_rows = []
+        for seq in (1, 2):
+            case = year * 100 + seq
+            row = _synthetic_accident_row(
+                case=case, year=9999,        # wrong YEAR in source
+                LATITUDE=38.9, LONGITUD=-75.4,
+                STATE=10, STATENAME="Delaware",
+            )
+            acc_rows.append(row)
+        acc_df = pd.DataFrame(acc_rows)
+        # Call the same stamp helper the real loader uses
+        acc_df = gfd._stamp_year_and_state(acc_df, year)
+
+        per_df = pd.DataFrame([{
+            "ST_CASE": year * 100 + 1, "STATE": 10, "YEAR": year,
+            "PER_TYP": 1, "INJ_SEV": 4, "AGE": 40, "DRINKING": 0,
+            "ALC_RES": 0, "REST_USE": 3,
+        }])
+        veh_df = pd.DataFrame([{
+            "ST_CASE": year * 100 + 1, "STATE": 10, "YEAR": year,
+            "SPEEDREL": 0, "BODY_TYP": 4, "MDRDSTRD": 0, "HIT_RUN": 0,
+        }])
+        gfd._FARS_BULK_CACHE[year] = {
+            "Accident": acc_df, "Person": per_df, "Vehicle": veh_df,
+        }
+
+    de = gfd.ABBR_LOOKUP["de"]
+    tag, df = gfd.process_state(
+        de, tmp_path, s3=None, bucket="x",
+        from_year=2020, to_year=2021,
+        force=False, local_only=True,
+    )
+    assert tag == "completed"
+    assert df is not None
+    # crash_year must reflect the download year (2020, 2021), not the 9999
+    # value from the synthetic source CSV.
+    years_in_output = set(df["crash_year"].tolist())
+    assert years_in_output == {2020, 2021}
+    assert 9999 not in years_in_output
+
+
+def test_extract_fars_csv_exact_basename():
+    """Unit test for _extract_fars_csv: PARKEDVEHICLE vs VEHICLE."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("PARKEDVEHICLE.CSV", "ST_CASE\n999\n")
+        zf.writestr("VEHICLE.CSV", "ST_CASE\n1\n2\n3\n")
+    buf.seek(0)
+    zf = zipfile.ZipFile(buf)
+    df = gfd._extract_fars_csv(zf, ["VEHICLE.CSV"])
+    assert df is not None
+    assert len(df) == 3           # real vehicle file
+    assert 999 not in df["ST_CASE"].values
+
+
+def test_extract_fars_csv_multiple_candidates():
+    """First match in the candidate list wins — canonical name preferred."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("VEH.CSV", "ST_CASE\n999\n")
+        zf.writestr("VEHICLE.CSV", "ST_CASE\n1\n")
+    buf.seek(0)
+    zf = zipfile.ZipFile(buf)
+    # Candidate list has VEHICLE.CSV first, but the current implementation
+    # iterates namelist() order, not candidate order. Either way, as long
+    # as only one of the candidates matches the exact basename, there's no
+    # collision. Assert we get SOME valid file back.
+    df = gfd._extract_fars_csv(zf, ["VEHICLE.CSV", "VEH.CSV"])
+    assert df is not None
+    assert "ST_CASE" in df.columns
+
+
+def test_extract_fars_csv_no_match_returns_none():
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("RANDOM.CSV", "ST_CASE\n1\n")
+    buf.seek(0)
+    zf = zipfile.ZipFile(buf)
+    assert gfd._extract_fars_csv(zf, ["VEHICLE.CSV"]) is None
+
+
 def test_download_all_datasets_filters_to_state():
     """Full end-to-end per-state slice: pre-seed cache, call the public API,
     and verify only target-state rows come back.

@@ -10,6 +10,82 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-13] fix | FARS bulk CSV — 4 post-Fix-2 bugs (PARKEDVEHICLE collision, YEAR override, subdirs, STATE dtype)
+
+Fix 2 got as far as a successful ZIP download from `static.nhtsa.gov`, but the per-year output logs showed three wrong-file / wrong-key symptoms in the Delaware workflow run:
+```
+DE 2020: accident=101  person=248  vehicle=44,236
+DE 2021: accident=0    person=248  vehicle=1,532        ← both broken
+DE 2022: accident=0    person=254  vehicle=1,547        ← both broken
+DE 2023: accident=103  person=251  vehicle=44,872
+```
+Plus a `KeyError: 'YEAR'` surfaced in `aggregate_persons()` on years where the source CSV didn't ship `YEAR` as a column.
+
+**Root cause (the headline bug):** `_extract_fars_csv()` used a **substring match** on the filename:
+```python
+if keyword.lower() in lower and lower.endswith(".csv"):
+```
+FARS bulk ZIPs contain auxiliary files whose basenames overlap the primary file names. In particular:
+- `PARKEDVEHICLE.CSV` (pedestrian-struck-by-parked-vehicle cases, ~1K rows nationwide) contains the substring `"vehicle"`. ZIP `namelist()` is alphabetical and `P < V`, so `PARKEDVEHICLE.CSV` was returned **before** `VEHICLE.CSV`. That's the exact "VEHICLE 44K→1,500" symptom.
+- An `ACCIDENT`-prefixed auxiliary file (likely `ACCIDENTEVENTS.CSV` or a nested-subdir `FARS2021NationalCSV/ACCIDENT.CSV` matching something weird) masked the real `ACCIDENT.CSV` on some years, producing `accident=0` when the parser hit a file without FARS's expected schema.
+
+**Fix:** replaced the substring match with **exact basename match**:
+```python
+def _extract_fars_csv(zf, candidate_basenames):
+    candidates_upper = {c.upper() for c in candidate_basenames}
+    for name in zf.namelist():
+        basename = os.path.basename(name).upper()  # strips subdirs
+        if basename in candidates_upper:
+            with zf.open(name) as f:
+                return pd.read_csv(f, encoding="latin-1", low_memory=False)
+    return None
+```
+Call sites are explicit about which files to look for, including a fallback list for Vehicle:
+```python
+accident_df = _extract_fars_csv(zf, ["ACCIDENT.CSV"])
+person_df   = _extract_fars_csv(zf, ["PERSON.CSV"])
+vehicle_df  = _extract_fars_csv(zf, ["VEHICLE.CSV", "VEH.CSV", "VEHICLES.CSV"])
+```
+`os.path.basename()` strips any subdirectory prefix (`FARS2021NationalCSV/ACCIDENT.CSV` → `ACCIDENT.CSV`), and `.upper()` gives case-insensitive matching.
+
+**Bug 1 fix — authoritative YEAR stamping.** Some FARS years don't ship a `YEAR` column (year is encoded in `ST_CASE`). New helper `_stamp_year_and_state(df, year)` runs immediately after `pd.read_csv()` and does two things:
+1. **Overrides** `df["YEAR"] = year` from the download year (authoritative — even if the CSV ships a wrong / missing value)
+2. Coerces `STATE` to numeric via `pd.to_numeric(errors="coerce")` so downstream `_filter_to_state` comparisons work regardless of whether the source CSV shipped STATE as int or string
+
+**On the join key.** The task description suggested "join on `ST_CASE` only (not `ST_CASE + YEAR`)". I kept the `(ST_CASE, YEAR)` compound key in `aggregate_persons` / `aggregate_vehicles` / `build_final_df` **intentionally**:
+
+- `download_all_datasets()` concats *multi-year* slices before handing them to `build_final_df()`
+- `ST_CASE` is only unique within `(state, year)` — the 6-digit ID repeats across calendar years, so a Delaware `ST_CASE=100001` in 2020 is a different crash from `ST_CASE=100001` in 2021
+- A ST_CASE-only join on the concatenated frame would cause cross-year false merges (2020's crash flags getting attached to 2021's crash, and vice versa, duplicating rows via the cross product)
+- Now that `_stamp_year_and_state()` guarantees `YEAR` is always present, the `(ST_CASE, YEAR)` key is safe **and** correct for multi-year data
+
+The ST_CASE-only approach from the task description would only be correct in an architecture that merges *per-year* before concatenating. I chose the minimally-invasive path that preserves the current architecture.
+
+**Diagnostic: ZIP contents log.** `download_fars_year_bulk()` now prints the first 10 entries of `zf.namelist()` so future filename-mismatch bugs are diagnosable from the Actions log without another round-trip:
+```
+ZIP contains 42 entries; first 10: ['ACCIDENT.CSV', 'CEVENT.CSV', 'DAMAGE.CSV', ...]
+```
+
+**Diagnostic: small-vehicle warning.** If a year's `VEHICLE` file has < 1,000 nationwide rows (expected ~60K), we log a loud `WARNING` line. This would have caught the PARKEDVEHICLE collision on the first run — the per-state output said `vehicle=1,532` for 2021 but the module didn't flag that 1,532 nationwide is wildly wrong.
+
+**Test suite: 44 → 54 tests (+10 regression tests).** All new tests green in ~1.8s.
+
+Added tests:
+- `test_download_fars_year_bulk_avoids_parkedvehicle_collision` — the PARKEDVEHICLE regression test. Builds a synthetic ZIP with both files, asserts the real `VEHICLE.CSV` (5 rows) is returned, not `PARKEDVEHICLE.CSV` (1 row).
+- `test_download_fars_year_bulk_avoids_accidentevents_collision` — same defense for `ACCIDENTEVENTS.CSV` masking `ACCIDENT.CSV`.
+- `test_download_fars_year_bulk_handles_subdirectory` — `FARS2022NationalCSV/ACCIDENT.CSV` nested path → `os.path.basename()` strips it and the match works.
+- `test_download_fars_year_bulk_alternate_vehicle_name` — ZIP with `VEH.CSV` instead of `VEHICLE.CSV` still loads via the fallback list.
+- `test_download_fars_year_bulk_stamps_year_authoritatively` — Accident CSV with no YEAR column and Person CSV with YEAR=1999 both come out with YEAR=2020 (the download year) after loading.
+- `test_download_fars_year_bulk_stamps_state_numeric` — STATE="10" as string → is_numeric_dtype True after loading, value == 10.
+- `test_process_state_end_to_end_with_year_override` — end-to-end: synthetic cache with YEAR=9999 in source, final parquet has `crash_year ∈ {2020, 2021}` not 9999.
+- `test_extract_fars_csv_exact_basename` — unit test asserting PARKEDVEHICLE.CSV (1 row) is ignored and VEHICLE.CSV (3 rows) is returned.
+- `test_extract_fars_csv_multiple_candidates` — fallback list works.
+- `test_extract_fars_csv_no_match_returns_none` — defensive None return when no file matches.
+
+Files changed: `generate_fars_data.py` (new `_stamp_year_and_state` helper, rewritten `_extract_fars_csv`, debug logging + vehicle-size warning in `download_fars_year_bulk`), `tests/test_fars_downloader.py` (+10 regression tests), `wiki/log.md`.
+
+---
+
 ## [2026-04-13] fix | FARS API still 403 — switched to static.nhtsa.gov bulk CSV ZIPs (Fix 2)
 
 Fix 1 (User-Agent header) **did not work**. The `generate-fars-cache.yml` workflow run on main HEAD `e454377` (which verified includes the `FARS_HEADERS` constant and the `headers=FARS_HEADERS` kwarg in `fetch_fars_dataset()`) still returned `403 Client Error: Forbidden` for every CrashAPI call. NHTSA is blocking GitHub Actions' Azure IPs at the network / WAF layer, not at the User-Agent sniff layer — no header combination will fix this. Confirmed from the failed run log at `2026-04-13T02:58:51Z`:

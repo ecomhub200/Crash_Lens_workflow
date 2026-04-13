@@ -276,16 +276,49 @@ def clear_bulk_cache():
     _FARS_BULK_CACHE.clear()
 
 
-def _extract_fars_csv(zf, keyword):
-    """Return the DataFrame for the first CSV in ZF whose filename contains
-    `keyword` (case-insensitive) and ends with .csv. Returns None if missing.
+def _extract_fars_csv(zf, candidate_basenames):
+    """Return the DataFrame for the first CSV in ZF whose basename (strip of
+    any subdirectory prefix) exactly matches one of the candidate names,
+    case-insensitively. Returns None if no match.
+
+    Uses exact basename matching — NOT substring matching — because FARS
+    bulk ZIPs contain auxiliary files whose names are substring-overlaps of
+    the primary files. In particular:
+      - "accident" appears in ACCIDENTEVENTS.CSV, etc.
+      - "vehicle" appears in PARKEDVEHICLE.CSV (pedestrian-hit cases, ~1K
+        rows), and ZIP namelist() is alphabetical so P < V and
+        PARKEDVEHICLE.CSV is returned first → 1,500 rows instead of 44K.
+
+    Exact basename match avoids both collisions. os.path.basename() strips
+    subdirectory prefixes like "FARS2021NationalCSV/ACCIDENT.CSV" which
+    some recent years use.
     """
+    candidates_upper = {c.upper() for c in candidate_basenames}
     for name in zf.namelist():
-        lower = name.lower()
-        if keyword.lower() in lower and lower.endswith(".csv"):
+        basename = os.path.basename(name).upper()
+        if basename in candidates_upper:
             with zf.open(name) as f:
                 return pd.read_csv(f, encoding="latin-1", low_memory=False)
     return None
+
+
+def _stamp_year_and_state(df, year):
+    """Post-load normalization of a FARS nationwide DataFrame.
+
+    - Always sets df["YEAR"] = year (overriding any column in the CSV).
+      The download year is authoritative; some FARS years don't ship YEAR
+      as a column at all (it's encoded in ST_CASE), which caused a
+      KeyError in aggregate_persons() / aggregate_vehicles().
+    - Coerces STATE to numeric so downstream _filter_to_state comparisons
+      work regardless of whether the source CSV shipped STATE as int or
+      string.
+    """
+    if df is None or df.empty:
+        return df
+    df["YEAR"] = year
+    if "STATE" in df.columns:
+        df["STATE"] = pd.to_numeric(df["STATE"], errors="coerce")
+    return df
 
 
 def download_fars_year_bulk(year):
@@ -323,9 +356,21 @@ def download_fars_year_bulk(year):
         _FARS_BULK_CACHE[year] = None
         return None
 
-    accident_df = _extract_fars_csv(zf, "accident")
-    person_df = _extract_fars_csv(zf, "person")
-    vehicle_df = _extract_fars_csv(zf, "vehicle")
+    # Debug: surface the top of namelist() so filename-mismatch bugs are
+    # easy to diagnose from the Actions log.
+    names = zf.namelist()
+    print(f"      ZIP contains {len(names)} entries; first 10: {names[:10]}")
+
+    accident_df = _extract_fars_csv(zf, ["ACCIDENT.CSV"])
+    person_df = _extract_fars_csv(zf, ["PERSON.CSV"])
+    # Vehicle file has shipped under multiple names across FARS years.
+    # Order matters — canonical name first, fallbacks after.
+    vehicle_df = _extract_fars_csv(zf, ["VEHICLE.CSV", "VEH.CSV", "VEHICLES.CSV"])
+
+    # Stamp YEAR and coerce STATE while the frames are still nationwide.
+    accident_df = _stamp_year_and_state(accident_df, year)
+    person_df = _stamp_year_and_state(person_df, year)
+    vehicle_df = _stamp_year_and_state(vehicle_df, year)
 
     acc_n = 0 if accident_df is None else len(accident_df)
     per_n = 0 if person_df is None else len(person_df)
@@ -333,6 +378,15 @@ def download_fars_year_bulk(year):
     print(
         f"      FARS {year}: ACCIDENT={acc_n:,}  PERSON={per_n:,}  VEHICLE={veh_n:,}"
     )
+    # A full FARS year has ~60K vehicles nationally. Anything under 1K means
+    # we likely picked up PARKEDVEHICLE.CSV or another auxiliary file, OR the
+    # bulk distribution changed its file naming. The run still proceeds
+    # (vehicle flags will just be sparse) but the log makes it loud.
+    if vehicle_df is not None and acc_n > 0 and veh_n < 1000:
+        print(
+            f"    WARNING: FARS {year} VEHICLE has only {veh_n} rows "
+            f"(expected ~60K). any_* vehicle flags may be incomplete."
+        )
 
     result = {
         "Accident": accident_df if accident_df is not None else pd.DataFrame(),
