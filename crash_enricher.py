@@ -487,6 +487,9 @@ def derive_roadway_alignment(curvature):
     - Ratio 1.15-1.40: HPMS C (moderate) — CURVE
     - Ratio > 1.40: HPMS D/E (sharp/very sharp) — SHARP CURVE
     """
+    # OSM curvature ratio threshold: 1.15 = road 15% longer than straight-line.
+    # Fallback only — HPMS curve_class covers ~95% of crashes.
+    # Calibrated to FHWA: curves = 5-10% of roads, 25-30% of crashes.
     if curvature <= 1.15:
         return "1. Straight - Level"
     elif curvature <= 1.40:
@@ -1026,15 +1029,44 @@ class CrashEnricher:
 
         # ── Intersection Type distribution (diagnostic) ──
         # After the degree→approach classification fix, ~35% of crashes
-        # should be "Not at Intersection" (was ~2.6% under the buggy >=3
-        # threshold). Phase 2 (streets_per_node) should push this to ~45–50%.
+        # should be "Not at Intersection" on Phase-1-only runs (was ~2.6%
+        # under the buggy >=3 threshold). Phase 2 (streets_per_node) should
+        # push this to ~45–50% and the "Metric:" line below confirms which
+        # branch of road_inventory_enricher actually fired.
         if "Intersection Type" in df.columns:
-            int_dist = df["Intersection Type"].value_counts()
             total = len(df)
+            int_dist = df["Intersection Type"].value_counts()
+            at_int = total - int_dist.get("1. Not at Intersection", 0)
+            not_int = int_dist.get("1. Not at Intersection", 0)
             if total > 0:
-                print(f"\n    Intersection Type distribution ({total:,} total):")
-                for val, cnt in int_dist.head(10).items():
-                    print(f"      {cnt:>7,} ({cnt/total*100:5.1f}%): {val}")
+                print(f"\n    Intersection Type ({total:,} crashes):")
+                print(f"      At intersection:     {at_int:>7,} "
+                      f"({at_int/total*100:.1f}%)")
+                print(f"      Not at intersection: {not_int:>7,} "
+                      f"({not_int/total*100:.1f}%)")
+                for val, cnt in int_dist.items():
+                    print(f"        {cnt:>7,} ({cnt/total*100:5.1f}%): {val}")
+
+                # Which metric was actually used? streets_per_node is bulk-
+                # assigned onto matched crash rows by road_inventory_enricher
+                # when the road inventory has the column; check for numeric
+                # values (unmatched rows are "" empty strings, not NaN).
+                if "streets_per_node" in df.columns:
+                    spn_num = pd.to_numeric(
+                        df["streets_per_node"], errors="coerce")
+                    spn_used = int((spn_num > 0).sum())
+                    if spn_used > 0:
+                        print(f"      Metric: streets_per_node used for "
+                              f"{spn_used:,} ({spn_used/total*100:.1f}%) "
+                              f"— MIRE-correct")
+                    else:
+                        print(f"      Metric: degree>=6 fallback "
+                              f"(streets_per_node column present but empty "
+                              f"— regenerate OSM cache)")
+                else:
+                    print(f"      Metric: degree>=6 fallback "
+                          f"(no streets_per_node in road inventory "
+                          f"— regenerate OSM cache)")
 
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)
@@ -1224,8 +1256,9 @@ class CrashEnricher:
         intersection node proximity in road_inventory_enricher.py.
 
         Old approach tagged 85.7%+ of crashes as intersection (wrong).
-        New approach uses actual OSM intersection nodes (intersection_degree >= 3,
-        within 30m of crash) from the road inventory.
+        New approach uses actual OSM intersection nodes (streets_per_node >= 3
+        when available, else intersection_degree >= 6; within 30m of crash)
+        from the road inventory.
         """
         return df
 
