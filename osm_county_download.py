@@ -558,6 +558,11 @@ def main():
                 rd = load_checkpoint(slug, "roads", s3, bucket, r2_prefix, cache_dir)
                 if rd is not None:
                     it = load_checkpoint(slug, "ints", s3, bucket, r2_prefix, cache_dir)
+                    # Backfill streets_per_node = 0 on pre-2026-04-12 checkpoints
+                    # so schemas stay consistent across a mixed resume run.
+                    if it is not None and len(it) > 0 and "streets_per_node" not in it.columns:
+                        it = it.copy()
+                        it["streets_per_node"] = 0
                     safe_print(f"      [{index:3d}/{total}] {county['NAMELSAD']}... "
                                f"resumed ({len(rd):,} roads)")
                     return county["NAMELSAD"], rd, it if it is not None else pd.DataFrame()
@@ -685,8 +690,15 @@ def main():
             a = len(merged_r)
             bi = len(merged_i)
             if len(merged_i) > 0:
-                merged_i = merged_i.groupby("node_id", as_index=False).agg(
-                    {"lat": "first", "lon": "first", "degree": "max"})
+                # Aggregate per unique node_id. For nodes on county boundaries,
+                # each county's subgraph sees only part of the true degree —
+                # "max" is a best-effort recovery. streets_per_node is included
+                # so the MIRE-correct undirected physical approach count
+                # survives the county merge (added 2026-04-12).
+                int_agg = {"lat": "first", "lon": "first", "degree": "max"}
+                if "streets_per_node" in merged_i.columns:
+                    int_agg["streets_per_node"] = "max"
+                merged_i = merged_i.groupby("node_id", as_index=False).agg(int_agg)
             ai = len(merged_i)
             safe_print(f"roads {b:,}→{a:,}, ints {bi:,}→{ai:,}")
 

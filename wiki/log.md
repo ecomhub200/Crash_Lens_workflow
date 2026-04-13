@@ -43,6 +43,16 @@ Files changed: `generate_fars_data.py` (new), `.github/workflows/generate-fars-c
 
 ---
 
+## [2026-04-12] fix | OSM curvature fallback threshold 1.10 → 1.15
+
+Raised `derive_roadway_alignment()` OSM fallback threshold from `1.10` to `1.15` in `crash_enricher.py` (lines 483–487). Roads are now classified as curves only when their road length is ≥15% longer than the straight-line distance (previously ≥10%). More conservative — reduces false positives on gentle bends drivers don't perceive as curves.
+
+Scope: OSM fallback only (~5% of crashes). HPMS `curve_class` authority logic (A/B=Straight, C=Curve, D/E=Sharp) and the `1.40` sharp-curve upper threshold are unchanged. Calibrated to FHWA benchmark that 25–30% of crashes occur on curves nationwide.
+
+Files changed: `crash_enricher.py`, `wiki/log.md`.
+
+---
+
 ## [2026-04-12] fix | Intersection degree — directed-graph ≥6 + streets_per_node (MIRE-correct)
 
 Fixed a classification bug that was tagging ~97% of Delaware crashes as "at intersection". Root cause: `intersection_degree` comes from osmnx's MultiDiGraph, so every two-way road contributes 2 directed edges per node. The pipeline used `degree >= 3` as the intersection threshold — but a 3-road T-intersection actually has directed degree 6 (3 roads × 2 edges). Degrees 3–5 are ramp merges / continuations / bends, not intersections.
