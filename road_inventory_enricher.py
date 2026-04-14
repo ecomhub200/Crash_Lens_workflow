@@ -48,10 +48,17 @@ OVERWRITE_COLUMNS = {
 }
 
 FILL_COLUMNS = {
-    "Traffic Control Type", "Intersection Type", "RTE Name",
+    "Traffic Control Type", "RTE Name",
     "Max Speed Diff", "Through_Lanes", "School Zone",
     "Roadway Alignment", "Roadway Surface Condition",
 }
+# NOTE: "Intersection Type" was removed from FILL_COLUMNS in the node-based
+# classification fix. The road inventory's per-segment value is segment-
+# inherited (every crash on a segment that touches an intersection inherits
+# the tag), which over-counted "at intersection" by ~30 percentage points.
+# `Intersection Type` is now written exclusively by the node-based matcher
+# in crash_enricher._match_crashes_to_intersections() (50 m STRtree nearest
+# real-node lookup).
 
 
 def _is_empty(val):
@@ -268,102 +275,19 @@ class RoadInventorySession:
                 if fill_mask.any():
                     df.loc[matched_ci[fill_mask], col] = ri_vals[fill_mask]
 
-        # ── Intersection Type from road inventory node proximity ──
-        # (replaces GPS clustering — uses actual OSM intersection nodes)
+        # NOTE: Intersection Type is no longer derived here. The previous
+        # implementation used the segment u/v node proximity, which inherited
+        # the segment's intersection tag for any crash anywhere along the
+        # segment — over-counting "at intersection" by ~30 percentage points
+        # (Delaware: 91.4% vs FHWA-expected 55–65%).
         #
-        # OSM intersection_degree counts DIRECTED edges from a MultiDiGraph.
-        # Each two-way road contributes 2 edges per node, so a 3-road
-        # T-intersection has degree 6, not 3. The MIRE-correct metric is
-        # streets_per_node (undirected physical street count): spn>=3 is a
-        # real intersection. When streets_per_node is present on the road
-        # inventory slice (Phase 2), prefer it; otherwise fall back to the
-        # directed-degree mapping (deg>=6 ≈ T-intersection).
-        if "intersection_degree" in self.ri.columns:
-            # Use a distinct name here — do NOT clobber `ri_slice`, which holds
-            # the string-cast copy from line 237 and must stay intact for the
-            # `new_cols` bulk assign below. Clobbering it caused a pyarrow
-            # `ArrowInvalid` on AADT (mixed int64/str object column) under
-            # pandas 3.0.2 + pyarrow 23.0.1.
-            ri_seg = self.ri.iloc[matched_ri]
-            seg_int_deg = pd.to_numeric(
-                ri_seg["intersection_degree"], errors="coerce"
-            ).fillna(0).astype(int).values
-            has_spn = "streets_per_node" in ri_seg.columns
-            if has_spn:
-                seg_spn = pd.to_numeric(
-                    ri_seg["streets_per_node"], errors="coerce"
-                ).fillna(0).astype(int).values
-            else:
-                seg_spn = None
-            seg_u_lat = ri_seg["u_lat"].values.astype(float)
-            seg_u_lon = ri_seg["u_lon"].values.astype(float)
-            seg_v_lat = ri_seg["v_lat"].values.astype(float)
-            seg_v_lon = ri_seg["v_lon"].values.astype(float)
-
-            c_lat = lats[matched_ci]
-            c_lon = lons[matched_ci]
-
-            # Longitude scale factor for approximate distance
-            valid_lats = c_lat[c_lat != 0]
-            mean_lat = np.nanmean(valid_lats) if len(valid_lats) > 0 else 39.0
-            lon_scale = np.cos(np.radians(mean_lat))
-
-            # Squared distance to u-node and v-node (in meters)
-            d_u_sq = ((c_lat - seg_u_lat) * 111000)**2 + \
-                     ((c_lon - seg_u_lon) * 111000 * lon_scale)**2
-            d_v_sq = ((c_lat - seg_v_lat) * 111000)**2 + \
-                     ((c_lon - seg_v_lon) * 111000 * lon_scale)**2
-            min_dist_sq = np.minimum(d_u_sq, d_v_sq)
-
-            # At intersection = real intersection node within 30m.
-            # streets_per_node >= 3 (preferred) or directed degree >= 6 (fallback).
-            if has_spn:
-                node_is_real = seg_spn >= 3
-            else:
-                node_is_real = seg_int_deg >= 6
-            at_intersection = node_is_real & (min_dist_sq <= 900)
-
-            # Only fill empty Intersection Type
-            if "Intersection Type" not in df.columns:
-                df["Intersection Type"] = ""
-            crash_it = df.loc[matched_ci, "Intersection Type"] \
-                .fillna("").astype(str).str.strip()
-            needs_fill = crash_it.isin(["", "nan", "None", "Not Applicable"]).values
-
-            # Map degree/spn → Intersection Type string. Prefer spn (direct
-            # physical street count) when available; otherwise use directed
-            # degree with ~2:1 ratio for two-way streets.
-            if has_spn:
-                int_type_arr = np.where(
-                    seg_spn >= 5, "5. Five-Point, or More",
-                    np.where(seg_spn >= 4, "4. Four Approaches",
-                    np.where(seg_spn >= 3, "3. Three Approaches",
-                             "1. Not at Intersection")))
-            else:
-                int_type_arr = np.where(
-                    seg_int_deg >= 10, "5. Five-Point, or More",
-                    np.where(seg_int_deg >= 8, "4. Four Approaches",
-                    np.where(seg_int_deg >= 6, "3. Three Approaches",
-                             "1. Not at Intersection")))
-
-            fill_as_int = needs_fill & at_intersection
-            fill_as_not = needs_fill & ~at_intersection
-
-            if fill_as_int.any():
-                df.loc[matched_ci[fill_as_int], "Intersection Type"] = \
-                    int_type_arr[fill_as_int]
-            if fill_as_not.any():
-                df.loc[matched_ci[fill_as_not], "Intersection Type"] = \
-                    "1. Not at Intersection"
-
-            int_count = fill_as_int.sum()
-            not_count = fill_as_not.sum()
-            total_matched = len(matched_ci)
-            if int_count or not_count:
-                print(f"    Intersection Type (node proximity): "
-                      f"{int_count:,} at intersection "
-                      f"({int_count/total_matched*100:.1f}%), "
-                      f"{not_count:,} not at intersection")
+        # `Intersection Type` is now written exclusively by the node-based
+        # matcher in crash_enricher._match_crashes_to_intersections(), which
+        # measures actual crash GPS → nearest real intersection node distance
+        # via shapely STRtree and only tags crashes as "at intersection" when
+        # the nearest real node is within INTERSECTION_THRESHOLD_M (50 m).
+        # That call runs in CrashEnricher.enrich_all() right after this
+        # method returns.
 
         # NEW columns (bulk assign)
         new_cols = [c for c in self.transfer_cols

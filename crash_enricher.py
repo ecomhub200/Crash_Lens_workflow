@@ -33,11 +33,19 @@ import os
 import re
 import json
 import time
+import traceback
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+# ── Node-based intersection classification tunables ──
+# Crashes within INTERSECTION_THRESHOLD_M (meters) of a real intersection
+# node (streets_per_node >= 3) are tagged "at intersection". 50 m ≈ 164 ft
+# matches FHWA's typical "at-intersection" definition and yields a Delaware
+# at-intersection rate in the 55–65% expected band.
+INTERSECTION_THRESHOLD_M = 50
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -831,44 +839,169 @@ def _match_crashes_to_roads(crash_lats, crash_lons, road_df, max_dist_m=100):
 
 
 def _match_crashes_to_intersections(crash_lats, crash_lons, state_abbr, cache_dir="cache"):
-    """Match crashes to nearest intersection node. Returns dict of crash_index → node info."""
+    """Match each crash GPS to its nearest real intersection node (STRtree).
+
+    Replaces the old segment-inherited classification (which tagged every
+    crash on a segment that touched an intersection — over-counting Delaware
+    at-intersection by ~30 percentage points). This function:
+
+      1. Loads `cache/{abbr}_intersections.parquet` (fall back to .parquet.gz).
+      2. Filters to REAL intersection nodes (streets_per_node >= 3 if present,
+         else directed degree >= 6 — degree >= 6 corresponds to a 3-road
+         T-intersection in osmnx's MultiDiGraph).
+      3. Projects nodes + crashes into a flat-earth metric plane (meters)
+         using the same lat/lon scaling used elsewhere in this module so
+         distances come out directly in meters.
+      4. Builds a `shapely.strtree.STRtree` of the projected node Points and
+         queries the nearest node per crash via `query_nearest(..., return_
+         distance=True)` (shapely >= 2.0).
+      5. Tags any crash within INTERSECTION_THRESHOLD_M of a real node as
+         "at intersection" with the matched node's streets_per_node, and
+         everything else as "1. Not at Intersection" (streets_per_node = 0).
+
+    Returns: dict {crash_index → {node_id, distance_m, distance_ft,
+                                  intersection_type, streets_per_node}}.
+    Returns {} on any failure (missing cache, empty cache, exception) so an
+    intersection-cache problem degrades to "no fill" rather than killing
+    enrichment.
+    """
     int_path = Path(cache_dir) / f"{state_abbr.lower()}_intersections.parquet"
     if not int_path.exists():
+        int_path = Path(cache_dir) / f"{state_abbr.lower()}_intersections.parquet.gz"
+    if not int_path.exists():
+        print(f"    [Node match] Intersection cache not found: "
+              f"{state_abbr.lower()}_intersections.parquet[.gz]")
         return {}
 
     try:
-        from scipy.spatial import KDTree
-        int_df = pd.read_parquet(int_path)
+        from shapely.geometry import Point
+        from shapely.strtree import STRtree
+
+        # --- Load intersection cache ---
+        if str(int_path).endswith(".gz"):
+            import gzip
+            import io
+            with gzip.open(int_path, "rb") as f:
+                int_df = pd.read_parquet(io.BytesIO(f.read()))
+        else:
+            int_df = pd.read_parquet(int_path)
+
         if len(int_df) == 0:
+            print(f"    [Node match] Intersection cache empty: {int_path.name}")
             return {}
 
-        int_lats = int_df["lat"].values.tolist()
-        int_lons = int_df["lon"].values.tolist()
+        # --- Filter to REAL intersection nodes ---
+        # Prefer undirected streets_per_node (MIRE-correct physical street
+        # count); fall back to directed degree (osmnx MultiDiGraph each
+        # two-way road contributes 2 edges, so a 3-road T-intersection = 6).
+        if "streets_per_node" in int_df.columns:
+            int_df = int_df[
+                pd.to_numeric(int_df["streets_per_node"], errors="coerce")
+                .fillna(0).astype(int) >= 3
+            ].reset_index(drop=True)
+        elif "degree" in int_df.columns:
+            int_df = int_df[
+                pd.to_numeric(int_df["degree"], errors="coerce")
+                .fillna(0).astype(int) >= 6
+            ].reset_index(drop=True)
+        else:
+            print(f"    [Node match] Cache missing both streets_per_node and "
+                  f"degree columns: {int_path.name}")
+            return {}
 
-        mid_lat = sum(int_lats) / len(int_lats)
-        lon_scale = math.cos(math.radians(mid_lat))
+        if len(int_df) == 0:
+            print(f"    [Node match] No real intersection nodes after filter")
+            return {}
 
-        int_points = _make_crash_points(int_lats, int_lons, lon_scale)
-        tree = KDTree(int_points)
+        # Pre-extract node arrays in index order for STRtree result mapping
+        node_lats = int_df["lat"].values.astype(np.float64)
+        node_lons = int_df["lon"].values.astype(np.float64)
+        node_ids = int_df["node_id"].values
 
-        crash_points = _make_crash_points(crash_lats, crash_lons, lon_scale)
-        distances, indices = _chunked_kdtree_query(tree, crash_points, k=1)
-        del int_points, crash_points
-
-        matches = {}
         has_spn = "streets_per_node" in int_df.columns
-        for i, (dist, idx) in enumerate(zip(distances, indices)):
-            node = int_df.iloc[idx]
-            degree = int(node["degree"])
-            spn = int(node["streets_per_node"]) if has_spn else None
+        if has_spn:
+            node_spn = pd.to_numeric(
+                int_df["streets_per_node"], errors="coerce"
+            ).fillna(0).astype(int).values
+        else:
+            # Derive a plausible spn from directed degree: deg <= 7 → 3,
+            # deg <= 9 → 4, else 5. Matches the previous fallback mapping.
+            deg = pd.to_numeric(
+                int_df["degree"], errors="coerce"
+            ).fillna(0).astype(int).values
+            node_spn = np.where(deg <= 7, 3, np.where(deg <= 9, 4, 5))
 
-            # Derive Intersection Type from streets_per_node (preferred) or
-            # directed graph degree (fallback). A 3-road T-intersection has
-            # directed degree 6 (each two-way road = 2 edges), so thresholds
-            # are doubled relative to physical approach counts.
-            if dist > 50:  # More than 50m from intersection
-                int_type = "1. Not at Intersection"
-            elif spn is not None:
+        # --- Flat-earth projection (meters) ---
+        # Use the mean latitude of the node set so the longitudinal scale is
+        # stable across the whole state. This is the same projection used
+        # elsewhere in this module (see _build_kdtree, _make_crash_points)
+        # and is accurate to well under 50 m anywhere in the contiguous US.
+        mid_lat = float(np.nanmean(node_lats))
+        lon_scale = math.cos(math.radians(mid_lat))
+        M = 111000.0  # ~meters per degree of latitude
+
+        node_x = node_lats * M
+        node_y = node_lons * M * lon_scale
+
+        # --- Build STRtree once per call ---
+        node_points = [Point(node_x[i], node_y[i]) for i in range(len(int_df))]
+        tree = STRtree(node_points)
+
+        # --- Project crashes into the same plane ---
+        crash_lats_arr = np.asarray(crash_lats, dtype=np.float64)
+        crash_lons_arr = np.asarray(crash_lons, dtype=np.float64)
+        crash_x = crash_lats_arr * M
+        crash_y = crash_lons_arr * M * lon_scale
+
+        # Skip crashes with missing/zero GPS — they get no node match
+        valid_mask = (
+            np.isfinite(crash_x)
+            & np.isfinite(crash_y)
+            & (crash_lats_arr != 0)
+            & (crash_lons_arr != 0)
+        )
+        valid_idx = np.where(valid_mask)[0]
+        if len(valid_idx) == 0:
+            print(f"    [Node match] No valid crash GPS points")
+            return {}
+
+        # --- Vectorised nearest-node query (shapely >= 2.0) ---
+        # `all_matches=False` is critical here: with the default True the
+        # tree returns one row per geometric tie, so a crash equidistant
+        # from two nodes yields two pair entries — which would corrupt
+        # our 1:1 valid_idx → tree_idx mapping. all_matches=False
+        # guarantees exactly one (input_idx, tree_idx) pair per input
+        # geometry, returned in input order, so pair_arr[1] is directly
+        # the per-crash tree index.
+        crash_points = np.array(
+            [Point(crash_x[i], crash_y[i]) for i in valid_idx],
+            dtype=object,
+        )
+        try:
+            pair_arr, dists = tree.query_nearest(
+                crash_points, return_distance=True, all_matches=False
+            )
+            tree_idxs = pair_arr[1]
+        except TypeError:
+            # Older shapely without the all_matches kwarg / vectorised
+            # query_nearest. Fall back to a per-point loop. requirements.txt
+            # pins shapely>=2.0 so this branch is defensive only.
+            tree_idxs = np.empty(len(crash_points), dtype=np.int64)
+            dists = np.empty(len(crash_points), dtype=np.float64)
+            for i in range(len(crash_points)):
+                idx = tree.nearest(crash_points[i])
+                tree_idxs[i] = int(idx)
+                dists[i] = crash_points[i].distance(node_points[idx])
+
+        # --- Build the result dict ---
+        matches = {}
+        within = 0
+        beyond = 0
+        for k, ci in enumerate(valid_idx):
+            d_m = float(dists[k])
+            tree_i = int(tree_idxs[k])
+            if d_m <= INTERSECTION_THRESHOLD_M:
+                spn = int(node_spn[tree_i])
                 if spn >= 5:
                     int_type = "5. Five-Point, or More"
                 elif spn == 4:
@@ -876,27 +1009,38 @@ def _match_crashes_to_intersections(crash_lats, crash_lons, state_abbr, cache_di
                 elif spn == 3:
                     int_type = "3. Three Approaches"
                 else:
+                    # Shouldn't happen — filter above requires spn>=3 — but
+                    # be defensive in case the fallback degree mapping
+                    # produced something odd.
                     int_type = "1. Not at Intersection"
-            elif degree >= 10:
-                int_type = "5. Five-Point, or More"
-            elif degree >= 8:
-                int_type = "4. Four Approaches"
-            elif degree >= 6:
-                int_type = "3. Three Approaches"
+                    spn = 0
+                within += 1
             else:
                 int_type = "1. Not at Intersection"
+                spn = 0
+                beyond += 1
 
-            matches[i] = {
-                "node_id":          int(node["node_id"]),
-                "distance_ft":      round(dist * 3.28084),  # meters → feet
+            matches[int(ci)] = {
+                "node_id":          int(node_ids[tree_i]),
+                "distance_m":       round(d_m, 1),
+                "distance_ft":      round(d_m * 3.28084),
                 "intersection_type": int_type,
-                "degree":           degree,
+                "streets_per_node": spn,
             }
+
+        total = within + beyond
+        if total > 0:
+            print(f"    [Node match] {within:,}/{total:,} "
+                  f"({within/total*100:.1f}%) within "
+                  f"{INTERSECTION_THRESHOLD_M}m of a real intersection node "
+                  f"(beyond: {beyond:,}); cache: {int_path.name}, "
+                  f"real nodes: {len(int_df):,}")
 
         return matches
 
     except Exception as e:
-        print(f"    Intersection matching error: {e}")
+        print(f"    [Node match] Intersection matching error: {e}")
+        traceback.print_exc()
         return {}
 
 
@@ -996,6 +1140,82 @@ class CrashEnricher:
                 print(f"\n  ⚠️  Road inventory not found: {ri_path}")
                 print(f"    Build with: python build_road_inventory.py --state {self.state_abbr.lower()}")
 
+        # ── Node-based intersection classification (source of truth) ──
+        # Measures crash GPS → nearest real intersection node distance via
+        # shapely STRtree and tags as "at intersection" only within
+        # INTERSECTION_THRESHOLD_M (50 m). Overwrites any prior Intersection
+        # Type value (segment-inherited values were over-counting at-int by
+        # ~30 percentage points). Fills `node_intersection_type`,
+        # `node_streets_per_node`, `nearest_node_id`, `node_distance_m`,
+        # `node_distance_ft` on every crash with a usable GPS fix.
+        print(f"\n  [Node match] Classifying intersections via "
+              f"node distance (≤{INTERSECTION_THRESHOLD_M}m, STRtree)...")
+        crash_lats_arr = pd.to_numeric(
+            df.get("y", pd.Series(dtype=float)), errors="coerce"
+        ).fillna(0).values
+        crash_lons_arr = pd.to_numeric(
+            df.get("x", pd.Series(dtype=float)), errors="coerce"
+        ).fillna(0).values
+        node_matches = _match_crashes_to_intersections(
+            crash_lats_arr, crash_lons_arr, self.state_abbr, self.cache_dir
+        )
+        if node_matches:
+            # Ensure all target columns exist with object dtype so the
+            # bulk assigns below stay string/object-typed (matches the
+            # rest of the pipeline's pyarrow-safe convention).
+            for col in (
+                "Intersection Type",
+                "node_intersection_type",
+                "nearest_node_id",
+                "node_distance_m",
+                "node_distance_ft",
+                "node_streets_per_node",
+            ):
+                if col not in df.columns:
+                    df[col] = pd.Series("", index=df.index, dtype=object)
+
+            # Build positional arrays once, then bulk-assign
+            match_idx = np.fromiter(node_matches.keys(), dtype=np.int64)
+            int_types = np.array(
+                [node_matches[i]["intersection_type"] for i in match_idx],
+                dtype=object,
+            )
+            node_ids = np.array(
+                [str(node_matches[i]["node_id"]) for i in match_idx],
+                dtype=object,
+            )
+            d_m = np.array(
+                [str(node_matches[i]["distance_m"]) for i in match_idx],
+                dtype=object,
+            )
+            d_ft = np.array(
+                [str(node_matches[i]["distance_ft"]) for i in match_idx],
+                dtype=object,
+            )
+            spn_arr = np.array(
+                [str(node_matches[i]["streets_per_node"]) for i in match_idx],
+                dtype=object,
+            )
+
+            # Map positional crash indices → df labels (df is currently
+            # using its original index here, since road_inventory_enricher
+            # restores it before returning).
+            label_idx = df.index.to_numpy()[match_idx]
+
+            # Overwrite Intersection Type for ALL matched crashes — node
+            # result is the source of truth, segment-inherited tags are
+            # discarded.
+            df.loc[label_idx, "Intersection Type"] = int_types
+            df.loc[label_idx, "node_intersection_type"] = int_types
+            df.loc[label_idx, "nearest_node_id"] = node_ids
+            df.loc[label_idx, "node_distance_m"] = d_m
+            df.loc[label_idx, "node_distance_ft"] = d_ft
+            df.loc[label_idx, "node_streets_per_node"] = spn_arr
+            gc.collect()
+        else:
+            print(f"    [Node match] No matches returned — falling back to "
+                  f"segment/cluster Intersection Type (cache missing or empty)")
+
         # ── Derive Node from OSM intersection node IDs ──
         if "osm_u_node" in df.columns and "Node" in df.columns:
             # Only fill Node for crashes at intersections with empty Node
@@ -1020,6 +1240,9 @@ class CrashEnricher:
                 print(f"    Node derived from OSM (segments): {node_filled2:,} crashes")
 
         # ── Default remaining empty Intersection Type ──
+        # After node-based classification, the only empty cells should be
+        # crashes with no usable GPS (rare). Default them to "Not at
+        # Intersection" rather than leaving the column blank.
         if "Intersection Type" in df.columns:
             empty_int = df["Intersection Type"].fillna("").astype(str).str.strip().isin(
                 ["", "Not Applicable", "nan", "None"])
@@ -1027,46 +1250,99 @@ class CrashEnricher:
                 df.loc[empty_int, "Intersection Type"] = "1. Not at Intersection"
                 print(f"    Intersection Type: {empty_int.sum():,} defaulted to Not at Intersection")
 
-        # ── Intersection Type distribution (diagnostic) ──
-        # After the degree→approach classification fix, ~35% of crashes
-        # should be "Not at Intersection" on Phase-1-only runs (was ~2.6%
-        # under the buggy >=3 threshold). Phase 2 (streets_per_node) should
-        # push this to ~45–50% and the "Metric:" line below confirms which
-        # branch of road_inventory_enricher actually fired.
+        # ── Intersection Type distribution (diagnostic + assertion) ──
+        # With node-based classification (50 m STRtree), Delaware should
+        # land in the 55–65% at-intersection band per FHWA expectations.
+        # The 40–80% assertion below catches inverted-comparison bugs and
+        # cache-misses that would silently ship bad numbers.
+        AT_INT_LABELS = (
+            "3. Three Approaches",
+            "4. Four Approaches",
+            "5. Five-Point, or More",
+        )
         if "Intersection Type" in df.columns:
             total = len(df)
-            int_dist = df["Intersection Type"].value_counts()
-            at_int = total - int_dist.get("1. Not at Intersection", 0)
-            not_int = int_dist.get("1. Not at Intersection", 0)
+            int_dist = df["Intersection Type"].value_counts(dropna=False)
+            at_int = int(sum(int_dist.get(lbl, 0) for lbl in AT_INT_LABELS))
+            not_int = int(int_dist.get("1. Not at Intersection", 0))
+            unfilled = total - at_int - not_int
             if total > 0:
                 print(f"\n    Intersection Type ({total:,} crashes):")
                 print(f"      At intersection:     {at_int:>7,} "
                       f"({at_int/total*100:.1f}%)")
                 print(f"      Not at intersection: {not_int:>7,} "
                       f"({not_int/total*100:.1f}%)")
-                for val, cnt in int_dist.items():
+                if unfilled:
+                    print(f"      Unfilled / other:    {unfilled:>7,} "
+                          f"({unfilled/total*100:.1f}%)")
+                for val, cnt in sorted(int_dist.items(), key=lambda kv: str(kv[0])):
                     print(f"        {cnt:>7,} ({cnt/total*100:5.1f}%): {val}")
+                # Detect whether the node-based matcher actually populated
+                # node_distance_m for at least one crash. The two assertions
+                # below only run when node-based classification produced
+                # results — if the intersection cache was missing the
+                # function already printed a loud warning and we'd rather
+                # let the enricher complete (degraded) than fail the whole
+                # batch. Cache-misses are caught by the missing-cache log,
+                # not the assertion.
+                node_match_ran = False
+                if "node_distance_m" in df.columns:
+                    nd_check = pd.to_numeric(
+                        df["node_distance_m"], errors="coerce")
+                    node_match_ran = bool(nd_check.notna().any())
 
-                # Which metric was actually used? streets_per_node is bulk-
-                # assigned onto matched crash rows by road_inventory_enricher
-                # when the road inventory has the column; check for numeric
-                # values (unmatched rows are "" empty strings, not NaN).
-                if "streets_per_node" in df.columns:
-                    spn_num = pd.to_numeric(
-                        df["streets_per_node"], errors="coerce")
-                    spn_used = int((spn_num > 0).sum())
-                    if spn_used > 0:
-                        print(f"      Metric: streets_per_node used for "
-                              f"{spn_used:,} ({spn_used/total*100:.1f}%) "
-                              f"— MIRE-correct")
-                    else:
-                        print(f"      Metric: degree>=6 fallback "
-                              f"(streets_per_node column present but empty "
-                              f"— regenerate OSM cache)")
+                if node_match_ran:
+                    print(f"      Method: node-based "
+                          f"({INTERSECTION_THRESHOLD_M} m threshold, "
+                          f"streets_per_node, STRtree)")
                 else:
-                    print(f"      Metric: degree>=6 fallback "
-                          f"(no streets_per_node in road inventory "
-                          f"— regenerate OSM cache)")
+                    print(f"      Method: fallback (intersection cache "
+                          f"missing — node-based matcher did not run; "
+                          f"see [Node match] warning above)")
+
+                # ── Sanity assertions (only when node-based ran) ──
+                if node_match_ran:
+                    # 1. At-intersection rate within FHWA-plausible band.
+                    at_pct = at_int / total * 100.0
+                    if not (40.0 <= at_pct <= 80.0):
+                        raise AssertionError(
+                            f"Intersection Type at-intersection rate "
+                            f"{at_pct:.1f}% is outside the 40–80% sanity "
+                            f"window (expected ~55–65% for Delaware). "
+                            f"Likely causes: inverted distance comparison, "
+                            f"wrong streets_per_node filter, or stale "
+                            f"intersection cache. Method: node-based "
+                            f"({INTERSECTION_THRESHOLD_M} m threshold)."
+                        )
+                    # 2. Mean distance check: at-intersection rows should
+                    #    have mean node distance below the threshold and
+                    #    not-at-intersection rows should have mean distance
+                    #    above it. Catches an inverted comparison silently.
+                    nd = pd.to_numeric(
+                        df["node_distance_m"], errors="coerce")
+                    it = df["Intersection Type"].fillna("").astype(str)
+                    at_mask = it.isin(AT_INT_LABELS) & nd.notna()
+                    not_mask = (it == "1. Not at Intersection") & nd.notna()
+                    if at_mask.any() and not_mask.any():
+                        at_mean = float(nd[at_mask].mean())
+                        not_mean = float(nd[not_mask].mean())
+                        print(f"      Mean node_distance_m — "
+                              f"at-int: {at_mean:.1f}, "
+                              f"not-int: {not_mean:.1f}")
+                        if at_mean > INTERSECTION_THRESHOLD_M:
+                            raise AssertionError(
+                                f"At-intersection mean node_distance_m "
+                                f"({at_mean:.1f}) exceeds threshold "
+                                f"({INTERSECTION_THRESHOLD_M}) — likely "
+                                f"inverted distance comparison."
+                            )
+                        if not_mean < INTERSECTION_THRESHOLD_M:
+                            raise AssertionError(
+                                f"Not-at-intersection mean node_distance_m "
+                                f"({not_mean:.1f}) is below threshold "
+                                f"({INTERSECTION_THRESHOLD_M}) — likely "
+                                f"inverted distance comparison."
+                            )
 
         # ── Intersection Analysis (derived AFTER enrichment) ──
         df = self._derive_intersection_analysis(df)

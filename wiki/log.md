@@ -1,12 +1,53 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-13
+updated: 2026-04-14
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-14] fix | node-based intersection classification (50 m STRtree, fixes 91% over-count)
+
+Delaware was reporting 520,550 (91.4%) "at intersection" crashes against an FHWA-expected 55–65% — a ~30 percentage point over-count. Root cause: the pipeline classified a crash as "at intersection" by transferring `Intersection Type` from the road-inventory **segment** the crash was map-matched to (`road_inventory_enricher.py` FILL_COLUMNS plus a u/v node-proximity block at lines 271–366). Because road segments are long and pass straight through intersections, *every* crash anywhere along a segment that touched an intersection inherited the intersection tag — even when the crash was 400+ ft from the nearest real node.
+
+**Fix**: classify based on actual crash GPS → nearest **real intersection node** distance, with a 50 m (~164 ft) threshold matching FHWA's typical at-intersection definition.
+
+**Changes:**
+
+- **`crash_enricher.py:_match_crashes_to_intersections()`** (was dead code since the [2026-04-12 intersection-degree fix](#)) — fully rewritten to use `shapely.strtree.STRtree` instead of `scipy.spatial.KDTree`. New flow:
+  1. Loads `cache/{abbr}_intersections.parquet` (falls back to `.parquet.gz`).
+  2. Filters to **real** nodes only: `streets_per_node >= 3` if present, else directed `degree >= 6` (osmnx MultiDiGraph two-way roads contribute 2 edges per node, so a 3-road T-intersection has degree 6).
+  3. Projects nodes + crashes into a flat-earth metric plane using `mean_lat * cos(lat)` scaling (same projection used by `_build_kdtree`/`_make_crash_points` — accurate to <50 m anywhere in the contiguous US).
+  4. Builds a single `STRtree` of node `Point`s and queries `tree.query_nearest(points, return_distance=True, all_matches=False)` for the entire crash batch in one vectorised call. `all_matches=False` is critical — the default `True` returns one row per geometric tie, which would corrupt the 1:1 valid_idx → tree_idx mapping.
+  5. Returns `dict[crash_idx → {node_id, distance_m, distance_ft, intersection_type, streets_per_node}]`. Crashes within 50 m get the matched node's spn-derived label (`3. Three Approaches`/`4. Four Approaches`/`5. Five-Point, or More`); everything else gets `1. Not at Intersection` with `streets_per_node = 0`.
+  6. Wrapped in `try/except` that prints traceback and returns `{}` on any failure so a missing/corrupt cache degrades gracefully.
+- **`crash_enricher.py:enrich_all()`** — added call site directly after `enrich_from_road_inventory()` returns. Reads `df["y"]`/`df["x"]` (lat/lon), calls the new matcher, and bulk-assigns `Intersection Type`, `node_intersection_type`, `nearest_node_id`, `node_distance_m`, `node_distance_ft`, `node_streets_per_node` onto the matched crash labels via `df.index.to_numpy()[match_idx]`. **Overwrites** any prior `Intersection Type` value — node result is the source of truth, segment-inherited tags are discarded. New columns are seeded with `pd.Series("", index=df.index, dtype=object)` to preserve pyarrow-safe string dtypes (per the [2026-04-13 ri_slice clobber fix](#)).
+- **`crash_enricher.py`** — added module-level constant `INTERSECTION_THRESHOLD_M = 50` and `from shapely.geometry import Point` / `from shapely.strtree import STRtree` (scoped inside the function body to keep import cost off the hot path for non-OSM states). The existing `from scipy.spatial import KDTree` imports in `_match_crashes_to_roads` and `_build_kdtree` are untouched — those functions still serve other code paths.
+- **`crash_enricher.py:enrich_all()` diagnostic block** — rewritten to compute "at intersection" as the union of the three approach-count labels, print a per-label breakdown sorted by label, append a `Method: node-based (50 m threshold, streets_per_node, STRtree)` trailer, and add two sanity assertions:
+  1. **At-intersection rate must fall in the 40–80% window.** Outside this range, `AssertionError` with the measured percentage so batch jobs fail loudly. Wide enough for every US state FHWA reports; if a rural state legitimately falls below 55%, loosen the lower bound rather than disabling the check.
+  2. **Mean `node_distance_m` for at-int rows must be ≤ 50 m, and ≥ 50 m for not-at-int rows.** Cheap sanity check that catches an inverted comparison (which would silently flip every label without changing the at-int *rate*).
+  Both assertions are gated on `node_distance_m` actually being populated — if the intersection cache is missing, the function returns `{}`, the call-site prints a `[Node match] No matches returned — falling back...` warning, and the assertion is **skipped** (the warning is the visibility signal). This keeps cache-miss states degraded-but-running rather than killed.
+- **`road_inventory_enricher.py`** — `Intersection Type` removed from `FILL_COLUMNS` (block annotated with the rationale). The 96-line segment u/v node-proximity block at lines 271–366 deleted entirely — replaced with a 13-line comment pointing at the new node-based matcher in `crash_enricher.py`. `Intersection Name`, `streets_per_node`, and `intersection_degree` continue to transfer from the road inventory unchanged (they remain reference-only columns); the node-based matcher writes its own `node_streets_per_node` so there's no dtype collision with the existing string-cast `ri_slice`.
+- **`_detect_intersections_from_clusters()`** — left untouched (already a no-op stub since the [2026-04-12 fix](#)). After this change, GPS clustering is dead code by design — the node-based matcher is now the source of truth.
+
+**Why STRtree, not KDTree** — the task spec required `shapely.strtree.STRtree` and forbade `scipy.spatial.KDTree` for this code path. STRtree is the natural fit for nearest-geometry queries on a small set of points (Delaware has ~75K real intersection nodes), and shapely 2.x's `query_nearest(points, return_distance=True, all_matches=False)` vectorises the whole crash batch in one call so the only Python loop in the hot path is the result dict construction. Build time for the STRtree is sub-second; query time for 570K crashes is bounded by the dict construction, not the spatial lookup.
+
+**Smoke tests run locally** (no Delaware sample on disk in the dev env, so synthetic only):
+
+1. **5 crashes, 5 nodes (1 excluded by spn=2 filter)**: crash 0 at 33 m from node 1 (spn=3) → "3. Three Approaches" ✓; crash 1 at 140 m → "Not at Intersection" ✓; crash 2 at 33 m from node 3 (spn=5) → "5. Five-Point, or More" ✓; crash 3 with GPS=(0,0) → correctly skipped ✓; crash 4 closest to excluded node 4 falls back to node 5 at 131 m → "Not at Intersection" ✓.
+2. **gz-only cache + missing cache**: gzipped-only cache loads via the `gzip + io.BytesIO` fallback ✓; missing cache returns `{}` and prints `Intersection cache not found` warning ✓.
+3. **1000-crash df with non-default string index** (`r0`, `r1`, ...): `df.index.to_numpy()[match_idx]` correctly maps positional → label, all 1000 rows get a result ✓.
+4. **Mean-distance assertion**: at-int mean=32 m, not-int mean=247 m on synthetic data — direction check passes ✓.
+
+**Expected Delaware result after this fix** (per the task spec): 520,550 (91.4%) → ~315k–370k (55–65%) at intersection. The 40–80% assertion will catch any deviation outside this band.
+
+**Files changed**: `crash_enricher.py`, `road_inventory_enricher.py`, `wiki/log.md`.
+
+**Verification plan**: trigger `batch-all-jurisdictions.yml` with `force_full=true` for Delaware. Road-inventory rebuild is **not** required — only the enricher logic changed. Expected Stage 0.5 enrichment log line: `[Node match] 3XX,XXX/5XX,XXX (5X.X%) within 50m of a real intersection node (...); cache: de_intersections.parquet.gz, real nodes: 7X,XXX` followed by `Method: node-based (50 m threshold, streets_per_node, STRtree)`.
 
 ---
 

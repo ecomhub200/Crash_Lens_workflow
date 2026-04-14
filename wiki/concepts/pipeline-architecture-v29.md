@@ -52,14 +52,18 @@ Degree 3–5 represents ramp merges / continuations / bends — not real interse
 
 ### Classification locations
 
-Four places in the codebase assign `Intersection Type`. All use the same mapping above:
+`Intersection Type` is assigned by the **node-based matcher** as the single source of truth on crash rows. Road-segment tags are still computed for the road inventory but are no longer transferred to crashes.
 
-1. **`road_data_authority.merge_frontend_columns()`** (`road_data_authority.py:1325`) — first-pass on road segments during `build_road_inventory.py`. Overridden by step 2.
-2. **`road_inventory_postprocess.fix_intersection_type()`** (`road_inventory_postprocess.py:384`, FIX 4) — final authoritative value for road segments. `DEGREE_TO_INTERSECTION` constant at `road_inventory_postprocess.py:82`. `DEGREE_FIVE_PLUS_THRESHOLD = 10`.
-3. **`RoadInventorySession.enrich()`** (`road_inventory_enricher.py:271`) — per-crash assignment. Requires matched segment's node within 30m (squared distance ≤ 900).
-4. **`crash_enricher.py` fallback default** (line 989) — any remaining empty values → "1. Not at Intersection".
+1. **`road_data_authority.merge_frontend_columns()`** (`road_data_authority.py:1325`) — first-pass on road **segments** during `build_road_inventory.py`. Overridden by step 2. Crash-side: not transferred.
+2. **`road_inventory_postprocess.fix_intersection_type()`** (`road_inventory_postprocess.py:384`, FIX 4) — authoritative value for road **segments** (`DEGREE_TO_INTERSECTION` constant at `road_inventory_postprocess.py:82`, `DEGREE_FIVE_PLUS_THRESHOLD = 10`). Crash-side: **not transferred** as of [2026-04-14] — `Intersection Type` was removed from `road_inventory_enricher.FILL_COLUMNS`.
+3. **`crash_enricher._match_crashes_to_intersections()`** ([2026-04-14] node-based, STRtree) — **source of truth for crash rows**. Loads `cache/{abbr}_intersections.parquet[.gz]`, filters to real nodes (`streets_per_node >= 3` or `degree >= 6`), builds a `shapely.strtree.STRtree` of node `Point`s, and queries the nearest node per crash via `tree.query_nearest(points, return_distance=True, all_matches=False)`. Crashes within `INTERSECTION_THRESHOLD_M = 50 m` (~164 ft) of a real node get the spn-derived label; everything else gets `"1. Not at Intersection"`. Also fills `nearest_node_id`, `node_distance_m`, `node_distance_ft`, `node_streets_per_node`, `node_intersection_type` debug columns. Called from `enrich_all()` immediately after `enrich_from_road_inventory()` and **overwrites** any prior value.
+4. **`crash_enricher.py` fallback default** — any remaining empty values (crashes with no usable GPS) → `"1. Not at Intersection"`.
 
-`crash_enricher.py` prints an `Intersection Type distribution` table after enrichment for diagnostic monitoring. Expected for Delaware: ~35% "Not at Intersection" under Phase 1, ~45–50% under Phase 2.
+`crash_enricher.py` prints an `Intersection Type distribution` table after enrichment with a `Method: node-based (50 m threshold, streets_per_node, STRtree)` trailer plus two sanity assertions: (1) at-intersection rate must be in the 40–80% window (FHWA-plausible), and (2) mean `node_distance_m` for at-int rows must be ≤ 50 m and not-at-int rows must be ≥ 50 m (catches inverted comparisons). Both assertions are **gated** on `node_distance_m` actually being populated, so cache-miss states degrade rather than failing.
+
+Expected at-intersection rate for Delaware: ~55–65% under node-based classification (down from the 91.4% segment-inherited over-count).
+
+> **Why node-based, not segment-based?** Road segments are long and pass through intersections. Under the old segment-inherited logic, a crash 400+ ft from the nearest intersection could still inherit the "at intersection" tag if its matched segment touched an intersection at either endpoint. Node-based classification measures the actual GPS distance to the nearest **real** intersection node and only tags within 50 m, matching FHWA's typical at-intersection definition.
 
 ### `is_intersection` flag
 
