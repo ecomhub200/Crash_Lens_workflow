@@ -10,6 +10,101 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-15] fix | speed-limit resolution: DOT column fix, statutory defaults, RTE name from intersection
+
+Four correctness bugs in the Delaware road-inventory / crash-enrichment
+pipeline that together collapsed speed-limit fill to 36.4% on the road
+inventory and RTE Name fill to 25.4% on the crash file. All four land on
+branch `claude/fix-dot-speed-column-YJ526`, touching only
+`road_data_authority.py` and `crash_enricher.py`.
+
+**Bug A — DOT speed column drift (silent Tier A).**
+`resolve_speed_limit()` was checking `sdot_Max Speed Diff`, but
+`states/delaware/de_state_dot.py:548` writes `Speed_Limit_Est`, which
+`build_road_inventory.py:467` prefixes to `sdot_Speed_Limit_Est`. The
+legacy column no longer exists, so the State DOT tier was a silent
+no-op — ~17K DOT-measured speed limits (15,519 of them 25-mph
+residential) never reached `resolved_speed_limit`. The same dead check
+appeared in `compute_confidence_scores()`, so DOT never contributed to
+multi-source speed-limit confidence either.
+
+**Fix A / A2**: Replaced the bare `if "sdot_Max Speed Diff" in df.columns`
+checks in `road_data_authority.py` with a candidate-list lookup that
+prefers `sdot_Speed_Limit_Est` and falls back to the legacy name, so
+either column is honored. Both `resolve_speed_limit()` (lines 84-99) and
+the SPEED LIMIT block of `compute_confidence_scores()` (lines 589-600)
+now use the same pattern.
+
+**Bug B — No statutory default.**
+After all four authority tiers (OSM → Mapillary → HPMS → StateDOT), local
+roads with no external speed tag stayed at 0. Delaware Title 21 §4169
+sets a public-law default (25 mph in a business/residential district,
+50 mph otherwise), which is ground truth and should fill the remaining
+gap.
+
+**Fix B**: Added a final `Tier 5: Statutory default` block to
+`resolve_speed_limit()` (road_data_authority.py:101-128). It runs only
+where `values == 0` and uses **raw source columns** (`highway` from OSM
+for functional class, `geo_mpo_name` from geo_resolver for area type),
+because `resolve_speed_limit()` runs *before* `merge_frontend_columns()`
+and "Functional Class" / "Area Type" don't exist on the frame yet. Local
+classes (`residential`, `unclassified`, `living_street`, `service`) in
+an MPO get 25 mph; the same classes outside any MPO get 50 mph. Both
+paths tag `resolved_speed_source = "Statutory"`. Prints a single
+`Statutory: N local road defaults` line when any row was filled.
+Expected: total speed fill 36% → ~80%.
+
+**Bug C — RTE Name fallback missed "X & Y" intersection names.**
+`_canonicalize_post_enrichment()` already falls back from `RTE Name` to
+road-inventory route columns (`hpms_route_name`, `ri_route_name`, etc.),
+but many crashes only have a parseable `"X & Y"` `Intersection Name`
+available. The first leg of that intersection *is* the street the crash
+happened on.
+
+**Fix C**: Added a new RTE Name extractor in
+`crash_enricher.py:1709-1729` that runs right after the existing
+route-column fallback. Where `RTE Name` is still empty and
+`Intersection Name` is filled and contains `" & "`, split on `" & "`,
+take the first leg, and filter out numeric-only junk via
+`re.match(r'^-?\d+$', x)` (same filter as `road_data_authority.py`). No
+new imports — `import re` was already at `crash_enricher.py:5`.
+Expected: RTE Name fill 25.4% → ~93%.
+
+**Bug D — Phantom `Max Speed Diff` where speed is unknown.**
+When `resolved_speed_limit == 0` (no source fired) but `Max Speed Diff`
+still carried a non-zero value from an earlier stage, downstream
+consumers flagged the crash as speeding-related with no legitimate
+reference speed.
+
+**Fix D**: Added a cleanup block at
+`crash_enricher.py:1821-1827`, right before the "Null out not-tracked
+flags" block. Where `resolved_speed_limit == 0` AND
+`Max Speed Diff > 0`, set `Max Speed Diff` to `""`. Prints a
+`Max Speed Diff: N phantom values cleared` line.
+
+**Untouched (by user instruction).** Traffic Control Type handling in
+`merge_frontend_columns()`, Guardrail, `resolve_lanes`,
+`resolve_surface`, `resolve_signals`, `resolve_lighting`,
+`resolve_bridge`, `resolve_school_zone`. These are all working
+correctly and stay as-is.
+
+**Files changed**:
+- `road_data_authority.py` — Tier A candidate-list + new Tier 5
+  statutory block in `resolve_speed_limit()`; matching candidate-list in
+  `compute_confidence_scores()`.
+- `crash_enricher.py` — RTE Name `Intersection Name` extractor and
+  phantom `Max Speed Diff` cleanup, both inside
+  `_canonicalize_post_enrichment()`.
+
+**Verification**:
+- `python -c "import ast; ast.parse(open('road_data_authority.py').read())"` — OK
+- `python -c "import ast; ast.parse(open('crash_enricher.py').read())"` — OK
+- Regression suites (de_normalize 86/86, pipeline 26/26, audit 17/17)
+  must still pass; full-pipeline DOT + statutory fill-rate confirmation
+  requires running Delaware end-to-end.
+
+---
+
 ## [2026-04-15] docs | COLUMNS.md column registry + column-registry wiki page + CLAUDE.md rule
 
 Added `COLUMNS.md` at the repo root as the single source of truth for every
