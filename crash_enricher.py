@@ -1373,6 +1373,11 @@ class CrashEnricher:
         """
         print("\n  [Tier 1] Self-enrichment from existing fields...")
 
+        # Snapshot not-tracked flags as a sorted list so the
+        # post-enrichment canonicalizer can null them out after every
+        # downstream step, no matter which one re-defaulted a "No".
+        self._not_tracked_flags = sorted(self.not_tracked_flags)
+
         # 1. Contributing Circumstance → Flag columns
         df = self._derive_flags_from_circumstance(df)
 
@@ -1583,37 +1588,39 @@ class CrashEnricher:
         """
         Derive Intersection Analysis from Intersection Type + Ownership.
         Frontend expects: 'Not Intersection', 'Urban Intersection', 'DOT Intersection'.
-        
+
         Logic:
           - Intersection Type = '1. Not at Intersection' → 'Not Intersection'
           - Ownership = '1. State Hwy Agency' (DOT road) → 'DOT Intersection'
           - Everything else at intersection → 'Urban Intersection'
+
+        Always re-derives from the CURRENT Intersection Type — the node
+        matcher overwrites Intersection Type after road_inventory_enricher
+        populates Intersection Analysis, so any pre-existing value would
+        be stale. Vectorized over the full frame.
         """
+        if "Intersection Type" not in df.columns:
+            return df
         if "Intersection Analysis" not in df.columns:
             df["Intersection Analysis"] = ""
+        if "Ownership" not in df.columns:
+            df["Ownership"] = ""
 
-        ia_filled = 0
-        for idx in df.index:
-            if df.at[idx, "Intersection Analysis"]:
-                continue  # already set by state data
+        it = df["Intersection Type"].fillna("").astype(str).str.strip()
+        ow = df["Ownership"].fillna("").astype(str).str.strip()
 
-            int_type = str(df.at[idx, "Intersection Type"]).strip() if "Intersection Type" in df.columns else ""
-            ownership = str(df.at[idx, "Ownership"]).strip() if "Ownership" in df.columns else ""
+        not_int = it.isin(["1. Not at Intersection", "", "nan", "None"])
+        state_hw = ow == "1. State Hwy Agency"
 
-            if int_type == "1. Not at Intersection" or not int_type or int_type in ("nan", "None"):
-                df.at[idx, "Intersection Analysis"] = "Not Intersection"
-            elif ownership == "1. State Hwy Agency":
-                df.at[idx, "Intersection Analysis"] = "DOT Intersection"
-            else:
-                df.at[idx, "Intersection Analysis"] = "Urban Intersection"
-            ia_filled += 1
+        df.loc[not_int, "Intersection Analysis"] = "Not Intersection"
+        df.loc[~not_int & state_hw, "Intersection Analysis"] = "DOT Intersection"
+        df.loc[~not_int & ~state_hw, "Intersection Analysis"] = "Urban Intersection"
 
-        if ia_filled > 0:
-            dot_ct = (df["Intersection Analysis"] == "DOT Intersection").sum()
-            urb_ct = (df["Intersection Analysis"] == "Urban Intersection").sum()
-            not_ct = (df["Intersection Analysis"] == "Not Intersection").sum()
-            print(f"\n  [Intersection Analysis] {ia_filled:,} rows derived:")
-            print(f"    DOT Intersection: {dot_ct:,}, Urban Intersection: {urb_ct:,}, Not Intersection: {not_ct:,}")
+        dot_ct = (df["Intersection Analysis"] == "DOT Intersection").sum()
+        urb_ct = (df["Intersection Analysis"] == "Urban Intersection").sum()
+        not_ct = (df["Intersection Analysis"] == "Not Intersection").sum()
+        print(f"\n  [Intersection Analysis] {len(df):,} rows derived:")
+        print(f"    DOT Intersection: {dot_ct:,}, Urban Intersection: {urb_ct:,}, Not Intersection: {not_ct:,}")
 
         return df
 
@@ -1699,29 +1706,17 @@ class CrashEnricher:
             rte_after = (df["RTE Name"].fillna("").astype(str).str.strip() != "").sum()
             print(f"    RTE Name: {rte_before:,} → {rte_after:,} ({rte_after/n*100:.0f}%)")
 
-        # ── Fix 4: School Zone from location signals (NOT school bus) ──
-        # Only overwrite if at least one location-based signal column is
-        # present. Without any signals we'd unconditionally stamp every row
-        # "No" and silently erase state-correct School Zone values.
-        school_signal_cols = [
-            c for c in ("resolved_school_zone", "Near_School_1500ft", "map_school_zone")
-            if c in df.columns
-        ]
-        if "School Zone" in df.columns and school_signal_cols:
-            yes_values = {"Yes", "True", "1", "yes", "true"}
-            is_school_zone = pd.Series(False, index=df.index)
-            for col in school_signal_cols:
-                col_vals = df[col].fillna("").astype(str).str.strip()
-                is_school_zone = is_school_zone | col_vals.isin(yes_values)
-
-            before_yes = (df["School Zone"] == "Yes").sum()
-            df["School Zone"] = is_school_zone.map({True: "Yes", False: "No"})
-            after_yes = (df["School Zone"] == "Yes").sum()
-            print(f"    School Zone: {before_yes:,} → {after_yes:,} "
-                  f"(location-based from {', '.join(school_signal_cols)})")
-        elif "School Zone" in df.columns:
-            print(f"    School Zone: skipped — no location signal columns available "
-                  f"(resolved_school_zone / Near_School_1500ft / map_school_zone)")
+        # ── Fix 4: School Zone from federal proximity only ──
+        # Mapillary `map_school_zone` tags everything near a school-zone
+        # sign (inflates to ~13.7%); `resolved_school_zone` is a derived
+        # blend of the same noisy signal. Federal `Near_School_1500ft`
+        # is the accurate ground-truth proximity flag.
+        if "School Zone" in df.columns and "Near_School_1500ft" in df.columns:
+            df["School Zone"] = "No"
+            near_school = df["Near_School_1500ft"].fillna("").astype(str).str.strip() == "Yes"
+            df.loc[near_school, "School Zone"] = "Yes"
+            sz_yes = near_school.sum()
+            print(f"    School Zone: 0 → {sz_yes:,} (federal proximity only)")
 
         # ── Fix 7: RoadDeparture Type from definitive indicators only ──
         if "RoadDeparture Type" in df.columns:
@@ -1800,6 +1795,14 @@ class CrashEnricher:
                     df.loc[ramp_mask, "Relation To Roadway"] = "10. On/Off Ramp"
                     still_empty = (df["Relation To Roadway"].fillna("").astype(str).str.strip() == "").sum()
                     print(f"    Relation To Roadway: +{ramp_mask.sum():,} ramps, {still_empty:,} left unknown")
+
+        # ── Null out not-tracked flags (accuracy rule: NULL is honest) ──
+        not_tracked = getattr(self, '_not_tracked_flags', [])
+        for flag in not_tracked:
+            if flag in df.columns:
+                df[flag] = ""
+        if not_tracked:
+            print(f"    Not-tracked flags nulled: {', '.join(not_tracked)}")
 
         return df
 

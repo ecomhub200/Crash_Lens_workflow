@@ -1,12 +1,132 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-14
+updated: 2026-04-15
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-15] fix | crash_enricher accuracy: intersection_analysis re-derive, null not-tracked flags, federal-only school zone
+
+Three accuracy bugs in `crash_enricher.py` that together produced stale or
+fabricated values in Delaware (and any state inheriting the same pattern)
+output. All three fixes land in the post-enrichment canonicalization path
+that runs after the node-based intersection matcher completes.
+
+**Bug 1 — `Intersection Analysis` stale vs `Intersection Type`.**
+`road_inventory_enricher.py` populates `Intersection Analysis` on segment
+map-match, *before* the new node-based matcher (see
+[2026-04-14 log entry](#)) rewrites `Intersection Type` in
+`enrich_all()` at `crash_enricher.py:1208`. The old
+`_derive_intersection_analysis()` then skipped any row where
+`Intersection Analysis` was already filled — so the analysis column was
+frozen at the pre-node-match classification (91.4% "at intersection")
+while `Intersection Type` read correctly (63.6% "at intersection"). Same
+row disagreed with itself across two columns.
+
+The old loop was also row-by-row with `df.at[idx, …]` over ~570K rows, a
+measurable hotspot.
+
+**Fix 1**: drop the "already filled, skip" guard — always re-derive from
+the *current* `Intersection Type`. Replaced the Python loop with a
+vectorised implementation at `crash_enricher.py:1587-1626`:
+
+```python
+it = df["Intersection Type"].fillna("").astype(str).str.strip()
+ow = df["Ownership"].fillna("").astype(str).str.strip()
+
+not_int = it.isin(["1. Not at Intersection", "", "nan", "None"])
+state_hw = ow == "1. State Hwy Agency"
+
+df.loc[not_int, "Intersection Analysis"] = "Not Intersection"
+df.loc[~not_int & state_hw, "Intersection Analysis"] = "DOT Intersection"
+df.loc[~not_int & ~state_hw, "Intersection Analysis"] = "Urban Intersection"
+```
+
+Creates `Intersection Type`/`Intersection Analysis`/`Ownership` columns
+defensively if missing, prints the same diagnostic line (now over
+`len(df)`, not just newly-filled rows). Delaware: `Not Intersection`
+count should match the `Intersection Type` `1. Not at Intersection` count
+(~207K) exactly.
+
+**Bug 2 — not-tracked safety flags defaulting to `"No"`.**
+Delaware's `DE_NOT_TRACKED_FLAGS = ['Drowsy?', 'Hitrun?', 'Lgtruck?',
+'Senior?', 'Young?']` are fields the source CRASH1 export does not
+contain. `_derive_flags_from_circumstance()` at
+`crash_enricher.py:1423-1426` already clears any flag in
+`self.not_tracked_flags`, but downstream steps (normalizer defaults,
+cross-validation, road-inventory fills) were reintroducing `"No"` for
+`Lgtruck?`, `Senior?`, `Young?`. A `"No"` for an un-tracked field is a
+lie — it implies the state audited the crash and found no large truck /
+senior / young driver, when in reality the column is simply absent.
+
+**Fix 2**: two coordinated changes.
+
+1. Snapshot `self.not_tracked_flags` as a sorted list
+   `self._not_tracked_flags` at the top of `enrich_tier1()`
+   (`crash_enricher.py:1376-1379`) so a single instance variable is
+   reliably available to the canonicalizer regardless of call order.
+2. At the end of `_canonicalize_post_enrichment()`
+   (`crash_enricher.py:1799-1805`, just before `return df`), iterate the
+   snapshot and force each present not-tracked flag column to `""`:
+   ```python
+   not_tracked = getattr(self, '_not_tracked_flags', [])
+   for flag in not_tracked:
+       if flag in df.columns:
+           df[flag] = ""
+   if not_tracked:
+       print(f"    Not-tracked flags nulled: {', '.join(not_tracked)}")
+   ```
+
+This runs *after* every other enrichment step, so no matter which
+sub-routine re-wrote the flag, the final output is honest NULL. Delaware
+log line expected: `Not-tracked flags nulled: Drowsy?, Hitrun?, Lgtruck?,
+Senior?, Young?`.
+
+**Bug 3 — `School Zone` inflated to 13.7% by Mapillary signs.**
+The prior `Fix 4` block OR-ed together `resolved_school_zone`,
+`Near_School_1500ft`, and `map_school_zone`. `map_school_zone` is a
+Mapillary-sourced flag that tags any crash whose matched road segment
+has seen a school-zone *sign* in streetview imagery — wildly over-
+inclusive because one sign colors the entire segment (~500-1500 ft).
+Delaware: 77,817 crashes (13.7%) flagged, vs the ~4,500 (0.8%) the
+federal `Near_School_1500ft` proximity gives. `resolved_school_zone` is
+a derived blend of the same noisy Mapillary signal and inherits the
+inflation.
+
+**Fix 3**: replace the three-signal OR at `crash_enricher.py:1709-1719`
+with federal-only:
+
+```python
+if "School Zone" in df.columns and "Near_School_1500ft" in df.columns:
+    df["School Zone"] = "No"
+    near_school = df["Near_School_1500ft"].fillna("").astype(str).str.strip() == "Yes"
+    df.loc[near_school, "School Zone"] = "Yes"
+    sz_yes = near_school.sum()
+    print(f"    School Zone: 0 → {sz_yes:,} (federal proximity only)")
+```
+
+All references to `resolved_school_zone` and `map_school_zone` are
+dropped from the School Zone derivation. (Both columns still exist on
+the frame for anyone who wants to inspect them as raw signals — we just
+stop treating them as truth for the `School Zone` output column.)
+
+**Files changed**: `crash_enricher.py`, `wiki/log.md`.
+
+**Expected Delaware output deltas after this fix:**
+
+- `[Intersection Analysis] 570,XXX rows derived: … Not Intersection: ~207K` (matches `Intersection Type` `Not at Intersection` exactly).
+- `Not-tracked flags nulled: Drowsy?, Hitrun?, Lgtruck?, Senior?, Young?` — fill rates for those five columns drop to 0% in the post-enrichment report.
+- `School Zone: 0 → ~4,500 (federal proximity only)` — down from 77,817.
+
+**Verification**: `python -m pytest tests/ -v` for the full suite. No new
+test files were added; the existing incremental-pipeline-bugs tests
+check that the pipeline version hash still includes
+`crash_enricher.py`, which it does because the file contents changed.
 
 ---
 
