@@ -1706,6 +1706,28 @@ class CrashEnricher:
             rte_after = (df["RTE Name"].fillna("").astype(str).str.strip() != "").sum()
             print(f"    RTE Name: {rte_before:,} → {rte_after:,} ({rte_after/n*100:.0f}%)")
 
+        # RTE Name fallback: extract first road name from "X & Y" Intersection Name
+        if "RTE Name" in df.columns and "Intersection Name" in df.columns:
+            rte_empty = df["RTE Name"].fillna("").str.strip() == ""
+            int_filled = df["Intersection Name"].fillna("").str.strip() != ""
+            has_amp = df["Intersection Name"].str.contains(" & ", na=False)
+            fill_mask = rte_empty & int_filled & has_amp
+
+            if fill_mask.any():
+                extracted = (
+                    df.loc[fill_mask, "Intersection Name"]
+                    .str.split(" & ")
+                    .str[0]
+                    .str.strip()
+                )
+                # Filter out numeric-only junk values (same filter as road_data_authority.py)
+                valid_name = extracted.apply(
+                    lambda x: bool(x) and x != "nan" and not re.match(r'^-?\d+$', x)
+                )
+                df.loc[extracted[valid_name].index, "RTE Name"] = extracted[valid_name]
+                filled_count = valid_name.sum()
+                print(f"    RTE Name: +{filled_count:,} extracted from Intersection Name")
+
         # ── Fix 4: School Zone from federal proximity only ──
         # Mapillary `map_school_zone` tags everything near a school-zone
         # sign (inflates to ~13.7%); `resolved_school_zone` is a derived
@@ -1795,6 +1817,14 @@ class CrashEnricher:
                     df.loc[ramp_mask, "Relation To Roadway"] = "10. On/Off Ramp"
                     still_empty = (df["Relation To Roadway"].fillna("").astype(str).str.strip() == "").sum()
                     print(f"    Relation To Roadway: +{ramp_mask.sum():,} ramps, {still_empty:,} left unknown")
+
+        # Max Speed Diff: clear phantom defaults when speed limit is unknown
+        if "Max Speed Diff" in df.columns and "resolved_speed_limit" in df.columns:
+            rsl = pd.to_numeric(df["resolved_speed_limit"], errors="coerce").fillna(0)
+            phantom = (rsl == 0) & (pd.to_numeric(df["Max Speed Diff"], errors="coerce").fillna(0) > 0)
+            if phantom.any():
+                df.loc[phantom, "Max Speed Diff"] = ""
+                print(f"    Max Speed Diff: {phantom.sum():,} phantom values cleared (speed unknown)")
 
         # ── Null out not-tracked flags (accuracy rule: NULL is honest) ──
         not_tracked = getattr(self, '_not_tracked_flags', [])

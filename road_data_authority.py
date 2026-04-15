@@ -82,8 +82,14 @@ def resolve_speed_limit(df):
                 pass
 
     # Tier A: State DOT (HIGHEST authority — overwrites when available)
-    if "sdot_Max Speed Diff" in df.columns:
-        for i, v in enumerate(df["sdot_Max Speed Diff"].values):
+    # Check both column names: sdot_Speed_Limit_Est (current) and sdot_Max Speed Diff (legacy)
+    sdot_speed_col = None
+    for candidate in ["sdot_Speed_Limit_Est", "sdot_Max Speed Diff"]:
+        if candidate in df.columns:
+            sdot_speed_col = candidate
+            break
+    if sdot_speed_col is not None:
+        for i, v in enumerate(df[sdot_speed_col].values):
             try:
                 spd = int(float(v))
                 if 5 <= spd <= 85:
@@ -91,6 +97,35 @@ def resolve_speed_limit(df):
                     sources[i] = "StateDOT"
             except (ValueError, TypeError):
                 pass
+
+    # Tier 5: Statutory default (LOWEST priority — fills only when ALL other sources are empty)
+    # Delaware Title 21 §4169: residential/business district = 25 mph, non-residential = 50 mph
+    # IMPORTANT: "Functional Class" and "Area Type" don't exist yet at this stage,
+    # so we use raw source columns: "highway" for FC and "geo_mpo_name" for area type.
+    if "highway" in df.columns:
+        no_speed = values == 0
+        hw = df["highway"].astype(str).str.strip().str.lower()
+
+        # FC-7 equivalent: OSM highway=residential, unclassified, living_street, service
+        is_local = hw.isin(["residential", "unclassified", "living_street", "service"])
+
+        # Urban/Suburban = has an MPO assignment; Rural = no MPO
+        if "geo_mpo_name" in df.columns:
+            in_mpo = df["geo_mpo_name"].astype(str).str.strip() != ""
+        else:
+            in_mpo = pd.Series(False, index=df.index)
+
+        stat_25 = no_speed & is_local & in_mpo
+        stat_50 = no_speed & is_local & ~in_mpo
+
+        values[stat_25.values] = 25
+        sources[stat_25.values] = "Statutory"
+        values[stat_50.values] = 50
+        sources[stat_50.values] = "Statutory"
+
+        filled_stat = stat_25.sum() + stat_50.sum()
+        if filled_stat:
+            print(f"      Statutory: {filled_stat:,} local road defaults (25mph urban, 50mph rural)")
 
     return values, sources
 
@@ -553,9 +588,14 @@ def compute_confidence_scores(df):
 
     # ── SPEED LIMIT confidence ──
     speed_sources = np.zeros(n, dtype=int)
-    if "sdot_Max Speed Diff" in df.columns:
+    sdot_speed_conf_col = None
+    for candidate in ["sdot_Speed_Limit_Est", "sdot_Max Speed Diff"]:
+        if candidate in df.columns:
+            sdot_speed_conf_col = candidate
+            break
+    if sdot_speed_conf_col is not None:
         try:
-            has = pd.to_numeric(df["sdot_Max Speed Diff"], errors="coerce").fillna(0)
+            has = pd.to_numeric(df[sdot_speed_conf_col], errors="coerce").fillna(0)
             speed_sources += ((has >= 5) & (has <= 85)).astype(int)
         except: pass
     if "hpms_speed_limit" in df.columns:
