@@ -10,6 +10,76 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-15] docs | COLUMNS.md column registry + column-registry wiki page + CLAUDE.md rule
+
+Added `COLUMNS.md` at the repo root as the single source of truth for every
+column name in the CrashLens pipeline. Generated from a canonical Delaware
+run (`non_dot_roads`, 121,733 rows × 532 columns). The registry enumerates
+all 532 columns organized into 31 sections — golden schema (1-69),
+enrichment core, rankings (76 cols across 4 scopes × 19 metrics), state
+extras (`de_*`), HPMS (54), federal assets, Mapillary (57), state DOT raw
+`dot_*` (50), state DOT resolved `sdot_*` (24), frontend merged, and
+spatial matching `ri_*` — each with column type and Delaware fill %.
+
+Purpose: prevent the class of bugs where enrichment code references a
+column that does not exist under that exact name (e.g. `sdot_Max Speed
+Diff` vs the actual `sdot_Speed_Limit_Est`). Every pipeline script should
+reference `COLUMNS.md` instead of hardcoding column-name strings.
+
+**Key registry rules (canonicalized in COLUMNS.md):**
+
+1. Golden schema uses Title Case with spaces (`Crash Severity`, `Max
+   Speed Diff`). Rows 1-69.
+2. Enrichment/resolved uses snake_case (`resolved_speed_limit`,
+   `ri_matched`).
+3. Prefixes: `hpms_`, `dot_` (raw state DOT), `sdot_` (resolved state
+   DOT), `map_` (Mapillary), `{abbr}_` (state extras e.g. `de_`),
+   `Near_Poi{Type}_{radius}`, `Near_{Asset}_{radius}`.
+4. Rankings: `{Tier}_Rank_{metric}` for `Juris_`, `District_`, `MPO_`,
+   `PlanningDistrict_`.
+5. **`sdot_*` columns keep Title Case with spaces/underscores** — e.g.
+   `sdot_Speed_Limit_Est`, `sdot_Functional Class`, `sdot_Roadway
+   Surface Type`. These are not typos and must not be normalized.
+
+**Cross-reference map (critical, from COLUMNS.md):**
+The registry lists the canonical column names that `road_data_authority.py`
+reads in `resolve_speed_limit()`, `resolve_lanes()`, `resolve_surface()`,
+`resolve_signals()`, and `merge_frontend_columns()`. Renaming one of these
+without updating the other references will silently break Tier A/B/C/D
+resolution.
+
+- Tier A speed: `sdot_Speed_Limit_Est`
+- Tier B speed: `hpms_speed_limit`
+- Tier C speed: `map_speed_limit_value`
+- Tier D speed (OSM): `maxspeed`
+- Frontend speed: `resolved_speed_limit` → `Max Speed Diff`
+
+**Changes in this commit:**
+
+1. New file: `COLUMNS.md` (already present at repo root — documented here).
+2. New wiki page: `wiki/concepts/column-registry.md` — explains how to use
+   `COLUMNS.md`, lists the naming rules, cross-reference map, section
+   summary table (31 sections → 532 columns), rules for pipeline code,
+   and the update procedure.
+3. `CLAUDE.md` updated:
+   - Added `COLUMNS.md` and `wiki/concepts/column-registry.md` to the
+     Wiki-First key-files list.
+   - Added a new **Column-Naming Rule** section that requires consulting
+     `COLUMNS.md` before any column-touching work and calls out the
+     `sdot_*` Title Case convention.
+   - Extended the **Auto-Wiki Rule** with a new step: if a change
+     adds/renames/removes columns or changes column types, also update
+     `COLUMNS.md` and the section-summary table in
+     `wiki/concepts/column-registry.md`.
+
+**Relationship to existing schema docs:** `COLUMNS.md` is the naming
+layer; `wiki/concepts/supabase-schema-v3.md` is the storage layer (3-tier
+Postgres mapping with TIER1_MAP); `wiki/entities/schema-truth-document.md`
+is the Delaware data-quality layer. The new column-registry page cross-
+links all three.
+
+---
+
 ## [2026-04-15] fix | crash_enricher accuracy: intersection_analysis re-derive, null not-tracked flags, federal-only school zone
 
 Three accuracy bugs in `crash_enricher.py` that together produced stale or
