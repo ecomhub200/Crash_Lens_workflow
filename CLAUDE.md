@@ -9,17 +9,23 @@ Before answering ANY question about CrashLens architecture, database schema, pip
 
 Key files to check:
 - `wiki/log.md` — Most recent changes (read FIRST for current state)
-- `wiki/concepts/supabase-schema-v3.md` — Database schema, column types, TIER1_MAP
+- `COLUMNS.md` (repo root) — **Column Registry**: authoritative list of every column name, type, and fill % in the pipeline (532 cols). Read this before writing or renaming any column in pipeline code.
+- `wiki/concepts/column-registry.md` — How to use `COLUMNS.md`, naming rules, cross-reference map, update procedure
+- `wiki/concepts/supabase-schema-v3.md` — Database schema, column types, TIER1_MAP (Tier 1/2/3 mapping)
 - `wiki/concepts/supabase-sync-ci.md` — Sync architecture (webhook + SSH tunnel)
 - `wiki/concepts/pipeline-architecture-v29.md` — Full pipeline phases 0-4
 - `wiki/entities/delaware-pipeline.md` — Reference state implementation
 - `wiki/entities/webhook-sync.md` — VPS webhook infrastructure
 
+### Column-Naming Rule
+Any task that touches column names (writing, reading, renaming, migrating) MUST consult `COLUMNS.md` first. The `sdot_*` columns in particular are Title Case with spaces/underscores (e.g. `sdot_Speed_Limit_Est`, `sdot_Functional Class`) — do NOT normalize them to snake_case. See `wiki/concepts/column-registry.md` for the full naming rules and cross-reference map.
+
 ### Auto-Wiki Rule
 When making code changes, pipeline modifications, or architecture decisions:
 1. Update the relevant wiki page(s)
-2. Add an entry to `wiki/log.md` with date and summary
-3. Do NOT skip this — the wiki must stay current
+2. If columns were added, renamed, removed, or changed type: also update `COLUMNS.md` and the section-summary table in `wiki/concepts/column-registry.md`
+3. Add an entry to `wiki/log.md` with date and summary
+4. Do NOT skip this — the wiki must stay current
 
 ### Wiki Log Conflict-Avoidance Rule (IMPORTANT)
 `wiki/log.md` conflicts on nearly every PR because multiple branches append entries to the same top-of-file region in parallel. To minimize merge conflicts:
