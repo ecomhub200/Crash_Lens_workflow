@@ -309,8 +309,8 @@ def resolve_school_zone(df):
     values = np.full(n, "No", dtype=object)
     sources = np.full(n, "", dtype=object)
 
-    if "Near_School_1500ft" in df.columns:
-        mask = df["Near_School_1500ft"].values == "Yes"
+    if "Near_School_1000ft" in df.columns:
+        mask = df["Near_School_1000ft"].values == "Yes"
         values[mask] = "Yes"
         sources[mask] = "Federal"
 
@@ -572,8 +572,8 @@ def compute_confidence_scores(df):
 
     # ── SCHOOL ZONE confidence ──
     school_sources = np.zeros(n, dtype=int)
-    if "Near_School_1500ft" in df.columns:
-        school_sources += (df["Near_School_1500ft"] == "Yes").astype(int)
+    if "Near_School_1000ft" in df.columns:
+        school_sources += (df["Near_School_1000ft"] == "Yes").astype(int)
     if "map_school_zone" in df.columns:
         school_sources += (df["map_school_zone"] == "Yes").astype(int)
     if "Near_PoiCollege_1500ft" in df.columns:
@@ -744,8 +744,8 @@ def compute_risk_indicators(df):
     scores = np.zeros(n, dtype=int)
     
     near_school = np.zeros(n, dtype=bool)
-    if "Near_School_1500ft" in df.columns:
-        near_school = (df["Near_School_1500ft"].values == "Yes")
+    if "Near_School_1000ft" in df.columns:
+        near_school = (df["Near_School_1000ft"].values == "Yes")
     
     if near_school.sum() > 0:
         # Distance factor: 0-500ft=40pts, 500-1000ft=25pts, 1000-1500ft=15pts

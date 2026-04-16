@@ -1633,7 +1633,7 @@ class CrashEnricher:
 
         Covers:
             Fix 2  — RTE Name fallback from road-inventory route columns
-            Fix 4  — School Zone from resolved_school_zone / Near_School_1500ft
+            Fix 4  — School Zone from resolved_school_zone / Near_School_1000ft
             Fix 7  — RoadDeparture Type from definitive indicators only
             Fix 8  — Persons Injured = A_People + B_People + C_People (exact)
             Fix 9  — Pedestrians Killed/Injured from ped flag + severity (min estimate)
@@ -1731,11 +1731,11 @@ class CrashEnricher:
         # ── Fix 4: School Zone from federal proximity only ──
         # Mapillary `map_school_zone` tags everything near a school-zone
         # sign (inflates to ~13.7%); `resolved_school_zone` is a derived
-        # blend of the same noisy signal. Federal `Near_School_1500ft`
+        # blend of the same noisy signal. Federal `Near_School_1000ft`
         # is the accurate ground-truth proximity flag.
-        if "School Zone" in df.columns and "Near_School_1500ft" in df.columns:
+        if "School Zone" in df.columns and "Near_School_1000ft" in df.columns:
             df["School Zone"] = "No"
-            near_school = df["Near_School_1500ft"].fillna("").astype(str).str.strip() == "Yes"
+            near_school = df["Near_School_1000ft"].fillna("").astype(str).str.strip() == "Yes"
             df.loc[near_school, "School Zone"] = "Yes"
             sz_yes = near_school.sum()
             print(f"    School Zone: 0 → {sz_yes:,} (federal proximity only)")

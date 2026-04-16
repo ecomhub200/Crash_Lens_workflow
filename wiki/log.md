@@ -1,12 +1,58 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-15
+updated: 2026-04-16
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-16] fix | asset enrichment STRtree direction + 1000ft threshold rename (v2.7.2)
+
+`enrich_nearest_asset` in `build_road_inventory.py` was producing ~0.4% fill
+for `Near_School_1500ft` on Delaware (486 / 121,733 road segments) instead of
+the expected ~11%. Root cause: the STRtree path queried "for each asset,
+nearest road" — only ~236 roads ever got matched, because the inversion loop
+at the end kept just one road per asset.
+
+**Fix.** Replace the matching block (lines 559-591 of `enrich_nearest_asset`)
+so the STRtree is indexed on **assets** and queried from each **road**
+geometry. KDTree fallback inverted in the same direction. The existing
+`np.where(matched, value, default)` attribute-population block (lines 594-617)
+is preserved — it already honors the honesty principle: attributes remain
+empty/zero for roads beyond threshold.
+
+**Threshold rename (3 columns).** Schools 1500→1000 ft, hospital 2000→1000,
+clinic 1500→1000. Three Tier 1 Postgres columns renamed by migration 002 with
+`IF EXISTS` guards. `supabase_sync.py` TIER1_MAP updated on 3 lines
+(172, 176, 185). All other 12 `near_*` mappings unchanged.
+`crash_enricher.py` line 288 already used `Near_School_1000ft` — no code
+change needed there, it aligns after rename.
+
+**Schools gain two attributes:** `nearest_school_ncessch` (NCES federal school
+ID) and `nearest_school_leaid` (LEA district ID). Route to `road_data` JSONB
+via the existing `nearest_school` prefix in `ROAD_DATA_PREFIXES` — no Tier 1
+schema change.
+
+**Safety ranking matviews.** Migration 003 adds four matviews for grant
+analysis: `schools_safety_delaware` (236 rows), `hospitals_safety_delaware`,
+`transit_safety_delaware`, `rail_xings_safety_delaware` (with a priority_flag
+for unknown-warning-device crossings). Refreshed CONCURRENTLY at the end of
+`finalize_sync()` alongside `federal_summary` and `jurisdiction_baselines`.
+
+**Bug test.** `tests/test_asset_enrichment_fix.py` asserts renamed columns
+present / old columns absent, fill rates in realistic ranges (3-25% for
+schools, etc.), and — most importantly — attributes empty outside threshold
+(`populated_ratio < 2%` when `flag=No`). New `ncessch`/`leaid` columns are
+populated on ≥95% of `Near_School_1000ft=Yes` rows and empty on ≥98% of No
+rows.
+
+Schema bumps 3.1 → 3.2. Files touched: `build_road_inventory.py`,
+`supabase_sync.py`, two new SQL migrations, one new pytest file, three wiki
+pages.
 
 ---
 
