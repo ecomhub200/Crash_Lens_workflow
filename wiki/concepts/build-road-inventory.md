@@ -46,16 +46,35 @@ All read from `{state}/cache/`:
 
 | Asset | Threshold |
 |-------|-----------|
-| Schools | 1500 ft |
+| Schools | 1000 ft |
 | Transit stops | 500 ft |
 | Bridges | 500 ft |
 | Rail crossings | 500 ft |
 | POI bars | 1500 ft |
-| POI hospitals | 2000 ft |
+| POI colleges | 1500 ft |
+| POI hospitals | 1000 ft |
+| POI clinics | 1000 ft |
+| POI rest areas | 1000 ft |
+| POI restaurants | 500 ft |
 | POI parking/fuel | 500 ft |
+| POI signals/stop signs/crossings | 100 ft |
 | Mapillary speed signs | 500 ft |
 | Mapillary signals | 500 ft |
 | Mapillary general signs | 100 ft |
+
+**Honesty principle.** `enrich_nearest_asset` populates the `nearest_{asset}_*`
+attribute columns (name, lat, lon, type, etc.) **only for roads within the
+threshold**. Beyond threshold, every attribute is `""` (strings) or `0`
+(numerics), and the `Near_{Asset}_{N}ft` flag is `"No"`. The `dist_ft` column
+is always set regardless of threshold — it's the only attribute that carries
+meaning for unmatched roads. This preserves the principle that "NULL is
+honest; 'No' when we don't know is a lie."
+
+Asset enrichment indexes assets (not roads) in an STRtree and queries from
+each road's geometry — this guarantees every road segment receives a nearest-
+asset distance (fill ≈ 100% of roads computed, ≈ 11% of roads with
+`Near_School_1000ft = Yes` in Delaware). The pre-v2.7.2 path had inverted
+direction and produced ~0.4% Yes.
 
 ## Data Authority & Resolution
 

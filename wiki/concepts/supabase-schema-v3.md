@@ -3,7 +3,7 @@ title: Supabase Schema v3
 type: concept
 tags: [supabase, database, schema, migration, phase-1, 3-tier]
 created: 2026-04-06
-updated: 2026-04-06
+updated: 2026-04-16
 sources: [CrashLens_Architecture_Roadmap_v2, delaware_parquet_validation]
 status: validated
 ---
@@ -193,11 +193,11 @@ Total:                   517 of 517 (0 uncategorized, 0 catch-all)
 | CSV Column | Postgres Column | Type |
 |-----------|----------------|------|
 | Near_PoiBar_1500ft | near_poi_bar_1500ft | TEXT |
-| Near_PoiClinic_1500ft | near_poi_clinic_1500ft | TEXT |
+| Near_PoiClinic_1000ft | near_poi_clinic_1000ft | TEXT |
 | Near_PoiCollege_1500ft | near_poi_college_1500ft | TEXT |
 | Near_PoiCrossing_100ft | near_poi_crossing_100ft | TEXT |
 | Near_PoiFuel_500ft | near_poi_fuel_500ft | TEXT |
-| Near_PoiHospital_2000ft | near_poi_hospital_2000ft | TEXT |
+| Near_PoiHospital_1000ft | near_poi_hospital_1000ft | TEXT |
 | Near_PoiParking_500ft | near_poi_parking_500ft | TEXT |
 | Near_PoiRestArea_1000ft | near_poi_rest_area_1000ft | TEXT |
 | Near_PoiRestaurant_500ft | near_poi_restaurant_500ft | TEXT |
@@ -209,7 +209,7 @@ Total:                   517 of 517 (0 uncategorized, 0 catch-all)
 |-----------|----------------|------|
 | Near_Bridge_500ft | near_bridge_500ft | TEXT |
 | Near_RailXing_500ft | near_rail_xing_500ft | TEXT |
-| Near_School_1500ft | near_school_1500ft | TEXT |
+| Near_School_1000ft | near_school_1000ft | TEXT |
 | Near_Transit_500ft | near_transit_500ft | TEXT |
 
 ### Resolved Values (5)
@@ -711,3 +711,30 @@ Delaware Batch Pipeline completed end-to-end with Supabase sync via port 5433 (d
 ## AADT Storage Clarification (2026-04-08)
 
 AADT is a **Tier 1 explicit column** (`aadt TEXT`, 85.2% filled), NOT in `road_data` JSONB. The JSONB `road_data` contains 27 supplemental `hpms_*` keys (future_aadt, iri, design_speed, lane_width, median_type, nhs, etc.) but not current AADT — it was promoted to Tier 1 because the frontend queries and filters on it directly. There is no `hpms_aadt` key in JSONB. This is correct by design.
+
+
+## Schema v3.2 — Proximity Threshold Rename (2026-04-16)
+
+Three Tier 1 proximity flag columns were renamed to reflect tightened
+thresholds. The underlying data semantics (which roads/crashes are flagged
+`Yes`) change on the next full pipeline cycle; the rename itself preserves
+existing row counts.
+
+| Old column | New column | Threshold change |
+|-----------|-----------|------------------|
+| `near_school_1500ft` | `near_school_1000ft` | 1500 → 1000 ft |
+| `near_poi_hospital_2000ft` | `near_poi_hospital_1000ft` | 2000 → 1000 ft |
+| `near_poi_clinic_1500ft` | `near_poi_clinic_1000ft` | 1500 → 1000 ft |
+
+Applied by `migrations/002_rename_threshold_columns.sql` (idempotent RENAME
+guarded by `information_schema.columns` checks). The parent `crashes` table
+is altered — partitions inherit automatically.
+
+`supabase_sync.py` TIER1_MAP updated in the same PR (3 lines). The other
+12 `near_*` mappings are unchanged. Total Tier 1 column count stays at 120.
+
+Safety-ranking matviews added (`schools_safety_delaware`,
+`hospitals_safety_delaware`, `transit_safety_delaware`,
+`rail_xings_safety_delaware`) via `migrations/003_safety_ranking_views.sql`,
+and refreshed at the end of `finalize_sync()` alongside `federal_summary`
+and `jurisdiction_baselines`.

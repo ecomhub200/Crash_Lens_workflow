@@ -412,11 +412,11 @@ _Federal + POI proximity flags from build_road_inventory.py_
 | # | Column | Type | Fill % |
 |---|---|---|---|
 | 317 | `Near_PoiBar_1500ft` | str | 100% |
-| 318 | `Near_PoiClinic_1500ft` | str | 100% |
+| 318 | `Near_PoiClinic_1000ft` | str | 100% |
 | 319 | `Near_PoiCollege_1500ft` | str | 100% |
 | 320 | `Near_PoiCrossing_100ft` | str | 100% |
 | 321 | `Near_PoiFuel_500ft` | str | 100% |
-| 322 | `Near_PoiHospital_2000ft` | str | 100% |
+| 322 | `Near_PoiHospital_1000ft` | str | 100% |
 | 323 | `Near_PoiParking_500ft` | str | 100% |
 | 324 | `Near_PoiRestArea_1000ft` | str | 100% |
 | 325 | `Near_PoiRestaurant_500ft` | str | 100% |
@@ -424,7 +424,7 @@ _Federal + POI proximity flags from build_road_inventory.py_
 | 327 | `Near_PoiStopSign_100ft` | str | 100% |
 | 510 | `Near_Bridge_500ft` | str | 100% |
 | 511 | `Near_RailXing_500ft` | str | 100% |
-| 512 | `Near_School_1500ft` | str | 100% |
+| 512 | `Near_School_1000ft` | str | 100% |
 | 513 | `Near_Transit_500ft` | str | 100% |
 
 ### POI Details (41)

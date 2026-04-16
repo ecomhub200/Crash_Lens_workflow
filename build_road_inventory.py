@@ -555,40 +555,51 @@ def enrich_nearest_asset(roads, df, prefix, threshold_ft, attr_cols, label=""):
 
     al = df["lat"].values
     ao = df["lon"].values
+    rl = roads["mid_lat"].values
+    ro = roads["mid_lon"].values
 
-    # ── Two-pass matching: STRtree finds nearest road per asset, ──
-    # ── then we invert to find nearest asset per road              ──
-    use_strtree = _road_strtree is not None
+    # ── Build index on ASSETS, query from roads (fixes the inversion bug) ──
+    # Prefer STRtree when shapely + road linestrings are available — gives
+    # true point-to-linestring distance. Fall back to KDTree midpoint
+    # otherwise (same direction — tree on assets, query from roads).
+    indices = None
+    dists_m = None
+    try:
+        from shapely.geometry import Point
+        try:
+            from shapely import STRtree
+        except ImportError:
+            from shapely.strtree import STRtree
 
-    if use_strtree:
-        # For each ASSET, find nearest ROAD via STRtree (point-to-linestring)
-        asset_road_idx, asset_road_dists_m = query_nearest_road_linestring(al, ao)
-        threshold_m = threshold_ft * FT_TO_M
+        asset_points = [Point(ao[i], al[i]) for i in range(len(al))]
+        asset_tree = STRtree(asset_points)
 
-        # Invert: for each ROAD, find closest asset that matched to it
-        n_roads = len(roads)
-        best_asset_idx = np.full(n_roads, -1, dtype=int)
-        best_asset_dist = np.full(n_roads, np.inf)
+        if _road_linestrings is not None and len(_road_linestrings) == len(roads):
+            query_geoms = _road_linestrings
+        else:
+            query_geoms = [Point(ro[i], rl[i]) for i in range(len(rl))]
 
-        for asset_i in range(len(df)):
-            road_i = asset_road_idx[asset_i]
-            d = asset_road_dists_m[asset_i]
-            if d < best_asset_dist[road_i]:
-                best_asset_dist[road_i] = d
-                best_asset_idx[road_i] = asset_i
+        try:
+            indices = np.asarray(asset_tree.nearest(query_geoms), dtype=int)
+        except (TypeError, AttributeError):
+            indices = np.array([asset_tree.nearest(g) for g in query_geoms], dtype=int)
 
-        dists_ft = best_asset_dist * M_TO_FT
-        indices = np.clip(best_asset_idx, 0, len(df) - 1)  # clip -1 for unmatched
-        matched = (best_asset_idx >= 0) & (best_asset_dist <= threshold_m)
-    else:
-        # KDTree fallback (midpoint-to-midpoint)
-        rl = roads["mid_lat"].values
-        ro = roads["mid_lon"].values
+        # Convert degree distance → meters (same pattern as
+        # query_nearest_road_linestring lines 183-195)
+        M = 111320.0
+        cos_lat = np.cos(np.radians(np.mean(rl)))
+        dists_m = np.empty(len(roads))
+        for i, idx in enumerate(indices):
+            dists_m[i] = query_geoms[i].distance(asset_points[idx]) * M * cos_lat
+
+    except ImportError:
+        # KDTree fallback — tree on assets, query from roads (correct direction)
         tree = build_kdtree(al, ao)
         dists_m, indices = query_nearest(tree, rl, ro)
-        dists_ft = dists_m * M_TO_FT
-        threshold_m = threshold_ft * FT_TO_M
-        matched = dists_m <= threshold_m
+
+    dists_ft = dists_m * M_TO_FT
+    threshold_m = threshold_ft * FT_TO_M
+    matched = dists_m <= threshold_m
 
     # Yes/No
     roads[yesno_col] = np.where(matched, "Yes", "No")
@@ -655,12 +666,14 @@ def enrich_rail_crossings(roads, df):
 
 
 def enrich_schools(roads, df):
-    enrich_nearest_asset(roads, df, "school", 1500,
+    enrich_nearest_asset(roads, df, "school", 1000,
         attr_cols=[
             ("school_name",   "name"),
             ("school_level",  "level"),
             ("enrollment",    "enrollment"),
             ("school_type",   "type"),
+            ("ncessch",       "ncessch"),
+            ("leaid",         "leaid"),
         ],
         label="Schools")
 
@@ -690,8 +703,8 @@ def enrich_poi_categories(roads, pois):
     print("    POI categories...")
     poi_configs = [
         ("bar",        1500),
-        ("hospital",   2000),
-        ("clinic",     1500),
+        ("hospital",   1000),
+        ("clinic",     1000),
         ("parking",     500),
         ("fuel",        500),
         ("signal",      100),

@@ -169,11 +169,11 @@ TIER1_MAP = {
     "Urban_Area_GEOID":         "urban_area_geoid",
     # ── POI Proximity Flags (11) ──────────────────────────────
     "Near_PoiBar_1500ft":       "near_poi_bar_1500ft",
-    "Near_PoiClinic_1500ft":    "near_poi_clinic_1500ft",
+    "Near_PoiClinic_1000ft":    "near_poi_clinic_1000ft",
     "Near_PoiCollege_1500ft":   "near_poi_college_1500ft",
     "Near_PoiCrossing_100ft":   "near_poi_crossing_100ft",
     "Near_PoiFuel_500ft":       "near_poi_fuel_500ft",
-    "Near_PoiHospital_2000ft":  "near_poi_hospital_2000ft",
+    "Near_PoiHospital_1000ft":  "near_poi_hospital_1000ft",
     "Near_PoiParking_500ft":    "near_poi_parking_500ft",
     "Near_PoiRestArea_1000ft":  "near_poi_rest_area_1000ft",
     "Near_PoiRestaurant_500ft": "near_poi_restaurant_500ft",
@@ -182,7 +182,7 @@ TIER1_MAP = {
     # ── Federal Asset Proximity (4) ───────────────────────────
     "Near_Bridge_500ft":        "near_bridge_500ft",
     "Near_RailXing_500ft":      "near_rail_xing_500ft",
-    "Near_School_1500ft":       "near_school_1500ft",
+    "Near_School_1000ft":       "near_school_1000ft",
     "Near_Transit_500ft":       "near_transit_500ft",
     # ── Resolved Values (5) ───────────────────────────────────
     "resolved_speed_limit":     "resolved_speed_limit",
@@ -820,7 +820,11 @@ def finalize_sync(conn, state_name, abbr, fips, display):
         conn.commit()
 
         # ── Step 8: Refresh matviews (CONCURRENTLY with blocking fallback) ──
-        for mv in ["federal_summary", "jurisdiction_baselines"]:
+        # Safety-ranking matviews are state-scoped; they're skipped silently
+        # on states where they don't exist (see migrations/003).
+        for mv in ["federal_summary", "jurisdiction_baselines",
+                   "schools_safety_delaware", "hospitals_safety_delaware",
+                   "transit_safety_delaware", "rail_xings_safety_delaware"]:
             print(f"  Refreshing {mv}...")
             try:
                 cur.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {mv}")
