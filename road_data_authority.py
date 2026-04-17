@@ -127,6 +127,18 @@ def resolve_speed_limit(df):
         if filled_stat:
             print(f"      Statutory: {filled_stat:,} local road defaults (25mph urban, 50mph rural)")
 
+        # FC-5 collectors: OSM highway=tertiary, tertiary_link
+        is_collector = hw.isin(["tertiary", "tertiary_link"])
+        coll_35 = no_speed & is_collector & in_mpo
+        coll_50 = no_speed & is_collector & ~in_mpo
+        values[coll_35.values] = 35
+        sources[coll_35.values] = "Statutory"
+        values[coll_50.values] = 50
+        sources[coll_50.values] = "Statutory"
+        filled_coll = coll_35.sum() + coll_50.sum()
+        if filled_coll:
+            print(f"      Statutory: {filled_coll:,} collector defaults (35mph urban, 50mph rural)")
+
     return values, sources
 
 
