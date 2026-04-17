@@ -1,12 +1,33 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-16
+updated: 2026-04-17
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-17] tune | OSM curvature fallback threshold 1.15 → 1.30
+
+Raised the OSM curvature ratio threshold in `derive_roadway_alignment`
+(`crash_enricher.py:487-506`) from **1.15** to **1.30**. The old value was
+catching borderline "Slight" curves (HPMS B-ish) that aren't really curves,
+inflating the curve-crash count on the ~5% of crashes that fall back to OSM
+geometry when HPMS `curve_class` is unavailable.
+
+**Semantics.** `curvature = road_length / straight_line_distance`. The new
+threshold means a segment must be at least 30% longer than the straight-line
+distance between its endpoints before it's classified as a curve. Roads with
+ratio ≤ 1.30 → `"1. Straight - Level"`; 1.30–1.40 → `"2. Curve - Level"`;
+> 1.40 → `"4. Grade - Curve"` (unchanged).
+
+**Scope.** Affects OSM fallback only (~5% of crashes). HPMS `curve_class`
+(A/B/C/D/E) still covers the other ~95% and is untouched. Curvature
+calculation itself is untouched. No columns added or renamed, so `COLUMNS.md`
+does not change.
 
 ---
 
