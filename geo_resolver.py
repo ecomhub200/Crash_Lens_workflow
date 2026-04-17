@@ -112,6 +112,15 @@ RE_FEDERAL_ROUTE = re.compile(
     re.IGNORECASE
 )
 
+# Normalize known MPO name variants (canonical form on the right).
+# Applied at source in resolve_row() so downstream consumers (split.py,
+# road_data_authority.merge_frontend_columns, R2 folder slugs) all see
+# the canonical name. Add aliases here when a state's hierarchy.json or
+# us_mpos.json emits a punctuation/whitespace variant of an existing MPO.
+MPO_ALIASES = {
+    "Dover/Kent County MPO": "Dover / Kent County MPO",
+}
+
 # ═══════════════════════════════════════════════════════════════
 #  HELPER FUNCTIONS
 # ═══════════════════════════════════════════════════════════════
@@ -1159,6 +1168,8 @@ class GeoResolver:
 
         # ── Resolve MPO ──
         mpo_name = self.resolve_mpo(county_fips, lat, lon)
+        # Normalize known MPO name variants
+        mpo_name = MPO_ALIASES.get(mpo_name, mpo_name)
 
         # ── Derive Ownership ──
         ownership = OwnershipDeriver.derive(

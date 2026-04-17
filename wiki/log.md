@@ -1,12 +1,46 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-16
+updated: 2026-04-17
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-17] fix | statutory speed for FC-5 collectors + Dover/Kent MPO name alias
+
+Two data-quality fixes triggered by audit of resolved-speed gaps and MPO
+slug duplication on Delaware.
+
+**FC-5 statutory speed (`road_data_authority.resolve_speed_limit`).** The
+existing Tier 5 statutory block only filled OSM `highway = residential,
+unclassified, living_street, service` (FC-7 locals), leaving 20,612 FC-5
+Major Collectors with `resolved_speed_limit = 0` and empty source. Added a
+parallel block right after the FC-7 block, inside the same
+`if "highway" in df.columns` guard, that defaults `tertiary` and
+`tertiary_link` to **35 mph in-MPO** and **50 mph out-of-MPO**, tagged
+`Statutory`. Reuses the already-computed `no_speed`, `hw`, and `in_mpo`
+masks. FC-7 logic is unchanged. FC-4 (`secondary`) and FC-6
+(`unclassified`, already covered) are intentionally untouched.
+
+**MPO name alias (`geo_resolver.resolve_row`).** Two rows resolved to
+`Dover/Kent County MPO` (no spaces around the slash, from
+hierarchy.json's tprs), while 23,664 rows resolved to
+`Dover / Kent County MPO` (with spaces, from us_mpos.json centroid match).
+The variant created duplicate R2 folder slugs and split MPO baselines.
+Added a module-level `MPO_ALIASES` dict (after the route-name regexes) and
+applied it as the line right after `mpo_name = self.resolve_mpo(...)` in
+`resolve_row()`. Normalizing at source means
+`road_data_authority.merge_frontend_columns` (which copies `geo_mpo_name`
+to `MPO Name`) inherits the canonical form automatically — no second
+patch needed there. Future state-specific variants can be added to the
+same dict without touching the function.
+
+Files touched: `road_data_authority.py`, `geo_resolver.py`. No column
+adds/renames, no `COLUMNS.md` change required.
 
 ---
 
