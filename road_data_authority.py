@@ -1080,13 +1080,13 @@ def compute_curve_analysis(df):
     
     # ── 6. DEFINITIVE CURVE FLAG (for frontend) ──
     # A segment "is a curve" if ANY of these are true:
-    #   - OSM curvature > 1.2 AND length > 20m (geometric proof)
+    #   - OSM curvature > 1.30 AND length > 20m (geometric proof)
     #   - HPMS curve_class > 0 (federal confirmation)
     #   - Mapillary curve warning sign present (DOT placed sign)
     #   - curve_class >= 3 (our classification says Moderate+)
-    
+
     is_curve_definitive = (
-        ((effective_curv > 1.2) & (length > 20)) |  # Geometry
+        ((effective_curv > 1.30) & (length > 20)) |  # Geometry
         (hpms_curve > 0) |                           # Federal
         (df["curve_has_warning_sign"].values == "Yes")  # Sign
     )

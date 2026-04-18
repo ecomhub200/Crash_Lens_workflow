@@ -1,12 +1,43 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-17
+updated: 2026-04-18
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-18] fix | curvature threshold 1.30 for curve_is_curve + OSM fallback
+
+Raised the OSM curvature threshold used to classify a segment as "a curve"
+in two places so they agree and match the "road 30% longer than straight-line
+= actual curve" rule.
+
+`road_data_authority.compute_curve_analysis` — the **definitive** curve flag
+used by the frontend Safety Focus → Curve Crashes tab (section 6,
+`curve_is_curve`). Geometric branch changed from `effective_curv > 1.2` to
+`effective_curv > 1.30` (length gate unchanged at `> 20m`). The HPMS
+(`hpms_curve > 0`) and warning-sign branches are untouched, and so is the
+5-level `curve_class` classification ladder (1.05 / 1.2 / 1.5 / 2.5) which
+serves a different purpose.
+
+`crash_enricher.derive_roadway_alignment` — the OSM fallback used when HPMS
+`curve_class` is unavailable (~5% of crashes). Thresholds raised:
+`<= 1.30` → Straight - Level, `<= 1.60` → Curve - Level, else Grade - Curve
+(was 1.15 / 1.40). Docstring trimmed to a single line stating the
+"30% longer than straight-line" rule.
+
+Also rebuilds the Delaware road inventory via
+`python build_road_inventory.py --state de --upload` so the R2 cache picks
+up the new threshold alongside the already-deployed `SURFACE_LABELS[3] =
+Blacktop` fix and the `MPO_ALIASES` normalization. The stale cache was the
+root cause of the Brick 26% anomaly and the 7-row MPO count — both fixed
+by the rebuild, not by code changes.
+
+Files touched: `crash_enricher.py`, `road_data_authority.py`.
 
 ---
 
