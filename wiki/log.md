@@ -10,6 +10,33 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-17] fix | MPO alias in crash_enricher for road-inventory-sourced names
+
+Follow-up to the earlier MPO alias fix in `geo_resolver`. The
+`geo_resolver.MPO_ALIASES` dict only normalizes names produced by
+`GeoResolver.resolve_row()`. When `MPO Name` comes from the road
+inventory path (`geo_mpo_name` → `MPO Name` copy in
+`road_data_authority.merge_frontend_columns`), it never passes through
+the resolver and keeps whatever form the road inventory wrote.
+
+That path leaks ~2 Delaware crash rows with the compact
+`Dover/Kent County MPO` form back into the dataset, re-creating the
+same R2 slug-duplication the earlier fix was meant to close.
+
+Added the same alias mapping inside
+`crash_enricher._canonicalize_post_enrichment()` — right after the
+Max Speed Diff cleanup, before the not-tracked-flag nulling — so
+regardless of which path filled `MPO Name`, the canonical spaced form
+wins by the end of enrichment. Implementation is a single
+`df["MPO Name"].replace(MPO_ALIASES)` guarded by a column-presence
+check. Alias dict is intentionally duplicated at this boundary (not
+imported) so `crash_enricher` stays usable without a hard dep on
+`geo_resolver`.
+
+Files touched: `crash_enricher.py`.
+
+---
+
 ## [2026-04-17] fix | statutory speed for FC-5 collectors + Dover/Kent MPO name alias
 
 Two data-quality fixes triggered by audit of resolved-speed gaps and MPO
