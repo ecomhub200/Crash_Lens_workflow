@@ -3,7 +3,7 @@ title: Column Registry (COLUMNS.md)
 type: concept
 tags: [columns, schema, naming, registry, truth-source]
 created: 2026-04-15
-updated: 2026-04-15
+updated: 2026-04-18
 sources: [COLUMNS.md, road_data_authority.py, crash_enricher.py, build_road_inventory.py]
 status: active
 ---
@@ -91,7 +91,8 @@ Columns that reference the same logical attribute across pipeline stages. Renami
 | POI Details | 328-368 | 41 | OSM, `build_road_inventory.py` |
 | Mapillary Street-Level | 369-425 | 57 | `mapillary_county_download.py` |
 | OSM Graph Nodes | 426-428 | 3 | `osmnx`, `generate_osm_data.py` |
-| State DOT Raw (dot_*) | 429-478 | 50 | DelDOT shapefile, `generate_state_dot_data.py` |
+| State DOT Raw (dot_*) — Delaware | 429-478 | 50 | DelDOT shapefile, `generate_state_dot_data.py` |
+| State DOT Raw (dot_*) — Colorado | CO-1..CO-25 | 25 | CDOT Highways Layer 7, `states/colorado/co_state_dot.py` |
 | State DOT Resolved (sdot_*) | 479-502 | 24 | `build_road_inventory.py` `enrich_state_dot()` |
 | Frontend Merged | 503-522 | 16 | `merge_frontend_columns()` |
 | Road & Node Matching (ri_*) | 523-532 | 10 | `crash_enricher.py` spatial match |

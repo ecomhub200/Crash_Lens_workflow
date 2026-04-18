@@ -10,6 +10,37 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] feature | Colorado DOT road inventory config (co_state_dot.py) — CDOT Layer 7 Highways
+
+Added `states/colorado/co_state_dot.py` — pure-config module for CDOT's Highways inventory, following the Delaware reference pattern (`states/delaware/de_state_dot.py`). Also added an empty `states/colorado/__init__.py` so the package is importable by `generate_state_dot_data.py`'s `importlib` loader.
+
+Data source: CDOT CPLAN `open_data_sde/FeatureServer/7` (Layer 7 — "Highways"). This is the CDOT-maintained road inventory; unlike DelDOT it's a single rich layer with posted speed limit, AADT, lane width, surface type, median, shoulder, functional class, terrain, county, and route all in one pull. Server native SR is 26913 (UTM Z13N); we request `outSR=4326` for WGS84. `maxRecordCount` is 1000. `OUT_FIELDS = None` — request all fields (the layer has exactly what we need, no bloat to trim).
+
+`FIELD_MAP` has 31 entries (CDOT source → `dot_*` column). Colorado-specific value maps: `FC_TEXT_MAP` (Rural/Urban prefixes collapsed to the same CrashLens class), `REGION_MAP` (CDOT engineering regions 1-5), `SURFACE_TYPE_MAP` (text-based — note **"Composite" → Blacktop**, consistent with the `SURFACE_LABELS[7]` fix in the entry below), `ROUTE_SIGN_MAP` (I/US/SH passthrough), `TERRAIN_MAP` (Flat/Rolling/Mountainous), `DIVIDED_MAP` (Y/N → Facility Type). `FC_TO_SYSTEM` is reused verbatim from Delaware (CrashLens standard).
+
+Key divergences from Delaware in `normalize()`:
+
+- **Functional Class** uses text lookup + substring fallback (CDOT's `FUNCCLASS` is a text field like `"Rural Minor Arterial"`, not a 1-7 numeric code).
+- **Speed_Limit_Est** uses `SPEEDLIM` directly (actual posted speed). No FC+area lookup table needed. This is the big CDOT win over DelDOT's estimated values.
+- **Ownership** is hardcoded to `"1. State Hwy Agency"` — Layer 7 is CDOT-maintained only. No 3-tier cascade.
+- **Facility Type** uses the explicit `ISDIVIDED` Y/N flag; no median-code heuristic.
+- **Has_Sidewalk / Guardrail Related? / Has_Bike_Lane** are left empty — CDOT Layer 7 doesn't expose these. Downstream enrichment (HPMS, imagery) fills them.
+
+No changes to `generate_state_dot_data.py` — it already has `"co": ("Colorado", "colorado", "08")` in its `STATES` dict and dynamically loads `states.colorado.co_state_dot` via `importlib`. `download-registry.json` Colorado entry (drives the separate Playwright crash downloader) needs no change.
+
+`COLUMNS.md` updated with a new `### State DOT Raw — Colorado (25)` section using local numbering (`CO-1..CO-25`) — 25 Colorado-only columns plus 6 shared with Delaware (`dot_road_name`, `dot_route_number`, `dot_lanes`, `dot_lane_width`, `dot_beg_mp`, `dot_end_mp`). Fill-% is marked TBD until a canonical run is done. `wiki/concepts/column-registry.md` section-summary gained a matching row and `updated:` bumped to 2026-04-18.
+
+End-to-end verification (`python generate_state_dot_data.py --state co`) not yet run — this sandbox has no pandas/numpy. The config module byte-compiles cleanly, exports the expected symbols, and is importable by the driver's `load_state_config('co')`. Expected first-run output: `cache/co_state_dot.parquet.gz` with tens of thousands of CDOT highway segments, `Ownership` 100% State Hwy Agency, `Speed_Limit_Est` populated on >95% of rows, `Functional Class` non-empty on >99%.
+
+Files touched:
+- `states/colorado/__init__.py` (new, empty)
+- `states/colorado/co_state_dot.py` (new)
+- `COLUMNS.md` (new Colorado `dot_*` section)
+- `wiki/concepts/column-registry.md` (section-summary row + `updated:` bump)
+- `wiki/log.md` (this entry)
+
+---
+
 ## [2026-04-18] fix | SURFACE_LABELS[7] remap to Blacktop — HPMS code 7 is composite, not brick
 
 Second half of the SURFACE_LABELS brick bug. v2.7.1 had remapped

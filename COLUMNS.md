@@ -602,6 +602,43 @@ _Source: DelDOT shapefile, generate_state_dot_data.py → build_road_inventory.p
 | 477 | `dot_construction_type` | str | 0% |
 | 478 | `dot_hsip_code` | str | 25% |
 
+### State DOT Raw — Colorado (25)
+_Source: CDOT CPLAN FeatureServer Layer 7 (Highways), `states/colorado/co_state_dot.py` → `generate_state_dot_data.py`_
+_Local numbering — fill-% TBD (not yet in the canonical Delaware parquet)._
+
+| # | Column | Type | Fill % |
+|---|---|---|---|
+| CO-1  | `dot_fc_text`          | str | TBD |
+| CO-2  | `dot_route_sign`       | str | TBD |
+| CO-3  | `dot_nhs`              | str | TBD |
+| CO-4  | `dot_access_control`   | str | TBD |
+| CO-5  | `dot_description`      | str | TBD |
+| CO-6  | `dot_county_name`      | str | TBD |
+| CO-7  | `dot_county_fips`      | str | TBD |
+| CO-8  | `dot_city`             | str | TBD |
+| CO-9  | `dot_city_fips`        | str | TBD |
+| CO-10 | `dot_region_code`      | str | TBD |
+| CO-11 | `dot_tpr_id`           | str | TBD |
+| CO-12 | `dot_terrain`          | str | TBD |
+| CO-13 | `dot_surface_type`     | str | TBD |
+| CO-14 | `dot_is_divided`       | str | TBD |
+| CO-15 | `dot_median_type`      | str | TBD |
+| CO-16 | `dot_median_width`     | str | TBD |
+| CO-17 | `dot_shoulder_type`    | str | TBD |
+| CO-18 | `dot_shoulder_width`   | str | TBD |
+| CO-19 | `dot_aadt`             | str | TBD |
+| CO-20 | `dot_aadt_single`      | str | TBD |
+| CO-21 | `dot_aadt_combo`       | str | TBD |
+| CO-22 | `dot_speed_limit`      | str | TBD |
+| CO-23 | `dot_vmt`              | str | TBD |
+| CO-24 | `dot_vc_ratio`         | str | TBD |
+| CO-25 | `dot_seg_length`       | str | TBD |
+
+Shared with Delaware (already in the `dot_*` section above, same column name, reused by Colorado):
+`dot_road_name`, `dot_route_number`, `dot_lanes`, `dot_lane_width`, `dot_beg_mp`, `dot_end_mp`.
+
+Also written by `normalize()` on every state row (not state-specific): `dot_source`, `dot_source_url`.
+
 ### State DOT Resolved — sdot_ (24)
 _Source: generate_state_dot_data.py → build_road_inventory.py enrich_state_dot()_
 _⚠️ These are the ACTUAL column names. Code must match EXACTLY._
