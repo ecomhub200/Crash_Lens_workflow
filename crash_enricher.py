@@ -1826,6 +1826,16 @@ class CrashEnricher:
                 df.loc[phantom, "Max Speed Diff"] = ""
                 print(f"    Max Speed Diff: {phantom.sum():,} phantom values cleared (speed unknown)")
 
+        # MPO Name: normalize known variants that come from road-inventory
+        # geo_mpo_name (which doesn't go through geo_resolver.MPO_ALIASES).
+        # Catches the ~2 Delaware rows where the compact slash form leaks
+        # through the road-inventory path.
+        MPO_ALIASES = {
+            "Dover/Kent County MPO": "Dover / Kent County MPO",
+        }
+        if "MPO Name" in df.columns:
+            df["MPO Name"] = df["MPO Name"].replace(MPO_ALIASES)
+
         # ── Null out not-tracked flags (accuracy rule: NULL is honest) ──
         not_tracked = getattr(self, '_not_tracked_flags', [])
         for flag in not_tracked:
