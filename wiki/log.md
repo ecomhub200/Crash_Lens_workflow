@@ -10,6 +10,39 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] rule | Per-State Columns Rule — each state gets its own `{abbr}_columns.md`
+
+Added a new project rule: each state keeps its state-specific column list in its own file at `states/{abbr}_columns.md` (e.g. `states/de_columns.md` for Delaware, `states/co_columns.md` for Colorado). The repo-root `COLUMNS.md` holds only the shared schema (Golden Schema, HPMS, Mapillary, OSM, `sdot_*`, `resolved_*`, etc.) and points to each per-state file for `dot_*` columns and state-specific extras.
+
+Motivation:
+
+- Per-state fill-% is tied to a specific state's parquet — Delaware fill-% is meaningless for a Colorado column.
+- Onboarding a new state adds 20-50 columns at once; a per-state file keeps the diff scoped and avoids merge conflicts on the root `COLUMNS.md`.
+- Naming collisions between states surface immediately — each state owns its own definition file.
+
+Applied the rule to the two existing `dot_*` sources:
+
+- Created `states/de_columns.md` (Delaware, 50 columns, global #429-478).
+- Created `states/co_columns.md` (Colorado, 25 columns, local `CO-1..CO-25`) — factored out the section added in the Colorado config entry below.
+- Replaced both per-state sections in the root `COLUMNS.md` with a single summary table that lists each state + file + column count.
+
+Rule is documented in:
+
+- `CLAUDE.md` → new "Per-State Columns Rule" section.
+- `wiki/concepts/column-registry.md` → new "Per-State Columns Rule" section + updated section-summary (source column now points at the per-state files) + updated "See Also".
+
+No pipeline-code changes — pipeline parquet column names are unchanged. Only the location of the human-readable documentation moved.
+
+Files touched:
+- `states/de_columns.md` (new)
+- `states/co_columns.md` (new)
+- `COLUMNS.md` (per-state sections collapsed to summary + links)
+- `CLAUDE.md` (new rule)
+- `wiki/concepts/column-registry.md` (new rule + updated summary + See Also)
+- `wiki/log.md` (this entry)
+
+---
+
 ## [2026-04-18] feature | Colorado DOT road inventory config (co_state_dot.py) — CDOT Layer 7 Highways
 
 Added `states/colorado/co_state_dot.py` — pure-config module for CDOT's Highways inventory, following the Delaware reference pattern (`states/delaware/de_state_dot.py`). Also added an empty `states/colorado/__init__.py` so the package is importable by `generate_state_dot_data.py`'s `importlib` loader.

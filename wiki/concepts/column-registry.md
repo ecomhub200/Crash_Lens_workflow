@@ -91,17 +91,29 @@ Columns that reference the same logical attribute across pipeline stages. Renami
 | POI Details | 328-368 | 41 | OSM, `build_road_inventory.py` |
 | Mapillary Street-Level | 369-425 | 57 | `mapillary_county_download.py` |
 | OSM Graph Nodes | 426-428 | 3 | `osmnx`, `generate_osm_data.py` |
-| State DOT Raw (dot_*) — Delaware | 429-478 | 50 | DelDOT shapefile, `generate_state_dot_data.py` |
-| State DOT Raw (dot_*) — Colorado | CO-1..CO-25 | 25 | CDOT Highways Layer 7, `states/colorado/co_state_dot.py` |
+| State DOT Raw (dot_*) — Delaware | 429-478 | 50 | `states/de_columns.md` (per-state rule) |
+| State DOT Raw (dot_*) — Colorado | CO-1..CO-25 | 25 | `states/co_columns.md` (per-state rule) |
 | State DOT Resolved (sdot_*) | 479-502 | 24 | `build_road_inventory.py` `enrich_state_dot()` |
 | Frontend Merged | 503-522 | 16 | `merge_frontend_columns()` |
 | Road & Node Matching (ri_*) | 523-532 | 10 | `crash_enricher.py` spatial match |
 
+## Per-State Columns Rule
+
+Every state keeps its state-specific column list in its own file at `states/{abbr}_columns.md` (e.g. `states/de_columns.md` for Delaware, `states/co_columns.md` for Colorado). The repo-root `COLUMNS.md` holds only the shared schema and points to each per-state file for that state's `dot_*` columns and any state-specific extras.
+
+This separation exists because:
+
+- Per-state fill-% numbers are tied to a specific state's parquet (Delaware fill-% has no meaning for Colorado's `dot_surface_type`).
+- State onboarding adds 20-50 columns at a time; keeping them in per-state files makes code review scoped and avoids merge conflicts on `COLUMNS.md`.
+- Naming collisions between states (e.g. two states with slightly different semantics for `dot_surface_type`) are surfaced immediately — each state owns its own definition file.
+
+The root `COLUMNS.md` has a summary table at the "State DOT Raw — per-state" section that lists each state + file + column count. When onboarding a new state, create `states/{abbr}_columns.md` alongside `states/{state_name}/{abbr}_state_dot.py`; do NOT put the state's `dot_*` rows in the root `COLUMNS.md`.
+
 ## Rules for Pipeline Code
 
 1. **Never hardcode column names in module-level string constants** that don't reference `COLUMNS.md`. Prefer importing from a shared constants module that is itself generated/validated against `COLUMNS.md`.
-2. **When renaming a column**: grep the repo for the old name, update `COLUMNS.md`, update `wiki/concepts/supabase-schema-v3.md` TIER1_MAP if applicable, update `wiki/log.md`.
-3. **When adding a new column**: append to `COLUMNS.md` with section, type, and expected fill %, then update the section-summary table in this page.
+2. **When renaming a column**: grep the repo for the old name, update the authoritative file (`COLUMNS.md` for shared columns, `states/{abbr}_columns.md` for state-specific `dot_*`), update `wiki/concepts/supabase-schema-v3.md` TIER1_MAP if applicable, update `wiki/log.md`.
+3. **When adding a new column**: append to the authoritative file (root `COLUMNS.md` or the per-state `states/{abbr}_columns.md`) with section, type, and expected fill %, then update the section-summary table in this page.
 4. **sdot_ columns are case-sensitive and contain spaces** --- do not normalize them to snake_case in enrichment code. The pipeline parquet preserves the exact names from `sdot_*` as shown in COLUMNS.md rows 479-502.
 5. **Fill % is informational, not a contract** --- it represents Delaware non_dot_roads and will differ per state/jurisdiction.
 
@@ -116,7 +128,9 @@ After updating `COLUMNS.md`, update this page's section-summary table and add a 
 
 ## See Also
 
-- `COLUMNS.md` (repo root) --- the registry itself
+- `COLUMNS.md` (repo root) --- the registry itself (shared columns + per-state summary)
+- `states/de_columns.md` --- Delaware per-state `dot_*` columns
+- `states/co_columns.md` --- Colorado per-state `dot_*` columns
 - [[supabase-schema-v3]] --- 3-tier Postgres mapping
 - [[schema-truth-document]] --- validated Delaware fill %
 - [[build-road-inventory]] --- how `dot_*` -> `sdot_*` resolution happens
