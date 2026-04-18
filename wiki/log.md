@@ -10,6 +10,44 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] fix | SURFACE_LABELS[7] remap to Blacktop — HPMS code 7 is composite, not brick
+
+Second half of the SURFACE_LABELS brick bug. v2.7.1 had remapped
+`SURFACE_LABELS[3]` from "3. Brick or Block" to
+"2. Blacktop, Asphalt, Bituminous" on the grounds that FHWA HPMS code 3 is
+"Composite (asphalt over concrete)", not brick. Code 7 had the same problem
+but was missed at the time: in FHWA HPMS, 7 = **"Composite (PCC with AC
+overlay)"** — Portland-cement concrete with an asphalt overlay, i.e.
+asphalt on the driving surface. The state DOT confirms 90% of segments
+coded 7 read as Blacktop on the ground.
+
+Leaving code 7 mapped to "3. Brick or Block" was mislabeling 8,319 road
+segments (~5.6% of the inventory) as Brick, inflating the Brick surface
+share well above ground-truth.
+
+Change in `road_data_authority.SURFACE_LABELS` (single line):
+
+```python
+# before
+7: "3. Brick or Block",                # Brick/Block (alternate code)
+# after
+7: "2. Blacktop, Asphalt, Bituminous", # Composite (PCC with AC overlay) — NOT brick
+```
+
+After this fix the `SURFACE_LABELS` dict contains zero "Brick or Block"
+values — consistent with the policy that real brick roads come from the
+state DOT `sdot_*` surface column, not HPMS surface codes. Expected effect
+on the Delaware inventory: Brick share drops from ~5.6% to <0.5% (only
+genuine brick, via the DOT column).
+
+Next step (not in this commit): rebuild the road inventory
+(`python build_road_inventory.py --state de --upload`) and re-run the
+pipeline so the R2 cache picks up the new label.
+
+Files touched: `road_data_authority.py`.
+
+---
+
 ## [2026-04-18] fix | curvature threshold 1.30 for curve_is_curve + OSM fallback
 
 Raised the OSM curvature threshold used to classify a segment as "a curve"
