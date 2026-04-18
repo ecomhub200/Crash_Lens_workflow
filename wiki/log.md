@@ -10,6 +10,17 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] convention | COLUMNS.md per-state naming rule
+
+Each state gets its own columns/data dictionary file in the `states/` folder using the naming convention `{abbr}_columns.md`. Examples:
+- `states/de_columns.md` — Delaware column dictionary
+- `states/co_columns.md` — Colorado column dictionary
+- `states/va_columns.md` — Virginia column dictionary
+
+These files are generated from each state's statewide parquet after a full pipeline run. They live at the repo root `states/` folder level (NOT inside `states/{state_name}/` subdirectories). The old monolithic `COLUMNS.md` at repo root is deprecated in favor of per-state files.
+
+---
+
 ## [2026-04-18] rule | Per-State Columns Rule — each state gets its own `{abbr}_columns.md`
 
 Added a new project rule: each state keeps its state-specific column list in its own file at `states/{abbr}_columns.md` (e.g. `states/de_columns.md` for Delaware, `states/co_columns.md` for Colorado). The repo-root `COLUMNS.md` holds only the shared schema (Golden Schema, HPMS, Mapillary, OSM, `sdot_*`, `resolved_*`, etc.) and points to each per-state file for `dot_*` columns and state-specific extras.
