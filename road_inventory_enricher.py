@@ -293,14 +293,15 @@ class RoadInventorySession:
         new_cols = [c for c in self.transfer_cols
                     if c not in OVERWRITE_COLUMNS and c not in FILL_COLUMNS]
         if new_cols:
-            for col in new_cols:
-                if col not in df.columns:
-                    # Defensive: force object dtype. `ri_slice` is fully
-                    # string-cast at lines 240–242, so the bulk assign below
-                    # should always write strings — but keeping object dtype
-                    # matches pandas 2.x behavior and tolerates any future
-                    # caller that writes non-string values here.
-                    df[col] = pd.Series("", index=df.index, dtype=object)
+            missing_cols = [col for col in new_cols if col not in df.columns]
+            if missing_cols:
+                # Defensive: force object dtype. `ri_slice` is fully
+                # string-cast at lines 240–242, so the bulk assign below
+                # should always write strings — but keeping object dtype
+                # matches pandas 2.x behavior and tolerates any future
+                # caller that writes non-string values here.
+                new_col_data = {col: "" for col in missing_cols}
+                df = pd.concat([df, pd.DataFrame(new_col_data, index=df.index)], axis=1)
             df.loc[matched_ci, new_cols] = ri_slice[new_cols].values
 
         # ── Derived columns ──
