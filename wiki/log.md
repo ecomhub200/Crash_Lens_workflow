@@ -10,6 +10,16 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] perf | road_inventory_enricher batch-add missing columns via pd.concat
+
+`RoadInventoryEnricher._transfer_columns` used to add each missing transfer column one at a time with `df[col] = pd.Series("", index=df.index, dtype=object)` inside a loop (`road_inventory_enricher.py:295-304`). For wide transfer sets that fragments the DataFrame and triggers pandas' `PerformanceWarning: DataFrame is highly fragmented` on large statewide runs.
+
+Replaced the loop with a single batched add: compute `missing_cols` once, build a `{col: ""}` dict, and attach all new columns in one `pd.concat([df, pd.DataFrame(new_col_data, index=df.index)], axis=1)` call. Same object dtype, same "" fill, same downstream `df.loc[matched_ci, new_cols] = ri_slice[new_cols].values` bulk assign — just one block insert instead of N.
+
+No column names or types change, so `COLUMNS.md` and `wiki/concepts/column-registry.md` are unaffected.
+
+---
+
 ## [2026-04-18] convention | COLUMNS.md per-state naming rule
 
 Each state gets its own columns/data dictionary file in the `states/` folder using the naming convention `{abbr}_columns.md`. Examples:
