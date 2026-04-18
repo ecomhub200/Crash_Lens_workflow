@@ -20,6 +20,18 @@ Key files to check:
 ### Column-Naming Rule
 Any task that touches column names (writing, reading, renaming, migrating) MUST consult `COLUMNS.md` first. The `sdot_*` columns in particular are Title Case with spaces/underscores (e.g. `sdot_Speed_Limit_Est`, `sdot_Functional Class`) — do NOT normalize them to snake_case. See `wiki/concepts/column-registry.md` for the full naming rules and cross-reference map.
 
+### Per-State Columns Rule
+Every state keeps its state-specific column list in its own file at `states/{abbr}_columns.md` (e.g. `states/de_columns.md` for Delaware, `states/co_columns.md` for Colorado). The repo-root `COLUMNS.md` holds only the shared schema (Golden Schema, HPMS, Mapillary, OSM, sdot_*, resolved_*, etc.) and points to each per-state file for its `dot_*` columns and any state-specific extras.
+
+When adding, renaming, removing, or changing the type of a `dot_*` column for a state:
+
+1. Edit that state's `states/{abbr}_columns.md` — the per-state file is authoritative for state-specific columns.
+2. Update the per-state summary table in the root `COLUMNS.md` if the column count changes.
+3. Update `wiki/concepts/column-registry.md` if the section-summary table changes.
+4. When onboarding a new state, create `states/{abbr}_columns.md` alongside `states/{state_name}/{abbr}_state_dot.py` — do NOT put the state's `dot_*` rows into the root `COLUMNS.md`.
+
+The root `COLUMNS.md` is still the single starting point for "what columns exist in the pipeline?" — it just delegates state-specific details to the per-state files.
+
 ### Auto-Wiki Rule
 When making code changes, pipeline modifications, or architecture decisions:
 1. Update the relevant wiki page(s)
