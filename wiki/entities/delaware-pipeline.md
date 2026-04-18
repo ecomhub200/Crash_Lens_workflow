@@ -207,3 +207,6 @@ Earlier analysis showed 0% fill for Intersection Name — this was based on an o
 - **519,829 rows** loaded (partial — 47K gap from earlier `rest_sync.py` load)
 - **Pending**: Re-sync with corrected SSH tunnel port (5433) to load full 566,762 rows
 - All severity, boolean flags, JSONB, and geographic columns verified correct (proportional to row count)
+
+### Column Dictionary
+Delaware's column dictionary will be at `states/de_columns.md` (per new convention: `states/{abbr}_columns.md`). Regenerate from statewide parquet (569K rows × 550 cols) after v2.7.3 pipeline run with Brick fix + curvature threshold applied.

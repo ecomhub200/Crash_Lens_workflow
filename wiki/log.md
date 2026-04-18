@@ -10,6 +10,17 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] convention | COLUMNS.md per-state naming rule
+
+Each state gets its own columns/data dictionary file in the `states/` folder using the naming convention `{abbr}_columns.md`. Examples:
+- `states/de_columns.md` — Delaware column dictionary
+- `states/co_columns.md` — Colorado column dictionary
+- `states/va_columns.md` — Virginia column dictionary
+
+These files are generated from each state's statewide parquet after a full pipeline run. They live at the repo root `states/` folder level (NOT inside `states/{state_name}/` subdirectories). The old monolithic `COLUMNS.md` at repo root is deprecated in favor of per-state files.
+
+---
+
 ## [2026-04-18] fix | SURFACE_LABELS[7] remap to Blacktop — HPMS code 7 is composite, not brick
 
 Second half of the SURFACE_LABELS brick bug. v2.7.1 had remapped
