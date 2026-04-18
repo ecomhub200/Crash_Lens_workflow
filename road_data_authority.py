@@ -1192,7 +1192,7 @@ SURFACE_LABELS = {
     4: "4. Slag, Gravel, Stone",          # Gravel/Stone
     5: "5. Dirt",                          # Dirt/Earth
     6: "6. Other",                         # Other
-    7: "3. Brick or Block",               # Brick/Block (alternate code)
+    7: "2. Blacktop, Asphalt, Bituminous", # Composite (PCC with AC overlay) — NOT brick
     8: "5. Dirt",                          # Unpaved
     9: "6. Other",                         # Other (alternate)
     10: "2. Blacktop, Asphalt, Bituminous",# Asphalt (alternate)
