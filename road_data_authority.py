@@ -899,11 +899,11 @@ def compute_curve_analysis(df):
     Curve Classification (based on OSM curvature ratio):
       curvature = max(length_ratio, 1 + angular_deflection)
       1.0      = perfectly straight
-      1.0-1.05 = straight (negligible deviation)
-      1.05-1.2 = slight curve
-      1.2-1.5  = moderate curve
-      1.5-2.5  = sharp curve
-      >2.5     = extreme curve (switchback, ramp loop)
+      1.0-1.05  = straight (negligible deviation)
+      1.05-1.30 = slight curve
+      1.30-1.60 = moderate curve (FHWA-aligned "Curve - Level")
+      1.60-2.5  = sharp curve
+      >2.5      = extreme curve (switchback, ramp loop)
     
     Columns added:
       curve_class              1-5 classification (1=Straight...5=Extreme)
@@ -927,8 +927,8 @@ def compute_curve_analysis(df):
     effective_curv = np.where(length < 20, 1.0, curv)
     
     classes = np.where(effective_curv <= 1.05, 1,           # Straight
-              np.where(effective_curv <= 1.2, 2,            # Slight
-              np.where(effective_curv <= 1.5, 3,            # Moderate
+              np.where(effective_curv <= 1.30, 2,           # Slight (FHWA-aligned boundary)
+              np.where(effective_curv <= 1.60, 3,           # Moderate
               np.where(effective_curv <= 2.5, 4,            # Sharp
               5))))                                          # Extreme
     

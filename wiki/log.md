@@ -10,6 +10,18 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-18] fix | curve_class ladder aligned to FHWA 1.30/1.60 boundaries
+
+The 1.30/1.60 curvature thresholds committed in `dc0eea6` (PR #99) landed in two places — `crash_enricher.py::derive_roadway_alignment()` (OSM fallback, ~5% of crashes) and `road_data_authority.py` `curve_is_curve` definitive flag — but the Delaware pipeline still reported ~34.9% curves instead of the expected ~23–25%.
+
+Root cause: the `curve_class` ladder in `road_data_authority.py:929–933` still used the legacy `1.05 / 1.2 / 1.5 / 2.5` boundaries. `_canonicalize_post_enrichment()` in `crash_enricher.py:1640–1662` overwrites `Roadway Alignment` from `curve_class` (FHWA authority path) for the ~95% of crashes that have it, mapping `cc == 3` → `"2. Curve - Level"`. Because class 3 began at `effective_curv > 1.2` (not `> 1.30`), the overwrite promoted curvatures in the 1.2–1.30 band to "Curve", defeating the FHWA fallback's 1.30 boundary.
+
+Fix: raised the Slight → Moderate boundary from `1.2` → `1.30` and the Moderate → Sharp boundary from `1.5` → `1.60` at `road_data_authority.py:929–933` so `curve_class` matches the thresholds the OVERWRITE already agreed to use. Updated the in-docstring ladder at lines 902–906 to match. `curve_is_curve` (`effective_curv > 1.30 & length > 20`) and `derive_roadway_alignment()` (`<= 1.30` / `<= 1.60`) unchanged — they were already correct.
+
+No new or renamed columns, so `COLUMNS.md` and `wiki/concepts/column-registry.md` unaffected.
+
+---
+
 ## [2026-04-18] perf | road_inventory_enricher batch-add missing columns via pd.concat
 
 `RoadInventoryEnricher._transfer_columns` used to add each missing transfer column one at a time with `df[col] = pd.Series("", index=df.index, dtype=object)` inside a loop (`road_inventory_enricher.py:295-304`). For wide transfer sets that fragments the DataFrame and triggers pandas' `PerformanceWarning: DataFrame is highly fragmented` on large statewide runs.
