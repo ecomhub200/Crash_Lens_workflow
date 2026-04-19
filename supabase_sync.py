@@ -822,7 +822,7 @@ def finalize_sync(conn, state_name, abbr, fips, display):
         # ── Step 8: Refresh matviews (CONCURRENTLY with blocking fallback) ──
         # Safety-ranking matviews are state-scoped; they're skipped silently
         # on states where they don't exist (see migrations/003).
-        for mv in ["federal_summary", "jurisdiction_baselines",
+        for mv in ["federal_summary", "jurisdiction_baselines", "dashboard_summary",
                    "schools_safety_delaware", "hospitals_safety_delaware",
                    "transit_safety_delaware", "rail_xings_safety_delaware"]:
             print(f"  Refreshing {mv}...")

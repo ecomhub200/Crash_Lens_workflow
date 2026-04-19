@@ -10,6 +10,14 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-19] feat | dashboard_summary matview added to finalize refresh loop
+
+Added `dashboard_summary` to the matview refresh loop in `supabase_sync.py:825` so the finalize step (Step 8) refreshes it alongside `federal_summary` and `jurisdiction_baselines` on every state sync. The state-scoped safety matviews (`schools_*`, `hospitals_*`, `transit_*`, `rail_xings_*`) continue to be refreshed conditionally via the per-state try/except fallback.
+
+No schema, column, or pipeline-architecture changes — purely an operational fix so the dashboard_summary matview stays fresh after each state sync rather than relying on a separate manual refresh.
+
+---
+
 ## [2026-04-19] docs | Delaware deployed-Supabase column registry added at states/delaware/de_columns.md
 
 A second per-state column file now lives inside the Delaware state folder at `states/delaware/de_columns.md`, alongside the existing pipeline-parquet file at `states/de_columns.md`. The two files intentionally cover different scopes:
