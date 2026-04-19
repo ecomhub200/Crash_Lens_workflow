@@ -2,12 +2,19 @@
 type: entity
 tags: [delaware, data-dictionary, schema, reference]
 created: 2026-04-11
+updated: 2026-04-19
 status: active
 ---
 
 # Delaware Data Dictionary
 
 Reference implementation — first state onboarded to CrashLens.
+
+> **Column registry files:** The authoritative column lists for Delaware now live in two places:
+> - `states/de_columns.md` — pipeline-parquet `dot_*` columns (50 cols, Per-State Columns Rule).
+> - `states/delaware/de_columns.md` — deployed-Supabase registry for `crashes_delaware` (118 Tier 1 cols + 268 `road_data` / 15 `state_extras` / 76 `ranking_data` JSONB keys, 569,829 rows).
+>
+> Prefer those files as the source of truth for column names and fill %; the summary tables below are kept for readability but can lag.
 
 ## State Info
 | Field | Value |
@@ -117,3 +124,6 @@ Reference implementation — first state onboarded to CrashLens.
 - [[state-data-dictionary-template]]
 - [[pipeline-architecture-v29]]
 - [[webhook-sync]]
+- [[column-registry]]
+- `states/de_columns.md` — pipeline-parquet per-state registry
+- `states/delaware/de_columns.md` — deployed-Supabase per-state registry

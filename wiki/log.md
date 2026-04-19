@@ -1,12 +1,30 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-18
+updated: 2026-04-19
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-19] docs | Delaware deployed-Supabase column registry added at states/delaware/de_columns.md
+
+A second per-state column file now lives inside the Delaware state folder at `states/delaware/de_columns.md`, alongside the existing pipeline-parquet file at `states/de_columns.md`. The two files intentionally cover different scopes:
+
+- `states/de_columns.md` (repo convention, Per-State Columns Rule) — 50 `dot_*` raw pipeline columns with fill % measured against the canonical Delaware parquet run (121,733 rows, 2026-04-15). Governs pipeline code changes.
+- `states/delaware/de_columns.md` (new) — deployed-Supabase registry for the `crashes_delaware` partition: 118 Tier 1 explicit columns + 268 `road_data` JSONB keys + 15 `state_extras` JSONB keys + 76 `ranking_data` JSONB keys (4 tiers × 19 metrics), fill % measured against production (569,829 rows, v2.7.2 as of 2026-04-18). Used for on-call schema checks and state-onboarding scripts that need to see what the live table actually contains without leaving the state folder.
+
+Wiki updates:
+
+- `wiki/concepts/column-registry.md` — added a new "Two Flavors of Per-State Registry" subsection describing when to read each file, added the deployed-Supabase flavor to the "Relationship to Other Schema Docs" table, and added both files to the "See Also" list. Bumped `updated:` frontmatter to 2026-04-19.
+- `wiki/entities/delaware-data-dictionary.md` — added a callout at the top pointing to both column-registry files as the authoritative source; added both to the "Related Pages" list. Bumped `updated:` frontmatter to 2026-04-19.
+
+Authority rule (recorded on `column-registry.md`): if the two files disagree on a name, `states/{abbr}_columns.md` is authoritative for the pipeline parquet (pre-Supabase) and `states/{state_name}/{abbr}_columns.md` is authoritative for the deployed Postgres table. Divergences must be reconciled and logged.
+
+No code changes and no columns were added, renamed, or removed, so the root `COLUMNS.md` and the section-summary table in `column-registry.md` are unaffected.
 
 ---
 

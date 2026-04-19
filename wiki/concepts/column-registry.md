@@ -3,7 +3,7 @@ title: Column Registry (COLUMNS.md)
 type: concept
 tags: [columns, schema, naming, registry, truth-source]
 created: 2026-04-15
-updated: 2026-04-18
+updated: 2026-04-19
 sources: [COLUMNS.md, road_data_authority.py, crash_enricher.py, build_road_inventory.py]
 status: active
 ---
@@ -19,6 +19,8 @@ Single source of truth for **every column name** in the CrashLens pipeline. Live
 | Doc | Scope | Use For |
 |---|---|---|
 | `COLUMNS.md` (repo root) | **All 532 raw pipeline columns** by name, type, fill % | Naming reference, cross-references in code |
+| `states/{abbr}_columns.md` | Per-state pipeline parquet `dot_*` columns with per-state fill % | Pipeline column additions/renames for a specific state |
+| `states/{state_name}/{abbr}_columns.md` | Per-state **deployed-Supabase** column registry (Tier 1 explicit + `road_data` / `state_extras` / `ranking_data` JSONB keys) with production-table fill % | Cross-checking deployed schema, debugging Supabase reads |
 | `wiki/concepts/supabase-schema-v3.md` | 3-tier Supabase mapping (Tier 1 explicit / Tier 2 `road_data` JSONB / Tier 3 `state_extras` JSONB) | Database writes, TIER1_MAP |
 | `wiki/entities/schema-truth-document.md` | Validated fill % / data issues on Delaware `crashes_delaware` | Data-quality reference |
 
@@ -109,6 +111,15 @@ This separation exists because:
 
 The root `COLUMNS.md` has a summary table at the "State DOT Raw — per-state" section that lists each state + file + column count. When onboarding a new state, create `states/{abbr}_columns.md` alongside `states/{state_name}/{abbr}_state_dot.py`; do NOT put the state's `dot_*` rows in the root `COLUMNS.md`.
 
+### Two Flavors of Per-State Registry
+
+Delaware (the reference state) now has two complementary per-state files, and new states may follow the same pattern:
+
+- **`states/{abbr}_columns.md`** (e.g. `states/de_columns.md`) — canonical per-state pipeline registry. Scoped to that state's `dot_*` raw columns with fill % measured against the state's statewide parquet. Governed by the Per-State Columns Rule above. This is the file every pipeline code change must update.
+- **`states/{state_name}/{abbr}_columns.md`** (e.g. `states/delaware/de_columns.md`) — deployed-Supabase column registry for the state's partition (e.g. `crashes_delaware`). Lists all Tier 1 explicit columns plus every `road_data`, `state_extras`, and `ranking_data` JSONB key with production fill %. Lives alongside the state's adapter code so on-call engineers and state-onboarding scripts can see exactly what the production table contains without leaving the state folder.
+
+If the two files disagree on a name, the root `states/{abbr}_columns.md` is authoritative for the pipeline parquet (pre-Supabase), and the folder-level `states/{state_name}/{abbr}_columns.md` is authoritative for the deployed Postgres table. Any divergence should be reconciled by updating whichever is stale and adding a log entry.
+
 ## Rules for Pipeline Code
 
 1. **Never hardcode column names in module-level string constants** that don't reference `COLUMNS.md`. Prefer importing from a shared constants module that is itself generated/validated against `COLUMNS.md`.
@@ -129,7 +140,8 @@ After updating `COLUMNS.md`, update this page's section-summary table and add a 
 ## See Also
 
 - `COLUMNS.md` (repo root) --- the registry itself (shared columns + per-state summary)
-- `states/de_columns.md` --- Delaware per-state `dot_*` columns
+- `states/de_columns.md` --- Delaware per-state pipeline `dot_*` columns (50 cols, parquet fill %)
+- `states/delaware/de_columns.md` --- Delaware deployed-Supabase registry (118 Tier 1 cols + 268 `road_data` keys + 15 `state_extras` keys + 76 `ranking_data` keys, `crashes_delaware` 569,829 rows)
 - `states/co_columns.md` --- Colorado per-state `dot_*` columns
 - [[supabase-schema-v3]] --- 3-tier Postgres mapping
 - [[schema-truth-document]] --- validated Delaware fill %
