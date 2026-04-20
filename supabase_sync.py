@@ -427,6 +427,28 @@ def bulk_insert(conn, df, state_name):
     # per-row during INSERT.
     cols = [c for c in df.columns
             if c not in AUTO_COLUMNS and c not in TRIGGER_MANAGED_COLUMNS]
+
+    # Schema safety: auto-create any Tier 1 columns that are missing from the
+    # partition so pipeline changes (new proximity radii, new enrichment
+    # columns) can never break the COPY. ALTER targets the parent `crashes`
+    # table — partitions inherit columns and Postgres forbids adding columns
+    # directly to a partition.
+    table_name = f"crashes_{state_name}"
+    cur.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema = 'public' AND table_name = %s",
+        (table_name,),
+    )
+    existing_cols = {r[0] for r in cur.fetchall()}
+    missing = [c for c in cols if c not in existing_cols]
+    if missing:
+        for col in missing:
+            cur.execute(
+                f'ALTER TABLE crashes ADD COLUMN IF NOT EXISTS "{col}" TEXT'
+            )
+        conn.commit()
+        print(f"  Auto-created {len(missing)} missing columns: {missing}")
+
     buf = StringIO()
     df[cols].to_csv(buf, index=False, header=False, sep="\t", na_rep="\\N")
     buf.seek(0)

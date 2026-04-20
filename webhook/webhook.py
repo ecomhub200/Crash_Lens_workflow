@@ -292,24 +292,37 @@ def _run_batched_sync(
             log.flush()
 
         # ── Step 5: finalize (matviews + states upsert; geom handled by trigger) ──
-        log.write("[sync] Step 5/6: Finalizing (matviews, states; geom already set by trigger)...\n")
-        log.flush()
-        try:
-            fr = subprocess.run(
-                ["python3", SYNC_SCRIPT, "--state", abbr, "--finalize"],
-                env=env,
-                cwd=WORK_DIR,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                timeout=1800,  # conservative ceiling; trigger-driven finalize ~30s in practice
+        # Guard: if every batch failed, the partition is now empty (we
+        # truncated in Step 3). Running finalize would refresh matviews
+        # against empty data and overwrite the states row count with 0,
+        # effectively wiping this state from the dashboard. Skip it.
+        ok = num_batches - len(failed_batches)
+        if num_batches > 0 and ok == 0:
+            log.write(
+                f"[sync] ABORT: 0/{num_batches} batches succeeded — "
+                "keeping existing data\n"
             )
-            if fr.returncode != 0:
-                log.write(
-                    f"[sync] WARNING: Finalize exited rc={fr.returncode} "
-                    "(non-fatal; partial refresh is usually recoverable)\n"
+            log.write("[sync] Skipping finalize (no batches succeeded)\n")
+            log.flush()
+        else:
+            log.write("[sync] Step 5/6: Finalizing (matviews, states; geom already set by trigger)...\n")
+            log.flush()
+            try:
+                fr = subprocess.run(
+                    ["python3", SYNC_SCRIPT, "--state", abbr, "--finalize"],
+                    env=env,
+                    cwd=WORK_DIR,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    timeout=1800,  # conservative ceiling; trigger-driven finalize ~30s in practice
                 )
-        except subprocess.TimeoutExpired:
-            log.write("[sync] WARNING: Finalize timed out after 30 min\n")
+                if fr.returncode != 0:
+                    log.write(
+                        f"[sync] WARNING: Finalize exited rc={fr.returncode} "
+                        "(non-fatal; partial refresh is usually recoverable)\n"
+                    )
+            except subprocess.TimeoutExpired:
+                log.write("[sync] WARNING: Finalize timed out after 30 min\n")
 
         # ── Step 6: cleanup input file ──
         log.write("[sync] Step 6/6: Cleanup...\n")
@@ -321,8 +334,12 @@ def _run_batched_sync(
         except OSError as exc:
             log.write(f"[sync] Cleanup warning: {exc}\n")
 
-        status = "success" if not failed_batches else "partial"
-        ok = num_batches - len(failed_batches)
+        if num_batches > 0 and ok == 0:
+            status = "failed"
+        elif failed_batches:
+            status = "partial"
+        else:
+            status = "success"
         log.write(
             f"[sync] DONE: {status} | {total_rows:,} rows | "
             f"{ok}/{num_batches} batches ok\n"
