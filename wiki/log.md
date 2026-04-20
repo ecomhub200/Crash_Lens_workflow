@@ -1,12 +1,23 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-19
+updated: 2026-04-20
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-20] fix | Supabase sync safety — auto-create missing columns + abort finalize on zero-success batches
+
+Two defensive fixes landed so pipeline drift and bad sync runs can't silently wipe a state's dashboard:
+
+1. **`supabase_sync.py:bulk_insert()`** — before every COPY, query `information_schema.columns` for `crashes_{state_name}` and compare against the Tier 1 column list about to be written. Any missing columns are added via `ALTER TABLE crashes ADD COLUMN IF NOT EXISTS "{col}" TEXT` (altering the parent — Postgres forbids adding columns to a partition directly; partitions inherit). Logs `Auto-created {n} missing columns: {list}`. This means new proximity radii or new enrichment columns in the pipeline no longer break the sync with a "column does not exist" error.
+2. **`webhook/webhook.py:_run_batched_sync()`** — after the batch loop, if `0/N` batches succeeded the webhook now skips finalize entirely, logs `ABORT: 0/{N} batches succeeded — keeping existing data`, and returns status `"failed"` (previously the code returned `"partial"` and still ran finalize, which refreshed matviews against the just-truncated partition and upserted a `total_crashes=0` row, effectively wiping the state from the dashboard). Cleanup (Step 6) still runs so the input file is not left on disk.
+
+No schema, column-classification, COPY, or batch-sizing changes — both are narrow safety guards around the existing sync protocol. See `wiki/concepts/supabase-sync-ci.md` for the webhook/sync architecture these guards live in.
 
 ---
 
