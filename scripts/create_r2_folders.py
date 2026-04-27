@@ -364,6 +364,28 @@ def get_planning_district_folders(hierarchy):
     return []
 
 
+def generate_prefix_only_folders(state_filter=None):
+    """Generate ONLY the four bare prefix markers per state.
+
+    Used by --prefixes-only mode to make `_state/`, `_region/`, `_mpo/`, and
+    `_planning_district/` show up in the R2 dashboard for every state in
+    STATE_MAP, without creating any per-id child folders, jurisdictions,
+    cities, or top-level shared folders.
+    """
+    folders = []
+    states = STATE_MAP.keys()
+    if state_filter:
+        states = [s for s in states if s == state_filter]
+    for state_prefix in sorted(states):
+        folders.extend([
+            f"{state_prefix}/_state/",
+            f"{state_prefix}/_region/",
+            f"{state_prefix}/_mpo/",
+            f"{state_prefix}/_planning_district/",
+        ])
+    return folders
+
+
 def generate_all_folders(state_filter=None, top_level_only=False):
     """Generate the complete list of R2 folder paths to create."""
     project_root = get_project_root()
@@ -724,6 +746,11 @@ def main():
                         help="Just list all folder paths and exit")
     parser.add_argument("--top-level-only", action="store_true",
                         help="Only create state meta folders + regions + MPOs (skip jurisdictions)")
+    parser.add_argument("--prefixes-only", action="store_true",
+                        help="Only create the four bare prefix markers per state: "
+                             "{state}/_state/, {state}/_region/, {state}/_mpo/, "
+                             "{state}/_planning_district/. Skips jurisdictions, "
+                             "cities, hierarchy children, and shared/top-level folders.")
     parser.add_argument("--upload-geography", action="store_true",
                         help="Upload geography JSONs and hierarchy files to R2")
     parser.add_argument("--geography-only", action="store_true",
@@ -743,11 +770,15 @@ def main():
         uploaded, failed = upload_geography_files(dry_run=args.dry_run)
         sys.exit(0 if failed == 0 else 1)
 
-    print("Generating R2 folder structure...")
-    folders = generate_all_folders(
-        state_filter=args.state,
-        top_level_only=args.top_level_only
-    )
+    if args.prefixes_only:
+        print("Generating bare prefix markers (_state/, _region/, _mpo/, _planning_district/) for all states...")
+        folders = generate_prefix_only_folders(state_filter=args.state)
+    else:
+        print("Generating R2 folder structure...")
+        folders = generate_all_folders(
+            state_filter=args.state,
+            top_level_only=args.top_level_only
+        )
 
     if args.list_only:
         print(f"\nTotal folders: {len(folders)}\n")
@@ -762,8 +793,12 @@ def main():
 
     success = create_folders_batch(folders, dry_run=args.dry_run)
 
-    # Upload geography files if --upload-geography flag or running all states
-    if args.upload_geography or (not args.state and not args.top_level_only):
+    # Upload geography files if --upload-geography flag or running all states.
+    # --prefixes-only is a narrow operation and never triggers geography upload
+    # unless explicitly requested.
+    if not args.prefixes_only and (
+        args.upload_geography or (not args.state and not args.top_level_only)
+    ):
         uploaded, failed = upload_geography_files(dry_run=args.dry_run)
         if failed > 0:
             success = False
