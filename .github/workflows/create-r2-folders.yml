@@ -43,6 +43,7 @@ on:
           - prefixes_only
           - single_state
           - geography_only
+          - hierarchy_only
       state:
         description: 'State prefix (only used when scope=single_state)'
         required: false
@@ -118,6 +119,9 @@ jobs:
           if [ "${{ inputs.scope }}" = "geography_only" ]; then
             ARGS="--geography-only"
             echo "Scope: geography files only (us_counties.json, us_mpos.json, hierarchy.json, etc.)"
+          elif [ "${{ inputs.scope }}" = "hierarchy_only" ]; then
+            ARGS="--hierarchy-only"
+            echo "Scope: per-state hierarchy.json only ({state}/_state/hierarchy.json for all 50 states + DC)"
           elif [ "${{ inputs.scope }}" = "single_state" ] && [ -n "${{ inputs.state }}" ]; then
             ARGS="--state ${{ inputs.state }}"
             echo "Scope: single state (${{ inputs.state }})"
@@ -133,6 +137,7 @@ jobs:
 
           if [ "${{ inputs.upload_geography }}" = "true" ] \
               && [ "${{ inputs.scope }}" != "geography_only" ] \
+              && [ "${{ inputs.scope }}" != "hierarchy_only" ] \
               && [ "${{ inputs.scope }}" != "prefixes_only" ]; then
             ARGS="$ARGS --upload-geography"
             echo "Geography upload: enabled"

@@ -612,7 +612,7 @@ GEOGRAPHY_FILES = [
 ]
 
 
-def upload_geography_files(dry_run=False):
+def upload_geography_files(dry_run=False, hierarchy_only=False):
     """Upload geography JSON files from states/geography/ to R2.
 
     These files are needed by the HTML normalization tools and the frontend
@@ -620,24 +620,34 @@ def upload_geography_files(dry_run=False):
 
     R2 path: states/geography/{filename}
     Public URL: https://data.aicreatesai.com/states/geography/{filename}
+
+    When hierarchy_only=True, the five top-level geography JSONs are skipped
+    and only the per-state {state}/_state/hierarchy.json files are uploaded.
     """
     project_root = get_project_root()
     geo_dir = project_root / "states" / "geography"
 
-    if not geo_dir.exists():
+    if not geo_dir.exists() and not hierarchy_only:
         print(f"\n  [WARN] Geography directory not found: {geo_dir}")
         return 0, 0
 
     uploaded = 0
     failed = 0
 
-    print(f"\n{'='*60}")
-    print(f"Uploading geography files to R2")
-    print(f"  Source: {geo_dir}")
-    print(f"  Dest:   s3://{BUCKET}/states/geography/")
-    print(f"{'='*60}\n")
+    if hierarchy_only:
+        print(f"\n{'='*60}")
+        print(f"Uploading per-state hierarchy.json files to R2 (hierarchy-only)")
+        print(f"  Dest:   s3://{BUCKET}/{{state}}/_state/hierarchy.json")
+        print(f"{'='*60}\n")
+    else:
+        print(f"\n{'='*60}")
+        print(f"Uploading geography files to R2")
+        print(f"  Source: {geo_dir}")
+        print(f"  Dest:   s3://{BUCKET}/states/geography/")
+        print(f"{'='*60}\n")
 
-    for filename in GEOGRAPHY_FILES:
+    geography_filenames = [] if hierarchy_only else GEOGRAPHY_FILES
+    for filename in geography_filenames:
         local_path = geo_dir / filename
         if not local_path.exists():
             print(f"  [SKIP] {filename} — not found locally")
@@ -755,6 +765,10 @@ def main():
                         help="Upload geography JSONs and hierarchy files to R2")
     parser.add_argument("--geography-only", action="store_true",
                         help="ONLY upload geography files (skip folder creation)")
+    parser.add_argument("--hierarchy-only", action="store_true",
+                        help="ONLY upload per-state hierarchy.json files to "
+                             "{state}/_state/hierarchy.json (skip the five "
+                             "top-level geography JSONs and skip folder creation)")
     args = parser.parse_args()
 
     # Validate environment
@@ -768,6 +782,12 @@ def main():
 
     if args.geography_only:
         uploaded, failed = upload_geography_files(dry_run=args.dry_run)
+        sys.exit(0 if failed == 0 else 1)
+
+    if args.hierarchy_only:
+        uploaded, failed = upload_geography_files(
+            dry_run=args.dry_run, hierarchy_only=True
+        )
         sys.exit(0 if failed == 0 else 1)
 
     if args.prefixes_only:
