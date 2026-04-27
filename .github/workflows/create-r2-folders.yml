@@ -40,6 +40,7 @@ on:
         options:
           - all
           - top_level_only
+          - prefixes_only
           - single_state
           - geography_only
       state:
@@ -123,11 +124,16 @@ jobs:
           elif [ "${{ inputs.scope }}" = "top_level_only" ]; then
             ARGS="--top-level-only"
             echo "Scope: top-level + regions + MPOs (no jurisdiction subfolders)"
+          elif [ "${{ inputs.scope }}" = "prefixes_only" ]; then
+            ARGS="--prefixes-only"
+            echo "Scope: bare prefix markers only ({state}/_state/, /_region/, /_mpo/, /_planning_district/)"
           else
             echo "Scope: all states, regions, MPOs, and jurisdictions"
           fi
 
-          if [ "${{ inputs.upload_geography }}" = "true" ] && [ "${{ inputs.scope }}" != "geography_only" ]; then
+          if [ "${{ inputs.upload_geography }}" = "true" ] \
+              && [ "${{ inputs.scope }}" != "geography_only" ] \
+              && [ "${{ inputs.scope }}" != "prefixes_only" ]; then
             ARGS="$ARGS --upload-geography"
             echo "Geography upload: enabled"
           fi

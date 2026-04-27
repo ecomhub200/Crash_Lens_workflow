@@ -1,12 +1,23 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-20
+updated: 2026-04-27
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-27] feat | R2 bare-prefix markers — `--prefixes-only` mode for create_r2_folders
+
+Brought every state's R2 prefix to parity with Delaware's dashboard layout (the four green-circled prefixes: `_state/`, `_region/`, `_mpo/`, `_planning_district/`). Previously these only showed up if a state's `hierarchy.json` happened to populate region/MPO/PD child IDs — for any state without that data the bare prefixes were invisible in the R2 dashboard.
+
+1. **`scripts/create_r2_folders.py`** — new `generate_prefix_only_folders()` helper and `--prefixes-only` CLI flag. Emits exactly four zero-byte marker keys per entry in `STATE_MAP` (50 states + DC + nyc = 52 × 4 = 208 markers): `{state}/_state/`, `{state}/_region/`, `{state}/_mpo/`, `{state}/_planning_district/`. Skips jurisdictions, cities, hierarchy children, top-level shared folders, and geography upload. Idempotent — safe to re-run.
+2. **`.github/workflows/create-r2-folders.yml`** — added `prefixes_only` to the `scope` dropdown and wired it to `--prefixes-only`. Geography upload is suppressed in this scope (parallel to the existing `geography_only` carve-out).
+
+No schema, column, or pipeline changes. Existing `--top-level-only` and full-run modes are untouched.
 
 ---
 
