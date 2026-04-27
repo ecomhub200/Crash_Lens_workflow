@@ -196,33 +196,105 @@ def query_nearest_road_linestring(point_lats, point_lons, threshold_m=None):
 
     return nearest_idx, dists_m
 
+def _build_poi_strtree(poi_lats, poi_lons):
+    """Build a shapely STRtree on POI Points. Filters NaN/inf coords (cKDTree refuses
+    non-finite input — STRtree just won't get those rows).
+
+    Returns (tree, kept_idx, lats, lons) or (None, None, None, None) when empty.
+    `kept_idx` maps tree-local indices back to the original input indices so callers
+    can look up associated values (e.g. signal head counts, speed limits).
+    """
+    from shapely.geometry import Point
+    try:
+        from shapely import STRtree
+    except ImportError:
+        from shapely.strtree import STRtree
+    poi_lats = np.asarray(poi_lats, dtype=float)
+    poi_lons = np.asarray(poi_lons, dtype=float)
+    mask = np.isfinite(poi_lats) & np.isfinite(poi_lons)
+    if not mask.any():
+        return None, None, None, None
+    kept = np.flatnonzero(mask)
+    lats = poi_lats[mask]
+    lons = poi_lons[mask]
+    points = [Point(lons[i], lats[i]) for i in range(len(lats))]
+    return STRtree(points), kept, lats, lons
+
+
+def _meters_to_degrees(meters, ref_lats):
+    """Convert a meter threshold to a degree threshold using local longitude scale."""
+    cos_lat = float(np.cos(np.radians(np.nanmean(ref_lats))))
+    cos_lat = max(cos_lat, 1e-6)
+    return meters / (111320.0 * cos_lat)
+
+
 def proximity_yesno(road_lats, road_lons, poi_lats, poi_lons, threshold_ft):
+    n_road = len(road_lats)
     if len(poi_lats) == 0:
-        return np.zeros(len(road_lats), dtype=bool)
-    tree = build_kdtree(poi_lats, poi_lons)
-    dists_m, _ = query_nearest(tree, road_lats, road_lons)
-    return dists_m <= (threshold_ft * FT_TO_M)
+        return np.zeros(n_road, dtype=bool)
+    tree, _, _, _ = _build_poi_strtree(poi_lats, poi_lons)
+    if tree is None:
+        return np.zeros(n_road, dtype=bool)
+    from shapely.geometry import Point
+    threshold_deg = _meters_to_degrees(threshold_ft * FT_TO_M, road_lats)
+    query_pts = np.array([Point(road_lons[i], road_lats[i]) for i in range(n_road)], dtype=object)
+
+    out = np.zeros(n_road, dtype=bool)
+    try:
+        # shapely 2.x: vectorized — returns (2, K) of [query_idx, tree_idx] pairs within max_distance
+        result = tree.query_nearest(query_pts, max_distance=threshold_deg, all_matches=False)
+        result = np.asarray(result)
+        if result.ndim == 2 and result.shape[0] >= 1:
+            out[result[0].astype(int)] = True
+        elif result.ndim == 1 and len(result) == n_road:
+            # Older 2.x variant returning per-query nearest index (may include out-of-range)
+            # Fall back to per-point loop below
+            raise TypeError
+    except (TypeError, AttributeError):
+        # shapely 1.x fallback — per-point query
+        for i in range(n_road):
+            try:
+                idx = tree.query_nearest(query_pts[i], max_distance=threshold_deg)
+                if idx is not None and len(np.atleast_1d(idx)) > 0:
+                    out[i] = True
+            except Exception:
+                pass
+    return out
+
 
 def count_within_radius(road_lats, road_lons, poi_lats, poi_lons, radius_ft, chunk_size=500_000):
     """Count POIs within radius_ft for each road. Chunked for memory safety on large states."""
+    n_road = len(road_lats)
     if len(poi_lats) == 0:
-        return np.zeros(len(road_lats), dtype=int)
-    tree = build_kdtree(poi_lats, poi_lons)
-    radius_m = radius_ft * FT_TO_M
-    chord_r = 2 * np.sin(radius_m / (2 * EARTH_R))
-    
-    n = len(road_lats)
-    counts = np.zeros(n, dtype=int)
-    
-    # Process in chunks to limit memory from query_ball_point results
-    for start in range(0, n, chunk_size):
-        end = min(start + chunk_size, n)
-        chunk_pts = _to_cartesian(road_lats[start:end], road_lons[start:end])
-        results = tree.query_ball_point(chunk_pts, chord_r)
-        for i, r in enumerate(results):
-            counts[start + i] = len(r)
-        del results, chunk_pts
-    
+        return np.zeros(n_road, dtype=int)
+    tree, _, _, _ = _build_poi_strtree(poi_lats, poi_lons)
+    if tree is None:
+        return np.zeros(n_road, dtype=int)
+    from shapely.geometry import Point
+
+    radius_deg = _meters_to_degrees(radius_ft * FT_TO_M, road_lats)
+    counts = np.zeros(n_road, dtype=int)
+
+    for start in range(0, n_road, chunk_size):
+        end = min(start + chunk_size, n_road)
+        buffers = np.array(
+            [Point(road_lons[i], road_lats[i]).buffer(radius_deg) for i in range(start, end)],
+            dtype=object,
+        )
+        try:
+            # shapely 2.x: returns (2, K) array of (query_idx, tree_idx) pairs
+            qi_ti = np.asarray(tree.query(buffers, predicate="intersects"))
+            if qi_ti.ndim == 2 and qi_ti.shape[0] >= 1:
+                qi = qi_ti[0].astype(int)
+                np.add.at(counts, qi + start, 1)
+            else:
+                raise TypeError
+        except (TypeError, AttributeError):
+            for i, buf in enumerate(buffers):
+                ids = tree.query(buf)
+                counts[start + i] = len(np.atleast_1d(ids))
+        del buffers
+
     return counts
 
 # ═══════════════════════════════════════════════════════════════
@@ -737,12 +809,49 @@ def nearest_value(road_lats, road_lons, poi_lats, poi_lons, poi_values, radius_f
     result_dists = np.full(n, -1.0)
     if len(poi_lats) == 0:
         return result_vals, result_dists
-    tree = build_kdtree(poi_lats, poi_lons)
-    dists_m, indices = query_nearest(tree, road_lats, road_lons)
-    threshold_m = radius_ft * FT_TO_M
-    matched = dists_m <= threshold_m
-    result_vals[matched] = np.array(poi_values)[indices[matched]]
-    result_dists[matched] = np.round(dists_m[matched] * M_TO_FT, 1)
+    tree, kept, _, _ = _build_poi_strtree(poi_lats, poi_lons)
+    if tree is None:
+        return result_vals, result_dists
+    from shapely.geometry import Point
+
+    poi_values = np.asarray(poi_values, dtype=object)
+    radius_deg = _meters_to_degrees(radius_ft * FT_TO_M, road_lats)
+    M = 111320.0
+    query_pts = np.array([Point(road_lons[i], road_lats[i]) for i in range(n)], dtype=object)
+
+    try:
+        # shapely 2.x: ((2, K) indices, (K,) distances) within max_distance
+        result_idx, dists_deg = tree.query_nearest(
+            query_pts, max_distance=radius_deg, return_distance=True, all_matches=False
+        )
+        result_idx = np.asarray(result_idx)
+        dists_deg = np.asarray(dists_deg)
+        if result_idx.ndim == 2 and result_idx.shape[0] >= 2:
+            q_idx = result_idx[0].astype(int)
+            t_idx = result_idx[1].astype(int)
+            cos_lat = np.cos(np.radians(np.asarray(road_lats)[q_idx]))
+            cos_lat = np.maximum(cos_lat, 1e-6)
+            dists_m = dists_deg * M * cos_lat
+            result_vals[q_idx] = poi_values[kept[t_idx]]
+            result_dists[q_idx] = np.round(dists_m * M_TO_FT, 1)
+        else:
+            raise TypeError
+    except (TypeError, AttributeError):
+        cos_lat_mean = max(float(np.cos(np.radians(np.nanmean(road_lats)))), 1e-6)
+        for i in range(n):
+            try:
+                idx, dist = tree.query_nearest(
+                    query_pts[i], max_distance=radius_deg, return_distance=True
+                )
+                idx = np.atleast_1d(idx)
+                dist = np.atleast_1d(dist)
+                if len(idx) > 0:
+                    ti = int(idx[0])
+                    d_m = float(dist[0]) * M * cos_lat_mean
+                    result_vals[i] = poi_values[kept[ti]]
+                    result_dists[i] = round(d_m * M_TO_FT, 1)
+            except Exception:
+                pass
     return result_vals, result_dists
 
 
