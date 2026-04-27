@@ -10,6 +10,28 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-27] fix | Mapillary enrichment crash on VA — STRtree-based POI proximity helpers
+
+Virginia's `build-road-inventory` Actions run failed during `enrich_mapillary` with
+`scipy.spatial.cKDTree: data must be finite, check for nan or inf values`. The crash came from `proximity_yesno` / `count_within_radius` / `nearest_value` building a cKDTree on raw Mapillary `lat`/`lon` columns — some MUTCD subsets contained NaN coordinates that scipy refuses.
+
+`build_road_inventory.py` — replaced those three POI helpers with shapely `STRtree`-based
+implementations:
+
+1. New `_build_poi_strtree()` filters non-finite lat/lon at construction (NaN/inf rows are simply dropped before the tree is built) and returns `(tree, kept_idx, lats, lons)` so callers can map tree-local indices back to original input rows for `nearest_value`.
+2. New `_meters_to_degrees()` converts the meter threshold to a degree threshold using the local longitude scale (`cos(mean_lat)`), so STRtree's planar distance is comparable to the existing ft-based thresholds (acceptable error at the 100–1500 ft scale this script uses).
+3. `proximity_yesno` uses `tree.query_nearest(..., max_distance=, all_matches=False)` to find roads with any POI within the threshold.
+4. `count_within_radius` buffers each road point by `radius_deg` and uses `tree.query(..., predicate="intersects")` (chunked by `chunk_size` for memory safety on large states); falls back to a per-point loop on shapely 1.x.
+5. `nearest_value` uses the same `query_nearest` call with `return_distance=True`, then converts back to feet via the local cosine for the per-row distance.
+
+The lower-level `build_kdtree`/`query_nearest` primitives are kept — they're still used for road-midpoint-to-road-midpoint matching (HPMS, sdot, intersections) and those paths haven't crashed. Only the POI-proximity helpers (which is what hit the NaN data) switched to STRtree.
+
+Smoke-tested with a synthetic mix of valid POIs plus NaN/inf rows: all three helpers now return correct results (and no longer raise) on inputs that previously killed the run.
+
+No schema, column registry, or wiki concept changes — pure bug fix in the enrichment helpers.
+
+---
+
 ## [2026-04-27] feat | R2 bare-prefix markers — `--prefixes-only` mode for create_r2_folders
 
 Brought every state's R2 prefix to parity with Delaware's dashboard layout (the four green-circled prefixes: `_state/`, `_region/`, `_mpo/`, `_planning_district/`). Previously these only showed up if a state's `hierarchy.json` happened to populate region/MPO/PD child IDs — for any state without that data the bare prefixes were invisible in the R2 dashboard.
