@@ -10,6 +10,17 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-27] fix | R2 per-state hierarchy.json upload — `--hierarchy-only` mode for create_r2_folders
+
+Downstream consumers were 404'ing on `s3://crash-lens-data/{state}/_state/hierarchy.json` (HeadObject not found) for Virginia and other states. The per-state hierarchy upload loop already existed inside `upload_geography_files()` in `scripts/create_r2_folders.py` (lines ~696–733), but the only entry points that triggered it were `--geography-only`, `--upload-geography`, or a full run — and the previous workflow run was scoped to `prefixes_only`, which deliberately skips geography upload, so no hierarchies were pushed.
+
+1. **`scripts/create_r2_folders.py`** — `upload_geography_files()` now takes a `hierarchy_only=False` parameter; when `True` it skips the five top-level geography JSONs and only iterates `STATE_MAP` to upload `states/{state}/hierarchy.json` → `{state}/_state/hierarchy.json` (51 keys: 50 states + DC; nyc skipped because `hierarchy: None`). New `--hierarchy-only` CLI flag wires it up.
+2. **`.github/workflows/create-r2-folders.yml`** — added `hierarchy_only` to the `scope` dropdown and dispatched it to `--hierarchy-only`. Geography upload is suppressed in this scope (parallel to the existing `geography_only` and `prefixes_only` carve-outs).
+
+No schema, column, or pipeline changes. Existing `--geography-only`, `--upload-geography`, `--top-level-only`, `--prefixes-only`, and full-run modes are untouched.
+
+---
+
 ## [2026-04-27] feat | R2 bare-prefix markers — `--prefixes-only` mode for create_r2_folders
 
 Brought every state's R2 prefix to parity with Delaware's dashboard layout (the four green-circled prefixes: `_state/`, `_region/`, `_mpo/`, `_planning_district/`). Previously these only showed up if a state's `hierarchy.json` happened to populate region/MPO/PD child IDs — for any state without that data the bare prefixes were invisible in the R2 dashboard.
