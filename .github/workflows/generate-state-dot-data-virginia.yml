@@ -1,0 +1,157 @@
+name: Generate State DOT Data (Virginia)
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force re-download even if cache exists'
+        required: false
+        default: false
+        type: boolean
+
+  # Annual refresh — VDOT LRS releases quarterly but road inventory is annual
+  schedule:
+    - cron: '0 6 1 4 *'   # April 1 annually (VDOT releases Q1 LRS in March)
+
+env:
+  R2_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  generate:
+    name: "Virginia State DOT Inventory"
+    runs-on: ubuntu-latest
+    timeout-minutes: 120   # Virginia is large — 3 layers × 60K-150K features each
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas pyarrow boto3 numpy
+
+      - name: Verify Virginia config exists
+        run: |
+          CONFIG="states/virginia/va_state_dot.py"
+          if [ ! -f "$CONFIG" ]; then
+            echo "❌ Config not found: $CONFIG"
+            echo "Expected at: states/virginia/va_state_dot.py"
+            ls -la states/virginia/ 2>/dev/null || echo "Directory states/virginia/ does not exist"
+            exit 1
+          fi
+          echo "✅ Found config: $CONFIG"
+          python "$CONFIG"  # Run standalone test
+
+      - name: Download and normalize
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ inputs.force }}" = "true" ]; then
+            FORCE_FLAG="--force"
+          fi
+
+          # Virginia downloads 3 layers (FC + Responsibility + Speed Limits)
+          # Total time: ~15-30 min depending on VDOT server responsiveness
+          python generate_state_dot_data.py \
+            --state va \
+            --cache-dir cache \
+            --upload \
+            --timeout 180 \
+            $FORCE_FLAG
+
+      - name: Verify output
+        if: success()
+        run: |
+          FILE="cache/va_special_data.parquet.gz"
+          if [ -f "$FILE" ]; then
+            SIZE=$(du -h "$FILE" | cut -f1)
+            echo "✅ Output: $FILE ($SIZE)"
+
+            # Quick parquet inspection
+            python3 -c "
+          import pandas as pd, sys
+          try:
+              df = pd.read_parquet('$FILE')
+              print(f'Rows: {len(df):,}')
+              print(f'Columns: {len(df.columns)}')
+              print()
+              print('Key column fill rates:')
+              for col in ['Functional Class', 'Ownership', 'Area Type', 'DOT District',
+                          'RTE Name', 'Speed_Limit_Est', 'Through_Lanes', 'Facility Type',
+                          'Roadway Surface Type', 'Physical Juris Name']:
+                  if col in df.columns:
+                      pop = (df[col].fillna('').astype(str).str.strip() != '').sum()
+                      print(f'  {col:25s}: {pop:>7,}/{len(df):,} ({pop/len(df)*100:5.1f}%)')
+                  else:
+                      print(f'  {col:25s}: MISSING')
+              print()
+              print('Sample Functional Class distribution:')
+              if 'Functional Class' in df.columns:
+                  print(df['Functional Class'].value_counts().head(10).to_string())
+              print()
+              print('Sample DOT District distribution:')
+              if 'DOT District' in df.columns:
+                  print(df['DOT District'].value_counts().head(10).to_string())
+          except Exception as e:
+              print(f'Inspection failed: {e}')
+              sys.exit(1)
+          "
+          else
+            echo "❌ Output file not found: $FILE"
+            ls -la cache/ 2>/dev/null
+            exit 1
+          fi
+
+      - name: Upload cache artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: state-dot-virginia
+          path: cache/va_special_data.parquet.gz
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Job summary
+        if: always()
+        run: |
+          FILE="cache/va_special_data.parquet.gz"
+          if [ -f "$FILE" ]; then
+            SIZE=$(du -h "$FILE" | cut -f1)
+            ROWS=$(python3 -c "import pandas as pd; print(len(pd.read_parquet('$FILE')))" 2>/dev/null || echo "unknown")
+          else
+            SIZE="N/A"
+            ROWS="N/A"
+          fi
+
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Virginia State DOT Inventory — Generate Complete
+
+          | Metric | Value |
+          |--------|-------|
+          | State | Virginia (VA) |
+          | DOT | VDOT |
+          | Rows | $ROWS |
+          | File Size | $SIZE |
+          | Output | virginia/cache/va_special_data.parquet.gz |
+          | Force | ${{ inputs.force }} |
+          | Completed | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
+
+          ### Data Sources
+          | Layer | Endpoint |
+          |-------|----------|
+          | Functional Classification | VDOT LRS FeatureServer/4 |
+          | Responsibility/Ownership | VDOT LRS FeatureServer/2 |
+          | Posted Speed Limits | VDOT Speed Limits FeatureServer |
+
+          ### Pipeline Integration
+          Output file \`va_special_data.parquet.gz\` is uploaded to R2 at:
+          \`virginia/cache/va_special_data.parquet.gz\`
+
+          This is consumed by \`build_road_inventory.py\` as **Tier A** (State DOT) data,
+          the highest priority source in the speed/lanes/surface/ownership resolution hierarchy.
+          EOF
