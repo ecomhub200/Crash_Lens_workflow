@@ -76,7 +76,13 @@ jobs:
             python3 -c "
           import pandas as pd, sys
           try:
-              df = pd.read_parquet('$FILE')
+              if '$FILE'.endswith('.parquet.gz'):
+                  import gzip, io
+                  with gzip.open('$FILE', 'rb') as gz:
+                      buf = gz.read()
+                  df = pd.read_parquet(io.BytesIO(buf))
+              else:
+                  df = pd.read_parquet('$FILE')
               print(f'Rows: {len(df):,}')
               print(f'Columns: {len(df.columns)}')
               print()
@@ -122,7 +128,15 @@ jobs:
           FILE="cache/va_special_data.parquet.gz"
           if [ -f "$FILE" ]; then
             SIZE=$(du -h "$FILE" | cut -f1)
-            ROWS=$(python3 -c "import pandas as pd; print(len(pd.read_parquet('$FILE')))" 2>/dev/null || echo "unknown")
+            ROWS=$(python3 -c "
+          import pandas as pd, gzip, io
+          f='$FILE'
+          if f.endswith('.gz'):
+              with gzip.open(f,'rb') as gz: buf=gz.read()
+              print(len(pd.read_parquet(io.BytesIO(buf))))
+          else:
+              print(len(pd.read_parquet(f)))
+          " 2>/dev/null || echo "unknown")
           else
             SIZE="N/A"
             ROWS="N/A"
