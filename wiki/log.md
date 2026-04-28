@@ -10,6 +10,31 @@ Chronological record of wiki activity.
 
 ---
 
+## [2026-04-28] fix | VA workflow parquet.gz verification — decompress to BytesIO before pd.read_parquet
+
+`.github/workflows/generate-state-dot-data-virginia.yml` had two steps that called
+`pd.read_parquet('cache/va_special_data.parquet.gz')` directly. pyarrow expects
+either a raw parquet stream or a parquet file with internal codec compression
+(SNAPPY/ZSTD), not an outer gzip wrapper, so the Verify-output and Job-summary
+steps crashed after a successful download even when the artifact itself was fine.
+
+Fix in both steps:
+
+1. Prefer the uncompressed `cache/va_special_data.parquet` if present (the
+   pipeline writes both during `--upload`); fall back to the `.parquet.gz`.
+2. When falling back, `gzip.open()` → `BytesIO` → `pd.read_parquet()` rather
+   than handing pandas the raw `.gz` path.
+3. Guard the per-column fill-rate percentage with `len(df) > 0` so an empty
+   frame can't divide by zero in CI logs.
+
+`.github/workflows/generate-state-dot-data-colorado.yml` does not exist in this
+repo — only `download-colorado.yml` (no parquet step) and the generic matrix
+workflow `generate-state-dot-data.yml` (no Verify/Job-summary step). The same
+fix should be applied to that Colorado workflow when/if it's added; for now
+nothing to do on the CO side.
+
+---
+
 ## [2026-04-28] fix | VA `va_state_dot.py` Active filter dropped all 139,201 segments — switch to inactive-keyword exclusion
 
 `normalize()` in `states/virginia/va_state_dot.py` was filtering with
