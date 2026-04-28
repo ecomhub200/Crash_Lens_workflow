@@ -345,18 +345,31 @@ def normalize(df):
     print(f"  Normalizing {n:,} Virginia road segments...")
 
     # ════════════════════════════════════════════════════
-    #  FILTER: Keep only Active segments
+    #  FILTER: Remove only clearly inactive segments
     # ════════════════════════════════════════════════════
+    # VDOT status values vary — only remove segments explicitly marked
+    # as Proposed, Deleted, or Retired. Keep everything else.
 
     status = df.get("dot_status_name", pd.Series("", index=df.index))
     status = status.fillna("").astype(str).str.strip().str.upper()
-    active_mask = (status == "") | (status.str.contains("ACTIVE", na=False))
-    removed = (~active_mask).sum()
+
+    # Debug: show actual status values
+    status_counts = status.value_counts().head(10)
+    print(f"    Status values found:")
+    for val, cnt in status_counts.items():
+        print(f"      '{val}': {cnt:,}")
+
+    # Only remove segments explicitly marked as non-active
+    inactive_keywords = ["PROPOSED", "DELETED", "RETIRED", "REMOVED", "ABANDONED"]
+    inactive_mask = status.apply(
+        lambda x: any(kw in x for kw in inactive_keywords) if x else False
+    )
+    removed = inactive_mask.sum()
     if removed > 0:
-        print(f"    Filtered: {removed:,} non-active segments removed")
-        df = df[active_mask].reset_index(drop=True)
+        print(f"    Filtered: {removed:,} inactive segments removed (Proposed/Deleted/Retired)")
+        df = df[~inactive_mask].reset_index(drop=True)
         n = len(df)
-        print(f"    Remaining: {n:,} active segments")
+    print(f"    Remaining: {n:,} segments")
 
     # Tag ramps (keep them, but mark for downstream)
     ramp = df.get("dot_ramp_code", pd.Series("", index=df.index))
@@ -671,7 +684,8 @@ def normalize(df):
                 "Roadway Surface Type", "Physical Juris Name"]:
         if col in df.columns:
             pop = (df[col].fillna("").astype(str).str.strip() != "").sum()
-            print(f"    {col:25s}: {pop:>6,}/{n:,} ({pop/n*100:5.1f}%)")
+            pct = (pop / n * 100) if n > 0 else 0.0
+            print(f"    {col:25s}: {pop:>6,}/{n:,} ({pct:5.1f}%)")
 
     return df
 
