@@ -67,16 +67,32 @@ jobs:
       - name: Verify output
         if: success()
         run: |
-          FILE="cache/va_special_data.parquet.gz"
-          if [ -f "$FILE" ]; then
-            SIZE=$(du -h "$FILE" | cut -f1)
-            echo "✅ Output: $FILE ($SIZE)"
+          # Try uncompressed parquet first, then compressed
+          if [ -f "cache/va_special_data.parquet" ]; then
+            FILE="cache/va_special_data.parquet"
+          elif [ -f "cache/va_special_data.parquet.gz" ]; then
+            FILE="cache/va_special_data.parquet.gz"
+          else
+            echo "❌ No output file found"
+            ls -la cache/ 2>/dev/null
+            exit 1
+          fi
 
-            # Quick parquet inspection
-            python3 -c "
-          import pandas as pd, sys
+          SIZE=$(du -h "$FILE" | cut -f1)
+          echo "✅ Output: $FILE ($SIZE)"
+
+          python3 -c "
+          import pandas as pd, gzip, io, sys
+
+          filepath = '$FILE'
           try:
-              df = pd.read_parquet('$FILE')
+              if filepath.endswith('.parquet.gz'):
+                  with gzip.open(filepath, 'rb') as gz:
+                      buf = gz.read()
+                  df = pd.read_parquet(io.BytesIO(buf))
+              else:
+                  df = pd.read_parquet(filepath)
+
               print(f'Rows: {len(df):,}')
               print(f'Columns: {len(df.columns)}')
               print()
@@ -86,26 +102,22 @@ jobs:
                           'Roadway Surface Type', 'Physical Juris Name']:
                   if col in df.columns:
                       pop = (df[col].fillna('').astype(str).str.strip() != '').sum()
-                      print(f'  {col:25s}: {pop:>7,}/{len(df):,} ({pop/len(df)*100:5.1f}%)')
+                      pct = pop/len(df)*100 if len(df) > 0 else 0
+                      print(f'  {col:25s}: {pop:>7,}/{len(df):,} ({pct:5.1f}%)')
                   else:
                       print(f'  {col:25s}: MISSING')
               print()
-              print('Sample Functional Class distribution:')
+              print('Functional Class distribution:')
               if 'Functional Class' in df.columns:
                   print(df['Functional Class'].value_counts().head(10).to_string())
               print()
-              print('Sample DOT District distribution:')
-              if 'DOT District' in df.columns:
-                  print(df['DOT District'].value_counts().head(10).to_string())
+              print('Ownership distribution:')
+              if 'Ownership' in df.columns:
+                  print(df['Ownership'].value_counts().head(10).to_string())
           except Exception as e:
               print(f'Inspection failed: {e}')
               sys.exit(1)
           "
-          else
-            echo "❌ Output file not found: $FILE"
-            ls -la cache/ 2>/dev/null
-            exit 1
-          fi
 
       - name: Upload cache artifact
         if: always()
@@ -122,7 +134,16 @@ jobs:
           FILE="cache/va_special_data.parquet.gz"
           if [ -f "$FILE" ]; then
             SIZE=$(du -h "$FILE" | cut -f1)
-            ROWS=$(python3 -c "import pandas as pd; print(len(pd.read_parquet('$FILE')))" 2>/dev/null || echo "unknown")
+            ROWS=$(python3 -c "
+          import pandas as pd, gzip, io
+          f='cache/va_special_data.parquet'
+          if not __import__('os').path.exists(f): f='cache/va_special_data.parquet.gz'
+          if f.endswith('.gz'):
+              with gzip.open(f,'rb') as gz: buf=gz.read()
+              print(len(pd.read_parquet(io.BytesIO(buf))))
+          else:
+              print(len(pd.read_parquet(f)))
+          " 2>/dev/null || echo "unknown")
           else
             SIZE="N/A"
             ROWS="N/A"
