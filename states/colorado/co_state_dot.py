@@ -1,29 +1,39 @@
 #!/usr/bin/env python3
 """
-co_state_dot.py — Colorado DOT Road Inventory Downloader & Normalizer
-=======================================================================
+co_state_dot.py — Colorado DOT (CDOT) Road Inventory Downloader & Normalizer
+===============================================================================
 Single-file config for Colorado's state DOT road inventory.
 Called by generate_state_dot_data.py (root).
 
-Data Source: CDOT CPLAN open_data_sde FeatureServer — Layer 7 (Highways)
-  https://dtdapps.coloradodot.info/arcgis/rest/services/
-    CPLAN/open_data_sde/FeatureServer/7
+Data Source (ONE endpoint — CDOT publishes everything in a single layer):
+  CDOT Open Data SDE — Highways (Layer 7):
+    https://dtdapps.coloradodot.info/arcgis/rest/services/
+      CPLAN/open_data_sde/FeatureServer/7
+    ~9,000 segments with FC, speed limit, lanes, surface, AADT,
+    county, urban/rural, terrain, region, NHS, median, width
 
-CDOT's "Highways" layer is the CDOT-maintained road inventory. Unlike DelDOT,
-it's a single rich layer — posted speed limit, AADT, lane width, surface type,
-median, shoulder, functional class, terrain, county, and route are all here,
-no multi-layer joins required. Server native SR is 26913 (UTM Zone 13N); we
-request outSR=4326 for WGS84. maxRecordCount is 1000.
+  FALLBACK — CDOT Highways (Layer 15 in same service):
+    Same server, potentially different layer index if service changes.
+    Also available via Socrata: data.colorado.gov/resource/2h6w-z9ry
 
-Scope: CDOT-inventory only (Interstates, US highways, state highways). Does
-NOT include county or municipal roads — those live in separate local inventories.
+ENDPOINT STABILITY:
+  CDOT's dtdapps server has been stable since ~2018. The open_data_sde
+  FeatureServer provides the same data as the Socrata dataset
+  "Highways in Colorado" (2h6w-z9ry) but with ArcGIS pagination.
+  MaxRecordCount: 1000. Server version: 10.91.
 
-Columns map to CrashLens build_road_inventory.py first-22 architecture:
-  Functional Class, SYSTEM, Ownership, Facility Type, Surface Type,
-  Area Type, DOT District, RTE Name, Through_Lanes, Speed_Limit_Est, etc.
+Colorado is MUCH simpler than Virginia/Delaware — no secondary downloads
+needed. All road characteristics are in ONE layer.
+
+VERIFIED FIELD NAMES (from Socrata column list, matching ArcGIS uppercase):
+  ROUTE, ROUTESIGN, FUNCCLASS, SPEEDLIM, THRULNQTY, THRULNWD,
+  COUNTY, FIPSCOUNTY, REGION, TPRID, COMMDISTID, ACCESS, AADT,
+  TERRAIN, POPULATION, PRISURF, SEG_LENGTH, REFPT, ENDREFPT,
+  ISDIVIDED, NHSDESIG, ALIAS, CITY, MEDIAN, MEDIANWD
 
 Usage:
   python generate_state_dot_data.py --state co
+  python generate_state_dot_data.py --state co --upload
 """
 
 # ═══════════════════════════════════════════════════════════════
@@ -33,296 +43,394 @@ Usage:
 STATE_ABBR = "co"
 STATE_NAME = "Colorado"
 STATE_FIPS = "08"
-STATE_DOT  = "CDOT"
+STATE_DOT = "CDOT"
 
-# ArcGIS FeatureServer endpoint — Layer 7 "Highways"
+# PRIMARY: CDOT Open Data SDE — Highways layer
+# This is the richest endpoint — has speed, lanes, surface, AADT, FC, ownership
+# ALL in one layer. No secondary downloads needed.
 ENDPOINT_URL = (
     "https://dtdapps.coloradodot.info/arcgis/rest/services/"
     "CPLAN/open_data_sde/FeatureServer/7"
 )
 
 # ArcGIS pagination
-MAX_RECORD_COUNT = 1000   # CDOT server's maxRecordCount
-OUT_SR = 4326             # Request WGS84 lat/lon (server native is 26913 UTM Z13N)
+MAX_RECORD_COUNT = 1000
+OUT_SR = 4326             # Request WGS84
 GEOMETRY_TYPE = "polyline"
 
-# None = request all fields. CDOT Layer 7 has exactly what we need, no bloat.
+# Request all fields — CDOT has ~50 fields, all useful
 OUT_FIELDS = None
 
 
 # ═══════════════════════════════════════════════════════════════
 #  FIELD MAPPING: CDOT field → CrashLens column
 # ═══════════════════════════════════════════════════════════════
-# Keys = CDOT field name, Values = CrashLens target column.
-# Fields not listed here are kept with "dot_raw_" prefix by the driver.
+# Field names are UPPERCASE in ArcGIS. If the server returns lowercase
+# (some Socrata-backed services do), normalize() handles both.
 
 FIELD_MAP = {
-    # ── Core road classification ──
-    "FUNCCLASS":     "dot_fc_text",          # Text FC (e.g. "Rural Minor Arterial")
-    "ROUTESIGN":     "dot_route_sign",       # I / US / SH
-    "NHSDESIG":      "dot_nhs",              # National Highway System designation
-    "ACCESS_":       "dot_access_control",   # Access control category
+    # ── Route Identification ──
+    "ROUTE":              "dot_route",              # Route number ("006", "070")
+    "ROUTESIGN":          "dot_route_sign",          # "Interstate", "US Highway", "State Highway"
+    "ALIAS":              "dot_alias",               # Route alias/name
+    "DESCRIPTION":         "dot_description",         # Segment description
 
-    # ── Road identification ──
-    "ROUTE":         "dot_route_number",     # Route number (e.g. "025")
-    "ALIAS":         "dot_road_name",        # Road alias / street name
-    "DESCRIPTION":   "dot_description",      # Road description
+    # ── Classification ──
+    "FUNCCLASS":          "dot_func_class",          # FC code (1-7)
+    "NHSDESIG":           "dot_nhs",                 # NHS designation
+    "ACCESS_":            "dot_access",              # Access control
 
-    # ── Geography ──
-    "COUNTY":        "dot_county_name",      # County name (text)
-    "FIPSCOUNTY":    "dot_county_fips",      # County FIPS (3 digits)
-    "CITY":          "dot_city",             # City name
-    "FIPSCITY":      "dot_city_fips",        # City FIPS
-    "REGION":        "dot_region_code",      # CDOT engineering region 1-5
-    "TPRID":         "dot_tpr_id",           # Transportation Planning Region
-    "TERRAIN":       "dot_terrain",          # Flat / Rolling / Mountainous
+    # ── Speed & Geometry ──
+    "SPEEDLIM":           "dot_speed_limit",         # Posted speed limit (mph)
+    "THRULNQTY":          "dot_through_lanes",       # Through lane count
+    "THRULNWD":           "dot_lane_width",          # Through lane width (ft)
+    "ISDIVIDED":          "dot_is_divided",           # Divided highway flag
+    "MEDIAN":             "dot_median_type",          # Median type
+    "MEDIANWD":           "dot_median_width",         # Median width (ft)
 
-    # ── Road geometry/design ──
-    "THRULNQTY":     "dot_lanes",            # Through lane count
-    "THRULNWD":      "dot_lane_width",       # Through lane width (ft)
-    "PRISURF":       "dot_surface_type",     # Primary surface type (text)
-    "ISDIVIDED":     "dot_is_divided",       # Y/N divided highway flag
-    "MEDIAN":        "dot_median_type",      # Median type (text)
-    "MEDIANWD":      "dot_median_width",     # Median width
-    "PRIOUTSHLD":    "dot_shoulder_type",    # Primary outside shoulder type
-    "PRIOUTSHLDWD":  "dot_shoulder_width",   # Outside shoulder width
+    # ── Surface ──
+    "PRISURF":            "dot_surface",              # Primary surface type
 
     # ── Traffic ──
-    "AADT":          "dot_aadt",             # Annual average daily traffic
-    "AADTSINGLE":    "dot_aadt_single",      # Single-unit truck AADT
-    "AADTCOMB":      "dot_aadt_combo",       # Combination truck AADT
-    "SPEEDLIM":      "dot_speed_limit",      # Posted speed limit (mph) — ACTUAL!
-    "VMT":           "dot_vmt",              # Vehicle miles traveled
-    "VCRATIO":       "dot_vc_ratio",         # Volume/capacity ratio
+    "AADT":               "dot_aadt",                 # Average Annual Daily Traffic
+    "AADTYR":             "dot_aadt_year",             # AADT year
+    "AADTCOMB":           "dot_aadt_combo",            # AADT combination trucks
+    "AADTSINGLE":         "dot_aadt_single",           # AADT single unit trucks
+    "VMT":                "dot_vmt",                   # Vehicle miles traveled
+
+    # ── Location ──
+    "COUNTY":             "dot_county",               # County name (e.g. "Fremont Co")
+    "FIPSCOUNTY":         "dot_fips_county",           # County FIPS code
+    "CITY":               "dot_city",                  # City name
+    "FIPSCITY":           "dot_fips_city",             # City FIPS code
+    "REGION":             "dot_region",                # CDOT region (1-5)
+    "TPRID":              "dot_tpr_id",                # Transportation Planning Region
+    "COMMDISTID":         "dot_commission_district",   # Commission district
+    "MPOID":              "dot_mpo_id",                # MPO identifier
 
     # ── Milepoints ──
-    "REFPT":         "dot_beg_mp",           # Begin milepoint
-    "ENDREFPT":      "dot_end_mp",           # End milepoint
-    "SEG_LENGTH":    "dot_seg_length",       # Segment length (miles)
+    "REFPT":              "dot_beg_mp",               # Begin reference point
+    "ENDREFPT":           "dot_end_mp",               # End reference point
+    "SEG_LENGTH":         "dot_seg_length",            # Segment length
+
+    # ── Other ──
+    "TERRAIN":            "dot_terrain",               # Terrain type
+    "POPULATION":         "dot_population",            # Population category (Urban/Rural)
 }
 
 
 # ═══════════════════════════════════════════════════════════════
-#  VALUE TRANSFORMS: CDOT value → CrashLens standard value
+#  VALUE TRANSFORMS
 # ═══════════════════════════════════════════════════════════════
 
-# Functional Class: CDOT TEXT → CrashLens standard
-# CDOT prefixes with "Rural "/"Urban " — collapse both to the same CrashLens class.
-FC_TEXT_MAP = {
-    "Rural Interstate":                      "1-Interstate",
-    "Urban Interstate":                      "1-Interstate",
-    "Rural Freeway and Expressway":          "2-Freeway/Expressway",
-    "Urban Freeway and Expressway":          "2-Freeway/Expressway",
-    "Rural Principal Arterial - Other":      "3-Principal Arterial",
-    "Urban Principal Arterial - Other":      "3-Principal Arterial",
-    "Rural Minor Arterial":                  "4-Minor Arterial",
-    "Urban Minor Arterial":                  "4-Minor Arterial",
-    "Rural Major Collector":                 "5-Major Collector",
-    "Urban Major Collector":                 "5-Major Collector",
-    "Rural Minor Collector":                 "6-Minor Collector",
-    "Urban Minor Collector":                 "6-Minor Collector",
-    "Rural Local":                           "7-Local",
-    "Urban Local":                           "7-Local",
+# FC: CDOT funcclass code → CrashLens standard
+# CDOT uses FHWA standard 1-7 codes
+FC_CODE_MAP = {
+    # Actual CDOT values (digit + double space + description)
+    "1  Interstate":                                "1-Interstate",
+    "2  Other Freeways and Expressways":            "2-Freeway/Expressway",
+    "3  Principal Arterial - Other":                "3-Principal Arterial",
+    "4  Minor Arterial":                            "4-Minor Arterial",
+    "5  Major Collector":                           "5-Major Collector",
+    "6  Minor Collector":                           "6-Minor Collector",
+    "7  Local":                                     "7-Local",
+    # Single digit fallback
+    "1": "1-Interstate",
+    "2": "2-Freeway/Expressway",
+    "3": "3-Principal Arterial",
+    "4": "4-Minor Arterial",
+    "5": "5-Major Collector",
+    "6": "6-Minor Collector",
+    "7": "7-Local",
+    # Text-only fallback
+    "Interstate":            "1-Interstate",
+    "Other Freeways":        "2-Freeway/Expressway",
+    "Other Principal":       "3-Principal Arterial",
+    "Minor Arterial":        "4-Minor Arterial",
+    "Major Collector":       "5-Major Collector",
+    "Minor Collector":       "6-Minor Collector",
+    "Local":                 "7-Local",
 }
 
-# FC → SYSTEM (CrashLens standard — identical to Delaware)
 FC_TO_SYSTEM = {
-    "1-Interstate":           "DOT Interstate",
-    "2-Freeway/Expressway":   "DOT Primary",
-    "3-Principal Arterial":   "DOT Primary",
-    "4-Minor Arterial":       "DOT Secondary",
-    "5-Major Collector":      "DOT Secondary",
-    "6-Minor Collector":      "Non-DOT primary",
-    "7-Local":                "Non-DOT secondary",
+    "1-Interstate":          "DOT Interstate",
+    "2-Freeway/Expressway":  "DOT Primary",
+    "3-Principal Arterial":  "DOT Primary",
+    "4-Minor Arterial":      "DOT Secondary",
+    "5-Major Collector":     "DOT Secondary",
+    "6-Minor Collector":     "Non-DOT primary",
+    "7-Local":               "Non-DOT secondary",
 }
 
-# CDOT engineering regions (1-5)
+# Route sign → Ownership
+ROUTE_SIGN_OWNERSHIP = {
+    "Interstate":      "1. State Hwy Agency",
+    "US Highway":      "1. State Hwy Agency",
+    "State Highway":   "1. State Hwy Agency",
+    "U.S.":            "1. State Hwy Agency",
+    "State":           "1. State Hwy Agency",
+    "I":               "1. State Hwy Agency",
+    "US":              "1. State Hwy Agency",
+    "SH":              "1. State Hwy Agency",
+}
+
+# Surface type codes (CDOT PRISURF)
+SURFACE_MAP = {
+    # Actual CDOT values (digit + spaces + text)
+    "1    Asphalt":    "2. Blacktop, Asphalt, Bituminous",
+    "2    Concrete":   "1. Concrete",
+    "3    Composite":  "3. Composite",
+    "4    Gravel":     "5. Gravel",
+    "5    Dirt":       "6. Dirt",
+    # Single digit
+    "1":  "2. Blacktop, Asphalt, Bituminous",
+    "2":  "1. Concrete",
+    "3":  "3. Composite",
+    "4":  "4. Brick, Block",
+    "5":  "5. Gravel",
+    "6":  "6. Dirt",
+    "7":  "7. Other",
+    # Text values
+    "Concrete":        "1. Concrete",
+    "Asphalt":         "2. Blacktop, Asphalt, Bituminous",
+    "Bituminous":      "2. Blacktop, Asphalt, Bituminous",
+    "Composite":       "3. Composite",
+    "Gravel":          "5. Gravel",
+    "Dirt":            "6. Dirt",
+}
+
+# CDOT Regions (5 engineering regions)
 REGION_MAP = {
     "1": "Region 1 (Denver Metro)",
-    "2": "Region 2 (Southeast — Pueblo/Colorado Springs)",
-    "3": "Region 3 (Northwest — Grand Junction)",
-    "4": "Region 4 (Northeast — Greeley)",
-    "5": "Region 5 (Southwest — Durango)",
+    "2": "Region 2 (Southeast)",
+    "3": "Region 3 (Grand Junction)",
+    "4": "Region 4 (Greeley)",
+    "5": "Region 5 (Durango)",
 }
 
-# Surface Type: CDOT TEXT → CrashLens standard.
-# IMPORTANT: "Composite" = asphalt overlay, maps to Blacktop.
-# Matches SURFACE_LABELS[7] fix in wiki/log.md [2026-04-18] — composite is NOT brick.
-SURFACE_TYPE_MAP = {
-    "Asphalt":   "2. Blacktop, Asphalt, Bituminous",
-    "Bituminous":"2. Blacktop, Asphalt, Bituminous",
-    "Concrete":  "1. Concrete",
-    "Composite": "2. Blacktop, Asphalt, Bituminous",   # NOT brick — asphalt overlay
-    "Gravel":    "4. Slag, Gravel, Stone",
-    "Stone":     "4. Slag, Gravel, Stone",
-    "Dirt":      "5. Dirt",
-    "Unpaved":   "5. Dirt",
-    "Other":     "6. Other",
-}
-
-# Route sign prefixes (passthrough)
-ROUTE_SIGN_MAP = {
-    "I":  "I",    # Interstate
-    "US": "US",   # US Highway
-    "SH": "SH",   # State Highway
-}
-
-# Terrain: CDOT text → CrashLens alignment standard
-TERRAIN_MAP = {
-    "Flat":        "1. Straight - Level",
-    "Rolling":     "3. Grade - Straight",
-    "Mountainous": "4. Grade - Curve",
-}
-
-# Divided flag → Facility Type
-DIVIDED_MAP = {
-    "Y": "4-Two-Way Divided",
-    "N": "3-Two-Way Undivided",
+# Terrain → Area Type fallback
+TERRAIN_AREA = {
+    "F": "Rural",        # Flat
+    "R": "Rural",        # Rolling
+    "M": "Rural",        # Mountainous
+    "Flat": "Rural",
+    "Rolling": "Suburban",
+    "Mountainous": "Rural",
 }
 
 
 # ═══════════════════════════════════════════════════════════════
-#  NORMALIZER: Transform raw CDOT data → CrashLens columns
+#  NORMALIZER
 # ═══════════════════════════════════════════════════════════════
 
 def normalize(df):
     """
-    Normalize raw CDOT Highways inventory data to CrashLens column architecture.
-
-    Called by generate_state_dot_data.py after field mapping.
-    Input: DataFrame with dot_ prefixed columns from FIELD_MAP.
-    Output: Same DataFrame with CrashLens standard columns added.
-
-    Colorado specifics vs Delaware:
-      - FUNCCLASS is text, not numeric — substring-match fallback for rare values
-      - PRISURF is text, not code — "Composite" maps to Blacktop (not brick)
-      - SPEEDLIM gives actual posted speed, not an FC-table estimate
-      - ISDIVIDED is explicit Y/N, no median-code heuristic needed
-      - Layer 7 is CDOT-maintained only → Ownership is always State Hwy Agency
+    Normalize CDOT highway data → CrashLens columns.
+    Colorado is simple — one endpoint has everything.
+    No secondary downloads needed.
     """
     import numpy as np
     import pandas as pd
-    import re
 
-    # ── Functional Class (text lookup + substring fallback) ──
-    fc_txt = df["dot_fc_text"].fillna("").astype(str).str.strip()
-    fc_std = fc_txt.map(FC_TEXT_MAP).fillna("")
-    unmapped = fc_std == ""
-    if unmapped.any():
-        fallbacks = [
-            ("Interstate",      "1-Interstate"),
-            ("Freeway",         "2-Freeway/Expressway"),
-            ("Expressway",      "2-Freeway/Expressway"),
-            ("Principal",       "3-Principal Arterial"),
-            ("Minor Arterial",  "4-Minor Arterial"),
-            ("Major Collector", "5-Major Collector"),
-            ("Minor Collector", "6-Minor Collector"),
-            ("Collector",       "5-Major Collector"),
-            ("Local",           "7-Local"),
-        ]
-        for keyword, std in fallbacks:
-            hit = unmapped & fc_txt.str.contains(keyword, case=False, na=False)
-            fc_std.loc[hit] = std
-            unmapped = fc_std == ""
-    df["Functional Class"] = fc_std
+    n = len(df)
+    print(f"  Normalizing {n:,} Colorado road segments...")
 
-    # ── SYSTEM (derived from FC) ──
+    # ── Case-insensitive column handling ──
+    # CDOT sometimes returns lowercase (Socrata-backed) or UPPERCASE (native ArcGIS)
+    col_map = {c.lower(): c for c in df.columns}
+
+    def _get(name):
+        """Get column by case-insensitive name."""
+        lower = name.lower()
+        if lower in col_map:
+            return df[col_map[lower]].fillna("").astype(str).str.strip()
+        return pd.Series("", index=df.index)
+
+    def _get_numeric(name):
+        """Get numeric column."""
+        lower = name.lower()
+        if lower in col_map:
+            return pd.to_numeric(df[col_map[lower]], errors="coerce").fillna(0)
+        return pd.Series(0, index=df.index)
+
+    # ════════════════════════════════════════════════════
+    #  1. FUNCTIONAL CLASS
+    # ════════════════════════════════════════════════════
+
+    fc_raw = _get("dot_func_class")
+    df["Functional Class"] = fc_raw.map(FC_CODE_MAP).fillna("")
+
+    # Fallback: extract leading digit
+    empty_fc = df["Functional Class"] == ""
+    if empty_fc.any():
+        leading = fc_raw[empty_fc].str.extract(r'^(\d)', expand=False).fillna("")
+        fc_from_digit = leading.map(FC_CODE_MAP).fillna("")
+        df.loc[empty_fc & (fc_from_digit != ""), "Functional Class"] = (
+            fc_from_digit[empty_fc & (fc_from_digit != "")]
+        )
+    fc_fill = (df["Functional Class"] != "").sum()
+    pct = (fc_fill / n * 100) if n > 0 else 0
+    print(f"    Functional Class: {fc_fill:,}/{n:,} ({pct:.1f}%)")
+
+    # ════════════════════════════════════════════════════
+    #  2. SYSTEM
+    # ════════════════════════════════════════════════════
     df["SYSTEM"] = df["Functional Class"].map(FC_TO_SYSTEM).fillna("")
 
-    # ── Ownership — Layer 7 is CDOT-inventory only ──
-    df["Ownership"] = "1. State Hwy Agency"
+    # ════════════════════════════════════════════════════
+    #  3. OWNERSHIP (from route sign — CDOT highways are all state-maintained)
+    # ════════════════════════════════════════════════════
 
-    # ── Facility Type (explicit divided flag) ──
-    div_raw = df["dot_is_divided"].fillna("").astype(str).str.strip().str.upper()
-    df["Facility Type"] = div_raw.map(DIVIDED_MAP).fillna("3-Two-Way Undivided")
+    sign = _get("dot_route_sign")
+    df["Ownership"] = sign.map(ROUTE_SIGN_OWNERSHIP).fillna("")
 
-    # ── Roadway Surface Type (text lookup + substring fallback + paved override) ──
-    surf_raw = df["dot_surface_type"].fillna("").astype(str).str.strip()
-    surf_std = surf_raw.map(SURFACE_TYPE_MAP).fillna("")
-    unmapped = surf_std == ""
-    if unmapped.any():
-        surf_low = surf_raw.str.lower()
-        surf_std.loc[unmapped & surf_low.str.contains("asphalt|bitum|composite", na=False)] = \
-            "2. Blacktop, Asphalt, Bituminous"
-        surf_std.loc[(surf_std == "") & surf_low.str.contains("concrete", na=False)] = \
-            "1. Concrete"
-        surf_std.loc[(surf_std == "") & surf_low.str.contains("gravel|stone", na=False)] = \
-            "4. Slag, Gravel, Stone"
-        surf_std.loc[(surf_std == "") & surf_low.str.contains("dirt|unpaved", na=False)] = \
-            "5. Dirt"
-    surf_std = surf_std.replace("", "2. Blacktop, Asphalt, Bituminous")
-    # Interstates/Freeways/Arterials are ALWAYS paved
-    fc_major = df["Functional Class"].str.match(r"^[123]-", na=False)
-    bad_surf = fc_major & surf_std.isin(["5. Dirt", "4. Slag, Gravel, Stone"])
-    surf_std.loc[bad_surf] = "2. Blacktop, Asphalt, Bituminous"
-    df["Roadway Surface Type"] = surf_std
+    # Fallback: all CDOT highways are state-maintained
+    empty_own = df["Ownership"] == ""
+    if empty_own.any():
+        df.loc[empty_own, "Ownership"] = "1. State Hwy Agency"
+    print(f"    Ownership: {(df['Ownership'] != '').sum():,}/{n:,}")
 
-    # ── Area Type (derive from FC text prefix: Rural/Urban) ──
-    area = pd.Series("", index=df.index)
-    area.loc[fc_txt.str.contains(r"^Urban\b", case=False, na=False)] = "Urban"
-    area.loc[fc_txt.str.contains(r"^Rural\b", case=False, na=False)] = "Rural"
-    # Fallback: default to Rural (Colorado is predominantly rural off the Front Range)
-    area.loc[area == ""] = "Rural"
-    df["Area Type"] = area
+    # ════════════════════════════════════════════════════
+    #  4. SPEED LIMIT (actual posted speed — not estimate!)
+    # ════════════════════════════════════════════════════
 
-    # ── DOT District (CDOT engineering region) ──
-    reg_raw = df["dot_region_code"].fillna("").astype(str).str.strip()
-    # CDOT region may arrive as "1" or "1.0" from numeric fields — normalize
-    reg_raw = reg_raw.str.replace(r"\.0+$", "", regex=True)
-    df["DOT District"] = reg_raw.map(REGION_MAP).fillna("")
+    spd = _get_numeric("dot_speed_limit")
+    df["Speed_Limit_Est"] = np.where(spd > 0, spd.astype(int).astype(str), "")
+    spd_fill = (df["Speed_Limit_Est"] != "").sum()
+    pct = (spd_fill / n * 100) if n > 0 else 0
+    print(f"    Speed_Limit_Est: {spd_fill:,}/{n:,} ({pct:.1f}%) — ACTUAL posted speeds")
 
-    # ── Physical Juris Name (county, already text) ──
-    df["Physical Juris Name"] = df["dot_county_name"].fillna("").astype(str).str.strip()
+    # ════════════════════════════════════════════════════
+    #  5. THROUGH LANES (actual count)
+    # ════════════════════════════════════════════════════
 
-    # ── Through_Lanes (cap at 12) ──
-    lanes = pd.to_numeric(df["dot_lanes"], errors="coerce").fillna(0).astype(int)
-    lanes = lanes.clip(upper=12)
-    df["Through_Lanes"] = np.where(lanes > 0, lanes.astype(str), "")
+    lanes = _get_numeric("dot_through_lanes")
+    df["Through_Lanes"] = np.where(lanes > 0, lanes.astype(int).astype(str), "")
+    print(f"    Through_Lanes: {(df['Through_Lanes'] != '').sum():,}/{n:,}")
 
-    # ── RTE Name (sign + route number, strip leading zeros: "I" + "025" → "I 25") ──
-    sign_raw = df["dot_route_sign"].fillna("").astype(str).str.strip().str.upper()
-    num_raw  = df["dot_route_number"].fillna("").astype(str).str.strip()
-    sign_std = sign_raw.map(ROUTE_SIGN_MAP).fillna(sign_raw)
-    num_clean = num_raw.str.lstrip("0")
-    # If stripping left nothing but the original was non-empty (e.g. "000"), keep "0"
-    num_clean = np.where((num_clean == "") & (num_raw != ""), "0", num_clean)
-    num_clean = pd.Series(num_clean, index=df.index)
-    both = (sign_std != "") & (num_clean != "")
-    df["RTE Name"] = np.where(both, sign_std + " " + num_clean, "")
+    # ════════════════════════════════════════════════════
+    #  6. SURFACE TYPE
+    # ════════════════════════════════════════════════════
 
-    # ── RNS MP ──
-    beg_mp = pd.to_numeric(df["dot_beg_mp"], errors="coerce").fillna(0)
-    df["RNS MP"] = np.where(beg_mp >= 0, beg_mp, 0)
+    surf = _get("dot_surface")
+    df["Roadway Surface Type"] = surf.map(SURFACE_MAP).fillna("")
 
-    # ── Segment_Length_mi (prefer SEG_LENGTH, fallback to end-begin) ──
-    seg_len = pd.to_numeric(df["dot_seg_length"], errors="coerce").fillna(0)
-    end_mp = pd.to_numeric(df["dot_end_mp"], errors="coerce").fillna(0)
-    derived = (end_mp - beg_mp).clip(lower=0)
-    seg_final = np.where(seg_len > 0, seg_len, derived)
-    df["Segment_Length_mi"] = np.round(seg_final, 3)
+    # Fallback for unmapped values
+    empty_surf = df["Roadway Surface Type"] == ""
+    if empty_surf.any():
+        # Try partial matching
+        for key, val in SURFACE_MAP.items():
+            mask = empty_surf & surf.str.contains(key, case=False, na=False)
+            df.loc[mask, "Roadway Surface Type"] = val
+            empty_surf = df["Roadway Surface Type"] == ""
 
-    # ── Lane_Width_ft (CDOT reports directly) ──
-    lw = pd.to_numeric(df["dot_lane_width"], errors="coerce").fillna(0)
-    df["Lane_Width_ft"] = np.where(lw > 0, np.clip(lw, 8, 16), 0)
+    # Final fallback: asphalt
+    df.loc[df["Roadway Surface Type"] == "", "Roadway Surface Type"] = (
+        "2. Blacktop, Asphalt, Bituminous"
+    )
+    print(f"    Roadway Surface Type: {(df['Roadway Surface Type'] != '').sum():,}/{n:,}")
 
-    # ── Median_Width_ft ──
-    df["Median_Width_ft"] = pd.to_numeric(
-        df["dot_median_width"], errors="coerce"
-    ).fillna(0)
+    # ════════════════════════════════════════════════════
+    #  7. AREA TYPE (from POPULATION field — Urban/Rural designation)
+    # ════════════════════════════════════════════════════
 
-    # ── Shoulder_Width_ft (single value — CDOT reports outside shoulder only) ──
-    df["Shoulder_Width_ft"] = pd.to_numeric(
-        df["dot_shoulder_width"], errors="coerce"
-    ).fillna(0)
+    pop = _get("dot_population")
+    pop_upper = pop.str.upper()
+    # CDOT POPULATION values: "Urban", "Small Urban", "Rural", ""
+    df["Area Type"] = np.where(
+        pop_upper.str.contains("URBAN", na=False) & ~pop_upper.str.contains("SMALL", na=False), "Urban",
+        np.where(pop_upper.str.contains("SMALL URBAN", na=False), "Suburban",
+        np.where(pop_upper.str.contains("RURAL", na=False), "Rural", "Rural"))
+    )
+    print(f"    Area Type: {(df['Area Type'] != '').sum():,}/{n:,}")
 
-    # ── Speed_Limit_Est — USE ACTUAL POSTED SPEED (CDOT's big win) ──
-    spd_num = pd.to_numeric(df["dot_speed_limit"], errors="coerce").fillna(0).astype(int)
-    df["Speed_Limit_Est"] = np.where(spd_num > 0, spd_num.astype(str), "")
+    # ════════════════════════════════════════════════════
+    #  8. DOT DISTRICT (from REGION)
+    # ════════════════════════════════════════════════════
 
-    # ── Roadway Description (from Facility Type, same map as Delaware) ──
+    region = _get("dot_region")
+    df["DOT District"] = region.map(REGION_MAP).fillna("")
+    # Fallback: use raw value
+    empty_dist = df["DOT District"] == ""
+    if empty_dist.any():
+        df.loc[empty_dist & (region != ""), "DOT District"] = "Region " + region[empty_dist & (region != "")]
+    print(f"    DOT District: {(df['DOT District'] != '').sum():,}/{n:,}")
+
+    # ════════════════════════════════════════════════════
+    #  9. RTE NAME
+    # ════════════════════════════════════════════════════
+
+    route_num = _get("dot_route")
+    sign = _get("dot_route_sign")
+    alias = _get("dot_alias")
+
+    def _build_rte_name(num, sign_val, alias_val):
+        # Priority 1: alias if present ("US-50" → "US 50")
+        if alias_val:
+            import re
+            cleaned = re.sub(r'^(I|US|SH|CO)-?\s*(\d+)', r'\1 \2', alias_val)
+            return cleaned
+        if not num or num == "0":
+            return ""
+        # Strip trailing letter suffix: "050A" → "050" → "50"
+        import re
+        num_digits = re.sub(r'[A-Za-z]+$', '', num)
+        num_clean = num_digits.lstrip("0") or num_digits
+        sign_upper = sign_val.upper().strip() if sign_val else ""
+        if "INTERSTATE" in sign_upper:
+            return f"I {num_clean}"
+        elif "U.S." in sign_upper or "US" in sign_upper:
+            return f"US {num_clean}"
+        elif "STATE" in sign_upper or "SH" in sign_upper:
+            return f"SH {num_clean}"
+        else:
+            return f"SH {num_clean}"
+
+    df["RTE Name"] = [_build_rte_name(r, s, a) for r, s, a in zip(route_num, sign, alias)]
+    print(f"    RTE Name: {(df['RTE Name'] != '').sum():,}/{n:,}")
+
+    # ════════════════════════════════════════════════════
+    #  10. FACILITY TYPE (from ISDIVIDED)
+    # ════════════════════════════════════════════════════
+
+    divided = _get("dot_is_divided")
+    fc = df["Functional Class"]
+    is_major = fc.isin(["1-Interstate", "2-Freeway/Expressway"])
+    is_divided = divided.str.upper().isin(["Y", "YES", "TRUE", "1"])
+
+    df["Facility Type"] = "3-Two-Way Undivided"
+    df.loc[is_divided & is_major, "Facility Type"] = "4-Two-Way Divided"
+    df.loc[is_divided & ~is_major, "Facility Type"] = "4-Two-Way Divided"
+    df.loc[~is_divided & is_major, "Facility Type"] = "4-Two-Way Divided"
+
+    # ════════════════════════════════════════════════════
+    #  11. COUNTY
+    # ════════════════════════════════════════════════════
+
+    df["Physical Juris Name"] = _get("dot_county")
+
+    # ════════════════════════════════════════════════════
+    #  12. MILEPOINTS + SEGMENT LENGTH
+    # ════════════════════════════════════════════════════
+
+    beg = _get_numeric("dot_beg_mp")
+    end = _get_numeric("dot_end_mp")
+    df["RNS MP"] = np.where(beg > 0, beg, 0)
+    seg = _get_numeric("dot_seg_length")
+    df["Segment_Length_mi"] = np.where(seg > 0, np.round(seg, 3), 0)
+
+    # ════════════════════════════════════════════════════
+    #  13. AADT
+    # ════════════════════════════════════════════════════
+
+    aadt = _get_numeric("dot_aadt")
+    df["dot_aadt_value"] = np.where(aadt > 0, aadt, 0)
+
+    # ════════════════════════════════════════════════════
+    #  14. ROADWAY DESCRIPTION
+    # ════════════════════════════════════════════════════
+
     desc_map = {
-        "1-One-Way Undivided":  "4. One-Way, Not Divided",
-        "2-One-Way Divided":    "4. One-Way, Not Divided",
         "3-Two-Way Undivided":  "1. Two-Way, Not Divided",
         "4-Two-Way Divided":    "2. Two-Way, Divided, Unprotected Median",
     }
@@ -330,33 +438,36 @@ def normalize(df):
         "1. Two-Way, Not Divided"
     )
 
-    # ── Is_NHS ──
-    nhs_raw = df["dot_nhs"].fillna("").astype(str).str.strip()
-    df["Is_NHS"] = np.where(
-        (nhs_raw != "") & (nhs_raw.str.upper() != "N") & (nhs_raw != "0"),
-        "Yes", "No"
-    )
+    # ════════════════════════════════════════════════════
+    #  SOURCE TRACKING
+    # ════════════════════════════════════════════════════
 
-    # CDOT Layer 7 doesn't expose sidewalk / guardrail / bike-lane data.
-    # Leave these empty rather than invent values — downstream enrichment
-    # pulls them from other sources (HPMS, aerial imagery, etc.).
-    df["Has_Sidewalk"] = ""
-    df["Guardrail Related?"] = ""
-    df["Has_Bike_Lane"] = ""
-
-    # ── Source tracking ──
-    df["dot_source"] = "CDOT Highways Inventory"
+    df["dot_source"] = "CDOT Open Data SDE Highways"
     df["dot_source_url"] = ENDPOINT_URL
+
+    # ════════════════════════════════════════════════════
+    #  SUMMARY
+    # ════════════════════════════════════════════════════
+
+    print(f"\n  Normalization complete — {n:,} segments:")
+    for col in ["Functional Class", "Ownership", "Area Type", "DOT District",
+                "RTE Name", "Speed_Limit_Est", "Through_Lanes", "Facility Type",
+                "Roadway Surface Type", "Physical Juris Name"]:
+        if col in df.columns:
+            pop = (df[col].fillna("").astype(str).str.strip() != "").sum()
+            pct = (pop / n * 100) if n > 0 else 0
+            print(f"    {col:25s}: {pop:>6,}/{n:,} ({pct:5.1f}%)")
 
     return df
 
 
 # ═══════════════════════════════════════════════════════════════
-#  STANDALONE (for testing)
+#  STANDALONE
 # ═══════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    print(f"Colorado DOT Road Inventory Config")
-    print(f"  Endpoint: {ENDPOINT_URL}")
-    print(f"  Fields: {len(FIELD_MAP)} mapped")
+    print(f"Colorado DOT Road Inventory Config (CDOT)")
+    print(f"  Primary: {ENDPOINT_URL}")
+    print(f"  Fields:  {len(FIELD_MAP)} mapped")
+    print(f"  Note:    ONE endpoint has everything — speed, lanes, surface, AADT, FC")
     print(f"  Run via: python generate_state_dot_data.py --state co")
