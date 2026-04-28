@@ -1,12 +1,37 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-27
+updated: 2026-04-28
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-04-28] fix | VA `va_state_dot.py` Active filter dropped all 139,201 segments — switch to inactive-keyword exclusion
+
+`normalize()` in `states/virginia/va_state_dot.py` was filtering with
+`status.str.contains("ACTIVE")` after uppercasing `dot_status_name`, but VDOT's
+`LOCATION_COMPONENT_STATUS_NAME` values don't actually contain that substring,
+so every row was dropped (`Filtered: 139,201 non-active segments removed /
+Remaining: 0`). The 0-row frame then triggered nan%/divide-by-zero noise in the
+end-of-normalize summary print loop.
+
+Fix:
+
+1. Replace the keep-only-`ACTIVE` filter with an explicit
+   inactive-keyword exclusion list (`PROPOSED`, `DELETED`, `RETIRED`,
+   `REMOVED`, `ABANDONED`). Anything that doesn't match those keywords is kept
+   — including blank/unknown statuses.
+2. Print the top 10 actual `dot_status_name` values during normalization so
+   future status-string drift is immediately visible in the run log.
+3. Guard the summary percentage print with `pct = (pop / n * 100) if n > 0 else 0.0`
+   so a defensively-empty frame no longer raises divide-by-zero.
+
+Pure bug fix in the Virginia state-DOT normalizer — no schema, column-registry,
+or pipeline-architecture changes.
 
 ---
 
