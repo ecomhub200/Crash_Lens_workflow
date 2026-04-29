@@ -1,0 +1,115 @@
+name: Generate State DOT Data (Indiana)
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force re-download even if cache exists'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: '0 6 1 3 *'   # March 1 annually
+
+env:
+  R2_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: crash-lens-data
+
+jobs:
+  generate:
+    name: "Indiana State DOT Inventory"
+    runs-on: ubuntu-latest
+    timeout-minutes: 90   # INDOT server can be slow
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests pandas pyarrow boto3 numpy
+
+      - name: Verify config exists
+        run: |
+          CONFIG="states/indiana/in_state_dot.py"
+          if [ ! -f "$CONFIG" ]; then
+            echo "❌ Config not found: $CONFIG"
+            exit 1
+          fi
+          echo "✅ Found: $CONFIG"
+          python "$CONFIG"
+
+      - name: Download and normalize
+        run: |
+          FORCE_FLAG=""
+          if [ "${{ inputs.force }}" = "true" ]; then FORCE_FLAG="--force"; fi
+          python generate_state_dot_data.py --state in --cache-dir cache --upload --timeout 180 $FORCE_FLAG
+
+      - name: Verify output
+        if: success()
+        run: |
+          # Virginia lesson: handle both .parquet and .parquet.gz
+          if [ -f "cache/in_special_data.parquet" ]; then
+            FILE="cache/in_special_data.parquet"
+          elif [ -f "cache/in_special_data.parquet.gz" ]; then
+            FILE="cache/in_special_data.parquet.gz"
+          else
+            echo "❌ No output file found"
+            ls -la cache/ 2>/dev/null
+            exit 1
+          fi
+
+          SIZE=$(du -h "$FILE" | cut -f1)
+          echo "✅ Output: $FILE ($SIZE)"
+
+          # Virginia lesson: decompress parquet.gz before reading
+          python3 -c "
+          import pandas as pd, gzip, io, sys
+
+          filepath = '$FILE'
+          try:
+              if filepath.endswith('.parquet.gz'):
+                  with gzip.open(filepath, 'rb') as gz:
+                      buf = gz.read()
+                  df = pd.read_parquet(io.BytesIO(buf))
+              else:
+                  df = pd.read_parquet(filepath)
+
+              print(f'Rows: {len(df):,}  Columns: {len(df.columns)}')
+              if len(df) == 0:
+                  print('⚠️  WARNING: 0 rows — check RECORD_STATUS filter')
+                  sys.exit(1)
+              print()
+              print('Key column fill rates:')
+              for col in ['Functional Class','Ownership','Speed_Limit_Est','Through_Lanes',
+                          'Roadway Surface Type','Area Type','RTE Name','Physical Juris Name']:
+                  if col in df.columns:
+                      pop = (df[col].fillna('').astype(str).str.strip() != '').sum()
+                      pct = pop/len(df)*100 if len(df) > 0 else 0
+                      print(f'  {col:25s}: {pop:>7,}/{len(df):,} ({pct:5.1f}%)')
+                  else:
+                      print(f'  {col:25s}: MISSING')
+              print()
+              print('Functional Class distribution:')
+              if 'Functional Class' in df.columns:
+                  print(df['Functional Class'].value_counts().head(10).to_string())
+              print()
+              print('Speed Limit distribution:')
+              if 'Speed_Limit_Est' in df.columns:
+                  print(df['Speed_Limit_Est'].value_counts().head(10).to_string())
+          except Exception as e:
+              print(f'Inspection failed: {e}')
+              sys.exit(1)
+          "
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: state-dot-indiana
+          path: cache/in_special_data.parquet.gz
+          retention-days: 30
+          if-no-files-found: ignore
