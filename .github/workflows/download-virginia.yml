@@ -22,10 +22,16 @@
 name: "Download: Virginia"
 
 on:
-  schedule:
-    # First Monday of each month at 11:00 UTC (6:00 AM ET)
-    - cron: '0 11 1-7 * 1'
-
+  # No schedule here — the monthly statewide refresh runs from
+  # virginia-batch-download.yml (cron '0 11 1 * *'), which downloads all 133
+  # jurisdictions via states/download-registry.json and hands off to
+  # virginia-batch-pipeline.yml. This workflow stays manual-only for one-off
+  # jurisdiction / region / MPO pulls.
+  #
+  # It previously carried cron '0 11 1-7 * 1' ("first Monday of the month"),
+  # which actually fired ~9-10x/month — cron OR's day-of-month with day-of-week —
+  # and, because scheduled events supply no inputs, defaulted to scope=jurisdiction
+  # / selection=henrico, so it only ever refreshed Henrico County.
   workflow_dispatch:
     inputs:
       scope:

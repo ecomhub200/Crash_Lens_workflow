@@ -1,12 +1,57 @@
 ---
 title: Wiki Log
 type: log
-updated: 2026-04-28
+updated: 2026-08-22
 ---
 
 # Crash Lens Wiki — Log
 
 Chronological record of wiki activity.
+
+---
+
+## [2026-08-22] fix | Virginia monthly refresh moved to `virginia-batch-download.yml` (statewide) — cron OR-bug fixed
+
+**Problem.** Virginia's only automated crash-data refresh lived on
+`download-virginia.yml` with `cron: '0 11 1-7 * 1'`, commented "first Monday of each
+month". Cron **OR**s day-of-month and day-of-week when both are restricted, so it fired
+on days 1-7 *and* every Monday — 7 runs in May, 8 in June, 10 in July, 9 in August 2026
+(verified against the `data: virginia download ...` commit log).
+
+Worse, scheduled events supply no `workflow_dispatch` inputs, so
+`${{ github.event.inputs.scope || 'jurisdiction' }}` / `... || 'henrico' }}` fell through
+to the dispatch defaults. Every automated run was `jurisdiction/henrico` — **the other
+132 jurisdictions were never refreshed on a schedule**, and the registry-driven statewide
+path (`virginia-batch-download.yml`) had no schedule at all.
+
+**Change.**
+
+- `virginia-batch-download.yml` — added `schedule: '0 11 1 * *'` (true monthly, 1st at
+  11:00 UTC). Scheduled runs resolve to `scope=statewide` and `incremental=true` via
+  explicit `|| ` fallbacks at point of use; the remaining boolean flags
+  (`force_download`, `skip_pipeline`, `skip_forecasts`, `dry_run`) already read correctly
+  as "not true" when empty. Job names and the job-summary table also take fallbacks, plus
+  a `Trigger` row so scheduled vs. manual runs are distinguishable. Without the `scope`
+  fallback a scheduled run would have hard-failed: the resolve step rejects an empty
+  scope with "Selection required for scope=".
+- `download-virginia.yml` — `schedule:` removed, now manual-only for one-off
+  jurisdiction / region / MPO pulls. Replaced with a comment recording why.
+- `wiki/entities/github-actions-ci.md` — new "Scheduled Refreshes" section documenting
+  the cron OR rule, the missing-inputs-on-schedule rule, and the current cadence table.
+
+**Effect.** Sep-Dec 2026: 41 scheduled fires → 4, and each one now covers all 133
+jurisdictions and chains into `virginia-batch-pipeline.yml`. Incremental mode means a
+month where VDOT publishes nothing costs one download and stops at the `notify-skipped`
+job instead of running the full batch pipeline.
+
+**Not changed.** `generate-state-dot-data-virginia.yml` (annual April 1) was already
+correct. Three other workflows still carry the OR'd pattern and were left alone as
+out of scope: `download-data.yml` (`0 11 1-7 * 1` — note it also string-matches that
+literal cron in two `if:` conditions, so a fix must update those together),
+`validate-data.yml` (`0 6 1-7 * 1`), `generate-osm-nationwide.yml` (`0 2 1-7 * 5`).
+
+No schema, column, or pipeline-code changes — `COLUMNS.md` and
+`wiki/concepts/column-registry.md` untouched.
 
 ---
 

@@ -3,7 +3,7 @@ title: GitHub Actions CI/CD
 type: entity
 tags: [ci-cd, github-actions, automation, workflows]
 created: 2026-04-05
-updated: 2026-04-05
+updated: 2026-08-22
 sources: [source-workflow-repo]
 ---
 
@@ -41,6 +41,33 @@ One workflow per state, triggered manually or on schedule:
 State Download → Merge/Convert → Unified Pipeline → R2 Upload
 (manual/schedule)  (auto-trigger)   (7 stages)      (auto)
 ```
+
+## Scheduled Refreshes
+
+Cron in GitHub Actions **OR**s day-of-month with day-of-week whenever both fields are
+restricted. `'0 11 1-7 * 1'` therefore does **not** mean "first Monday of the month" —
+it fires on days 1-7 **and** every Monday, roughly 9-10 times a month. For a true
+monthly cadence restrict only one field: `'0 11 1 * *'`.
+
+Scheduled events also carry **no `workflow_dispatch` inputs**, so every
+`github.event.inputs.*` expression resolves to an empty string. Any workflow with both
+triggers must supply explicit fallbacks (`${{ github.event.inputs.scope || 'statewide' }}`)
+or the scheduled run silently uses the dispatch defaults — or fails input validation.
+
+| Workflow | Cron | Cadence |
+|----------|------|---------|
+| `virginia-batch-download.yml` | `0 11 1 * *` | Monthly — statewide, all 133 jurisdictions, incremental; chains to `virginia-batch-pipeline.yml` |
+| `download-delaware-crash-data.yml` | `0 11 1 * *` | Monthly |
+| `download-colorado.yml` | `0 11 1 * *` | Monthly |
+| `generate-state-dot-data-virginia.yml` | `0 6 1 4 *` | Annual (April 1 — VDOT publishes Q1 LRS in March) |
+| `r2-health-check.yml` | `0 6 * * *` | Daily |
+
+`download-virginia.yml` is **manual-only**; it handles one-off jurisdiction / region / MPO
+pulls. Its monthly schedule moved to `virginia-batch-download.yml` on 2026-08-22.
+
+Still carrying the OR'd `1-7 * N` pattern (not yet reviewed): `download-data.yml`
+(also string-matches that literal cron at two `if:` conditions, so any fix must update
+those too), `validate-data.yml`, `generate-osm-nationwide.yml`.
 
 ## Related Pages
 

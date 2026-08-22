@@ -13,6 +13,19 @@
 name: "Virginia Batch Download"
 
 on:
+  # Monthly statewide refresh — 1st of every month at 11:00 UTC (6:00/7:00 AM ET).
+  # NOTE: day-of-month and day-of-week are OR'd by cron, so only ONE of them may be
+  # restricted. Use '1 * *' (day 1, any weekday) — never '1-7 * 1', which fires on
+  # days 1-7 AND every Monday (~9-10 runs/month).
+  #
+  # Scheduled runs carry no dispatch inputs, so every `github.event.inputs.*` below
+  # resolves to an empty string. Empty is already the desired value for the boolean
+  # flags (force_download / skip_pipeline / skip_forecasts / dry_run all read as
+  # "not true"); `scope` and `incremental` are given explicit fallbacks at their
+  # point of use so a scheduled run means: full statewide, incremental.
+  schedule:
+    - cron: '0 11 1 * *'
+
   workflow_dispatch:
     inputs:
       scope:
@@ -74,7 +87,7 @@ jobs:
   # JOB 1: Registry-driven download of statewide data
   # ============================================================
   download:
-    name: "Download (virginia / ${{ github.event.inputs.scope }})"
+    name: "Download (virginia / ${{ github.event.inputs.scope || 'statewide' }})"
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
@@ -179,7 +192,8 @@ jobs:
         id: resolve
         run: |
           STATE="virginia"
-          SCOPE="${{ github.event.inputs.scope }}"
+          # Scheduled runs have no inputs — default to the full statewide refresh
+          SCOPE="${{ github.event.inputs.scope || 'statewide' }}"
           SELECTION="${{ github.event.inputs.selection }}"
 
           DEFAULT_R="${{ steps.registry.outputs.default_region }}"
@@ -415,7 +429,9 @@ jobs:
           CSV_PATH="${{ steps.finalize.outputs.csv_path }}"
           TOTAL="${{ steps.finalize.outputs.total_records }}"
           LOCAL_MD5="${{ steps.finalize.outputs.local_md5 }}"
-          INCREMENTAL="${{ github.event.inputs.incremental }}"
+          # Unset (scheduled run) => incremental: skip the batch pipeline when VDOT
+          # has published no new data since the last upload (checksum match).
+          INCREMENTAL="${{ github.event.inputs.incremental || 'true' }}"
           R2_ENDPOINT="https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
           R2_BUCKET="crash-lens-data"
           R2_KEY="${R2_PREFIX}/statewide/${STATE}_statewide_all_roads.csv"
@@ -648,8 +664,9 @@ jobs:
           | Records | ${TOTAL:-N/A} |
           | R2 Key | ${R2_KEY:-'(dry run)'} |
           | Data Changed | ${DATA_CHANGED:-N/A} |
-          | Incremental | ${{ github.event.inputs.incremental }} |
-          | Dry Run | ${{ github.event.inputs.dry_run }} |
+          | Trigger | ${{ github.event_name }} |
+          | Incremental | ${{ github.event.inputs.incremental || 'true' }} |
+          | Dry Run | ${{ github.event.inputs.dry_run || 'false' }} |
           | Completed | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |
           EOF
 
@@ -657,7 +674,7 @@ jobs:
   # JOB 2: Trigger Virginia batch pipeline
   # ============================================================
   trigger-pipeline:
-    name: "Trigger Virginia batch pipeline (${{ github.event.inputs.scope }})"
+    name: "Trigger Virginia batch pipeline (${{ github.event.inputs.scope || 'statewide' }})"
     needs: download
     if: >-
       github.event.inputs.skip_pipeline != 'true' &&
@@ -714,7 +731,7 @@ jobs:
           | State | $STATE |
           | Scope | $SCOPE ${SELECTION:+($SELECTION)} |
           | Jurisdictions | ${JCOUNT:-N/A} |
-          | Skip Forecasts | ${{ github.event.inputs.skip_forecasts }} |
+          | Skip Forecasts | ${{ github.event.inputs.skip_forecasts || 'false' }} |
           | Data Changed | ${{ needs.download.outputs.data_changed }} |
 
           **Pipeline:** R2 Download → Init Cache → Split Jurisdiction → Split Road Type → Aggregate → Upload → Forecasts → Manifest
